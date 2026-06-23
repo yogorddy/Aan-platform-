@@ -308,7 +308,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
   return (
     <div className="flex-1 bg-slate-950 text-slate-100 flex flex-col md:flex-row min-h-[calc(100vh-45px)] pr-[2px]" id="aan-academy-viewport">
       
-      {/* 📘 LEFT ACADEMY SIDEBAR: LIST & SEARCH */}
+      {/*  LEFT ACADEMY SIDEBAR: LIST & SEARCH */}
       <div className="w-full md:w-80 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 h-auto md:h-[calc(100vh-45px)] sticky top-0 md:top-[45px]">
         {/* Search header container */}
         <div className="p-4 border-b border-slate-800">
@@ -489,7 +489,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
         </div>
       </div>
 
-      {/* 📘 RIGHT ACADEMY ACTIVE LESSON GRID */}
+      {/*  RIGHT ACADEMY ACTIVE LESSON GRID */}
       <div className="flex-1 flex flex-col min-w-0 bg-slate-950">
         {showRbacSettings ? (
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 scrollbar-thin">
@@ -823,7 +823,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                 <span className="text-slate-400">Authenticated Identity:</span>
                 <span className="text-amber-400 text-right font-bold">{activeRole}</span>
                 <span className="text-slate-400">Permission Check:</span>
-                <span className="text-rose-500 text-right font-bold">DENIED ✕</span>
+                <span className="text-rose-500 text-right font-bold">DENIED </span>
               </div>
             </div>
 
@@ -949,7 +949,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                 : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
-            📘 Learn Lesson
+             Learn Lesson
           </button>
           <button
             onClick={() => setActiveTab("quiz")}
@@ -959,11 +959,11 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                 : "border-transparent text-slate-400 hover:text-slate-200"
             }`}
           >
-            🧠 Knowledge Test
+             Knowledge Test
           </button>
         </div>
 
-        {/* 📘 VIEWPORT SCROLL FOR CONTENT */}
+        {/*  VIEWPORT SCROLL FOR CONTENT */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 scrollbar-thin">
           
           {activeTab === "learn" ? (
@@ -1186,7 +1186,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             <ul className="text-[10px] text-slate-300 font-mono space-y-1">
                               {calculatedRisk.factors.map((f, i) => (
                                 <li key={i} className="flex items-start gap-1">
-                                  <span className="text-rose-500">⚠</span>
+                                  <span className="text-rose-500"></span>
                                   <span>{f}</span>
                                 </li>
                               ))}
@@ -1475,7 +1475,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       <ul className="text-xs font-sans text-slate-300 space-y-1.5">
                         {activeLesson.securityModel.risks.map((risk, rIdx) => (
                           <li key={rIdx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-rose-500 font-bold shrink-0">⚠</span>
+                            <span className="text-rose-500 font-bold shrink-0"></span>
                             <span>{risk}</span>
                           </li>
                         ))}
@@ -1487,7 +1487,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       <ul className="text-xs font-sans text-slate-300 space-y-1.5">
                         {activeLesson.securityModel.privacy.map((priv, pIdx) => (
                           <li key={pIdx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-emerald-500 font-bold shrink-0">✔</span>
+                            <span className="text-emerald-500 font-bold shrink-0"></span>
                             <span>{priv}</span>
                           </li>
                         ))}
@@ -1633,7 +1633,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               )}
             </>
           ) : (
-            /* 🧠 SUB-TAB: QUIZ KNOWLEDGE CHECK */
+            /*  SUB-TAB: QUIZ KNOWLEDGE CHECK */
             <div className="space-y-6">
               <div className="bg-slate-900/30 p-4 rounded-lg border border-slate-800 space-y-1">
                 <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider font-extrabold">CONCEPTS TEST</span>

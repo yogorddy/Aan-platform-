@@ -466,7 +466,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
 
     const confirmPurge = window.confirm(
-      `⚠️ DANGER - IRREVERSIBLE CRIME ANALYSIS PURGE:\n\n` +
+      ` DANGER - IRREVERSIBLE CRIME ANALYSIS PURGE:\n\n` +
       `This action will permanently delete User ${userId} from the directory. All zero-knowledge biometric hashes, physical device signatures, and developer platform linking histories will be completely purged from AAN. Under no circumstance can this dataset be incepted again.\n\n` +
       `Proceed with absolute deletion?`
     );
@@ -544,14 +544,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             onClick={() => onNavigate('landing')} 
             className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
           >
-            ← Public Portal
+             Public Portal
           </button>
           <span className="text-slate-700 font-mono text-xs">|</span>
           <button 
             onClick={() => onNavigate('partner')} 
             className="text-xs text-slate-400 hover:text-white transition-colors font-mono hover:underline cursor-pointer"
           >
-            Partner Portal →
+            Partner Portal 
           </button>
         </div>
       </header>
@@ -814,7 +814,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                       </div>
 
                       <div className="bg-slate-950 border border-slate-850 p-3.5 rounded-lg text-[10px] text-slate-400 font-mono">
-                        💡 <strong className="text-slate-300">Enforcement Strategy:</strong> Dynamic challenges and profile automations reduce friction on 88% of requests while keeping bad actors off our servers entirely.
+                         <strong className="text-slate-300">Enforcement Strategy:</strong> Dynamic challenges and profile automations reduce friction on 88% of requests while keeping bad actors off our servers entirely.
                       </div>
                     </div>
 
@@ -906,7 +906,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                           onClick={() => setShowPolicyModal(false)}
                           className="text-slate-400 hover:text-white font-bold cursor-pointer"
                         >
-                          ✕
+                          
                         </button>
                       </div>
 
@@ -1067,7 +1067,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
                     {!selectedUserId ? (
                       <div className="text-center py-10 text-slate-500 font-mono text-xs">
-                        ✕ NO PROFILE ID SELECTED. SELECT AN ACTIVE ACCOUNT FROM THE DROPDOWN LIST ABOVE.
+                         NO PROFILE ID SELECTED. SELECT AN ACTIVE ACCOUNT FROM THE DROPDOWN LIST ABOVE.
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1120,19 +1120,19 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                                   onClick={() => handleAccountAction(selectedUserId, 'challenge')}
                                   className="bg-slate-900 border border-slate-800 text-slate-300 hover:text-white px-2 py-1.5 rounded text-left transition cursor-pointer"
                                 >
-                                  ⚡ Challenge Session
+                                   Challenge Session
                                 </button>
                                 <button 
                                   onClick={() => handleAccountAction(selectedUserId, 'suspend')}
                                   className="bg-slate-900 border border-slate-800 text-yellow-500 hover:text-yellow-400 px-2 py-1.5 rounded text-left transition cursor-pointer"
                                 >
-                                  🛑 Suspend User
+                                   Suspend User
                                 </button>
                                 <button 
                                   onClick={() => handleAccountAction(selectedUserId, 'disable')}
                                   className="col-span-2 bg-slate-900 border border-slate-800 text-red-500 hover:text-red-400 px-2 py-1.5 rounded text-left transition cursor-pointer"
                                 >
-                                  ✕ Lock/Disable Profile
+                                   Lock/Disable Profile
                                 </button>
                               </div>
                             </div>
@@ -1199,7 +1199,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                           
                           {timeline.length === 0 ? (
                             <div className="p-8 text-center text-[11px] font-mono text-slate-550 bg-slate-950 border border-slate-850 rounded-xl">
-                              💡 No history timeline entries registered for user {selectedUserId}. Actions trigger real-time updates.
+                               No history timeline entries registered for user {selectedUserId}. Actions trigger real-time updates.
                             </div>
                           ) : (
                             <div className="relative border-l-2 border-slate-850 pl-5 ml-2.5 space-y-5 py-2">
@@ -1579,7 +1579,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                               <button
                                 onClick={async () => {
                                   const clearanceConfirmed = window.confirm(
-                                    `🚨 INSTITUTIONAL APPROVAL REQUIRED\n\n` +
+                                    ` INSTITUTIONAL APPROVAL REQUIRED\n\n` +
                                     `This action will permanently delete user profile ${user.id}.\n` +
                                     `Do you have institutional security authorization to purge this record?`
                                   );

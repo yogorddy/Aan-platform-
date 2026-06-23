@@ -4,7 +4,7 @@ A production-ready technology infrastructure MVP designed to help digital platfo
 
 ---
 
-## 🚀 Product Positioning & Non-Negotiable Rules
+## Product Positioning & Non-Negotiable Rules
 
 *   **Human Unique Infrastructure:** AAN helps digital channels run simple liveness tests and multi-account blocklist checks securely.
 *   **Decoupled Biometric Geometry:** We *NEVER* save camera streams, screen captures, SSNs, or driver's license files.
@@ -14,7 +14,7 @@ A production-ready technology infrastructure MVP designed to help digital platfo
 
 ---
 
-## 🛠️ Micro-Architecture Overview
+## Micro-Architecture Overview
 
 The codebase is engineered with high modularity and clean architectural guidelines:
 
@@ -37,7 +37,7 @@ The codebase is engineered with high modularity and clean architectural guidelin
 
 ---
 
-## 📊 Database & Relational Layout (Supabase-Postgres Ready)
+## Database & Relational Layout (Supabase-Postgres Ready)
 
 The file `/supabase_schema.sql` at the root contains production table schema script queries. The architecture models:
 
@@ -51,7 +51,7 @@ The file `/supabase_schema.sql` at the root contains production table schema scr
 
 ---
 
-## ⚖️ Real-Time Multi-Signal Risk Scoring
+## Real-Time Multi-Signal Risk Scoring
 
 Our automated risk scoring model assesses 8 specific triggers (0 to 100):
 
@@ -65,7 +65,7 @@ Our automated risk scoring model assesses 8 specific triggers (0 to 100):
 
 ---
 
-## 📡 REST API Specifications
+## REST API Specifications
 
 The MVP server exposes full compliance endpoints:
 
@@ -150,7 +150,7 @@ The MVP server exposes full compliance endpoints:
 
 ---
 
-## 🏃 Local Setup & Development Instructions
+## Local Setup & Development Instructions
 
 ### Prerequisite Dependencies
 Make sure Node.js (v18+) is active.

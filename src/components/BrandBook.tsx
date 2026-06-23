@@ -361,7 +361,7 @@ export default function BrandBook() {
                       Avoid fear-mongering copy, hype marketing slogans ("web3 paradigm shifter"), cyber-hacking terminology, dark hacker graphics, or claiming to completely halt all online fraud.
                     </p>
                     <p className="text-slate-400 italic bg-red-950/10 border-l border-red-500/50 p-2 text-[11px] text-red-300 rounded-r">
-                      "❌ THE BOTPOCALYPSE IS HERE. DEFEND YOUR SERVERS WITH THE ULTIMATE BLOCKCHAIN BIOMETRIC SECURITY SYSTEM."
+                      " THE BOTPOCALYPSE IS HERE. DEFEND YOUR SERVERS WITH THE ULTIMATE BLOCKCHAIN BIOMETRIC SECURITY SYSTEM."
                     </p>
                   </div>
                 </div>
@@ -881,10 +881,10 @@ export default function BrandBook() {
                   
                   <div className="space-y-3">
                     <div className="bg-emerald-950/20 border-l border-emerald-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-emerald-400 font-bold font-mono">✓ DO:</span> Render the horizontal logomark exclusively on clean dark-slate backgrounds, leaving ample padding on all sides.
+                      <span className="text-emerald-400 font-bold font-mono"> DO:</span> Render the horizontal logomark exclusively on clean dark-slate backgrounds, leaving ample padding on all sides.
                     </div>
                     <div className="bg-red-950/20 border-l border-red-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-red-400 font-bold font-mono">✗ DON'T:</span> Distort or crop the ribbon monogram layers, or apply bright unapproved overlay gradients (e.g. rainbow, cyberpunk neon).
+                      <span className="text-red-400 font-bold font-mono"> DON'T:</span> Distort or crop the ribbon monogram layers, or apply bright unapproved overlay gradients (e.g. rainbow, cyberpunk neon).
                     </div>
                   </div>
                 </div>
@@ -895,10 +895,10 @@ export default function BrandBook() {
                   
                   <div className="space-y-3">
                     <div className="bg-emerald-950/20 border-l border-emerald-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-emerald-400 font-bold font-mono">✓ DO:</span> Set headers in crisp Inter display typography, using a tracking metric of -0.015em to ensure a modern feel.
+                      <span className="text-emerald-400 font-bold font-mono"> DO:</span> Set headers in crisp Inter display typography, using a tracking metric of -0.015em to ensure a modern feel.
                     </div>
                     <div className="bg-red-950/20 border-l border-red-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-red-400 font-bold font-mono">✗ DON'T:</span> Mix decorative serif headlines, or present codebase calls and JSON schemas in non-mono fonts.
+                      <span className="text-red-400 font-bold font-mono"> DON'T:</span> Mix decorative serif headlines, or present codebase calls and JSON schemas in non-mono fonts.
                     </div>
                   </div>
                 </div>
@@ -909,10 +909,10 @@ export default function BrandBook() {
                   
                   <div className="space-y-3">
                     <div className="bg-emerald-950/20 border-l border-emerald-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-emerald-400 font-bold font-mono">✓ DO:</span> Leverage crisp, pixel-perfect modular blueprint line art or dark-toned monochromatic photos highlighting human geometry naturally.
+                      <span className="text-emerald-400 font-bold font-mono"> DO:</span> Leverage crisp, pixel-perfect modular blueprint line art or dark-toned monochromatic photos highlighting human geometry naturally.
                     </div>
                     <div className="bg-red-950/20 border-l border-red-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-red-400 font-bold font-mono">✗ DON'T:</span> Feature bright vector cartoon stock characters, fake futuristic glowing hacker grids, or cyberpunk overlays.
+                      <span className="text-red-400 font-bold font-mono"> DON'T:</span> Feature bright vector cartoon stock characters, fake futuristic glowing hacker grids, or cyberpunk overlays.
                     </div>
                   </div>
                 </div>
@@ -923,10 +923,10 @@ export default function BrandBook() {
                   
                   <div className="space-y-3">
                     <div className="bg-emerald-950/20 border-l border-emerald-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-emerald-400 font-bold font-mono">✓ DO:</span> Use strict, 8-pixel grid alignments. Leave generous negative spaces to convey confidence and enterprise quality.
+                      <span className="text-emerald-400 font-bold font-mono"> DO:</span> Use strict, 8-pixel grid alignments. Leave generous negative spaces to convey confidence and enterprise quality.
                     </div>
                     <div className="bg-red-950/20 border-l border-red-500/50 p-2 text-[11px] text-slate-300 rounded">
-                      <span className="text-red-400 font-bold font-mono">✗ DON'T:</span> Crowded page layouts with unnecessary text boxes or system telemetry logs.
+                      <span className="text-red-400 font-bold font-mono"> DON'T:</span> Crowded page layouts with unnecessary text boxes or system telemetry logs.
                     </div>
                   </div>
                 </div>
@@ -1094,7 +1094,7 @@ export default function BrandBook() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-left">
             <span className="font-mono text-[10px] text-slate-300 font-bold uppercase block">AAN SOVEREIGN IDENTITY CO.</span>
-            <span className="text-[9px] text-slate-400 mt-0.5 block">© 2026 AAN. Decoupling digital trust from corporate tracking.</span>
+            <span className="text-[9px] text-slate-400 mt-0.5 block"> 2026 AAN. Decoupling digital trust from corporate tracking.</span>
           </div>
           <div className="font-mono text-[10px] text-slate-400">
             ALL INTELLECTUAL PROPERTY REGISTERED • SOC2 READY

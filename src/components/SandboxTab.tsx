@@ -299,7 +299,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
                 <div className="bg-slate-900 px-3 py-1 flex justify-between items-center text-slate-500 font-bold uppercase">
                   <span>Decoded Verdict Claims Mapping</span>
                   <span className={`text-[8px] px-1.5 py-0.2 select-none border rounded ${decodedClaims.valid !== false ? "text-emerald-400 border-emerald-900/50" : "text-rose-400 border-rose-900/50"}`}>
-                    {decodedClaims.valid !== false ? "✓ Valid Signature Claims" : "✕ Authentication Failed"}
+                    {decodedClaims.valid !== false ? " Valid Signature Claims" : " Authentication Failed"}
                   </span>
                 </div>
                 <pre className="p-3.5 text-blue-300 overflow-x-auto whitespace-pre">

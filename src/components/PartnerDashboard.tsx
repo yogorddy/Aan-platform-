@@ -560,14 +560,14 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             onClick={() => onNavigate('landing')} 
             className="text-xs text-slate-400 hover:text-white transition-all bg-slate-950/50 hover:bg-slate-800 px-3 py-1.5 rounded border border-slate-800 cursor-pointer"
           >
-            ← Public Center
+             Public Center
           </button>
           <span className="text-slate-800 font-mono text-xs">|</span>
           <button 
             onClick={() => onNavigate('admin')} 
             className="text-xs text-slate-300 hover:text-white transition-all bg-blue-600 hover:bg-blue-500 font-semibold px-3 py-1.5 rounded cursor-pointer"
           >
-            Admin Verification Platform →
+            Admin Verification Platform 
           </button>
         </div>
       </header>
@@ -981,7 +981,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                             <code>{createdApiKeyResponse.plain_text_key_warning}</code>
                           </div>
                           <p className="text-[10px] text-slate-400 mt-2 leading-relaxed italic">
-                            *⚠️ Safety Policy: Record this key immediately. It is permanently hashed using SHA-255 inside database directories and cannot be displayed again.
+                            * Safety Policy: Record this key immediately. It is permanently hashed using SHA-255 inside database directories and cannot be displayed again.
                           </p>
                         </div>
                       )}

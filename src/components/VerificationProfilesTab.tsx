@@ -1044,7 +1044,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                                   <span className="line-through text-red-500">
                                     [enabled: {prev?.enabled ? 'Y' : 'N'}, req: {prev?.required ? 'Y' : 'N'}]
                                   </span>
-                                  <span className="text-zinc-600">→</span>
+                                  <span className="text-zinc-600"></span>
                                   <span className="text-green-400 font-bold">
                                     [enabled: {curr?.enabled ? 'Y' : 'N'}, req: {curr?.required ? 'Y' : 'N'}]
                                   </span>

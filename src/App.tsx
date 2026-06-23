@@ -133,7 +133,7 @@ export default function App() {
   return (
     <div className="relative min-h-screen bg-slate-950 flex flex-col text-slate-200">
       
-      {/* 🛠️ AI STUDIO WORKSPACE INTERFACE SWITCHER HEADER */}
+      {/*  AI STUDIO WORKSPACE INTERFACE SWITCHER HEADER */}
       {/* Explains roles and lets user jump straight to any part of the MVP */}
       <div className="relative z-50 bg-slate-900 border-b border-blue-900/40 text-slate-300 py-3 px-4 text-xs select-none">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">

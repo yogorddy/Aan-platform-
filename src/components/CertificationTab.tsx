@@ -119,7 +119,7 @@ export default function CertificationTab({ onNavigateToAcademy }: CertificationT
                       Your current configurations comply perfectly with sandbox-v2 specifications. This verified seal confirms protocol completeness.
                     </p>
                     <span className="text-[9px] text-slate-500 leading-none block font-mono mt-1.5 uppercase font-bold">
-                      ✕ LEGAL DISCLAIMER: Certifies protocol compliance only; does not imply legal biometric compliance.
+                       LEGAL DISCLAIMER: Certifies protocol compliance only; does not imply legal biometric compliance.
                     </span>
                   </div>
                 </div>

@@ -451,13 +451,13 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
                   {primaryMethod === 'sso' && (
                     <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl leading-relaxed text-xs text-slate-350">
-                      🔗 Linked SSO Provider: <strong className="text-emerald-400">Sovereign GitHub OAuth Hub</strong> verified.
+                       Linked SSO Provider: <strong className="text-emerald-400">Sovereign GitHub OAuth Hub</strong> verified.
                     </div>
                   )}
 
                   {primaryMethod === 'saml' && (
                     <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl text-xs text-slate-350">
-                      🏢 Enterprise Federated Relay: Okta / Ping Directory assertion linked automatically.
+                       Enterprise Federated Relay: Okta / Ping Directory assertion linked automatically.
                     </div>
                   )}
 
@@ -735,7 +735,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                       onClick={() => { setFlowState('primary_auth'); setSelectedChallengeType(null); }}
                       className="text-slate-500 hover:text-slate-350 font-mono"
                     >
-                      ✕ Restart Login
+                       Restart Login
                     </button>
 
                     {challengeStep !== 'choose' && challengeStep !== 'success' && (
@@ -743,7 +743,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                         onClick={() => { setChallengeStep('choose'); stopCamera(); }}
                         className="text-blue-400 hover:text-blue-300 font-mono"
                       >
-                        ← Choose different factor
+                         Choose different factor
                       </button>
                     )}
                   </div>
@@ -834,7 +834,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                     onClick={() => setFlowState('username')}
                     className="w-full bg-slate-950 hover:bg-slate-850 text-slate-300 border border-slate-800 font-mono text-xs py-2.5 rounded-lg transition"
                   >
-                    ✕ Restart Gateway Evaluation
+                     Restart Gateway Evaluation
                   </button>
                 </div>
               </div>

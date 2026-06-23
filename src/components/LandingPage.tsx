@@ -1861,7 +1861,7 @@ print(res.json())`}
         </div>
 
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-6 border-t border-slate-900 text-center font-mono text-[11px] text-slate-500">
-          © 2026 AAN. Decoupled Identity Verification Credentials & Digital Trust Infrastructure layer. All rights reserved.
+           2026 AAN. Decoupled Identity Verification Credentials & Digital Trust Infrastructure layer. All rights reserved.
         </div>
       </footer>
 

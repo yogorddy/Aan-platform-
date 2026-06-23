@@ -1235,10 +1235,10 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                     <strong className="text-white text-sm font-sans block">Institutional Advisory Inquiries:</strong>
                     <p>We work closely with institutional compliance teams to outline secure integration programs. Contact Sales regarding:</p>
                     <ul className="list-disc pl-4 space-y-1.5 text-slate-350 font-mono text-[11px]">
-                      <li>🏢 Custom corporate onboarding setups (Okta/SAML)</li>
-                      <li>🔒 High-volume dedicated container hosts with 99.999% SLA</li>
-                      <li>🛡️ Zero-knowledge verification templates for sensitive branches</li>
-                      <li>🤝 Government custom deployment proposals</li>
+                      <li> Custom corporate onboarding setups (Okta/SAML)</li>
+                      <li> High-volume dedicated container hosts with 99.999% SLA</li>
+                      <li> Zero-knowledge verification templates for sensitive branches</li>
+                      <li> Government custom deployment proposals</li>
                     </ul>
                   </div>
 
@@ -1370,7 +1370,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
               <div className="space-y-5 leading-relaxed text-xs text-slate-400 font-sans">
                 
                 <div className="p-4 bg-yellow-950/25 border border-yellow-800/40 text-yellow-400 rounded-lg space-y-1.5 animate-pulse">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest block">🔒 REWARD ELIGIBILITY CRITERIA</span>
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest block"> REWARD ELIGIBILITY CRITERIA</span>
                   <p className="text-xs">We value coordinate security research. Gaps or leakage detected on sandbox environments are eligible for symbolic bounty recognition rosters.</p>
                 </div>
 
@@ -1410,7 +1410,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
       </div>
 
       <footer className="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs font-mono text-slate-500">
-        © 2026 AAN Trust Infrastructure. Safe, decoupled proof-of-human middleware.
+         2026 AAN Trust Infrastructure. Safe, decoupled proof-of-human middleware.
       </footer>
 
     </div>

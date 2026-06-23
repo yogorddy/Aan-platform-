@@ -536,7 +536,7 @@ export default function IntegrationWizardTab({ onNavigateToAcademy, onRefreshDas
               </button>
             ) : (
               <span className="text-[10px] font-mono text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-900/30 px-3 py-1 rounded">
-                ✓ Integration Complete
+                 Integration Complete
               </span>
             )}
           </div>
@@ -548,7 +548,7 @@ export default function IntegrationWizardTab({ onNavigateToAcademy, onRefreshDas
           
           <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-4 space-y-3">
             <h4 className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              💡 Development Tip
+               Development Tip
             </h4>
             <p className="text-xs text-slate-400 leading-normal font-sans">
               Always preserve privacy metrics. AAN designed verification responses to share status and signatures without exposing client faces or hardware identifiers directly.
@@ -557,7 +557,7 @@ export default function IntegrationWizardTab({ onNavigateToAcademy, onRefreshDas
 
           <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-4 space-y-3.5">
             <h4 className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              🛠️ Configuration Registry
+               Configuration Registry
             </h4>
             
             <div className="space-y-3 font-mono text-[10px] select-all">

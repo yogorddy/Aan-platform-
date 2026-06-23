@@ -757,7 +757,7 @@ app.post("/v1/auth/aan-status", (req, res) => {
     console.log("Integrity match! Safe to trust payload.");
     res.status(200).send("Verified");
   } else {
-    res.status(403).send("Signature verification failed ✕");
+    res.status(403).send("Signature verification failed ");
   }
 });`}
                 </pre>
