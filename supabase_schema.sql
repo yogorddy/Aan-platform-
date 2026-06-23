@@ -206,3 +206,36 @@ create table if not exists public.removal_requests (
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     approved_at timestamp with time zone
 );
+
+-- ==========================================================
+-- 12. SECURITY_EVENTS SCHEMA (BYPASS & INTRUSION DETECTION LAYER)
+-- ==========================================================
+
+create table if not exists public.security_events (
+    id uuid primary key default gen_random_uuid(),
+    severity text not null check (severity in ('low', 'medium', 'high', 'critical')),
+    event_type text not null, -- e.g., 'invalid_token_signature', 'expired_token_reuse', 'token_replay_attempt', 'impossible_session_state_transition', etc.
+    actor_type text not null check (actor_type in ('user', 'partner_app', 'admin', 'system', 'unknown')),
+    actor_id text not null,
+    ip_address text not null,
+    user_agent text not null,
+    session_id text,
+    partner_app_id text,
+    request_path text,
+    detection_reason text not null,
+    raw_metadata jsonb default '{}'::jsonb not null,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create index if not exists idx_security_events_severity on public.security_events(severity);
+create index if not exists idx_security_events_type on public.security_events(event_type);
+
+-- RLS FOR SECURITY_EVENTS: Ensure strict administrative boundary
+alter table public.security_events enable row level security;
+
+-- Admin-only policy: Only authorized administrative roles may read system intrusion logs. Guest/Partner users are denied.
+create policy "Admins select access to security events"
+    on public.security_events
+    for select
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+

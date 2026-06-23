@@ -55,8 +55,14 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
   // Layout sidebar tab state
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'projects' | 'api-keys' | 'policies' | 'logs' | 'risks' | 'duplicates' | 'webhooks' | 'removals' | 'audits' | 'settings' | 'docs' | 'wizard' | 'developer-portal' | 'sandbox' | 'health' | 'certification' | 'profiles'
+    'overview' | 'organizations' | 'verification-activity' | 'security-center' | 'trust-analytics' | 'api-keys' | 'webhooks' | 'audit-logs' | 'developers' | 'documentation' | 'settings'
   >('overview');
+
+  // Sub-tab toggles inside advanced hubs
+  const [orgSubTab, setOrgSubTab] = useState<'settings' | 'policies' | 'profiles'>('settings');
+  const [securitySubTab, setSecuritySubTab] = useState<'threats' | 'sybils' | 'removals'>('threats');
+  const [trustSubTab, setTrustSubTab] = useState<'health' | 'badge'>('health');
+  const [devSubTab, setDevSubTab] = useState<'setup' | 'sandbox' | 'playground'>('setup');
 
   // Search & Filter controllers
   const [searchValue, setSearchValue] = useState("");
@@ -523,10 +529,10 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#080b11] font-sans text-slate-100 flex flex-col">
       
       {/* Horiz Header */}
-      <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between z-10">
+      <header className="bg-[#0c0f16] border-b border-slate-900 px-6 py-4 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
           <div className="bg-blue-600/15 text-blue-400 p-2 rounded-lg border border-blue-500/10">
             <Shield className="w-5 h-5 animate-pulse" />
@@ -576,7 +582,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         
         {/* Left Side menu */}
-        <aside className="w-full md:w-64 bg-slate-900/90 border-r border-slate-850 p-4 space-y-1.5 shrink-0">
+        <aside className="w-full md:w-64 bg-[#0c0f16]/95 border-r border-slate-900 p-4 space-y-1.5 shrink-0">
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block px-3 mb-2 font-bold">Workspace Navigation</span>
           
           <button 
@@ -584,15 +590,42 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'overview' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
             <Activity className="w-4 h-4" />
-            Integration Overview
+            Overview
           </button>
 
           <button 
-            onClick={() => { setActiveTab('projects'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'projects' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            onClick={() => { setActiveTab('organizations'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'organizations' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
-            <Sliders className="w-4 h-4" />
-            Project Settings
+            <Layers className="w-4 h-4 text-indigo-400" />
+            Organizations
+          </button>
+
+          <button 
+            onClick={() => { setActiveTab('verification-activity'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'verification-activity' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+          >
+            <Database className="w-4 h-4" />
+            Verification Activity
+          </button>
+
+          <button 
+            onClick={() => { setActiveTab('security-center'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'security-center' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+          >
+            <Shield className="w-4 h-4 text-red-400" />
+            Security Center
+            {(sessions.filter(s => s.risk_score >= 70).length > 0 || duplicateSignals.length > 0) && (
+              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            )}
+          </button>
+
+          <button 
+            onClick={() => { setActiveTab('trust-analytics'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'trust-analytics' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+          >
+            <Activity className="w-4 h-4 text-emerald-400" />
+            Trust Analytics
           </button>
 
           <button 
@@ -600,146 +633,53 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'api-keys' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
             <Key className="w-4 h-4" />
-            API Keys Credentials
+            API Keys
           </button>
-
-          <button 
-            onClick={() => { setActiveTab('policies'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'policies' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <ShieldCheck className="w-4 h-4" />
-            MFA Login Policies
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('profiles'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'profiles' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <Sliders className="w-4 h-4 text-emerald-450" />
-            Verification Profiles
-          </button>
-
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block px-3 pt-4 mb-2 font-bold">Identity & Fraud Logs</span>
-
-          <button 
-            onClick={() => { setActiveTab('logs'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'logs' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <Database className="w-4 h-4" />
-            Verification Sessions
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('risks'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'risks' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <AlertTriangle className="w-4 h-4" />
-            Engine Risk Events
-            {sessions.filter(s => s.risk_score >= 70).length > 0 && (
-              <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            )}
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('duplicates'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'duplicates' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <FolderSync className="w-4 h-4" />
-            Duplicate Sybil Signals
-            {duplicateSignals.length > 0 && (
-              <span className="ml-auto bg-yellow-500 text-slate-950 text-[9px] font-bold font-mono px-1.5 py-0.2 rounded-full">
-                {duplicateSignals.length}
-              </span>
-            )}
-          </button>
-
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block px-3 pt-4 mb-2 font-bold">Asynchronous Ops</span>
 
           <button 
             onClick={() => { setActiveTab('webhooks'); setSearchValue(""); }}
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'webhooks' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
             <Webhook className="w-4 h-4" />
-            Webhooks Gateway
+            Webhooks
           </button>
 
           <button 
-            onClick={() => { setActiveTab('removals'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'removals' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            onClick={() => { setActiveTab('audit-logs'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'audit-logs' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
-            <Trash2 className="w-4 h-4" />
-            Removal Claims Queue
-            {removalRequests.filter(r => r.status === 'pending').length > 0 && (
-              <span className="ml-auto bg-purple-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
-                {removalRequests.filter(r => r.status === 'pending').length}
-              </span>
-            )}
+            <ClipboardList className="w-4 h-4 text-teal-400" />
+            Audit Logs
           </button>
 
           <button 
-            onClick={() => { setActiveTab('audits'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'audits' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <BookOpen className="w-4 h-4" />
-            Workspace Audit Logs
-          </button>
-
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block px-3 pt-4 mb-2 font-bold">Integration Lifecycle</span>
-
-          <button 
-            onClick={() => { setActiveTab('wizard'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'wizard' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <Layers className="w-4 h-4 text-blue-400" />
-            01. Integration Wizard
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('developer-portal'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'developer-portal' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            onClick={() => { setActiveTab('developers'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'developers' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
             <Terminal className="w-4 h-4 text-emerald-400" />
-            02. Developer Portal
+            Developers
           </button>
 
           <button 
-            onClick={() => { setActiveTab('sandbox'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'sandbox' ? 'bg-rose-600/15 text-rose-450 font-bold border-l-2 border-rose-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            onClick={() => { setActiveTab('documentation'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'documentation' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
-            <Sliders className="w-4 h-4 text-rose-450 animate-pulse" />
-            03. Sandbox Stage
+            <BookOpen className="w-4 h-4 text-blue-400" />
+            Documentation
           </button>
 
           <button 
-            onClick={() => { setActiveTab('health'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'health' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            onClick={() => { setActiveTab('settings'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'settings' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
           >
-            <Activity className="w-4 h-4 text-teal-400" />
-            04. Telemetry Health
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('certification'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'certification' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <Award className="w-4 h-4 text-yellow-450" />
-            05. Compliance Badge
-          </button>
-
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block px-3 pt-4 mb-2 font-bold">Integration Reference</span>
-
-          <button 
-            onClick={() => { setActiveTab('docs'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'docs' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
-          >
-            <Code className="w-4 h-4" />
-            API & Integration Docs
+            <Settings className="w-4 h-4" />
+            Settings
           </button>
 
         </aside>
 
         {/* Right workspace view */}
-        <main className="flex-1 overflow-y-auto p-8 bg-slate-950">
+        <main className="flex-1 overflow-y-auto p-8 bg-[#080b11]">
           
           {loading ? (
             <div className="flex flex-col items-center justify-center h-96 text-slate-400">
@@ -855,9 +795,29 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 </div>
               )}
 
-              {/* ==================== PROJECTS TAB ==================== */}
-              {activeTab === 'projects' && (
+              {/* ==================== ORGANIZATIONS TAB: SETTINGS ==================== */}
+              {activeTab === 'organizations' && orgSubTab === 'settings' && (
                 <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setOrgSubTab('settings')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Project Settings
+                    </button>
+                    <button
+                      onClick={() => setOrgSubTab('policies')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      MFA Login Policies
+                    </button>
+                    <button
+                      onClick={() => setOrgSubTab('profiles')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Verification Profiles
+                    </button>
+                  </div>
                   <div className="border-b border-slate-800 pb-4">
                     <h2 className="text-lg font-bold text-white">Project Identity & Enforcement Policy blueprint</h2>
                     <p className="text-xs text-slate-400">Manage API origin restrictions, allowed domains and automation enforcement modes.</p>
@@ -1011,9 +971,29 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 </div>
               )}
 
-              {/* ==================== MFA LOGIN POLICIES TAB ==================== */}
-              {activeTab === 'policies' && (
+              {/* ==================== ORGANIZATIONS TAB: POLICIES ==================== */}
+              {activeTab === 'organizations' && orgSubTab === 'policies' && (
                 <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setOrgSubTab('settings')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Project Settings
+                    </button>
+                    <button
+                      onClick={() => setOrgSubTab('policies')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      MFA Login Policies
+                    </button>
+                    <button
+                      onClick={() => setOrgSubTab('profiles')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Verification Profiles
+                    </button>
+                  </div>
                   <div className="border-b border-slate-800 pb-4">
                     <h2 className="text-lg font-bold text-white">Automation Rules & Threat Risk Thresholds Policies</h2>
                     <p className="text-xs text-slate-400">Configure conditional rules triggered by device reputations and Sybil anomalies.</p>
@@ -1055,7 +1035,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               )}
 
               {/* ==================== VERIFICATION SESSIONS TAB ==================== */}
-              {activeTab === 'logs' && (
+              {activeTab === 'verification-activity' && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
@@ -1152,9 +1132,29 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 </div>
               )}
 
-              {/* ==================== RISK EVENTS TAB ==================== */}
-              {activeTab === 'risks' && (
+              {/* ==================== SECURITY CENTER: THREATS ==================== */}
+              {activeTab === 'security-center' && securitySubTab === 'threats' && (
                 <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setSecuritySubTab('threats')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Threat Events
+                    </button>
+                    <button
+                      onClick={() => setSecuritySubTab('sybils')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Duplicate Sybil Signals
+                    </button>
+                    <button
+                      onClick={() => setSecuritySubTab('removals')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Removal Claims Queue
+                    </button>
+                  </div>
                   <div className="border-b border-slate-800 pb-4">
                     <h2 className="text-lg font-bold text-white">Anomalous Engine Threat Risk Events</h2>
                     <p className="text-xs text-slate-400">Reviews and override queries targeting high-risk emulators, proxy networks, and bot structures.</p>
@@ -1193,9 +1193,29 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 </div>
               )}
 
-              {/* ==================== DUPLICATE SIGNALS TAB ==================== */}
-              {activeTab === 'duplicates' && (
+              {/* ==================== SECURITY CENTER: SYBILS ==================== */}
+              {activeTab === 'security-center' && securitySubTab === 'sybils' && (
                 <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setSecuritySubTab('threats')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Threat Events
+                    </button>
+                    <button
+                      onClick={() => setSecuritySubTab('sybils')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Duplicate Sybil Signals
+                    </button>
+                    <button
+                      onClick={() => setSecuritySubTab('removals')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Removal Claims Queue
+                    </button>
+                  </div>
                   <div className="border-b border-slate-800 pb-4">
                     <h2 className="text-lg font-bold text-white">Sybil Biometric Duplicate Twins Signals (Anti-Collusion)</h2>
                     <p className="text-xs text-slate-400">Detections where processed biometric embeddings target multiple decoupled external partner credentials.</p>
@@ -1374,9 +1394,29 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 </div>
               )}
 
-              {/* ==================== REMOVAL REQUESTS TAB ==================== */}
-              {activeTab === 'removals' && (
+              {/* ==================== SECURITY CENTER: REMOVALS ==================== */}
+              {activeTab === 'security-center' && securitySubTab === 'removals' && (
                 <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setSecuritySubTab('threats')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Threat Events
+                    </button>
+                    <button
+                      onClick={() => setSecuritySubTab('sybils')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Duplicate Sybil Signals
+                    </button>
+                    <button
+                      onClick={() => setSecuritySubTab('removals')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Removal Claims Queue
+                    </button>
+                  </div>
                   <div className="border-b border-slate-800 pb-4">
                     <h2 className="text-lg font-bold text-white">Partner-Approved User Removal and Purge Requests</h2>
                     <p className="text-xs text-slate-400">Execute strict, irrevocable manual purges of suspected Sybils or users violating policies.</p>
@@ -1440,7 +1480,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               )}
 
               {/* ==================== AUDIT LOGS TAB ==================== */}
-              {activeTab === 'audits' && (
+              {activeTab === 'audit-logs' && (
                 <div className="space-y-6 animate-fadeIn">
                   <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
@@ -1521,7 +1561,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               )}
 
               {/* ==================== API DOCS TAB ==================== */}
-              {activeTab === 'docs' && (
+              {activeTab === 'documentation' && (
                 <div className="space-y-8 animate-fadeIn text-slate-300 max-w-4xl">
                   
                   <div className="border-b border-slate-800 pb-4">
@@ -1648,65 +1688,185 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
                 </div>
               )}
 
-              {activeTab === 'wizard' && (
-                <IntegrationWizardTab 
-                  onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
-                  onRefreshDashboard={fetchDashboardData}
-                />
+              {activeTab === 'developers' && devSubTab === 'setup' && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setDevSubTab('setup')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'setup' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      01. Integration Wizard
+                    </button>
+                    <button
+                      onClick={() => setDevSubTab('playground')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'playground' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      02. Developer Portal
+                    </button>
+                    <button
+                      onClick={() => setDevSubTab('sandbox')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'sandbox' ? 'border-[#f43f5e] text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      03. Sandbox Stage controls
+                    </button>
+                  </div>
+                  <IntegrationWizardTab 
+                    onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
+                    onRefreshDashboard={fetchDashboardData}
+                  />
+                </div>
               )}
 
-              {activeTab === 'developer-portal' && (
-                <DeveloperPortalTab 
-                  onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
-                />
+              {activeTab === 'developers' && devSubTab === 'playground' && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setDevSubTab('setup')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'setup' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      01. Integration Wizard
+                    </button>
+                    <button
+                      onClick={() => setDevSubTab('playground')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'playground' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      02. Developer Portal
+                    </button>
+                    <button
+                      onClick={() => setDevSubTab('sandbox')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'sandbox' ? 'border-[#f43f5e] text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      03. Sandbox Stage controls
+                    </button>
+                  </div>
+                  <DeveloperPortalTab 
+                    onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
+                  />
+                </div>
               )}
 
-              {activeTab === 'sandbox' && (
-                <SandboxTab 
-                  onAddAuditLog={(action, entity, status, detail) => {
-                    const newLog = {
-                      id: "aud_sb_" + Math.random().toString(36).substring(2, 7),
-                      actor: "SAN_PLAYGROUND",
-                      action,
-                      entity,
-                      status,
-                      detail,
-                      timestamp: new Date().toISOString()
-                    };
-                    setAuditLogs(prev => [newLog, ...prev]);
-                  }}
-                />
+              {activeTab === 'developers' && devSubTab === 'sandbox' && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setDevSubTab('setup')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'setup' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      01. Integration Wizard
+                    </button>
+                    <button
+                      onClick={() => setDevSubTab('playground')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'playground' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      02. Developer Portal
+                    </button>
+                    <button
+                      onClick={() => setDevSubTab('sandbox')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${devSubTab === 'sandbox' ? 'border-[#f43f5e] text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      03. Sandbox Stage controls
+                    </button>
+                  </div>
+                  <SandboxTab 
+                    onAddAuditLog={(action, entity, status, detail) => {
+                      const newLog = {
+                        id: "aud_sb_" + Math.random().toString(36).substring(2, 7),
+                        actor: "SAN_PLAYGROUND",
+                        action,
+                        entity,
+                        status,
+                        detail,
+                        timestamp: new Date().toISOString()
+                      };
+                      setAuditLogs(prev => [newLog, ...prev]);
+                    }}
+                  />
+                </div>
               )}
 
-              {activeTab === 'health' && (
-                <HealthMonitorTab 
-                  onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
-                />
+              {activeTab === 'trust-analytics' && trustSubTab === 'health' && (
+                <div className="space-y-6">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setTrustSubTab('health')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${trustSubTab === 'health' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Telemetry Health
+                    </button>
+                    <button
+                      onClick={() => setTrustSubTab('badge')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${trustSubTab === 'badge' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Compliance Badge
+                    </button>
+                  </div>
+                  <HealthMonitorTab 
+                    onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
+                  />
+                </div>
               )}
 
-              {activeTab === 'certification' && (
-                <CertificationTab 
-                  onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
-                />
+              {activeTab === 'trust-analytics' && trustSubTab === 'badge' && (
+                <div className="space-y-6">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setTrustSubTab('health')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${trustSubTab === 'health' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Telemetry Health
+                    </button>
+                    <button
+                      onClick={() => setTrustSubTab('badge')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${trustSubTab === 'badge' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Compliance Badge
+                    </button>
+                  </div>
+                  <CertificationTab 
+                    onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
+                  />
+                </div>
               )}
 
-              {activeTab === 'profiles' && (
-                <VerificationProfilesTab 
-                  partnerApps={partnerApps}
-                  onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
-                  onAddAuditLog={async (action, targetType, targetId, metadata) => {
-                    try {
-                      await fetch('/api/internal/audit-logs', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action, target_type: targetType, target_id: targetId, metadata })
-                      });
-                      fetchDashboardData();
-                    } catch (e) {
-                      console.error("Failed to append audit log on backend", e);
-                    }
-                  }}
-                />
+              {activeTab === 'organizations' && orgSubTab === 'profiles' && (
+                <div className="space-y-6 animate-fadeIn">
+                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                    <button
+                      onClick={() => setOrgSubTab('settings')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Project Settings
+                    </button>
+                    <button
+                      onClick={() => setOrgSubTab('policies')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      MFA Login Policies
+                    </button>
+                    <button
+                      onClick={() => setOrgSubTab('profiles')}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                    >
+                      Verification Profiles
+                    </button>
+                  </div>
+                  <VerificationProfilesTab 
+                    partnerApps={partnerApps}
+                    onNavigateToAcademy={(lessonId) => onNavigate('academy', undefined, lessonId)}
+                    onAddAuditLog={async (action, targetType, targetId, metadata) => {
+                      try {
+                        await fetch('/api/internal/audit-logs', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ action, target_type: targetType, target_id: targetId, metadata })
+                        });
+                        fetchDashboardData();
+                      } catch (e) {
+                        console.error("Failed to append audit log on backend", e);
+                      }
+                    }}
+                  />
+                </div>
               )}
 
             </>

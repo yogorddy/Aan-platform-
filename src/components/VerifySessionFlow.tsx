@@ -326,11 +326,11 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between py-8 px-4 selection:bg-blue-600">
+    <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col justify-between py-8 px-4 selection:bg-blue-600">
       
       {/* Platform Banner explaining trust architecture */}
       <div className="max-w-7xl mx-auto w-full mb-6">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between flex-wrap gap-4">
+        <div className="bg-[#0c0f16] border border-slate-900 p-4 rounded-xl flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <div className="bg-blue-900/40 p-2 rounded-lg border border-blue-900/40 text-blue-400">
               <ShieldCheck className="w-5 h-5" />

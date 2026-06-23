@@ -12,7 +12,8 @@ import {
   AuditLog,
   RiskResult,
   Policy,
-  TrustTimelineEntry
+  TrustTimelineEntry,
+  SecurityEvent
 } from "./src/types";
 
 // ============================================================================
@@ -434,6 +435,385 @@ const mockTrustTimelines: TrustTimelineEntry[] = [
   }
 ];
 
+// ============================================================================
+// BYPASS & INTRUSION DETECTION LAYER (DEFENSIVE RULE-BASED ANOMALY SCANNING)
+// ============================================================================
+
+const mockSecurityEvents: SecurityEvent[] = [
+  {
+    id: "sec_event_b1a23",
+    severity: "critical",
+    event_type: "invalid_token_signature",
+    actor_type: "partner_app",
+    actor_id: "partner_apps_dao_456",
+    ip_address: "185.220.101.44",
+    user_agent: "curl/7.81.0",
+    session_id: "vss_session_failed_df9",
+    partner_app_id: "partner_apps_dao_456",
+    request_path: "/api/v1/verify-proof-token",
+    detection_reason: "Bypass Blocked: Decoded claims payload does not match HMAC-SHA256 signature verification hash. Signature tampered with.",
+    raw_metadata: {
+      attempted_claims: { organization_id: "org_enterprise_999", human_status: "verified", uniqueness_status: "unique" },
+      expected_signature_alg: "HS256"
+    },
+    created_at: new Date(Date.now() - 3.5 * 3600 * 1000).toISOString()
+  },
+  {
+    id: "sec_event_c3d45",
+    severity: "high",
+    event_type: "impossible_session_state_transition",
+    actor_type: "user",
+    actor_id: "usr_9a48f2c0",
+    ip_address: "198.51.100.12",
+    user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0",
+    session_id: "vss_session_failed_df9",
+    partner_app_id: "partner_apps_fintech_123",
+    request_path: "/api/v1/verification-sessions/vss_session_failed_df9/biometric",
+    detection_reason: "Defensive Transition Enforcer Blocked: Direct state jump request attempted from created to proof_issued bypassing active consent & liveness verification.",
+    raw_metadata: {
+      current_status: "created",
+      failed_target_status: "proof_issued"
+    },
+    created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+  },
+  {
+    id: "sec_event_e5f67",
+    severity: "medium",
+    event_type: "token_replay_attempt",
+    actor_type: "partner_app",
+    actor_id: "partner_apps_fintech_123",
+    ip_address: "203.0.113.88",
+    user_agent: "PostmanRuntime/7.36.1",
+    session_id: "vss_session_failed_df9",
+    partner_app_id: "partner_apps_fintech_123",
+    request_path: "/api/v1/proofs/verify",
+    detection_reason: "Repetitive proof token submission flagged. Potential replay attempt in quick succession.",
+    raw_metadata: {
+      verification_count: 3,
+      session_id: "vss_session_failed_df9"
+    },
+    created_at: new Date(Date.now() - 1.2 * 3600 * 1000).toISOString()
+  },
+  {
+    id: "sec_event_f7g89",
+    severity: "critical",
+    event_type: "api_key_abuse",
+    actor_type: "unknown",
+    actor_id: "revoked_key_hash_66a7ec2b",
+    ip_address: "185.190.140.22",
+    user_agent: "unknown",
+    request_path: "/api/v1/verification-sessions",
+    detection_reason: "Disabled API Key signature used repeatedly. Multiple requests blocked due to lack of valid authorization credentials.",
+    raw_metadata: {
+      auth_header_length: 32,
+      attempts_count: 14
+    },
+    created_at: new Date(Date.now() - 10 * 60 * 1000).toISOString()
+  }
+];
+
+function appendSecurityEvent(
+  severity: 'low' | 'medium' | 'high' | 'critical',
+  eventType: string,
+  actorType: 'user' | 'partner_app' | 'admin' | 'system' | 'unknown',
+  actorId: string,
+  ipAddress: string,
+  userAgent: string,
+  reason: string,
+  metadata: Record<string, any> = {},
+  sessionId?: string,
+  partnerAppId?: string,
+  requestPath?: string
+) {
+  const newEvent = {
+    id: `sec_${crypto.randomBytes(4).toString('hex')}`,
+    severity,
+    event_type: eventType,
+    actor_type: actorType,
+    actor_id: actorId,
+    ip_address: ipAddress || "127.0.0.1",
+    user_agent: userAgent || "AAN-Defensive-Core",
+    session_id: sessionId,
+    partner_app_id: partnerAppId,
+    request_path: requestPath,
+    detection_reason: reason,
+    raw_metadata: metadata,
+    created_at: new Date().toISOString()
+  };
+  db.securityEvents.unshift(newEvent);
+  return newEvent;
+}
+
+function calculateIntrusionRiskScore(partnerAppId?: string) {
+  const events = partnerAppId ? db.securityEvents.filter((e: any) => e.partner_app_id === partnerAppId) : db.securityEvents;
+  let score = 5;
+  const signalsCount = {
+    failedTokens: 0,
+    impossibleTransitions: 0,
+    unauthorizedAccess: 0,
+    apiKeyAbuse: 0,
+    unusualIPActivity: 0,
+    adminAnomalies: 0,
+  };
+
+  events.forEach((e: any) => {
+    if (e.event_type === 'invalid_token_signature' || e.event_type === 'expired_token_reuse' || e.event_type === 'token_replay_attempt') {
+      signalsCount.failedTokens++;
+      score += e.severity === 'critical' ? 25 : e.severity === 'high' ? 18 : 10;
+    } else if (e.event_type === 'impossible_session_state_transition') {
+      signalsCount.impossibleTransitions++;
+      score += 25;
+    } else if (e.event_type === 'unauthorized_proof_approval' || e.event_type === 'rls_policy_violation_attempt') {
+      signalsCount.unauthorizedAccess++;
+      score += 30;
+    } else if (e.event_type === 'api_key_abuse' || e.event_type === 'webhook_tampering_attempt') {
+      signalsCount.apiKeyAbuse++;
+      score += 20;
+    } else if (e.event_type === 'admin_override_anomaly' || e.event_type === 'suspicious_role_change') {
+      signalsCount.adminAnomalies++;
+      score += 15;
+    } else if (e.severity === 'critical') {
+      score += 20;
+    } else if (e.severity === 'high') {
+      score += 12;
+    } else {
+      score += 4;
+    }
+  });
+
+  score = Math.max(0, Math.min(100, score));
+  let level: 'normal' | 'suspicious' | 'high risk' | 'critical' = 'normal';
+  if (score >= 86) {
+    level = 'critical';
+  } else if (score >= 61) {
+    level = 'high risk';
+  } else if (score >= 31) {
+    level = 'suspicious';
+  }
+
+  return { score, level, signalsCount };
+}
+
+function transitionSession(session: any, targetStatus: any, req: any, reason: string = ""): { allowed: boolean; eventLogged?: boolean } {
+  const currentStatus = session.status;
+  if (currentStatus === targetStatus) {
+    return { allowed: true };
+  }
+
+  let allowed = false;
+
+  if (targetStatus === 'expired' || targetStatus === 'revoked') {
+    allowed = true;
+  } else if (currentStatus === 'expired') {
+    allowed = false;
+  } else if (currentStatus === 'created' || currentStatus === 'started') {
+    allowed = (targetStatus === 'consent_given' || targetStatus === 'verification_started' || targetStatus === 'verification_failed' || targetStatus === 'verification_passed');
+  } else if (currentStatus === 'consent_given') {
+    allowed = (targetStatus === 'verification_started' || targetStatus === 'verification_failed' || targetStatus === 'verification_passed' || targetStatus === 'review');
+  } else if (currentStatus === 'verification_started') {
+    allowed = (targetStatus === 'verification_passed' || targetStatus === 'verification_failed' || targetStatus === 'review' || targetStatus === 'passed' || targetStatus === 'failed');
+  } else if (currentStatus === 'verification_passed' || currentStatus === 'passed') {
+    allowed = (targetStatus === 'proof_issued' || targetStatus === 'revoked' || targetStatus === 'expired');
+  } else if (currentStatus === 'verification_failed' || currentStatus === 'failed') {
+    allowed = (targetStatus === 'created' || targetStatus === 'consent_given' || targetStatus === 'verification_started');
+  } else if (currentStatus === 'proof_issued') {
+    allowed = (targetStatus === 'revoked' || targetStatus === 'expired');
+  }
+
+  if (targetStatus === 'proof_issued' && currentStatus !== 'verification_passed' && currentStatus !== 'passed') {
+    allowed = false;
+  }
+
+  if (allowed) {
+    session.status = targetStatus;
+    if (reason) session.result_reason = reason;
+    return { allowed: true };
+  } else {
+    const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
+    const ua = (req.headers['user-agent'] || "Unknown").toString();
+    appendSecurityEvent(
+      'critical',
+      'impossible_session_state_transition',
+      'system',
+      'intrusion_defense_agent',
+      ip,
+      ua,
+      `Bypass blocked: Forced impossible state jump attempted for session ${session.id} from [${currentStatus}] directly to [${targetStatus}].`,
+      {
+        previous_status: currentStatus,
+        attempted_status: targetStatus,
+        session_id: session.id,
+        context: "State Transition Integrity Guard"
+      },
+      session.id,
+      session.partner_app_id,
+      req.path
+    );
+    return { allowed: false, eventLogged: true };
+  }
+}
+
+function verifyHardwareProofToken(proofToken: string, req: any): { valid: boolean; claims?: any; error?: string } {
+  const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
+  const ua = (req.headers['user-agent'] || "Unknown").toString();
+
+  // 1. Structural Checks
+  if (!proofToken || typeof proofToken !== 'string') {
+    return { valid: false, error: "Missing required parameter: proof_token" };
+  }
+
+  const parts = proofToken.split('.');
+  if (parts.length !== 3) {
+    appendSecurityEvent(
+      'critical',
+      'invalid_token_signature',
+      'unknown',
+      'unauthorized_api_client',
+      ip,
+      ua,
+      "Block Malicious Payload: Structural damage detected. The digital token was not minted by AAN.",
+      { parts_count: parts.length, token_stub: proofToken.substring(0, 15) },
+      undefined,
+      undefined,
+      req.path
+    );
+    return { valid: false, error: "Signature verification failed: Invalid cryptographic proof_token integrity" };
+  }
+
+  const [headerBase64, claimsBase64, signature] = parts;
+
+  // 2. Validate cryptographic signature
+  const project = db.projects[0] || { id: "proj_security_777", webhook_secret: "whsec_sha255_default" };
+  const expectedSignature = crypto
+    .createHmac('sha256', project.webhook_secret)
+    .update(`${headerBase64}.${claimsBase64}`)
+    .digest('base64url');
+
+  if (signature !== expectedSignature) {
+    appendSecurityEvent(
+      'critical',
+      'invalid_token_signature',
+      'system',
+      project.id,
+      ip,
+      ua,
+      "Block Malicious Override: Signature verification failed. Cryptographic signature does not match expected project key hash.",
+      { attempted_signature: signature, expected: expectedSignature },
+      undefined,
+      project.id,
+      req.path
+    );
+    return { valid: false, error: "Cryptographic signature validation mismatch" };
+  }
+
+  // 3. Claims analysis
+  let claims: any;
+  try {
+    claims = JSON.parse(Buffer.from(claimsBase64, 'base64url').toString());
+  } catch (err) {
+    return { valid: false, error: "Failed to decode claims payload" };
+  }
+
+  // 4. Expiration check
+  if (new Date(claims.expires_at).getTime() < Date.now()) {
+    appendSecurityEvent(
+      'high',
+      'expired_token_reuse',
+      'user',
+      claims.partner_user_id || "unknown",
+      ip,
+      ua,
+      `Access Denied: Re-use of expired cryptographic token detected. Expired on: ${claims.expires_at}.`,
+      { expired_at: claims.expires_at, session_id: claims.session_id },
+      claims.session_id,
+      project.id,
+      req.path
+    );
+    return { valid: false, error: "Proof token expired", claims };
+  }
+
+  // 5. Issuer metadata matching
+  const expectedOrg = db.organizations[0] || { id: "org_enterprise_999" };
+  if (claims.organization_id !== expectedOrg.id || claims.project_id !== project.id) {
+    appendSecurityEvent(
+      'high',
+      'invalid_token_signature',
+      'partner_app',
+      project.id,
+      ip,
+      ua,
+      "Access Denied: Token was issued for an alternative project or organization audience.",
+      { claims_audience: { org: claims.organization_id, proj: claims.project_id } },
+      claims.session_id,
+      project.id,
+      req.path
+    );
+    return { valid: false, error: "Token audience claims mismatch" };
+  }
+
+  // 6. Session and user claim database consistency check (detect forged payloads even with valid signatures from alternate secret keys)
+  const session = db.verificationSessions.find(s => s.id === claims.session_id);
+  if (!session) {
+    appendSecurityEvent(
+      'critical',
+      'unauthorized_proof_approval',
+      'partner_app',
+      project.id,
+      ip,
+      ua,
+      `Critical Tampering Attempt: Claim verification sessions [id: ${claims.session_id}] do not exist in the master database.`,
+      { session_id: claims.session_id },
+      claims.session_id,
+      project.id,
+      req.path
+    );
+    return { valid: false, error: "Verification session claimed in token does not exist" };
+  }
+
+  // Let's verify status matches or we have a valid output
+  if (session.external_user_id !== claims.partner_user_id) {
+    appendSecurityEvent(
+      'critical',
+      'unauthorized_proof_approval',
+      'partner_app',
+      project.id,
+      ip,
+      ua,
+      "Critical User Contaminations: Claimed identity user ID does not match active verification session user ID.",
+      { claims_user: claims.partner_user_id, session_user: session.external_user_id },
+      claims.session_id,
+      project.id,
+      req.path
+    );
+    return { valid: false, error: "Claim consistency mismatch: partner_user_id mismatch" };
+  }
+
+  // 7. Token Replay Check
+  if (!db.verifiedTokens[claims.session_id]) {
+    db.verifiedTokens[claims.session_id] = 0;
+  }
+  db.verifiedTokens[claims.session_id]++;
+
+  if (db.verifiedTokens[claims.session_id] > 1) {
+    appendSecurityEvent(
+      'high',
+      'token_replay_attempt',
+      'partner_app',
+      project.id,
+      ip,
+      ua,
+      `Verification Replay Flagged: Re-submission of valid proof token for session ${claims.session_id}. Counter: ${db.verifiedTokens[claims.session_id]}.`,
+      { attempts: db.verifiedTokens[claims.session_id] },
+      claims.session_id,
+      project.id,
+      req.path
+    );
+    return { valid: false, error: "Proof token replay detected" };
+  }
+
+  return { valid: true, claims };
+}
+
 // Active State Storage Object (acts as our local relational storage system for MVP state)
 const db = {
   partnerApps: [...mockPartnerApps],
@@ -445,6 +825,11 @@ const db = {
   auditLogs: [...mockAuditLogs],
   policies: [...mockPolicies],
   trustTimelines: [...mockTrustTimelines],
+  securityEvents: [...mockSecurityEvents],
+  verifiedTokens: {
+    "vss_session_failed_df9": 2
+  } as Record<string, number>,
+
   organizations: [
     {
       id: "org_enterprise_999",
@@ -743,6 +1128,41 @@ async function startServer() {
       const finder = db.partnerApps.find(app => app.api_key_hash === hash);
       if (finder) {
         partnerApp = finder;
+        if (partnerApp.status === 'suspended') {
+          const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
+          const ua = (req.headers['user-agent'] || "Unknown").toString();
+          appendSecurityEvent(
+            'critical',
+            'api_key_abuse',
+            'partner_app',
+            partnerApp.id,
+            ip,
+            ua,
+            `Access Denied: Attempted verification session creation using a suspended API Key [app: ${partnerApp.name}].`,
+            { attempted_key_hash: hash.substring(0, 10) + "..." },
+            undefined,
+            partnerApp.id,
+            req.path
+          );
+          return res.status(403).json({ error: "Access Denied: Partner app is suspended" });
+        }
+      } else {
+        const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
+        const ua = (req.headers['user-agent'] || "Unknown").toString();
+        appendSecurityEvent(
+          'high',
+          'api_key_abuse',
+          'unknown',
+          'unknown_actor',
+          ip,
+          ua,
+          `Unauthorized request rejected: Invalid or unregistered API Key signature used.`,
+          { attempted_key_hash: hash.substring(0, 10) + "..." },
+          undefined,
+          undefined,
+          req.path
+        );
+        return res.status(401).json({ error: "Access Denied: Invalid API Key" });
       }
     }
 
@@ -751,7 +1171,7 @@ async function startServer() {
       id: verificationSessionId,
       partner_app_id: partnerApp.id,
       external_user_id,
-      status: "started",
+      status: "created", // Set initialized state to 'created' as specified
       risk_score: 0,
       duplicate_candidate: false,
       result_reason: "Session initialized via Partner API route. Pending user verification.",
@@ -809,6 +1229,18 @@ async function startServer() {
 
     if (!session) {
       return res.status(404).json({ error: "Verification session not found" });
+    }
+
+    // Defensive State Transition Guard: Step 1 (created -> consent_given)
+    const tConsent = transitionSession(session, 'consent_given', req, "User digital consent verified.");
+    if (!tConsent.allowed) {
+      return res.status(400).json({ error: "Bypass Blocked: Invalid session state transition sequence" });
+    }
+
+    // Defensive State Transition Guard: Step 2 (consent_given -> verification_started)
+    const tStarted = transitionSession(session, 'verification_started', req, "Biometric active verification started.");
+    if (!tStarted.allowed) {
+      return res.status(400).json({ error: "Bypass Blocked: Invalid session state transition sequence" });
     }
 
     // Capture User Identification linkage
@@ -904,8 +1336,8 @@ async function startServer() {
     const emMode = activeProject.enforcement_mode;
 
     if (riskResult.risk_score >= 70) {
-      session.status = "failed";
-      session.result_reason = "Anomalous user verification score triggers blocklist restrictions. Reason: " + riskResult.reasons.join(", ");
+      // Direct state transition
+      transitionSession(session, 'verification_failed', req, "Anomalous user verification score triggers blocklist restrictions. Reason: " + riskResult.reasons.join(", "));
       
       const targetUserObj = db.users.find(u => u.id === targetUserId);
       if (targetUserObj) targetUserObj.status = "rejected";
@@ -922,34 +1354,39 @@ async function startServer() {
         });
       }
     } else if (riskResult.risk_score >= 35) {
-      session.status = "review";
-      session.result_reason = "Unrecognized multi-device environment flags registered. Pending administrative manual override review.";
+      // Move to review
+      transitionSession(session, 'review', req, "Unrecognized multi-device environment flags registered. Pending administrative manual override review.");
       
       dispatchWebhook('aan.reverification.required', session.external_user_id, riskResult.risk_level, 'manual_review', {
         risk_score: riskResult.risk_score,
         risk_reasons: riskResult.reasons
       });
     } else {
-      session.status = "passed";
-      session.result_reason = "Fully preservation-compliant structural match succeeded. Signed Proof of Human token minted.";
-      session.completed_at = new Date().toISOString();
-
-      const uniquenessStatus = isDuplicateBiometric ? 'duplicate' : 'unique';
+      // Move to passed
+      const passTransition = transitionSession(session, 'verification_passed', req, "Fully preservation-compliant structural match succeeded. Signed Proof of Human token minted.");
       
-      // cryptographic JWT-structured proof token signing
-      session.proof_token = issueProofToken(session.external_user_id, session.id, 'verified', uniquenessStatus, riskResult.risk_level);
+      if (passTransition.allowed) {
+        session.completed_at = new Date().toISOString();
+        const uniquenessStatus = isDuplicateBiometric ? 'duplicate' : 'unique';
+        
+        // cryptographic JWT-structured proof token signing
+        session.proof_token = issueProofToken(session.external_user_id, session.id, 'verified', uniquenessStatus, riskResult.risk_level);
 
-      const targetUserObj = db.users.find(u => u.id === targetUserId);
-      if (targetUserObj) {
-        targetUserObj.status = "verified";
-        targetUserObj.updated_at = new Date().toISOString();
+        // Move to proof_issued
+        transitionSession(session, 'proof_issued', req, "Signed Proof of Human token successfully minted and released.");
+
+        const targetUserObj = db.users.find(u => u.id === targetUserId);
+        if (targetUserObj) {
+          targetUserObj.status = "verified";
+          targetUserObj.updated_at = new Date().toISOString();
+        }
+
+        // Dispatch verification completed webhook
+        dispatchWebhook('aan.verification.completed', session.external_user_id, riskResult.risk_level, 'allow', {
+          session_id: session.id,
+          uniqueness_status: uniquenessStatus
+        });
       }
-
-      // Dispatch verification completed webhook
-      dispatchWebhook('aan.verification.completed', session.external_user_id, riskResult.risk_level, 'allow', {
-        session_id: session.id,
-        uniqueness_status: uniquenessStatus
-      });
     }
 
     appendAuditLog(
@@ -973,42 +1410,23 @@ async function startServer() {
       return res.status(400).json({ error: "Missing required string parameter: proof_token" });
     }
 
-    // Check matching session token
-    const matchingSession = db.verificationSessions.find(s => s.proof_token === proof_token);
+    const verificationResult = verifyHardwareProofToken(proof_token, req);
 
-    if (!matchingSession && !proof_token.includes(".")) {
+    if (!verificationResult.valid) {
       return res.status(400).json({
         valid: false,
         claims: null,
-        error: "Signature verification failed: Invalid cryptographic proof_token integrity"
+        error: verificationResult.error || "Signature verification failed: Invalid cryptographic proof_token integrity"
       });
     }
-
-    try {
-      if (proof_token.includes(".")) {
-        const parts = proof_token.split('.');
-        if (parts.length === 3) {
-          const claims = JSON.parse(Buffer.from(parts[1], 'base64url').toString());
-          return res.json({
-            valid: true,
-            claims: {
-              human_verified: claims.human_status === 'verified',
-              unique_human: claims.uniqueness_status === 'unique',
-              issued_at: claims.issued_at,
-              expires_at: claims.expires_at
-            }
-          });
-        }
-      }
-    } catch(e) {}
 
     res.json({
       valid: true,
       claims: {
-        human_verified: true,
-        unique_human: matchingSession ? !matchingSession.duplicate_candidate : true,
-        issued_at: matchingSession ? matchingSession.completed_at : new Date(Date.now() - 3600 * 1000).toISOString(),
-        expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString() // 30 day grace proof
+        human_verified: verificationResult.claims.human_status === 'verified',
+        unique_human: verificationResult.claims.uniqueness_status === 'unique',
+        issued_at: verificationResult.claims.issued_at,
+        expires_at: verificationResult.claims.expires_at
       }
     });
   });
@@ -1198,54 +1616,19 @@ async function startServer() {
       return res.status(400).json({ error: "Missing required parameter: proof_token" });
     }
 
-    try {
-      const parts = proof_token.split('.');
-      if (parts.length !== 3) {
-        const findSession = db.verificationSessions.find(s => s.proof_token === proof_token);
-        if (findSession) {
-          return res.json({
-            valid: true,
-            claims: {
-              organization_id: "org_enterprise_999",
-              project_id: "proj_security_777",
-              partner_user_id: findSession.external_user_id,
-              session_id: findSession.id,
-              human_status: "verified",
-              uniqueness_status: findSession.duplicate_candidate ? "duplicate" : "unique",
-              risk_level: "low",
-              issued_at: findSession.completed_at || new Date().toISOString(),
-              expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString()
-            }
-          });
-        }
-        return res.status(401).json({ valid: false, error: "Invalid signature format" });
-      }
+    const verificationResult = verifyHardwareProofToken(proof_token, req);
 
-      const [headerBase64, claimsBase64, signature] = parts;
-      
-      const project = db.projects[0] || { webhook_secret: "whsec_sha255_default" };
-      const expectedSignature = crypto
-        .createHmac('sha256', project.webhook_secret)
-        .update(`${headerBase64}.${claimsBase64}`)
-        .digest('base64url');
-
-      if (signature !== expectedSignature) {
-        return res.status(401).json({ valid: false, error: "Cryptographic signature validation mismatch" });
-      }
-
-      const claims = JSON.parse(Buffer.from(claimsBase64, 'base64url').toString());
-      
-      if (new Date(claims.expires_at).getTime() < Date.now()) {
-        return res.status(401).json({ valid: false, error: "Proof token expired" });
-      }
-
-      res.json({
-        valid: true,
-        claims
+    if (!verificationResult.valid) {
+      return res.status(401).json({
+        valid: false,
+        error: verificationResult.error || "Cryptographic signature validation failure"
       });
-    } catch (e: any) {
-      res.status(400).json({ valid: false, error: `Proof decoding error: ${e.message}` });
     }
+
+    res.json({
+      valid: true,
+      claims: verificationResult.claims
+    });
   });
 
 
@@ -1290,6 +1673,67 @@ async function startServer() {
     res.json({ success: true, count: db.auditLogs.length });
   });
 
+  // ============================================================================
+  // ADMINISTRATIVE SECURITY CONTROL ENDPOINTS
+  // ============================================================================
+
+  app.get("/api/internal/security-events", (req, res) => {
+    const { severity, event_type, partner_app_id } = req.query;
+    let filteredEvents = [...db.securityEvents];
+
+    if (severity) {
+      filteredEvents = filteredEvents.filter((e: any) => e.severity === severity);
+    }
+    if (event_type) {
+      filteredEvents = filteredEvents.filter((e: any) => e.event_type === event_type);
+    }
+    if (partner_app_id) {
+      filteredEvents = filteredEvents.filter((e: any) => e.partner_app_id === partner_app_id);
+    }
+
+    res.json(filteredEvents);
+  });
+
+  app.get("/api/internal/security-risk", (req, res) => {
+    const { partner_app_id } = req.query;
+    const stats = calculateIntrusionRiskScore(partner_app_id as string | undefined);
+    res.json(stats);
+  });
+
+  app.post("/api/internal/security-events/:id/resolve", (req, res) => {
+    const { id } = req.params;
+    const { notes } = req.body;
+    const event = db.securityEvents.find((e: any) => e.id === id);
+
+    if (!event) {
+      return res.status(404).json({ error: "Security event not found" });
+    }
+
+    event.raw_metadata = {
+      ...(event.raw_metadata || {}),
+      resolved: true,
+      resolved_at: new Date().toISOString(),
+      resolution_notes: notes || "System Administrator dismissed this intrusion flag."
+    };
+
+    appendAuditLog(
+      'admin',
+      'admin_super_user_one',
+      'security_event.resolve',
+      'security_event',
+      id,
+      { notes, event_type: event.event_type }
+    );
+
+    res.json({ success: true, event });
+  });
+
+  app.post("/api/internal/security-events/clear", (req, res) => {
+    db.securityEvents = [...mockSecurityEvents];
+    appendAuditLog('admin', 'admin_super_user_one', 'security_events.reset', 'security_event_table', 'all', {});
+    res.json({ success: true, count: db.securityEvents.length });
+  });
+
   // Action overrides (re-evaluating, suspending, and verifying)
   app.post("/api/internal/sessions/:id/action", (req, res) => {
     const { action } = req.body; // 'approve' | 'reject'
@@ -1302,6 +1746,25 @@ async function startServer() {
     );
 
     if (action === "approve") {
+      const oldScore = session.risk_score;
+      if (oldScore >= 70 || session.duplicate_candidate) {
+        const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
+        const ua = (req.headers['user-agent'] || "Unknown").toString();
+        appendSecurityEvent(
+          'medium',
+          'admin_override_anomaly',
+          'admin',
+          'admin_super_user_one',
+          ip,
+          ua,
+          `Risky Admin Override Approved: Session ${session.id} verified despite high risk level (${oldScore}/100) or duplicate candidate flags.`,
+          { previous_score: oldScore, duplicate_candidate: session.duplicate_candidate },
+          session.id,
+          session.partner_app_id,
+          req.path
+        );
+      }
+
       session.status = "passed";
       session.risk_score = 5; // Reduced post manual audit review
       session.proof_token = `proof_claims_${crypto.randomBytes(3).toString('hex')}_sig_manual_${crypto.randomBytes(4).toString('hex')}`;

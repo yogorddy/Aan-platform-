@@ -67,12 +67,12 @@ export default function BrandBook() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#080b11] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       
       {/* Brand Book Hero Banner */}
-      <div className="relative border-b border-slate-900 bg-slate-950 overflow-hidden py-16 px-6">
+      <div className="relative border-b border-slate-900 bg-[#080b11] overflow-hidden py-16 px-6">
         {/* Ambient grids and lighting */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#020617_1px,transparent_1px),linear-gradient(to_bottom,#020617_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#080b11_1px,transparent_1px),linear-gradient(to_bottom,#080b11_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30" />
         <div className="absolute top-0 right-1/4 w-[500px] h-[150px] bg-blue-500/10 blur-[80px] rounded-full pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 w-[300px] h-[100px] bg-emerald-500/5 blur-[80px] rounded-full pointer-events-none" />
 
@@ -501,13 +501,13 @@ export default function BrandBook() {
                 <h3 className="text-xs font-mono text-slate-300 uppercase tracking-widest bg-slate-900/40 p-2 rounded">1. Identity Color Palette</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
                   {[
-                    { name: 'Core Slate Black', hex: '#020617', tailwind: 'bg-slate-950', use: 'App Background / Deep Canvas' },
+                    { name: 'Core Space Black', hex: '#080b11', tailwind: 'bg-[#080b11] border border-slate-900', use: 'Platform Main Deep Canvas Background' },
                     { name: 'Sovereign White', hex: '#F8FAFC', tailwind: 'bg-slate-50 border border-slate-200', use: 'Primary Display Typography' },
                     { name: 'Sovereign Blue', hex: '#2563EB', tailwind: 'bg-blue-600', use: 'Interactive Primaries & Selections' },
                     { name: 'AAN Mint Green', hex: '#10B981', tailwind: 'bg-emerald-500', use: 'Verification Success Accents' },
                     { name: 'Anomalous Rust', hex: '#EF4444', tailwind: 'bg-red-500', use: 'High-Risk Anomaly Alerts' },
-                    { name: 'Carbon Accent', hex: '#F1F5F9', tailwind: 'bg-slate-100', use: 'Clean Corporate Interface Backgrounds' },
-                    { name: 'Aura Depth Blue', hex: '#1E3A8A', tailwind: 'bg-blue-900', use: 'Border Elements & Dark Gradients' },
+                    { name: 'Deep Chamber Grid', hex: '#0a0d13', tailwind: 'bg-[#0a0d13] border border-slate-905', use: 'Inner Code Editors & Terminal Viewports' },
+                    { name: 'Elite Card Slate', hex: '#0c0f16', tailwind: 'bg-[#0c0f16] border border-slate-900', use: 'Primary Page Cards & Block Elements' },
                     { name: 'Ink Charcoal', hex: '#0F172A', tailwind: 'bg-slate-900', use: 'Form fields & Component panels' }
                   ].map((col, idx) => (
                     <div key={idx} className="bg-slate-950 border border-slate-850 p-3 rounded-lg flex flex-col gap-3">

@@ -42,6 +42,18 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [selectedUserId, setSelectedUserId] = useState<string>("usr_df990a31");
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [institutionalConsent, setInstitutionalConsent] = useState(false);
+
+  // Defensive bypass & intrusion detection state
+  const [securityEvents, setSecurityEvents] = useState<any[]>([]);
+  const [securityRisk, setSecurityRisk] = useState<{ score: number; level: string; signalsCount: any }>({
+    score: 0,
+    level: "normal",
+    signalsCount: { failedTokens: 0, impossibleTransitions: 0, unauthorizedAccess: 0, apiKeyAbuse: 0, unusualIPActivity: 0, adminAnomalies: 0 }
+  });
+  const [resolvingEventId, setResolvingEventId] = useState<string | null>(null);
+  const [resolutionNotes, setResolutionNotes] = useState("");
+  const [severityFilter, setSeverityFilter] = useState<string>("all");
+  const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
   
   // Custom Policy Builder Form Space
   const [policyForm, setPolicyForm] = useState({
@@ -52,7 +64,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   });
 
   // Active view tab state (within Admin dashboard context)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'overrides' | 'users' | 'policies' | 'timeline' | 'devices' | 'biometrics' | 'audits' | 'verification-logs'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'overrides' | 'users' | 'policies' | 'timeline' | 'devices' | 'biometrics' | 'audits' | 'verification-logs' | 'security-alerts'>('analytics');
 
   // Filter params
   const [auditQuery, setAuditQuery] = useState("");
@@ -313,6 +325,67 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setBiometrics(bioData);
 
+      // 6. Fetch live security events with fallbacks
+      let secEvents;
+      try {
+        const secRes = await fetch('/api/internal/security-events');
+        secEvents = await secRes.json();
+      } catch (e) {
+        secEvents = [
+          {
+            id: "sec_event_b1a23",
+            severity: "critical",
+            event_type: "invalid_token_signature",
+            actor_type: "partner_app",
+            actor_id: "partner_apps_dao_456",
+            ip_address: "185.220.101.44",
+            user_agent: "curl/7.81.0",
+            session_id: "vss_session_failed_df9",
+            partner_app_id: "partner_apps_dao_456",
+            request_path: "/api/v1/verify-proof-token",
+            detection_reason: "Bypass Blocked: Decoded claims payload does not match HMAC-SHA256 signature verification hash. Signature tampered with.",
+            raw_metadata: {
+              attempted_claims: { organization_id: "org_enterprise_999", human_status: "verified", uniqueness_status: "unique" },
+              expected_signature_alg: "HS256"
+            },
+            created_at: new Date(Date.now() - 3.5 * 3600 * 1005).toISOString()
+          },
+          {
+            id: "sec_event_c3d45",
+            severity: "high",
+            event_type: "impossible_session_state_transition",
+            actor_type: "user",
+            actor_id: "usr_9a48f2c0",
+            ip_address: "198.51.100.12",
+            user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0",
+            session_id: "vss_session_failed_df9",
+            partner_app_id: "partner_apps_fintech_123",
+            request_path: "/api/v1/verification-sessions/vss_session_failed_df9/biometric",
+            detection_reason: "Defensive Transition Enforcer Blocked: Direct state jump request attempted from created to proof_issued bypassing active consent & liveness verification.",
+            raw_metadata: {
+              current_status: "created",
+              failed_target_status: "proof_issued"
+            },
+            created_at: new Date(Date.now() - 2 * 3600 * 1005).toISOString()
+          }
+        ];
+      }
+      setSecurityEvents(secEvents);
+
+      // 7. Fetch live security risk report with fallback
+      let secRisk;
+      try {
+        const riskRes = await fetch('/api/internal/security-risk');
+        secRisk = await riskRes.json();
+      } catch (e) {
+        secRisk = {
+          score: 45,
+          level: "suspicious",
+          signalsCount: { failedTokens: 1, impossibleTransitions: 1, unauthorizedAccess: 0, apiKeyAbuse: 0, unusualIPActivity: 0, adminAnomalies: 0 }
+        };
+      }
+      setSecurityRisk(secRisk);
+
       await fetchPoliciesAndTimelines();
     } catch (err) {
       console.warn("Gracefully unresolved admin sync status: using client verification repository", err);
@@ -357,6 +430,37 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
     } catch (err) {
       console.error("User override fail", err);
+    }
+  };
+
+  const handleResolveEvent = async (id: string) => {
+    try {
+      const res = await fetch(`/api/internal/security-events/${id}/resolve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: resolutionNotes })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setResolvingEventId(null);
+        setResolutionNotes("");
+        fetchAdminState();
+      }
+    } catch (err) {
+      console.error("Failed to resolve security event:", err);
+    }
+  };
+
+  const handleResetSecurityEvents = async () => {
+    if (!window.confirm("Are you sure you want to restore simulated security mock event telemetry?")) return;
+    try {
+      const res = await fetch(`/api/internal/security-events/clear`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        fetchAdminState();
+      }
+    } catch (err) {
+      console.error("Failed to clear security events:", err);
     }
   };
 
@@ -512,10 +616,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 font-sans text-slate-150">
+    <div className="min-h-screen bg-[#080b11] font-sans text-slate-150">
       
       {/* Dashboard Top Header Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+      <header className="bg-[#0c0f16] border-b border-slate-900 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="bg-emerald-600/15 text-emerald-400 p-2 rounded-lg">
             <ShieldAlert className="w-5 h-5" />
@@ -561,7 +665,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         
         {/* Left mini Sidebar links */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden p-4">
+          <div className="bg-[#0c0f16] border border-slate-900 rounded-xl overflow-hidden p-4">
             <span className="font-mono text-[9px] text-slate-500 font-extrabold block uppercase tracking-wider mb-3">Auditing Directories</span>
             
             <div className="flex flex-col gap-1.5 font-sans text-xs">
@@ -659,10 +763,27 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 <Terminal className="w-4 h-4" />
                 System Audit Rails
               </button>
+
+              <button
+                onClick={() => setActiveTab('security-alerts')}
+                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer relative ${
+                  activeTab === 'security-alerts'
+                    ? 'bg-rose-950/80 border border-rose-800 text-rose-200 font-semibold'
+                    : 'hover:bg-slate-850 text-slate-405 text-slate-400 hover:text-slate-100'
+                }`}
+              >
+                <ShieldAlert className={`w-4 h-4 ${securityEvents.some((e: any) => !e.raw_metadata?.resolved && e.severity === 'critical') ? 'text-red-500 animate-bounce' : 'text-rose-450 text-rose-500'}`} />
+                <span>Intrusion & Bypass Alerts</span>
+                {securityEvents.filter((e: any) => !e.raw_metadata?.resolved).length > 0 && (
+                  <span className="ml-[1px] bg-red-650 bg-red-600 text-white font-bold font-mono text-[9px] px-1.5 py-0.5 rounded-full leading-none shrink-0">
+                    {securityEvents.filter((e: any) => !e.raw_metadata?.resolved).length}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
 
-          <div className="bg-slate-950 border border-slate-900 p-4 rounded-xl text-xs space-y-2">
+          <div className="bg-[#0c0f16] border border-slate-900 p-4 rounded-xl text-xs space-y-2">
             <span className="font-mono text-[9px] text-slate-500 font-bold uppercase block">SECURITY STANDARDS MET</span>
             <div className="flex items-center gap-1.5 text-slate-450 font-mono text-[10px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
@@ -1749,6 +1870,235 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                         ))}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Intrusion & Bypass Alerts Hub */}
+              {activeTab === 'security-alerts' && (
+                <div className="space-y-6">
+                  {/* High level overview grids */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Gauge Panel */}
+                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl flex flex-col justify-between shadow-xl">
+                      <div>
+                        <span className="font-mono text-[9px] text-slate-450 uppercase tracking-widest block mb-1">AGGREGATED RISK STATE</span>
+                        <h3 className="font-bold text-white text-base">Intrusion Risk Score</h3>
+                      </div>
+                      <div className="py-4 flex items-center gap-4">
+                        <div className="relative flex items-center justify-center">
+                          <span className={`text-4xl font-extrabold font-mono tracking-tight ${
+                            securityRisk.score >= 75 ? 'text-red-500' :
+                            securityRisk.score >= 40 ? 'text-amber-500' : 'text-emerald-400'
+                          }`}>
+                            {securityRisk.score}
+                          </span>
+                          <span className="text-slate-500 text-xs font-mono">/100</span>
+                        </div>
+                        <div className="space-y-1 flex-1">
+                          <div className={`text-[9px] uppercase font-extrabold px-2 py-0.5 rounded font-mono inline-block ${
+                            securityRisk.score >= 75 ? 'bg-red-950 border border-red-800 text-red-200' :
+                            securityRisk.score >= 40 ? 'bg-amber-955 border border-amber-900 text-amber-200' :
+                            'bg-emerald-955 border border-emerald-900 text-emerald-200'
+                          }`}>
+                            {securityRisk.level.toUpperCase()} STATUS
+                          </div>
+                          <p className="text-[10px] text-slate-450">Continuous system security event monitoring index.</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleResetSecurityEvents}
+                        className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-800 rounded text-slate-400 hover:text-white px-3 py-1.5 text-center font-mono text-[10px] font-bold cursor-pointer transition-colors"
+                      >
+                        Reset Triggered Telemetry
+                      </button>
+                    </div>
+
+                    {/* Threat Vectors Aggregates */}
+                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl md:col-span-2 shadow-xl flex flex-col justify-between">
+                      <div>
+                        <span className="font-mono text-[9px] text-slate-450 uppercase tracking-widest block mb-1">CYBER RISK VECTORS</span>
+                        <h3 className="font-bold text-white text-base">Active Monitoring Indicators</h3>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 py-4 text-xs font-mono">
+                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
+                          <span className="text-[10px] text-slate-400 truncate">Failed Tokens</span>
+                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.failedTokens || 0)}</span>
+                        </div>
+                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between font-mono">
+                          <span className="text-[10px] text-slate-400 truncate">Blocked Transitions</span>
+                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.impossibleTransitions || 0)}</span>
+                        </div>
+                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
+                          <span className="text-[10px] text-slate-400 truncate">Unauthorized API</span>
+                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.unauthorizedAccess || 0)}</span>
+                        </div>
+                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
+                          <span className="text-[10px] text-slate-400 truncate">Key Re-Verification</span>
+                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.apiKeyAbuse || 0)}</span>
+                        </div>
+                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
+                          <span className="text-[10px] text-slate-400 truncate">Unusual IP Spikes</span>
+                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.unusualIPActivity || 0)}</span>
+                        </div>
+                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
+                          <span className="text-[10px] text-slate-400 truncate">Admin Overrides</span>
+                          <span className="text-lg font-bold text-yellow-500 mt-1">{(securityRisk.signalsCount?.adminAnomalies || 0)}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
+                        <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping shrink-0" />
+                        <span>Continuous background heuristics validating cryptographic liveness tokens on the device hardware layer.</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Alerts directory container */}
+                  <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                    <div className="p-6 border-b border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div>
+                        <h3 className="font-bold text-white text-sm">Defensive Intrusion Events Ledger</h3>
+                        <p className="text-[10px] text-slate-400">Deep telemetry list tracing attempts to bypass, spoof, or force tokens outside authorized state channels.</p>
+                      </div>
+
+                      <div className="flex gap-2 flex-wrap items-center">
+                        {/* Filters */}
+                        <select
+                          value={severityFilter}
+                          onChange={(e) => setSeverityFilter(e.target.value)}
+                          className="bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-[10px] text-slate-300 focus:outline-none focus:border-slate-700"
+                        >
+                          <option value="all">All Severities</option>
+                          <option value="critical">Critical Only</option>
+                          <option value="high">High Only</option>
+                          <option value="medium">Medium Only</option>
+                          <option value="low">Low Only</option>
+                        </select>
+
+                        <select
+                          value={eventTypeFilter}
+                          onChange={(e) => setEventTypeFilter(e.target.value)}
+                          className="bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-[10px] text-slate-300 focus:outline-none focus:border-slate-700"
+                        >
+                          <option value="all">All Vector Types</option>
+                          <option value="invalid_token_signature">Token Signature Tamper</option>
+                          <option value="impossible_session_state_transition">Impossible Transitions</option>
+                          <option value="replay_attack_attempt">Replay Attacks</option>
+                          <option value="unauthorized_api_key_abuse">API Key Abuse</option>
+                          <option value="admin_override_anomaly">Admin Overrides</option>
+                        </select>
+
+                        <button onClick={fetchAdminState} className="bg-slate-950 p-2.5 border border-slate-850 rounded text-slate-450 hover:text-white cursor-pointer transition-colors">
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Active resolve box */}
+                    {resolvingEventId && (
+                      <div className="bg-slate-950 border-b border-slate-850 p-6 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-bold text-white text-xs flex items-center gap-1.5">
+                            <span className="w-2 h-2 bg-yellow-500 rounded-full" />
+                            Security Alert Intervention: Resolve Event {resolvingEventId}
+                          </h4>
+                          <button onClick={() => setResolvingEventId(null)} className="text-slate-400 hover:text-white font-mono text-[11px] hover:underline">Cancel</button>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <input
+                            type="text"
+                            placeholder="Enter mitigation review, firewall rules applied, or override justification notes..."
+                            value={resolutionNotes}
+                            onChange={(e) => setResolutionNotes(e.target.value)}
+                            className="bg-slate-900 border border-slate-800 rounded px-3 py-2 text-xs text-slate-100 flex-1 focus:outline-none focus:border-slate-750 font-sans"
+                          />
+                          <button
+                            onClick={() => handleResolveEvent(resolvingEventId)}
+                            className="bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-[10px] px-4 py-2 rounded shrink-0 cursor-pointer transition-colors"
+                          >
+                            Execute Resolve Override
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="overflow-x-auto text-[11px]">
+                      <table className="w-full text-left font-mono">
+                        <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
+                          <tr>
+                            <th className="py-3 px-6">Event ID</th>
+                            <th className="py-3 px-4">Severity</th>
+                            <th className="py-3 px-4">Threat Event Type</th>
+                            <th className="py-3 px-4">Actor ID / host</th>
+                            <th className="py-3 px-4">Reason / payload</th>
+                            <th className="py-3 px-4">Status</th>
+                            <th className="py-3 px-6 text-right">Sequence (UTC)</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-850 text-slate-300">
+                          {securityEvents
+                            .filter((e: any) => severityFilter === "all" || e.severity === severityFilter)
+                            .filter((e: any) => eventTypeFilter === "all" || e.event_type === eventTypeFilter)
+                            .length === 0 ? (
+                              <tr>
+                                <td colSpan={7} className="text-center p-12 text-slate-500 font-mono text-xs">
+                                  No anomalies or bypass intrusion alerts registered matching this query. Defensive shield fully intact.
+                                </td>
+                              </tr>
+                            ) : (
+                              securityEvents
+                                .filter((e: any) => severityFilter === "all" || e.severity === severityFilter)
+                                .filter((e: any) => eventTypeFilter === "all" || e.event_type === eventTypeFilter)
+                                .map((evt: any) => (
+                                  <tr key={evt.id} className="hover:bg-slate-950/20">
+                                    <td className="py-4 px-6 text-slate-500 font-bold">{evt.id}</td>
+                                    <td className="py-4 px-4 text-xs font-mono">
+                                      <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
+                                        evt.severity === 'critical' ? 'bg-red-955 border border-red-900 text-red-400 font-extrabold' :
+                                        evt.severity === 'high' ? 'bg-amber-955 border border-amber-900 text-amber-500 font-bold' :
+                                        evt.severity === 'medium' ? 'bg-yellow-955 border border-yellow-900 text-yellow-500 font-medium' :
+                                        'bg-slate-850 border border-slate-800 text-slate-400'
+                                      }`}>
+                                        {evt.severity.toUpperCase()}
+                                      </span>
+                                    </td>
+                                    <td className="py-4 px-4 font-bold text-white text-[11px] font-mono">{evt.event_type}</td>
+                                    <td className="py-4 px-4 font-sans text-[10px] space-y-0.5 max-w-[140px] truncate">
+                                      <div className="font-extrabold text-slate-300 uppercase leading-none">{evt.actor_type}: <code className="font-mono text-slate-450">{evt.actor_id}</code></div>
+                                      <div className="font-mono text-[9px] text-slate-500 leading-none mt-1">{evt.ip_address}</div>
+                                      <div className="font-mono text-[9px] text-slate-500 truncate" title={evt.user_agent}>{evt.user_agent}</div>
+                                    </td>
+                                    <td className="py-4 px-4 max-w-sm space-y-1.5 font-sans">
+                                      <p className="text-slate-100 text-[10px] font-medium leading-relaxed">{evt.detection_reason}</p>
+                                      <div className="bg-slate-950 p-2 rounded border border-slate-850 font-mono text-[9px] text-slate-400 overflow-x-auto whitespace-pre leading-normal">
+                                        {JSON.stringify(evt.raw_metadata || {}, null, 1)}
+                                      </div>
+                                    </td>
+                                    <td className="py-4 px-4 font-sans">
+                                      {evt.raw_metadata?.resolved ? (
+                                        <div className="space-y-1 text-slate-400 text-[10px]">
+                                          <span className="text-emerald-400 font-bold border border-emerald-900 bg-emerald-955 px-1.5 py-0.5 rounded uppercase font-mono tracking-wider text-[8px]">RESOLVED</span>
+                                          <p className="text-[9px] italic text-slate-500 line-clamp-2 leading-snug" title={evt.raw_metadata.resolution_notes}>"{evt.raw_metadata.resolution_notes}"</p>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          onClick={() => {
+                                            setResolvingEventId(evt.id);
+                                            setResolutionNotes("");
+                                          }}
+                                          className="bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-300 hover:text-white font-mono text-[9px] font-bold px-2 py-1 rounded cursor-pointer transition-all uppercase"
+                                        >
+                                          Mark Resolved
+                                        </button>
+                                      )}
+                                    </td>
+                                    <td className="py-4 px-6 text-right text-slate-500 max-w-[100px] truncate">{new Date(evt.created_at).toISOString()}</td>
+                                  </tr>
+                                ))
+                            )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}

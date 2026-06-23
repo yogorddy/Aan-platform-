@@ -1,5 +1,24 @@
 export type UserStatus = 'pending' | 'verified' | 'rejected' | 'suspended';
-export type VerificationSessionStatus = 'started' | 'passed' | 'failed' | 'review';
+export type VerificationSessionStatus = 
+  | 'started' | 'passed' | 'failed' | 'review'
+  | 'created' | 'consent_given' | 'verification_started' | 'verification_passed' | 'verification_failed' | 'proof_issued' | 'expired' | 'revoked';
+
+export interface SecurityEvent {
+  id: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  event_type: string;
+  actor_type: 'user' | 'partner_app' | 'admin' | 'system' | 'unknown';
+  actor_id: string;
+  ip_address: string;
+  user_agent: string;
+  session_id?: string;
+  partner_app_id?: string;
+  request_path?: string;
+  detection_reason: string;
+  raw_metadata: Record<string, any>;
+  created_at: string;
+}
+
 
 export interface User {
   id: string; // uuid
