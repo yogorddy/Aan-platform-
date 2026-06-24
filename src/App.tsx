@@ -114,7 +114,7 @@ export default function App() {
     },
     {
       id: 'brand',
-      name: '5. Brand Book (/brand)',
+      name: '5. Brand Core (/brand)',
       description: 'Core corporate tokens, visual scales, layout pairs, color palettes, and typographic patterns.',
       icon: BookOpen,
       path: '/brand'
