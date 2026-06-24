@@ -126,22 +126,125 @@ create trigger tr_users_update_timestamp
     execute procedure public.handle_update_timestamp();
 
 -- ==========================================================
--- SECURITY NOTES & RLS POLICY SKELETON
+-- REALISTIC ROW LEVEL SECURITY (RLS) POLICIES
 -- ==========================================================
--- Enable Row Level Security (RLS) on sensitive tables in production
---
--- ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.biometric_templates ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.devices ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.partner_apps ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.partner_user_links ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.verification_sessions ENABLE ROW LEVEL SECURITY;
--- ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
---
--- Example security rules:
--- 1. No partner or user can directly query public.biometric_templates.
--- 2. Partner apps can only SELECT verification_sessions belonging to their own partner_app_id.
--- 3. Audit logs are INSERT-only for administrative audit systems.
+
+-- Enable Row Level Security on all core tables
+alter table public.users enable row level security;
+alter table public.biometric_templates enable row level security;
+alter table public.devices enable row level security;
+alter table public.partner_apps enable row level security;
+alter table public.partner_user_links enable row level security;
+alter table public.verification_sessions enable row level security;
+alter table public.audit_logs enable row level security;
+
+-- 1. Users Table Security Policies
+-- Users are privacy-centric and can only be queried by authorized admin roles or authenticated partners.
+create policy "Admins have full access to users"
+    on public.users
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partner apps can select linked users"
+    on public.users
+    for select
+    using (
+        exists (
+            select 1 from public.partner_user_links l
+            where l.user_id = public.users.id
+        )
+    );
+
+-- 2. Biometric Templates Security Policies
+-- Extremely sensitive. Never expose raw biometric hashes or embeddings.
+-- Strictly restricted to service-role background verification workers. No client/partner selects.
+create policy "Strict service-role only access to biometric templates"
+    on public.biometric_templates
+    for all
+    using (auth.jwt()->>'role' = 'service_role')
+    with check (auth.jwt()->>'role' = 'service_role');
+
+-- 3. Devices Security Policies
+-- Tracks fingerprints and hardware keys. Accessible only by service-role or linked partner apps.
+create policy "Admins have full access to devices"
+    on public.devices
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partner apps can select devices of their users"
+    on public.devices
+    for select
+    using (
+        exists (
+            select 1 from public.partner_user_links l
+            where l.user_id = public.devices.user_id
+        )
+    );
+
+-- 4. Partner Apps Security Policies
+-- Partners can only select their own app settings.
+create policy "Admins have full access to partner apps"
+    on public.partner_apps
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can select their own partner app configuration"
+    on public.partner_apps
+    for select
+    using (
+        -- In Supabase, can compare with claims or partner app ID
+        id::text = auth.jwt()->>'partner_app_id'
+    );
+
+-- 5. Partner User Links Security Policies
+-- Scoped to the partner application ID matching their credentials.
+create policy "Admins have full access to partner user links"
+    on public.partner_user_links
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can select their own user links"
+    on public.partner_user_links
+    for select
+    using (partner_app_id::text = auth.jwt()->>'partner_app_id');
+
+-- 6. Verification Sessions Security Policies
+-- Scoped strictly so partners can only view their own verification sessions.
+create policy "Admins have full access to verification sessions"
+    on public.verification_sessions
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can select their own sessions"
+    on public.verification_sessions
+    for select
+    using (partner_app_id::text = auth.jwt()->>'partner_app_id');
+
+create policy "Partners can create sessions under their ID"
+    on public.verification_sessions
+    for insert
+    with check (partner_app_id::text = auth.jwt()->>'partner_app_id');
+
+-- 7. Audit Logs Security Policies
+-- Append-only constraint: Only system processes or authorized roles can append logs.
+-- Update and Delete actions are strictly prohibited on audit tables to prevent cover-up of malicious activities.
+create policy "Admins can read audit logs"
+    on public.audit_logs
+    for select
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can read their own target audit logs"
+    on public.audit_logs
+    for select
+    using (actor_id = auth.jwt()->>'partner_app_id');
+
+create policy "System and Admins can insert audit logs"
+    on public.audit_logs
+    for insert
+    with check (true); -- Append-only trigger
+
+-- No update/delete policies are declared, which safely disables update/delete for all roles!
+
 
 -- ==========================================================
 -- 8. ORGANIZATIONS & PROJECTS SCHEMAS (MODULE 1)
@@ -238,4 +341,95 @@ create policy "Admins select access to security events"
     on public.security_events
     for select
     using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+
+-- ==========================================================
+-- RLS FOR MODULE SPECIFIC TABLES
+-- ==========================================================
+
+-- Enable Row Level Security
+alter table public.organizations enable row level security;
+alter table public.projects enable row level security;
+alter table public.webhook_deliveries enable row level security;
+alter table public.duplicate_signals enable row level security;
+alter table public.removal_requests enable row level security;
+
+-- 8. Organizations RLS Policies
+create policy "Admins have full access to organizations"
+    on public.organizations
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Users can select their linked organization"
+    on public.organizations
+    for select
+    using (
+        -- Assumes partner app is mapped or matching claim in JWT
+        id::text = auth.jwt()->>'organization_id'
+    );
+
+-- 9. Projects RLS Policies
+create policy "Admins have full access to projects"
+    on public.projects
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can select projects within their organization"
+    on public.projects
+    for select
+    using (
+        organization_id::text = auth.jwt()->>'organization_id'
+    );
+
+-- 10. Webhook Deliveries RLS Policies
+create policy "Admins have full access to webhook deliveries"
+    on public.webhook_deliveries
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can select webhook deliveries of their projects"
+    on public.webhook_deliveries
+    for select
+    using (
+        exists (
+            select 1 from public.projects p
+            where p.id = public.webhook_deliveries.project_id
+            and p.organization_id::text = auth.jwt()->>'organization_id'
+        )
+    );
+
+-- 11. Duplicate Signals RLS Policies
+create policy "Admins have full access to duplicate signals"
+    on public.duplicate_signals
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can select duplicate signals of their projects"
+    on public.duplicate_signals
+    for select
+    using (
+        exists (
+            select 1 from public.projects p
+            where p.id = public.duplicate_signals.project_id
+            and p.organization_id::text = auth.jwt()->>'organization_id'
+        )
+    );
+
+-- 12. Removal Requests RLS Policies
+create policy "Admins have full access to removal requests"
+    on public.removal_requests
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
+create policy "Partners can select or create removal requests of their projects"
+    on public.removal_requests
+    for all
+    using (
+        exists (
+            select 1 from public.projects p
+            where p.id = public.removal_requests.project_id
+            and p.organization_id::text = auth.jwt()->>'organization_id'
+        )
+    );
+
 

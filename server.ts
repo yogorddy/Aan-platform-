@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import crypto from "crypto";
+import { supabaseService } from "./src/lib/supabaseService";
 import { 
   User, 
   BiometricTemplate, 
@@ -17,6 +18,7 @@ import {
 } from "./src/types";
 
 // ============================================================================
+// MOCK IMPLEMENTATION — Replace with certified identity, biometric, fraud, and security providers before production use.
 // STATEFUL IN-MEMORY DATABASE WITH PERSISTENT STRUCTURE FOR THE MVP MODEL
 // ============================================================================
 
@@ -540,7 +542,7 @@ function appendSecurityEvent(
     raw_metadata: metadata,
     created_at: new Date().toISOString()
   };
-  db.securityEvents.unshift(newEvent);
+  supabaseService.recordSecurityEvent(newEvent, db.securityEvents);
   return newEvent;
 }
 
@@ -627,6 +629,7 @@ function transitionSession(session: any, targetStatus: any, req: any, reason: st
   if (allowed) {
     session.status = targetStatus;
     if (reason) session.result_reason = reason;
+    supabaseService.updateVerificationSession(session.id, { status: targetStatus, result_reason: session.result_reason }, db.verificationSessions);
     return { allowed: true };
   } else {
     const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
@@ -906,7 +909,7 @@ function appendAuditLog(actorType: AuditLog['actor_type'], actorId: string, acti
     metadata,
     created_at: new Date().toISOString()
   };
-  db.auditLogs.unshift(newLog); // Prepend to show newest first
+  supabaseService.recordAuditEvent(newLog, db.auditLogs);
   return newLog;
 }
 
@@ -1181,7 +1184,7 @@ async function startServer() {
       completed_at: null
     };
 
-    db.verificationSessions.unshift(newSession);
+    supabaseService.createVerificationSession(newSession, db.verificationSessions);
 
     appendAuditLog(
       'partner', 
@@ -1222,7 +1225,8 @@ async function startServer() {
   });
 
   // 3. POST /api/v1/verification-sessions/:id/biometric
-  // processes encrypted face payloads using mock biometric logic
+  // MOCK IMPLEMENTATION — Replace with certified identity, biometric, fraud, and security providers before production use.
+  // Processes encrypted face payloads using mock biometric logic
   app.post("/api/v1/verification-sessions/:id/biometric", (req, res) => {
     const { liveness_token, face_embedding, device_public_key, device_fingerprint_hash } = req.body;
     const session = db.verificationSessions.find(s => s.id === req.params.id);
@@ -1524,7 +1528,7 @@ async function startServer() {
         created_at: new Date().toISOString(),
         completed_at: user && user.status === 'verified' ? new Date().toISOString() : null
       };
-      db.verificationSessions.unshift(existingSession);
+      supabaseService.createVerificationSession(existingSession, db.verificationSessions);
     }
 
     let humanStatus = 'pending';
@@ -1546,6 +1550,7 @@ async function startServer() {
       proofToken = issueProofToken(partner_user_id, verificationSessionId, humanStatus, uniquenessStatus, riskLevel);
       existingSession.proof_token = proofToken;
       existingSession.status = 'passed';
+      supabaseService.updateVerificationSession(existingSession.id, { proof_token: proofToken, status: 'passed' }, db.verificationSessions);
     }
 
     if (duplicateSignalsFound) {
@@ -1832,7 +1837,7 @@ async function startServer() {
       created_at: new Date().toISOString()
     };
 
-    db.partnerApps.push(newPartner);
+    supabaseService.savePartnerApp(newPartner, db.partnerApps);
 
     appendAuditLog('admin', 'admin_super_user_one', 'partner_app.create', 'partner_app', newPartner.id, { name });
 

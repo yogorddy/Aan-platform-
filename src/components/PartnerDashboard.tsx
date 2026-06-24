@@ -681,6 +681,17 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         {/* Right workspace view */}
         <main className="flex-1 overflow-y-auto p-8 bg-[#080b11]">
           
+          {/* Global MVP Mock Disclaimer */}
+          <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4 mb-6 text-xs text-amber-200/90 leading-relaxed font-sans flex gap-3">
+            <span className="text-amber-500 font-bold shrink-0 text-sm">⚠️ MVP Sandbox Notice:</span>
+            <div>
+              <p className="font-semibold mb-0.5">MOCK IMPLEMENTATION — Replace with certified identity, biometric, fraud, and security providers before production use.</p>
+              <p className="text-amber-400/80">
+                AAN Platform operates in sandbox mode for testing and demonstration. This interface simulates live biometric and threat signals. Connect a certified HSM signing system and authorized verification SDKs prior to production release.
+              </p>
+            </div>
+          </div>
+
           {loading ? (
             <div className="flex flex-col items-center justify-center h-96 text-slate-400">
               <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mb-2" />

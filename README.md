@@ -1,12 +1,23 @@
-# AAN
+# AAN Platform
 
-Privacy-preserving proof-of-human identity infrastructure.
+Privacy-preserving trust verification infrastructure.
+
+> **⚠️ MOCK sandboxed sandbox DISCLAIMER**
+> This repository contains the AAN Platform MVP. Anywhere verification, identity matching, trust tokens, risk scoring, device trust, or duplicate detection is mocked, it is simulated. 
+> *“MOCK IMPLEMENTATION — Replace with certified identity, fraud, and security providers before production use.”*
+>
+> In this MVP:
+> - Raw personal or physical device secrets are never stored.
+> - Perfect fraud prevention or legally binding compliant verification is not claimed.
+> - High-security production cryptographic signing must be connected to certified HSM providers.
 
 ## Why AAN Exists
 
-Modern digital platforms face an escalating battle against automated bots, sybil attacks, and multi-account fraud. Existing verification solutions force a false choice: either ask users for intrusive government documents, or accept widespread platform exploitation.
+Modern digital platforms face an escalating battle against automated bots, sybil attacks, and multi-account fraud. Existing verification solutions force a false choice: either ask users for intrusive government documents and personal data, or accept widespread platform exploitation.
 
-AAN exists to solve this dilemma. It helps platforms prove that an account is managed by a unique, real human, without collecting, storing, or exposing their raw biometric data or real-world credentials.
+AAN exists to solve this dilemma. It helps platforms prove that an access attempt is legitimate and unique, without collecting, storing, or exposing raw personal identifiers, device secrets, or real-world credentials.
+
+AAN evaluates the trustworthiness of an access attempt using privacy-preserving system signals while minimizing the collection of personal information. AAN does not identify who a person is. It helps determine whether an access attempt appears legitimate, duplicated, automated, or suspicious.
 
 We are building a trust layer for the internet that respects personal privacy by design.
 
@@ -17,26 +28,26 @@ We are building a trust layer for the internet that respects personal privacy by
 AAN is designed as an API-first verification platform. The verification cycle consists of three phases:
 
 1. **Session Instantiation**: A partner application initiates a verification session via the API. This returns a temporary, secure verification checkout URL.
-2. **User Verification**: The user visits the verification URL, provides explicit consent, and performs an ephemeral biometric check (such as a 3D liveness and face template generation) in their browser.
-3. **Proof Delivery**: AAN processes the session, encrypts the high-dimensional biometric template, runs risk checks, and generates a cryptographically signed proof token. The raw media is permanently deleted from memory immediately.
+2. **User Verification**: The user visits the verification URL, provides explicit consent, and performs an ephemeral trust handshake (evaluating session integrity, request parameters, and request consistency) in their browser without requiring camera access.
+3. **Proof Delivery**: AAN processes the session, encrypts the anonymized system signal commitments, runs risk checks, and generates a cryptographically signed proof token. Any temporary session context is permanently deleted from memory immediately.
 
 ---
 
 ## What AAN Returns
 
-AAN never shares raw biometric representations, government IDs, facial templates, or hardware records with partner applications. Instead, the partner receives only a signed proof token containing clean, pseudonymous assertions:
+AAN never shares raw personal information, device secrets, internal trust calculations, or private system signals with partner applications. Instead, the partner receives only a signed proof token containing clean, pseudonymous assertions:
 
-- **is_real_human**: Verifies that the user has successfully passed a 3D liveness check.
-- **is_unique_human**: Verifies that the user's biometric footprint does not match any existing enrolled ledger.
-- **is_same_person**: Confirms that a returning user matches the same identity registered previously.
+- **is_verified**: Verifies that the access attempt has successfully passed all session and integrity checks.
+- **is_unique**: Verifies that the access footprint does not match any duplicate or suspicious patterns in the enrolled ledger.
 - **risk_score**: A clean anomaly index reflecting device or session-level fraud flags.
+- **reason_codes**: Optional machine-readable codes detailing detected anomalies without revealing raw signals.
 
 ---
 
 ## Core Features
 
-- **Decoupled Biometric Geometry**: Ephemeral template generation without central storage of raw face geometry, screen captures, or images.
-- **Risk Scoring Engine**: Real-time validation of signals, including hardware signatures, device fingerprint associations, liveness tokens, session timeouts, and template collisions.
+- **Decoupled Trust Signals**: Ephemeral verification without central storage of private identifiers, device credentials, or personal information.
+- **Risk Scoring Engine**: Real-time validation of signals, including hardware signatures, device consistency metrics, session timeouts, and duplicate check collisions.
 - **Interactive Developer Console**: A complete web interface allowing developers to manage API endpoints, trigger webhooks, query database records, and run trial sessions statefully in a sandboxed environment.
 - **Sovereign Brand Manual**: An integrated manual containing visual design tokens, design principles, and developer integration frameworks.
 
@@ -52,11 +63,11 @@ During development, an Express backend serves API requests and integrates with V
 
 ## Data Model
 
-AAN relies on seven core database tables that map clean relationships without exposing private information:
+AAN relies on core database tables that map clean relationships without exposing private information:
 
-- **Users**: Tracks high-level pseudonym status (pending, verified, rejected, suspended) tied to an immutable, cryptographically anonymized human identifier.
-- **Biometric Templates**: Stores encrypted high-dimensional numerical embeddings to prevent duplicate registrations, with no raw image data preserved.
-- **Devices**: Records hardware-locked browser fingerprints to flag multi-account attacks on a single machine.
+- **Users**: Tracks high-level verification status (pending, verified, rejected, suspended) tied to an immutable, cryptographically anonymized unique commitment identifier.
+- **Verification Signatures**: Stores encrypted high-dimensional numerical signals to prevent duplicate registrations, with no private or personal data preserved.
+- **Devices**: Records secure browser consistency markers to flag multi-account attacks on a single machine.
 - **Partner Apps**: Authorizes external applications. API keys are hashed with SHA-256 immediately upon creation.
 - **Partner User Links**: Provides isolated, app-specific identifiers for users to shield them from cross-app tracking.
 - **Verification Sessions**: Manages individual session lifecycles, capturing real-time risk factors and computing intermediate status flags.
@@ -66,15 +77,15 @@ AAN relies on seven core database tables that map clean relationships without ex
 
 ## API Overview
 
-The AAN API exposes four main endpoints to programmatically manage the verification lifecycle:
+The AAN API exposes endpoints to programmatically manage the verification lifecycle:
 
 ### Create Session
 `POST /api/v1/verification-sessions`  
 Creates a unique session and returns an interactive verification checkout URL.
 
-### Submit Biometric Results
-`POST /api/v1/verification-sessions/:id/biometric`  
-Processes ephemeral 3D liveness tokens and client device fingerprints.
+### Submit Trust Signals
+`POST /api/v1/verification-sessions/:id/signals`  
+Processes ephemeral integrity parameters and device consistency signals.
 
 ### Retrieve Session Results
 `GET /api/v1/verification-sessions/:id`  
@@ -96,7 +107,7 @@ Validates the structural integrity and expiration of a cryptographic claim token
 - `src/App.tsx` - Main single-page router and user interface role controller.
 - `src/components/` - Focused frontend components split by active systems:
   - `LandingPage.tsx` - Public enterprise product positioning.
-  - `VerifySessionFlow.tsx` - Ephemeral video liveness scanner UI.
+  - `VerifySessionFlow.tsx` - Ephemeral trust check UI.
   - `PartnerDashboard.tsx` - Sandbox API keys generator and webhook loggers.
   - `AdminDashboard.tsx` - Administrative system ledger and audit overrides.
   - `BrandBook.tsx` - Core visual tokens and brand guidebooks.
@@ -135,14 +146,6 @@ npm run start
 
 ---
 
-## Roadmap
+## Licensing
 
-- **FIDO2 / WebAuthn Ledger**: Tie unique user identifiers directly to hardware security keys for stronger returning human guarantees.
-- **Zero-Knowledge Proofs**: Utilize advanced zero-knowledge techniques so partner applications can verify assertions without querying AAN servers.
-- **Plug-and-Play UI Widgets**: Pre-built web components and mobile SDKs to integrate verification checks into registration flows within minutes.
-
----
-
-## License
-
-AAN is licensed under the MIT License. See individual code headers for detail.
+This repository contains proprietary software owned by AAN. Unless explicitly stated otherwise, no portion of this repository is licensed for public reuse.

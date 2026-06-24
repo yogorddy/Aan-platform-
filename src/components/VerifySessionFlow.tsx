@@ -104,34 +104,29 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
   // Enabled methods state (Organization Control)
   const [enabledMethods, setEnabledMethods] = useState({
-    deviceBiometrics: true,
+    deviceConsistency: true,
     passkey: true,
     authenticator: true,
     emailToken: true,
     smsToken: true,
     hardwareKey: true,
-    cameraLiveness: true // Note carefully: camera liveness is OPTIONAL!
+    sessionIntegrity: true
   });
 
   const [requiredMethod, setRequiredMethod] = useState<string>("any_allowed");
 
   // Chosen Adaptive verification tool during challenge mode
-  const [selectedChallengeType, setSelectedChallengeType] = useState<'biometrics' | 'authenticator' | 'emailToken' | 'smsToken' | 'hardwareKey' | 'cameraLiveness' | null>(null);
+  const [selectedChallengeType, setSelectedChallengeType] = useState<'deviceConsistency' | 'authenticator' | 'emailToken' | 'smsToken' | 'hardwareKey' | 'sessionIntegrity' | null>(null);
   const [challengeStep, setChallengeStep] = useState<'choose' | 'active' | 'success' | 'fail'>('choose');
 
   // Multi-step challenge tracking state variables
   const [totpInput, setTotpInput] = useState<string>("");
   const [emailTokenInput, setEmailTokenInput] = useState<string>("");
-  const [deviceBiometricScanning, setDeviceBiometricScanning] = useState<boolean>(false);
+  const [deviceScanning, setDeviceScanning] = useState<boolean>(false);
   const [hardwareKeyDetected, setHardwareKeyDetected] = useState<boolean>(false);
   
-  // Camera simulation variables
-  const [cameraActive, setCameraActive] = useState(false);
-  const [cameraBlocked, setCameraBlocked] = useState(false);
-  const [scanningProgress, setScanningProgress] = useState(0);
-  const [cameraChallenge, setCameraChallenge] = useState("Align your face within the frame");
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  // Handshake simulation variables
+  const [handshakeProgress, setHandshakeProgress] = useState(0);
 
   // Terminal telemetry logs
   const [telemetryLogs, setTelemetryLogs] = useState<string[]>([]);
@@ -151,7 +146,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
     setFlowState('username');
     setChallengeStep('choose');
     setSelectedChallengeType(null);
-    setScanningProgress(0);
+    setHandshakeProgress(0);
   };
 
   // Run real-time simulation evaluation logs console
@@ -163,7 +158,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
     const logPoints = [
       `[INIT] Launching AAN Trust Framework for session ID ${sessionId}`,
       `[SECURITY] Assessing identifier primary claim: ${username}`,
-      `[HARDWARE] Fingerprinting physical canvas: [${activeScenario.signals.deviceReputation.toUpperCase()}]`,
+      `[HARDWARE] Evaluating physical system signature: [${activeScenario.signals.deviceReputation.toUpperCase()}]`,
       `[INTEGRITY] Evaluating browser integrity index: ${activeScenario.signals.browserIntegrityIndex}/100`,
       `[LOCATION] Resolving IP location: ${activeScenario.signals.locationMatch.replace('_', ' ').toUpperCase()}`,
       activeScenario.signals.proxyDetected ? `[WARN] Proxy network tunnel or VPN fingerprint observed` : `[NETWORK] Clean residential ISP gateway validated`,
@@ -208,12 +203,12 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
   };
 
   const getFirstEnabledChallenge = (): any => {
-    if (enabledMethods.deviceBiometrics) return 'biometrics';
+    if (enabledMethods.deviceConsistency) return 'deviceConsistency';
     if (enabledMethods.passkey) return 'hardwareKey';
     if (enabledMethods.authenticator) return 'authenticator';
     if (enabledMethods.emailToken) return 'emailToken';
     if (enabledMethods.smsToken) return 'smsToken';
-    if (enabledMethods.cameraLiveness) return 'cameraLiveness';
+    if (enabledMethods.sessionIntegrity) return 'sessionIntegrity';
     return null;
   };
 
@@ -235,38 +230,11 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
     }
   };
 
-  // Start optional camera simulation stream
-  const startCamera = async () => {
-    setCameraBlocked(false);
-    setScanningProgress(0);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 400, height: 400 } });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      setCameraActive(true);
-    } catch (err) {
-      console.warn("We webcam blocked. Reverting to interactive simulator", err);
-      setCameraBlocked(true);
-      setCameraActive(false);
-    }
-  };
-
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
-    }
-    setCameraActive(false);
-  };
-
   // Handlers for dynamic simulator challengers
-  const handleDeviceBiometricTrigger = () => {
-    setDeviceBiometricScanning(true);
+  const handleDeviceConsistencyTrigger = () => {
+    setDeviceScanning(true);
     setTimeout(() => {
-      setDeviceBiometricScanning(false);
+      setDeviceScanning(false);
       setChallengeStep('success');
     }, 1500);
   };
@@ -291,29 +259,28 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
     setChallengeStep('success');
   };
 
-  // Camera optional pipeline simulations
+  // Cryptographic handshake simulation
   useEffect(() => {
-    if (selectedChallengeType !== 'cameraLiveness' || challengeStep !== 'active') return;
+    if (selectedChallengeType !== 'sessionIntegrity' || challengeStep !== 'active') return;
 
     let scanTimer: NodeJS.Timeout;
     scanTimer = setInterval(() => {
-      setScanningProgress(prev => {
+      setHandshakeProgress(prev => {
         if (prev >= 100) {
           clearInterval(scanTimer);
-          stopCamera();
           setChallengeStep('success');
           return 100;
         }
         return prev + 5;
       });
-    }, 150);
+    }, 120);
 
     return () => clearInterval(scanTimer);
   }, [selectedChallengeType, challengeStep]);
 
-  const handleStartCameraChallenge = () => {
+  const handleStartSessionIntegrityChallenge = () => {
     setChallengeStep('active');
-    startCamera();
+    setHandshakeProgress(0);
   };
 
   const completeAdaptiveAuthFlow = () => {
@@ -336,8 +303,8 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <span className="font-mono text-[9px] text-blue-400 uppercase tracking-wider font-extrabold block">AAN Adaptive Trust Gateway</span>
-              <h1 className="font-sans font-bold text-white text-sm">Friction-Mitigated Identity Assurance</h1>
+              <span className="font-mono text-[9px] text-blue-400 uppercase tracking-wider font-extrabold block">AAN Trust Gate</span>
+              <h1 className="font-sans font-bold text-white text-sm">Privacy-Preserving Proof of Human Access</h1>
             </div>
           </div>
           <div className="text-[10px] text-slate-400 font-mono max-w-md text-right hidden lg:block">
@@ -356,13 +323,25 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
             {/* STAGE A: ENTER USERNAME AND ACCOUNT CLAIM */}
             {flowState === 'username' && (
               <div className="p-8 space-y-6">
-                <div className="text-center space-y-1">
-                  <div className="bg-blue-950/40 text-blue-400 w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <User className="w-5 h-5" />
+                <div className="text-center space-y-3">
+                  <div className="bg-blue-950/40 text-blue-400 w-11 h-11 rounded-full flex items-center justify-center mx-auto mb-1">
+                    <Shield className="w-5 h-5" />
                   </div>
-                  <h2 className="text-lg font-bold text-white font-sans">Enterprise Authentication Portal</h2>
-                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                    Verify account status on AAN Trust Hub protected clusters. Entering identifiers evaluates continuous signals.
+                  
+                  <div className="space-y-1">
+                    <h2 className="text-lg font-bold text-white font-sans tracking-tight">Verified by AAN</h2>
+                    <div className="inline-flex items-center gap-1 bg-blue-950/50 border border-blue-900/50 px-2.5 py-0.5 rounded text-[9px] font-mono text-blue-400 tracking-wider">
+                      <Shield className="w-2.5 h-2.5" />
+                      <span>SECURED BY AAN</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-950/25 border border-amber-900/40 p-2.5 rounded text-[10px] text-amber-300 font-sans leading-relaxed text-left">
+                    <strong>⚠️ Sandbox Sandbox:</strong> Verification prompts, integrity assertions, and security templates are simulated sandbox mock-ups.
+                  </div>
+
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed font-sans">
+                    AAN is a <strong>privacy-preserving human verification infrastructure</strong> deployed to reduce bots, duplicate accounts, and coordinated abuse, while keeping your raw identity private.
                   </p>
                 </div>
 
@@ -443,8 +422,8 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                   {primaryMethod === 'passkey' && (
                     <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl space-y-3">
                       <div className="flex items-center gap-2.5 text-xs text-slate-350 leading-relaxed font-sans">
-                        <Fingerprint className="w-5 h-5 text-indigo-400 shrink-0" />
-                        <span>FIDO2 / WebAuthn passkey assertion prompt is configured. Touch the biometric sensor or key when prompted.</span>
+                        <Lock className="w-5 h-5 text-indigo-400 shrink-0" />
+                        <span>FIDO2 / WebAuthn passkey assertion prompt is configured. Touch your platform security key or sensor when prompted.</span>
                       </div>
                     </div>
                   )}
@@ -523,17 +502,17 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                     <div className="space-y-4">
                       <div>
                         <span className="text-[10px] uppercase font-mono text-slate-400 font-bold tracking-widest block">Choose Adaptive Factor Checklist</span>
-                        <p className="text-[11px] text-slate-500 font-sans">AAN policy allows unlocking the cluster via any enabled challenge. Camera is explicitly optional.</p>
+                        <p className="text-[11px] text-slate-500 font-sans">AAN policy allows unlocking the cluster via any enabled challenge factors.</p>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
-                        {enabledMethods.deviceBiometrics && (
+                        {enabledMethods.deviceConsistency && (
                           <button 
-                            onClick={() => { setSelectedChallengeType('biometrics'); setChallengeStep('active'); }}
+                            onClick={() => { setSelectedChallengeType('deviceConsistency'); setChallengeStep('active'); }}
                             className="bg-slate-950 border border-slate-850 hover:bg-slate-850 hover:border-blue-600/40 p-3 rounded-lg text-left transition text-slate-200 cursor-pointer flex items-center gap-2"
                           >
-                            <Fingerprint className="w-4 h-4 text-indigo-400 shrink-0" />
-                            <span>Touch ID / Face ID</span>
+                            <Laptop className="w-4 h-4 text-indigo-400 shrink-0" />
+                            <span>Device Consistency Check</span>
                           </button>
                         )}
 
@@ -567,13 +546,13 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                           </button>
                         )}
 
-                        {enabledMethods.cameraLiveness && (
+                        {enabledMethods.sessionIntegrity && (
                           <button 
-                            onClick={() => { setSelectedChallengeType('cameraLiveness'); handleStartCameraChallenge(); }}
+                            onClick={() => { setSelectedChallengeType('sessionIntegrity'); handleStartSessionIntegrityChallenge(); }}
                             className="bg-slate-950 border border-slate-850 hover:bg-slate-850 hover:border-blue-600/40 p-3 rounded-lg text-left transition text-slate-300 hover:text-white cursor-pointer flex items-center gap-2 font-bold"
                           >
-                            <Camera className="w-4 h-4 text-purple-400 shrink-0 animate-pulse" />
-                            <span>Camera Liveness check</span>
+                            <ShieldCheck className="w-4 h-4 text-purple-400 shrink-0 animate-pulse" />
+                            <span>Session Integrity Handshake</span>
                           </button>
                         )}
                       </div>
@@ -581,19 +560,19 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                   )}
 
                   {/* ACTIVE STATE CHALLENGES CONTENT */}
-                  {challengeStep === 'active' && selectedChallengeType === 'biometrics' && (
+                  {challengeStep === 'active' && selectedChallengeType === 'deviceConsistency' && (
                     <div className="bg-slate-950 border border-slate-850 p-6 rounded-xl space-y-4 text-center">
-                      <Fingerprint className={`w-14 h-14 mx-auto ${deviceBiometricScanning ? 'text-blue-500 animate-pulse' : 'text-slate-400'}`} />
+                      <Laptop className={`w-14 h-14 mx-auto ${deviceScanning ? 'text-blue-500 animate-pulse' : 'text-slate-400'}`} />
                       <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-white">Touch ID / Private Biometrics Check</h4>
-                        <p className="text-xs text-slate-400">AAN prompts your platform device to sign a challenge assertion.</p>
+                        <h4 className="text-sm font-bold text-white">Device Consistency Check</h4>
+                        <p className="text-xs text-slate-400">AAN evaluates non-fingerprinting secure hardware and OS consistency assertions.</p>
                       </div>
                       
                       <button 
-                        onClick={handleDeviceBiometricTrigger}
+                        onClick={handleDeviceConsistencyTrigger}
                         className="bg-blue-600 hover:bg-blue-500 text-xs px-5 py-2 rounded text-white font-mono transition cursor-pointer"
                       >
-                        {deviceBiometricScanning ? "Polling Device..." : "Simulate Biometric Consent Touch"}
+                        {deviceScanning ? "Verifying device..." : "Simulate Device Attestation"}
                       </button>
                     </div>
                   )}
@@ -673,39 +652,32 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                     </form>
                   )}
 
-                  {challengeStep === 'active' && selectedChallengeType === 'cameraLiveness' && (
+                  {challengeStep === 'active' && selectedChallengeType === 'sessionIntegrity' && (
                     <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl space-y-4">
-                      <div className="text-center font-mono text-[9px] uppercase tracking-widest text-[8px] text-blue-400">
-                        OPTIONAL FACE METRICS CONFIDENCE CHECK
+                      <div className="text-center font-mono text-[9px] uppercase tracking-widest text-blue-400">
+                        SESSION INTEGRITY HANDSHAKE
                       </div>
                       
-                      {/* Webcam scan guide circle */}
-                      <div className="relative w-44 h-44 mx-auto rounded-full border-2 border-slate-800 overflow-hidden bg-black shadow-inner">
-                        <div className="absolute inset-0 border border-dashed border-blue-500/20 rounded-full animate-pulse pointer-events-none" />
-                        <div className="absolute left-0 w-full h-0.5 bg-blue-500 top-0 animate-[bounce_4s_infinite] pointer-events-none z-10" />
-
-                        {cameraActive && !cameraBlocked ? (
-                          <video
-                            ref={videoRef}
-                            className="w-full h-full object-cover rounded-full scale-x-[-1]"
-                            muted
-                            playsInline
-                          />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 text-center p-3 select-none">
-                            <Cpu className="w-8 h-8 text-blue-500/60 animate-pulse mb-1" />
-                            <span className="text-[8px] text-slate-500 font-mono uppercase">Feed Initializing</span>
-                          </div>
-                        )}
+                      <div className="bg-slate-900 border border-slate-850 p-4 rounded-lg font-mono text-[10px] text-slate-400 space-y-2 text-left">
+                        <div className="flex items-center gap-2 text-blue-400">
+                          <Terminal className="w-3.5 h-3.5 animate-pulse" />
+                          <span>Establishing Secure Attestation Session...</span>
+                        </div>
+                        <div className="text-[9px] text-slate-500 leading-relaxed pl-5 space-y-1">
+                          <div>&gt; Generating cryptographic verification challenge...</div>
+                          <div>&gt; Attesting device posture &amp; integrity signature...</div>
+                          {handshakeProgress > 30 && <div className="text-blue-400">&gt; Verification token signed securely by sandbox keys.</div>}
+                          {handshakeProgress > 70 && <div className="text-emerald-400">&gt; Signed proof token generated. Syncing...</div>}
+                        </div>
                       </div>
 
                       <div className="space-y-1.5 max-w-xs mx-auto">
                         <div className="flex justify-between font-mono text-[8px] text-slate-500">
-                          <span>MATRIX EVALUATION:</span>
-                          <span>{scanningProgress}% Complete</span>
+                          <span>ATTESTATION PIPELINE:</span>
+                          <span>{handshakeProgress}% Complete</span>
                         </div>
                         <div className="w-full bg-slate-900 h-1.5 rounded overflow-hidden">
-                          <div className="bg-blue-500 h-full rounded" style={{ width: `${scanningProgress}%` }}></div>
+                          <div className="bg-blue-500 h-full rounded transition-all duration-150" style={{ width: `${handshakeProgress}%` }}></div>
                         </div>
                       </div>
                     </div>
@@ -740,7 +712,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
                     {challengeStep !== 'choose' && challengeStep !== 'success' && (
                       <button 
-                        onClick={() => { setChallengeStep('choose'); stopCamera(); }}
+                        onClick={() => { setChallengeStep('choose'); }}
                         className="text-blue-400 hover:text-blue-300 font-mono"
                       >
                          Choose different factor
@@ -899,7 +871,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                 <Sliders className="w-4 h-4 text-indigo-400" />
                 <h3 className="font-sans font-bold text-white text-xs uppercase tracking-wide">Organization Controls</h3>
               </div>
-              <p className="text-[11px] text-slate-450 font-mono mt-0.5">Define allowed verification factor methods. Camera is explicitly optional.</p>
+              <p className="text-[11px] text-slate-450 font-mono mt-0.5">Define allowed verification factors for user sessions.</p>
             </div>
 
             {/* Allowed Checklist */}
@@ -910,11 +882,11 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                 <label className="flex items-center gap-2 text-slate-300 cursor-pointer select-none">
                   <input 
                     type="checkbox" 
-                    checked={enabledMethods.deviceBiometrics}
-                    onChange={(e) => setEnabledMethods({ ...enabledMethods, deviceBiometrics: e.target.checked })}
+                    checked={enabledMethods.deviceConsistency}
+                    onChange={(e) => setEnabledMethods({ ...enabledMethods, deviceConsistency: e.target.checked })}
                     className="accent-indigo-500"
                   />
-                  <span>Touch/Face ID</span>
+                  <span>Device Consistency</span>
                 </label>
 
                 <label className="flex items-center gap-2 text-slate-300 cursor-pointer select-none">
@@ -950,12 +922,12 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                 <label className="flex items-center gap-2 text-slate-300 cursor-pointer select-none col-span-2 border-t border-slate-850 pt-1.5 mt-1">
                   <input 
                     type="checkbox" 
-                    checked={enabledMethods.cameraLiveness}
-                    onChange={(e) => setEnabledMethods({ ...enabledMethods, cameraLiveness: e.target.checked })}
+                    checked={enabledMethods.sessionIntegrity}
+                    onChange={(e) => setEnabledMethods({ ...enabledMethods, sessionIntegrity: e.target.checked })}
                     className="accent-purple-500"
                   />
                   <span className="font-bold text-white flex items-center gap-1.5">
-                    Camera Liveness check <span className="bg-purple-950 text-purple-400 font-mono text-[8px] px-1 py-0.2 rounded border border-purple-900">OPTIONAL</span>
+                    Session Integrity check <span className="bg-purple-950 text-purple-400 font-mono text-[8px] px-1 py-0.2 rounded border border-purple-900">RECOMMENDED</span>
                   </span>
                 </label>
               </div>
@@ -1012,7 +984,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
       {/* Floater footer compliance note */}
       <div className="text-center mt-8 text-[10px] text-slate-500 max-w-lg mx-auto leading-relaxed">
-        <span className="text-slate-400">Compliance Assurance Audit:</span> Custom policies execute transparently. Camera based face scan is never mandatory and is treated strictly as an isolated, optional security factor under CCPA guidelines.
+        <span className="text-slate-400">Compliance Assurance Audit:</span> Custom policies execute transparently. Dynamic factors are never mandatory and are treated strictly as isolated security signals under organizational access guidelines.
       </div>
     </div>
   );

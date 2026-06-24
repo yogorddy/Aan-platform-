@@ -275,7 +275,7 @@ export default function BrandBook() {
                   },
                   {
                     title: 'Absolute Transparency',
-                    desc: 'Our schemas, cryptographic models, and SDKs are publicly open-source, reproducible, and verifiable.',
+                    desc: 'Our schemas, cryptographic models, and client integration SDKs are transparently published, verifiable, and open to secure corporate audits.',
                   },
                   {
                     title: 'Responsible Innovation',
@@ -1040,7 +1040,7 @@ export default function BrandBook() {
                 {[
                   {
                     phase: 'Phase 1: Seed & Uniqueness Consensus (Years 1 - 2)',
-                    desc: 'Validate user uniqueness and integrate anti-sybil safeguards. Secure partnerships with major SaaS and gaming channels. Release robust, headless open-source REST SDKs.',
+                    desc: 'Validate user uniqueness and integrate anti-sybil safeguards. Secure partnerships with major SaaS and gaming channels. Release robust, headless developer client integration SDKs.',
                     status: 'Active Launch Window',
                     color: 'text-emerald-400 border-emerald-500 bg-emerald-950/40'
                   },

@@ -146,33 +146,45 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
         </div>
       </nav>
 
+      {/* MVP Mock Disclaimer Banner */}
+      <div className="max-w-4xl mx-auto px-6 mt-6">
+        <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4 text-xs text-amber-200/90 leading-relaxed font-sans flex gap-3">
+          <span className="text-amber-500 font-bold shrink-0 text-sm">⚠️ MVP Sandbox Notice:</span>
+          <div>
+            <p className="font-semibold mb-0.5">MOCK IMPLEMENTATION — Replace with certified identity, biometric, fraud, and security providers before production use.</p>
+            <p className="text-amber-400/80">
+              AAN Platform is in simulated MVP mode. No raw selfies are permanently saved, and legal compliance or unbreakable security is not claimed. Connect production databases and official verification partners before live deployment.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <header className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center space-y-6">
-        <div className="inline-flex items-center gap-2 bg-slate-900/50 border border-slate-800 px-3 py-1 rounded-full text-[11px] font-mono text-slate-400">
+        <div className="inline-flex items-center gap-2 bg-slate-900/50 border border-slate-850 px-3 py-1 rounded-full text-[10px] font-mono text-slate-400">
           <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-          <span>Internet Trust Protocol & Identity Decoupling Layer</span>
+          <span>Human Verification Infrastructure</span>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl font-sans font-semibold tracking-tight text-white max-w-2xl mx-auto leading-[1.15]">
-          Quiet Digital Trust. <br />
-          <span className="text-slate-400 font-normal">No trackers, no storage, no friction.</span>
+        <h1 className="text-3xl sm:text-4xl font-sans font-semibold tracking-tight text-white max-w-2xl mx-auto leading-tight">
+          Privacy-Preserving Proof of Human Access.
         </h1>
 
-        <p className="text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
-          AAN is zero-exposure trust infrastructure for the modern coordinate Web. We verify humanness, uniqueness, and device reputation in milliseconds, allowing organizations to stop automated bot fraud while completely protecting user biometric privacy.
+        <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed">
+          AAN is a quiet, zero-exposure verification and trust layer that partner platforms deploy at <b>login, signup, account recovery, and suspicious activity checkpoints</b>. We securely reduce bots, duplicate accounts, and coordinated abuse without centralized biometric storage.
         </p>
 
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button 
             onClick={() => onNavigate('partner')}
-            className="w-full sm:w-auto bg-slate-100 hover:bg-white text-slate-950 px-5 py-2.5 rounded text-xs font-mono font-bold tracking-tight transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto bg-slate-100 hover:bg-white text-slate-950 px-5 py-2 rounded text-xs font-mono font-bold tracking-tight transition-colors cursor-pointer flex items-center justify-center gap-1.5"
           >
-            <span>Launch Partner Console</span>
+            <span>Launch Developer Console</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
           <button 
             onClick={onStartDemoSession}
-            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-850 text-slate-200 border border-slate-800 px-5 py-2.5 rounded text-xs font-mono tracking-tight transition-all cursor-pointer flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 px-5 py-2 rounded text-xs font-mono tracking-tight transition-all cursor-pointer flex items-center justify-center gap-1.5"
           >
             <span>Simulate Verification Flow</span>
           </button>

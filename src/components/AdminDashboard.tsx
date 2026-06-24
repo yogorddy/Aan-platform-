@@ -751,7 +751,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 }`}
               >
                 <Activity className="w-4 h-4" />
-                Biometric Embedding Indexes
+                Signature Verification Indexes
               </button>
 
               <button
@@ -803,6 +803,17 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         {/* Right Tab Content Block */}
         <div className="lg:col-span-3 space-y-8">
           
+          {/* Global MVP Mock Disclaimer */}
+          <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4 text-xs text-amber-200/90 leading-relaxed font-sans flex gap-3">
+            <span className="text-amber-500 font-bold shrink-0 text-sm">⚠️ MVP Sandbox Notice:</span>
+            <div>
+              <p className="font-semibold mb-0.5">MOCK IMPLEMENTATION — Replace with certified identity, fraud, and security providers before production use.</p>
+              <p className="text-amber-400/80">
+                AAN Admin console displays simulated metrics and mock identity records for MVP purposes. Legal compliance, certified security registries, or absolute threat protection are not active or claimed.
+              </p>
+            </div>
+          </div>
+
           {loading ? (
             <div className="p-12 text-center text-slate-400 text-xs bg-slate-900 border border-slate-800 rounded-xl">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-500 mb-2" />
@@ -1781,23 +1792,23 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 </div>
               )}
 
-              {/* Tab 4: Biometric embed indexes stats */}
+              {/* Tab 4: Cryptographic Signature indexes stats */}
               {activeTab === 'biometrics' && (
                 <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
                   <div className="p-6 border-b border-slate-850">
-                    <h3 className="font-bold text-white text-sm">Biometric Embedding Indexes</h3>
-                    <p className="text-[10px] text-slate-400">Zero-knowledge vector hashes. Raw face images are 100% discarded instantly upon match mapping.</p>
+                    <h3 className="font-bold text-white text-sm">Signature Verification Indexes</h3>
+                    <p className="text-[10px] text-slate-400">Zero-knowledge secure verification signatures. Raw credentials or private keys are never stored on the platform.</p>
                   </div>
 
                   <div className="overflow-x-auto text-xs">
                     <table className="w-full text-left">
                       <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
                         <tr>
-                          <th className="py-3.5 px-6">Biometric record ID</th>
+                          <th className="py-3.5 px-6">Signature record ID</th>
                           <th className="py-3.5 px-4">User ID Link</th>
-                          <th className="py-3.5 px-4">Template Fingerprint Hash</th>
-                          <th className="py-3.5 px-4">Embedding Payload Representation</th>
-                          <th className="py-3.5 px-4">Algorithm Model</th>
+                          <th className="py-3.5 px-4">Signature Hash</th>
+                          <th className="py-3.5 px-4">Payload Representation</th>
+                          <th className="py-3.5 px-4">Verification Algorithm</th>
                           <th className="py-3.5 px-6 text-right">Confidence Score</th>
                         </tr>
                       </thead>
