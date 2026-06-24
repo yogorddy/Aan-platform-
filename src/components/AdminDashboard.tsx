@@ -5,7 +5,7 @@ import {
   Sliders, Clock, BarChart3, HelpCircle, AlertTriangle, Play, Flame, UserPlus,
   Share2, ChevronRight, Settings, Info, Lock, BookOpen
 } from 'lucide-react';
-import { User, BiometricTemplate, Device, VerificationSession, AuditLog } from '@/src/types';
+import { User, SignatureTemplate, Device, VerificationSession, AuditLog } from '@/src/types';
 import { isAcademyEnabled } from '../academyConfig';
 
 interface AdminDashboardProps {
@@ -20,7 +20,7 @@ function mapTabToLesson(tab: string): string {
     policies: "roles_permissions",
     timeline: "device_trust",
     devices: "device_trust",
-    biometrics: "duplicate_detection",
+    signatures: "duplicate_detection",
     audits: "audit_logs",
     "verification-logs": "verification_sessions"
   };
@@ -33,7 +33,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [biometrics, setBiometrics] = useState<any[]>([]);
+  const [signatureTemplates, setSignatureTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Enterprise specific custom state containers
@@ -64,7 +64,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   });
 
   // Active view tab state (within Admin dashboard context)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'overrides' | 'users' | 'policies' | 'timeline' | 'devices' | 'biometrics' | 'audits' | 'verification-logs' | 'security-alerts'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'overrides' | 'users' | 'policies' | 'timeline' | 'devices' | 'signatures' | 'audits' | 'verification-logs' | 'security-alerts'>('analytics');
 
   // Filter params
   const [auditQuery, setAuditQuery] = useState("");
@@ -152,7 +152,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             status: "started",
             risk_score: 15,
             duplicate_candidate: false,
-            result_reason: "Session initialized/awaiting biometric upload.",
+            result_reason: "Session initialized/awaiting trust verification.",
             risk_reasons: [],
             proof_token: "",
             created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
@@ -165,7 +165,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             status: "passed",
             risk_score: 8,
             duplicate_candidate: false,
-            result_reason: "Biometric match unique; confidence 98.4%. Liveness passed.",
+            result_reason: "Trust signature unique; attestation checks passed.",
             risk_reasons: [],
             proof_token: "proof_claims_b71_sig_93f82e11ac0b",
             created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
@@ -178,8 +178,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             status: "failed",
             risk_score: 95,
             duplicate_candidate: true,
-            result_reason: "Critical: Duplicate biometric face template identified matching user usr_b710ef67. Liveness score low.",
-            risk_reasons: ["duplicate_biometric_template_hash", "many_accounts_on_one_device", "failed_liveness"],
+            result_reason: "Critical: Duplicate signature template identified matching user usr_b710ef67. Integrity checks failed.",
+            risk_reasons: ["duplicate_signature_template_hash", "many_accounts_on_one_device", "failed_integrity_handshake"],
             proof_token: "",
             created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
             completed_at: new Date(Date.now() - 11.9 * 3600 * 1000).toISOString()
@@ -204,7 +204,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             status: "passed",
             risk_score: 4,
             duplicate_candidate: false,
-            result_reason: "Same returning user on trusted hardware; biometric integrity intact.",
+            result_reason: "Same returning user on trusted hardware; signature integrity intact.",
             risk_reasons: [],
             proof_token: "proof_claims_bc4_sig_66a7b3c2ee10",
             created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
@@ -298,32 +298,32 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setAuditLogs(auditsData);
 
-      // 5. Fetch biometrics with fallback
+      // 5. Fetch signatures with fallback
       let bioData;
       try {
-        const bioRes = await fetch('/api/internal/biometrics');
+        const bioRes = await fetch('/api/internal/signatures');
         bioData = await bioRes.json();
       } catch (e) {
         bioData = [
           {
             id: "tmpl_101",
             user_id: "usr_b710ef67",
-            template_hash: "bio_hash_b710ef67",
-            model_version: "facenet-v3",
+            template_hash: "sig_hash_b710ef67",
+            model_version: "ecc-secp256k1",
             confidence_score: 98.4,
             created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString()
           },
           {
             id: "tmpl_102",
             user_id: "usr_df990a31",
-            template_hash: "bio_hash_b710ef67",
-            model_version: "facenet-v3",
+            template_hash: "sig_hash_b710ef67",
+            model_version: "ecc-secp256k1",
             confidence_score: 92.1,
             created_at: new Date(Date.now() - 11.95 * 3600 * 1000).toISOString()
           }
         ];
       }
-      setBiometrics(bioData);
+      setSignatureTemplates(bioData);
 
       // 6. Fetch live security events with fallbacks
       let secEvents;
@@ -360,8 +360,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0",
             session_id: "vss_session_failed_df9",
             partner_app_id: "partner_apps_fintech_123",
-            request_path: "/api/v1/verification-sessions/vss_session_failed_df9/biometric",
-            detection_reason: "Defensive Transition Enforcer Blocked: Direct state jump request attempted from created to proof_issued bypassing active consent & liveness verification.",
+            request_path: "/api/v1/verification-sessions/vss_session_failed_df9/signature",
+            detection_reason: "Defensive Transition Enforcer Blocked: Direct state jump request attempted from created to proof_issued bypassing active consent & integrity verification.",
             raw_metadata: {
               current_status: "created",
               failed_target_status: "proof_issued"
@@ -565,13 +565,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   // Deletes Unwanted / Fraudulent profiles completely upon Institutional approval!
   const handleCompletePurgeProfile = async (userId: string) => {
     if (!institutionalConsent) {
-      alert("Institutional Security Consent is strictly required. Please check the clearance checkmark before purging biometric records.");
+      alert("Institutional Security Consent is strictly required. Please check the clearance checkmark before purging user records.");
       return;
     }
 
     const confirmPurge = window.confirm(
       ` DANGER - IRREVERSIBLE CRIME ANALYSIS PURGE:\n\n` +
-      `This action will permanently delete User ${userId} from the directory. All zero-knowledge biometric hashes, physical device signatures, and developer platform linking histories will be completely purged from AAN. Under no circumstance can this dataset be incepted again.\n\n` +
+      `This action will permanently delete User ${userId} from the directory. All zero-knowledge signature hashes, physical device signatures, and developer platform linking histories will be completely purged from AAN. Under no circumstance can this dataset be incepted again.\n\n` +
       `Proceed with absolute deletion?`
     );
 
@@ -616,17 +616,17 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   });
 
   return (
-    <div className="min-h-screen bg-[#080b11] font-sans text-slate-150">
+    <div className="min-h-screen bg-[#0d0e12] font-sans text-[#e3e5eb] selection:bg-[#202533]">
       
       {/* Dashboard Top Header Bar */}
-      <header className="bg-[#0c0f16] border-b border-slate-900 px-6 py-4 flex items-center justify-between">
+      <header className="bg-[#111319] border-b border-[#1b1e28] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-emerald-600/15 text-emerald-400 p-2 rounded-lg">
+          <div className="bg-[#171a23] text-emerald-400 p-2 rounded border border-[#232a3b]">
             <ShieldAlert className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="font-bold text-base text-white">Administrative Compliance Console</h1>
-            <p className="text-[10px] text-slate-400 font-mono">INTERNAL SECURE SYSTEM DIRECTORY OVERVIEW</p>
+            <h1 className="font-bold text-sm text-white">Administrative Compliance Console</h1>
+            <p className="text-[10px] text-[#5d6780] font-mono uppercase font-black">Internal Secure System Directory Overview</p>
           </div>
         </div>
 
@@ -635,25 +635,25 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             <>
               <button 
                 onClick={() => onNavigate('academy', undefined, mapTabToLesson(activeTab))} 
-                className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-blue-950/80 hover:bg-blue-900 px-3 py-1.5 rounded-lg border border-blue-900/40 cursor-pointer font-bold font-mono uppercase tracking-wider blink-subtle"
+                className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-[#171a23] hover:bg-[#1f2431] px-3 py-1.5 rounded border border-[#232a3b] cursor-pointer font-bold font-mono uppercase tracking-wider blink-subtle"
                 title="Open contextual explanation for this feature inside the learning Academy"
               >
                 <BookOpen className="w-3.5 h-3.5 animate-none" />
                 <span>Explain This View</span>
               </button>
-              <span className="text-slate-800 font-mono text-xs">|</span>
+              <span className="text-[#1b1e28] font-mono text-xs">|</span>
             </>
           )}
           <button 
             onClick={() => onNavigate('landing')} 
-            className="text-xs text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="text-xs text-[#78819a] hover:text-white transition-colors cursor-pointer"
           >
              Public Portal
           </button>
-          <span className="text-slate-700 font-mono text-xs">|</span>
+          <span className="text-[#1b1e28] font-mono text-xs">|</span>
           <button 
             onClick={() => onNavigate('partner')} 
-            className="text-xs text-slate-400 hover:text-white transition-colors font-mono hover:underline cursor-pointer"
+            className="text-xs text-[#78819a] hover:text-white transition-colors font-mono hover:underline cursor-pointer"
           >
             Partner Portal 
           </button>
@@ -665,14 +665,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         
         {/* Left mini Sidebar links */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-[#0c0f16] border border-slate-900 rounded-xl overflow-hidden p-4">
-            <span className="font-mono text-[9px] text-slate-500 font-extrabold block uppercase tracking-wider mb-3">Auditing Directories</span>
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden p-4">
+            <span className="font-mono text-[9px] text-[#5d6780] font-extrabold block uppercase tracking-wider mb-3">Auditing Directories</span>
             
             <div className="flex flex-col gap-1.5 font-sans text-xs">
               <button
                 onClick={() => setActiveTab('analytics')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'analytics' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'analytics' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <BarChart3 className="w-4 h-4 text-sky-400" />
@@ -682,7 +682,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 onClick={() => setActiveTab('verification-logs')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'verification-logs' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'verification-logs' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <Shield className="w-4 h-4 text-emerald-400" />
@@ -692,7 +692,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 onClick={() => setActiveTab('overrides')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'overrides' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'overrides' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <ShieldCheck className="w-4 h-4" />
@@ -707,7 +707,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 onClick={() => setActiveTab('users')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'users' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'users' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <UserCheck className="w-4 h-4" />
@@ -717,7 +717,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 onClick={() => setActiveTab('policies')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'policies' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'policies' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <Sliders className="w-4 h-4 text-indigo-400" />
@@ -727,7 +727,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 onClick={() => setActiveTab('timeline')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'timeline' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'timeline' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <Clock className="w-4 h-4 text-emerald-400" />
@@ -737,7 +737,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 onClick={() => setActiveTab('devices')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'devices' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'devices' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <Database className="w-4 h-4" />
@@ -745,9 +745,9 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               </button>
 
               <button
-                onClick={() => setActiveTab('biometrics')}
+                onClick={() => setActiveTab('signatures')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'biometrics' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'signatures' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <Activity className="w-4 h-4" />
@@ -757,7 +757,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <button
                 onClick={() => setActiveTab('audits')}
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'audits' ? 'bg-blue-600 text-white font-semibold' : 'hover:bg-slate-850 text-slate-400 hover:text-slate-100'
+                  activeTab === 'audits' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
                 <Terminal className="w-4 h-4" />
@@ -769,10 +769,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer relative ${
                   activeTab === 'security-alerts'
                     ? 'bg-rose-950/80 border border-rose-800 text-rose-200 font-semibold'
-                    : 'hover:bg-slate-850 text-slate-405 text-slate-400 hover:text-slate-100'
+                    : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
                 }`}
               >
-                <ShieldAlert className={`w-4 h-4 ${securityEvents.some((e: any) => !e.raw_metadata?.resolved && e.severity === 'critical') ? 'text-red-500 animate-bounce' : 'text-rose-450 text-rose-500'}`} />
+                <ShieldAlert className={`w-4 h-4 ${securityEvents.some((e: any) => !e.raw_metadata?.resolved && e.severity === 'critical') ? 'text-red-500 animate-bounce' : 'text-rose-500'}`} />
                 <span>Intrusion & Bypass Alerts</span>
                 {securityEvents.filter((e: any) => !e.raw_metadata?.resolved).length > 0 && (
                   <span className="ml-[1px] bg-red-650 bg-red-600 text-white font-bold font-mono text-[9px] px-1.5 py-0.5 rounded-full leading-none shrink-0">
@@ -783,17 +783,17 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             </div>
           </div>
 
-          <div className="bg-[#0c0f16] border border-slate-900 p-4 rounded-xl text-xs space-y-2">
-            <span className="font-mono text-[9px] text-slate-500 font-bold uppercase block">SECURITY STANDARDS MET</span>
-            <div className="flex items-center gap-1.5 text-slate-450 font-mono text-[10px]">
+          <div className="bg-[#111319] border border-[#1b1e28] p-4 rounded-xl text-xs space-y-2">
+            <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase block">SECURITY STANDARDS MET</span>
+            <div className="flex items-center gap-1.5 text-[#78819a] font-mono text-[10px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               AES-GCM Encryption Enabled
             </div>
-            <div className="flex items-center gap-1.5 text-slate-450 font-mono text-[10px]">
+            <div className="flex items-center gap-1.5 text-[#78819a] font-mono text-[10px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               SHA-256 API Key hashing
             </div>
-            <div className="flex items-center gap-1.5 text-slate-450 font-mono text-[10px]">
+            <div className="flex items-center gap-1.5 text-[#78819a] font-mono text-[10px]">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               RSA-2048 Device signatures
             </div>
@@ -804,18 +804,18 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         <div className="lg:col-span-3 space-y-8">
           
           {/* Global MVP Mock Disclaimer */}
-          <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4 text-xs text-amber-200/90 leading-relaxed font-sans flex gap-3">
-            <span className="text-amber-500 font-bold shrink-0 text-sm">⚠️ MVP Sandbox Notice:</span>
+          <div className="bg-[#1a1412] border border-amber-900/30 rounded-lg p-4 text-xs text-[#d2ab6c] leading-relaxed font-sans flex gap-3">
+            <span className="text-[#d2ab6c] font-bold shrink-0 text-xs">⚠️ SANDBOX ADVISORY:</span>
             <div>
-              <p className="font-semibold mb-0.5">MOCK IMPLEMENTATION — Replace with certified identity, fraud, and security providers before production use.</p>
-              <p className="text-amber-400/80">
+              <p className="font-semibold mb-0.5">MOCK ATTESTATION PREVIEW — Administrative Sandbox Mode</p>
+              <p className="text-[#78819a]">
                 AAN Admin console displays simulated metrics and mock identity records for MVP purposes. Legal compliance, certified security registries, or absolute threat protection are not active or claimed.
               </p>
             </div>
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-slate-400 text-xs bg-slate-900 border border-slate-800 rounded-xl">
+            <div className="p-12 text-center text-[#78819a] text-xs bg-[#111319] border border-[#1b1e28] rounded-xl">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-500 mb-2" />
               Syncing compliance server registry datasets...
             </div>
@@ -1424,7 +1424,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                     <div className="p-6 border-b border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div>
                         <h3 className="font-bold text-white text-sm">Enterprise Verification Session Ledger</h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Secure ledger of unique biometric validations, trust score outcomes, and platform claims.</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Secure ledger of unique trust validations, trust score outcomes, and platform claims.</p>
                       </div>
 
                       <div className="flex items-center gap-2.5">
@@ -1793,7 +1793,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               )}
 
               {/* Tab 4: Cryptographic Signature indexes stats */}
-              {activeTab === 'biometrics' && (
+              {activeTab === 'signatures' && (
                 <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
                   <div className="p-6 border-b border-slate-850">
                     <h3 className="font-bold text-white text-sm">Signature Verification Indexes</h3>
@@ -1813,13 +1813,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-850 text-slate-300">
-                        {biometrics.map((tmpl) => (
+                        {signatureTemplates.map((tmpl) => (
                           <tr key={tmpl.id} className="hover:bg-slate-950/20">
                             <td className="py-4 px-6 font-mono text-xs">{tmpl.id}</td>
                             <td className="py-4 px-4 font-mono text-xs text-blue-400 font-semibold">{tmpl.user_id}</td>
                             <td className="py-4 px-4 font-mono text-xs text-slate-350 select-all">{tmpl.template_hash}</td>
                             <td className="py-4 px-4 font-mono text-[11px] text-slate-500">
-                              AES_GCM_ENCRYPTED_VECTOR_KEY_#{tmpl.encrypted_payload_hash}
+                              {tmpl.encrypted_template ? tmpl.encrypted_template.slice(0, 32) + "..." : "AES_GCM_ENCRYPTED_SIGNATURE"}
                             </td>
                             <td className="py-4 px-4 font-mono text-slate-400">{tmpl.model_version}</td>
                             <td className="py-4 px-6 text-right font-mono text-emerald-400 font-bold">{tmpl.confidence_score}%</td>
@@ -1959,7 +1959,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                       </div>
                       <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
                         <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping shrink-0" />
-                        <span>Continuous background heuristics validating cryptographic liveness tokens on the device hardware layer.</span>
+                        <span>Continuous background heuristics validating cryptographic attestation signatures on the device hardware layer.</span>
                       </div>
                     </div>
                   </div>

@@ -219,7 +219,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                     AAN (Adaptive Assurance Network) is a modern digital identity middleware infrastructure. Modern platforms are plagued by automated botnets, duplicate registrations, sybil account networks, and credential stuffing vectors. Traditional MFA processes are cumbersome, and heavyweight document-based checks (government IDs) introduce high drop-off and severe privacy risks.
                   </p>
                   <p>
-                    AAN bridges this gap. By evaluating device-bound credentials, contextual telemetry (residential proxy routing, browser execution layers, fast action tempos), and optionally evaluating transient face liveness markers, AAN provides deterministic assurance of returning unique human status.
+                    AAN bridges this gap. By evaluating device-bound credentials and contextual telemetry (residential proxy routing, browser execution layers, fast action tempos), AAN provides deterministic assurance of returning unique human status.
                   </p>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                   "AAN provides adaptive authentication and trust infrastructure that helps organizations evaluate login risk and apply verification policies appropriate to each authentication attempt."
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Our architecture guarantees strict data minimization. Sensitive liveness video streams, face map configurations, and location logs are processed strictly in client memory. Only short-lived cryptographic assertion hashes are synced and logged to verify user status, mitigating structural breach damage.
+                  Our architecture guarantees strict data minimization. Sensitive contextual logs and location logs are minimized. Only short-lived cryptographic assertion hashes are synced and logged to verify user status, mitigating structural breach damage.
                 </p>
               </div>
 
@@ -557,7 +557,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <span className="font-mono text-[9px] bg-amber-950 text-amber-400 px-2 py-0.5 rounded border border-amber-950 font-bold uppercase tracking-widest">Coming Soon</span>
                     </div>
                     <p className="text-xs text-slate-450 leading-relaxed font-sans">
-                      Provides dedicated React hooks to fetch risk scores and launch adaptive liveness modals inline within UI transitions.
+                      Provides dedicated React hooks to fetch risk scores and launch adaptive verification modals inline within UI transitions.
                     </p>
                   </div>
                 </div>
@@ -755,7 +755,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                   <ul className="list-disc pl-4 space-y-1.5 text-slate-405">
                     <li><strong>Contextual Signals:</strong> Client device IP metadata (to resolve state proxy, data-center nodes, or impossible velocity travels).</li>
                     <li><strong>Device Fingerprints:</strong> Declared browser platform parameters, screen bounds, and hardware thread metadata.</li>
-                    <li><strong>Optional Face Liveness metrics:</strong> Hashed biometric landmark values computed entirely in client memory buffers to satisfy elevated verification hurdles.</li>
+                    <li><strong>System Integrity Indicators:</strong> Client-side cryptographic integrity checks computed entirely in client memory buffers to satisfy elevated verification hurdles.</li>
                   </ul>
                 </div>
 
@@ -806,10 +806,10 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                   { name: "Session Validation", status: "Operational", assert: "Transient evaluation matching" },
                   { name: "Symmetric Encryption", status: "Enabled", assert: "AES-256 for active fields" },
                   { name: "Compliance Logging", status: "Enabled", assert: "Immutable internal timeline hashes" },
-                  { name: "Raw Face Snapshots", status: "Not Stored", assert: "Purged instantly after landmark hash" },
-                  { name: "Biometric Map database", status: "Not Stored", assert: "Decoupled architecture" },
+                  { name: "Raw Credentials", status: "Not Stored", assert: "Purged instantly after signature hash" },
+                  { name: "Identity Database", status: "Not Stored", assert: "Decoupled architecture" },
                   { name: "Government Database Links", status: "Not Stored", assert: "Pre-KYC level proxying only" },
-                  { name: "Demo Sandbox Utilities", status: "Mocked", assert: "Simulated liveness camera frames" }
+                  { name: "Demo Sandbox Utilities", status: "Mocked", assert: "Simulated integrity handshake" }
                 ].map((row, rIdx) => (
                   <div key={rIdx} className="grid grid-cols-3 p-3 border-b border-slate-900/80 hover:bg-slate-900/10 text-slate-350">
                     <span className="text-white font-sans font-bold text-xs">{row.name}</span>
@@ -826,7 +826,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
               <div className="space-y-4">
                 <h3 className="font-sans font-bold text-white text-sm border-b border-slate-850 pb-1 pt-2">Known Technical Limitations</h3>
                 <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                  The contextual device risk calculation may flag users operating premium dedicated residential IP ranges linked to high-velocity VPN nodes or business secure networks. AAN mitigates this false friction by prioritizing low-摩擦 biometric challenge touch gestures during elevated thresholds rather than terminating access outright.
+                  The contextual device risk calculation may flag users operating premium dedicated residential IP ranges linked to high-velocity VPN nodes or business secure networks. AAN mitigates this false friction by prioritizing adaptive interactive challenge gestures during elevated thresholds rather than terminating access outright.
                 </p>
                 
                 <h3 className="font-sans font-bold text-white text-sm border-b border-slate-850 pb-1">Responsible Disclosure Guideline</h3>
@@ -894,7 +894,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                   "AAN provides adaptive authentication and trust infrastructure that helps organizations evaluate login risk and apply verification policies appropriate to each authentication attempt."
                 </blockquote>
                 <p>
-                  To restore digital trust, systems must confirm human authenticity. But building static databases of biometric profiles results in dangerous centralizing. A breached biometric archive is permanent. 
+                  To restore digital trust, systems must confirm human authenticity. But building static databases of personal identifiers results in dangerous centralizing. A breached identity archive is permanent. 
                 </p>
                 <p>
                   AAN maintains an elegant alternative: <strong>minimization at rest</strong>. By proving returning uniqueness entirely on the client, and using ephemeral hashes to clear downstream challenges, AAN balances rigorous platform security against complete consumer privacy.
@@ -965,9 +965,9 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
               <div className="space-y-6">
                 
                 <div className="p-5 bg-slate-950/40 border border-slate-900 rounded-lg space-y-2">
-                  <span className="font-mono text-[9px] text-blue-400 font-bold block uppercase">PREPRINT: "Continuous Client Telemetry Heuristics vs Central Biometric Storage"</span>
+                  <span className="font-mono text-[9px] text-blue-400 font-bold block uppercase">PREPRINT: "Continuous Client Telemetry Heuristics vs Centralized Identity Storage"</span>
                   <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                    Explores the risk mitigation efficacy of tracking rolling speed metrics, browser canvas parameters, and system behaviors compared to maintaining permanent biometric archives. Demonstrates 98% botnet suppression with zero long-term profile storage.
+                    Explores the risk mitigation efficacy of tracking rolling speed metrics, browser canvas parameters, and system behaviors compared to maintaining permanent user profile archives. Demonstrates 98% botnet suppression with zero long-term profile storage.
                   </p>
                 </div>
 
@@ -1041,7 +1041,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <span className="font-mono text-[10px] text-emerald-400">Free</span>
                     </div>
                     <p className="text-xs text-slate-450 leading-relaxed">
-                      Designed to secure experimental projects, test REST integration scripts, and verify liveness interfaces.
+                      Designed to secure experimental projects, test REST integration scripts, and verify system integrity interfaces.
                     </p>
                     <ul className="text-[10.5px] text-slate-400 font-mono space-y-1">
                       <li>• 100 verifications/month</li>
@@ -1203,8 +1203,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
 
                   <div className="space-y-3.5 text-xs">
                     {[
-                      { q: "Is a web camera scan mandatory for login?", a: "No. AAN uses adaptive validation. If device fingerprints, residential IP flags, and interaction tempos appear consistent, trusted users login with zero friction." },
-                      { q: "Do you store high-res face files?", a: "Never. Camera frames are processed fully in client memory cache. Hashed landmark mapping signatures are compared volatilely then immediately destroyed." },
+                      { q: "Is a full personal registration mandatory for login?", a: "No. AAN uses adaptive validation. If device fingerprints, residential IP flags, and interaction tempos appear consistent, trusted users login with zero friction." },
+                      { q: "Do you store permanent identity files?", a: "Never. Posture signals are processed fully in client memory cache. Hashed signature templates are compared volatilely then immediately destroyed." },
                       { q: "How do I clear mock accounts registered in sandboxes?", a: "Trigger a DELETE /verification request targeting your claim id, which wipes out all timeline logs securely." }
                     ].filter(item => item.q.toLowerCase().includes(faqSearch.toLowerCase()) || item.a.toLowerCase().includes(faqSearch.toLowerCase())).map((faq, fIdx) => (
                       <div key={fIdx} className="p-3 bg-slate-900 border border-slate-850 rounded text-slate-350 space-y-1">
@@ -1337,7 +1337,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                 <div className="space-y-2">
                   <h3 className="font-sans font-bold text-white text-sm">2. Acceptable Use Policies</h3>
                   <p>
-                    Organizations are strictly forbidden from passing raw biometric files, persistent government identifiers, or non-claim linked personal information to our public API endpoints. Partners are responsible for ensuring clear end-user consent before initiating discretionary facial liveness evaluation scripts.
+                    Organizations are strictly forbidden from passing raw personal files, persistent government identifiers, or non-claim linked personal information to our public API endpoints. Partners are responsible for ensuring clear end-user consent before initiating discretionary security verification scripts.
                   </p>
                 </div>
 

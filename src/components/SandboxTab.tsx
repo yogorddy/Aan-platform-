@@ -75,7 +75,8 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
       "failed",
       "Sandbox Warning: Biometric twin signature match detected on global decentralized registry."
     );
-    alert("Sandbox Simulation Alert: Cryptographic replica match detected safely!");
+    // Silent safe log to avoid blocking alerts inside iframes
+    console.log("Sandbox Simulation Alert: Cryptographic replica match detected safely!");
   };
 
   const simulateElevatedRisk = () => {
@@ -121,7 +122,10 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
 
   const decodeJwtClaimsSim = () => {
     if (!activeJwtToDecode.trim()) {
-      alert("Please paste a valid signed JWT proof token first.");
+      setDecodedClaims({
+        valid: false,
+        error: "Missing Token: Please paste a valid signed JWT proof token first."
+      });
       return;
     }
     
@@ -156,9 +160,9 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
     <div className="space-y-6 text-slate-300 font-sans text-left relative">
       
       {/* Visual Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-rose-950 pb-5">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#1b1e28] pb-5">
         <div className="space-y-1">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-rose-450 font-black bg-rose-950/80 px-2.5 py-0.5 border border-rose-900/40 rounded flex items-center gap-1.5 w-fit">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-rose-450 font-black bg-[#111319]/80 px-2.5 py-0.5 border border-[#1b1e28] rounded flex items-center gap-1.5 w-fit">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
             Isolated Sandbox Environment
           </span>
@@ -166,12 +170,12 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
             <HardDrive className="w-5 h-5 text-rose-400" />
             AAN Simulated Playground
           </h2>
-          <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
+          <p className="text-xs text-[#78819a] max-w-2xl leading-relaxed">
             Manipulate security triggers, trigger sybil duplicates, and review webhooks in a fully static playground context without affecting your live production user directories.
           </p>
         </div>
 
-        <span className="text-[10px] font-mono font-black text-rose-400 border border-rose-900/40 px-3 py-1 bg-rose-950/20 rounded">
+        <span className="text-[10px] font-mono font-black text-rose-400 border border-[#1b1e28] px-3 py-1 bg-[#111319] rounded">
           Sandbox Stage Active
         </span>
       </div>
@@ -183,7 +187,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
         <div className="lg:col-span-8 space-y-6">
           
           {/* User simulation creator */}
-          <div className="bg-slate-900/35 border border-slate-900 rounded-xl p-5 space-y-4">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4">
             <h3 className="font-mono text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
               <UserPlus className="w-4 h-4 text-blue-400" />
               Provision simulated environment users
@@ -191,23 +195,23 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
 
             <form onSubmit={handleCreateSimUser} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
               <div className="space-y-1.5">
-                <label className="text-[9px] font-mono text-slate-500 uppercase font-bold">Simulated Target human Name</label>
+                <label className="text-[9px] font-mono text-[#78819a] uppercase font-bold">Simulated Target human Name</label>
                 <input
                   type="text"
                   required
                   value={simName}
                   onChange={(e) => setSimName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 font-mono focus:outline-none placeholder-slate-655"
+                  className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 text-xs text-slate-205 font-mono focus:outline-none placeholder-slate-655"
                   placeholder="e.g. Charlie Jenkins"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-mono text-slate-500 uppercase font-bold">Risk profile mapping</label>
+                <label className="text-[9px] font-mono text-[#78819a] uppercase font-bold">Risk profile mapping</label>
                 <select
                   value={simRisk}
                   onChange={(e) => setSimRisk(e.target.value as any)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 font-mono focus:outline-none"
+                  className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 text-xs text-slate-205 font-mono focus:outline-none"
                 >
                   <option value="low">Low Risk Profile (Passed)</option>
                   <option value="medium">Medium Risk Profile (Needs Check)</option>
@@ -216,12 +220,12 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[9px] font-mono text-slate-500 uppercase font-bold">Browser / OS Device footprint</label>
+                <label className="text-[9px] font-mono text-[#78819a] uppercase font-bold">Browser / OS Device footprint</label>
                 <input
                   type="text"
                   value={simDevice}
                   onChange={(e) => setSimDevice(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 font-mono focus:outline-none"
+                  className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 text-xs text-slate-205 font-mono focus:outline-none"
                 />
               </div>
 
@@ -237,12 +241,12 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
           </div>
 
           {/* Sandbox Controls console */}
-          <div className="bg-slate-900/35 border border-slate-900 rounded-xl p-5 space-y-4">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4">
             <h3 className="font-mono text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
               <Zap className="w-4 h-4 text-rose-400" />
               Sandbox Security Trigger Simulators
             </h3>
-            <p className="text-xs text-slate-400 leading-normal">
+            <p className="text-xs text-[#78819a] leading-normal">
               Inject anomalous behavior vectors into the sandbox registry to assert how your integration logic enforces security steps.
             </p>
 
@@ -252,7 +256,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
                 className="p-4 rounded-xl border border-red-900/30 bg-red-950/15 hover:bg-red-950/20 text-left transition-all cursor-pointer group"
               >
                 <span className="font-mono text-[10px] uppercase font-black text-red-400 block mb-1">Simulate Sybil Replica Attack</span>
-                <p className="text-[11px] text-slate-400 font-sans leading-normal group-hover:text-slate-300">
+                <p className="text-[11px] text-[#78819a] font-sans leading-normal group-hover:text-slate-300">
                   Submits face signature matches already stored inside AAN vault registries to trigger duplication alarms.
                 </p>
               </button>
@@ -262,7 +266,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
                 className="p-4 rounded-xl border border-orange-900/30 bg-orange-950/15 hover:bg-orange-950/20 text-left transition-all cursor-pointer group"
               >
                 <span className="font-mono text-[10px] uppercase font-black text-orange-400 block mb-1">Simulate Elevated Risk Surge</span>
-                <p className="text-[11px] text-slate-400 font-sans leading-normal group-hover:text-slate-300">
+                <p className="text-[11px] text-[#78819a] font-sans leading-normal group-hover:text-slate-300">
                   Triggers rate-limit bursts, device emulator footprints, and proxy routing alerts simultaneously.
                 </p>
               </button>
@@ -270,7 +274,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
           </div>
 
           {/* Token decrypt parsing tool */}
-          <div className="bg-slate-900/35 border border-slate-900 rounded-xl p-5 space-y-4 text-left">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4 text-left">
             <h3 className="font-mono text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
               <Lock className="w-4 h-4 text-emerald-400" />
               Signed JWT proof Decrypt Claims validation tool
@@ -282,7 +286,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
                 onChange={(e) => setActiveJwtToDecode(e.target.value)}
                 placeholder="Paste AAN proof JWT signature block to decode..."
                 rows={3}
-                className="w-full bg-slate-950 border border-slate-800 rounded font-mono text-[11px] p-2.5 text-slate-300 focus:outline-none placeholder-slate-700"
+                className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded font-mono text-[11px] p-2.5 text-slate-305 focus:outline-none placeholder-slate-700"
               />
               <div className="text-right">
                 <button
@@ -295,8 +299,8 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
             </div>
 
             {decodedClaims && (
-              <div className="bg-slate-950 border border-slate-850 rounded-lg overflow-hidden font-mono text-[10px]">
-                <div className="bg-slate-900 px-3 py-1 flex justify-between items-center text-slate-500 font-bold uppercase">
+              <div className="bg-[#0d0e12] border border-[#1b1e28] rounded-lg overflow-hidden font-mono text-[10px]">
+                <div className="bg-[#111319] px-3 py-1 flex justify-between items-center text-[#78819a] font-bold uppercase">
                   <span>Decoded Verdict Claims Mapping</span>
                   <span className={`text-[8px] px-1.5 py-0.2 select-none border rounded ${decodedClaims.valid !== false ? "text-emerald-400 border-emerald-900/50" : "text-rose-400 border-rose-900/50"}`}>
                     {decodedClaims.valid !== false ? " Valid Signature Claims" : " Authentication Failed"}
@@ -315,23 +319,23 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
         <div className="lg:col-span-4 space-y-4 text-left font-mono">
           
           {/* Active Sandbox registry users list */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-xl p-4 space-y-3.5">
-            <h4 className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3.5">
+            <h4 className="text-[10px] font-mono font-black text-[#78819a] uppercase tracking-widest flex items-center gap-1.5">
               <Users className="w-4 h-4 text-blue-400" />
               Simulated entity registry
             </h4>
 
             <div className="space-y-2 max-h-56 overflow-y-auto scrollbar-thin">
               {simulatedUsers.map((u) => (
-                <div key={u.id} className="p-2.5 bg-slate-950 border border-slate-900 rounded text-[10px] leading-relaxed flex flex-col justify-between">
-                  <div className="flex justify-between items-center pb-1 border-b border-slate-900">
+                <div key={u.id} className="p-2.5 bg-[#0d0e12] border border-[#1b1e28] rounded text-[10px] leading-relaxed flex flex-col justify-between">
+                  <div className="flex justify-between items-center pb-1 border-b border-[#1b1e28]">
                     <span className="text-white font-bold">{u.alias}</span>
                     <span className={`text-[9px] font-black uppercase ${u.risk === "low" ? "text-emerald-400" : u.risk === "medium" ? "text-amber-400" : "text-red-400"}`}>
                       {u.risk} Risk
                     </span>
                   </div>
                   <div className="pt-1.5 flex justify-between items-center gap-2">
-                    <span className="text-slate-500 text-[9px] truncate max-w-[120px]" title={u.device}>{u.device}</span>
+                    <span className="text-[#5d6780] text-[9px] truncate max-w-[120px]" title={u.device}>{u.device}</span>
                     
                     <button
                       onClick={() => triggerMockWebhook(u.alias, "aan.verification.completed")}
@@ -346,23 +350,23 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
           </div>
 
           {/* Sandbox Wh deliverables logs container */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-xl p-4 space-y-3">
-            <h4 className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3">
+            <h4 className="text-[10px] font-mono font-black text-[#78819a] uppercase tracking-widest flex items-center gap-1.5">
               <HardDrive className="w-4 h-4 text-rose-450" />
               Simulated Webhook Gate deliverables
             </h4>
 
             <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-thin">
               {webhookLogs.length === 0 ? (
-                <span className="text-slate-600 text-[10px] block py-4 text-center">(No webhook fired yet)</span>
+                <span className="text-slate-655 text-[10px] block py-4 text-center">(No webhook fired yet)</span>
               ) : (
                 webhookLogs.map((l) => (
-                  <div key={l.id} className="p-2 bg-slate-950 border border-slate-900 rounded text-[9px]">
-                    <div className="flex justify-between text-slate-500 font-bold mb-0.5">
-                      <span className="text-slate-450 text-[10px] truncate">{l.event}</span>
+                  <div key={l.id} className="p-2 bg-[#0d0e12] border border-[#1b1e28] rounded text-[9px]">
+                    <div className="flex justify-between text-[#5d6780] font-bold mb-0.5">
+                      <span className="text-slate-455 text-[10px] truncate">{l.event}</span>
                       <span className="text-emerald-405">{l.status}</span>
                     </div>
-                    <div className="text-slate-500">
+                    <div className="text-[#5d6780]">
                       Subject: <span className="text-white">{l.user}</span> • {l.time}
                     </div>
                   </div>

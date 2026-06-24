@@ -207,7 +207,7 @@ export default function BrandBook() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">Brand Promise</span>
                     <span className="col-span-2 leading-relaxed text-slate-300">
-                      We secure authentic human interactions at scale, guaranteeing that partner platforms receive zero user tracking vectors or stored biometric templates.
+                      We secure authentic human interactions at scale, guaranteeing that partner platforms receive zero user tracking vectors or stored private templates.
                     </span>
                   </div>
 
@@ -228,7 +228,7 @@ export default function BrandBook() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">Elevator Pitch</span>
                     <span className="col-span-2 leading-relaxed text-slate-300">
-                      Traditional identity companies scan driver’s licenses, hoard SSNs, and record high-res facial scans, creating permanent security and privacy hazards. AAN changes the game. We provide a decentralized backend infrastructure that lets apps verify real, unique users through secure, locally-hashed biometrics. Recipient portals get only cryptographic approvals—never raw user data.
+                      Traditional identity companies scan driver’s licenses, hoard SSNs, and record high-res facial scans, creating permanent security and privacy hazards. AAN changes the game. We provide a decentralized backend infrastructure that lets apps verify real, unique users through secure, locally-hashed cryptographic postures. Recipient portals get only cryptographic approvals—never raw user data.
                     </span>
                   </div>
                 </div>
@@ -396,9 +396,9 @@ export default function BrandBook() {
                   },
                   {
                     segment: '2. Fintech Platforms',
-                    problem: 'Rapid synthetic identity creation using deepfake face replays to open mule banking details.',
-                    goal: 'Perform quick 3-dimensional liveness validations before proceeding to standard manual review steps.',
-                    painPoint: 'High rates of facial mock spoofing rendering existing 2D cameras obsolete.',
+                    problem: 'Rapid synthetic identity creation and coordinated automated signups.',
+                    goal: 'Perform quick integrity and attestation handshakes before proceeding to standard manual review steps.',
+                    painPoint: 'High rates of automated spoofing rendering standard CAPTCHAs obsolete.',
                     motivation: 'Sovereign hardware-bound client credential verification.'
                   },
                   {
@@ -413,13 +413,13 @@ export default function BrandBook() {
                     problem: 'Smurfing, cheat scripts, botnets farming virtual materials, complete lobby compromise.',
                     goal: 'Ensure each player is a distinct, verifiable biological operator.',
                     painPoint: 'Hard blocks on IP or device parameters affect dormitories and households incorrectly.',
-                    motivation: 'Low friction hardware-bound biometric authentication.'
+                    motivation: 'Low friction hardware-bound attestation.'
                   },
                   {
                     segment: '5. Enterprise Software',
                     problem: 'Credential stuffing, social engineering attacks, and fake user approvals.',
-                    goal: 'Add an ironclad, frictionless privacy-centric biometric layer to MFA.',
-                    painPoint: 'Employees resent sharing corporate face databases due to metadata leaks.',
+                    goal: 'Add an ironclad, frictionless privacy-centric hardware-bound layer to MFA.',
+                    painPoint: 'Employees resent sharing corporate credentials or central telemetry.',
                     motivation: 'Stateless, zero-knowledge human validation.'
                   },
                   {
@@ -433,20 +433,20 @@ export default function BrandBook() {
                     segment: '7. Healthcare Tech',
                     problem: 'Spam telehealth appointment reservations and duplicate record files.',
                     goal: 'Secure unique returning human continuity without leaking clinical files.',
-                    painPoint: 'HIPAA requires perfect decoupling of biological biometric indicators from clinical tables.',
-                    motivation: 'ZKP biometric template isolation.'
+                    painPoint: 'HIPAA requires perfect decoupling of personal indicators from clinical tables.',
+                    motivation: 'ZKP credential isolation.'
                   },
                   {
                     segment: '8. EdTech Tools',
                     problem: 'AI bots taking courses, duplicate submissions, and online examination fraud.',
                     goal: 'Lock student sessions to verified physical human students.',
-                    painPoint: 'Aggressive camera surveillance causes anxiety and prompts major regulatory pushbacks.',
-                    motivation: 'Local, secure camera verification.'
+                    painPoint: 'Aggressive surveillance causes anxiety and prompts major regulatory pushbacks.',
+                    motivation: 'Local, secure client attestation.'
                   },
                   {
                     segment: '9. Gov Contractors',
-                    problem: 'Protecting secure portal entry without exposing physical biometric databases to hackers.',
-                    goal: 'Strict multi-signal risk metrics combining device profiles with localized biometrics.',
+                    problem: 'Protecting secure portal entry without exposing physical identity databases to hackers.',
+                    goal: 'Strict multi-signal risk metrics combining device profiles with localized cryptographic signatures.',
                     painPoint: 'Traditional databases are constant massive targets for sovereign state hackers.',
                     motivation: 'Military-grade cryptographic proof signatures.'
                   },
@@ -731,11 +731,11 @@ export default function BrandBook() {
 
               <div className="space-y-4">
                 {[
-                  { name: 'AAN Verify', use: 'The high-velocity verification session flow containing liveness metrics and dynamic challenge generators.' },
+                  { name: 'AAN Verify', use: 'The high-velocity verification session flow containing device attestation signals and dynamic challenge generators.' },
                   { name: 'AAN Trust', use: 'Risk analysis, template hashes indexation matching, and multi-device correlation algorithms.' },
                   { name: 'AAN Sentinel', use: 'Anomalous bot vector trackers, spoof mitigation, and real-time attempt velocity restrictions.' },
                   { name: 'AAN Console', use: 'Secure partner portal interface displaying session histories, audit logs, and status controls.' },
-                  { name: 'AAN SDK', use: 'Multi-framework client developer libraries enabling fast, low-friction camera configurations.' },
+                  { name: 'AAN SDK', use: 'Multi-framework client developer libraries enabling fast, low-friction hardware-bound configurations.' },
                   { name: 'AAN Connect', use: 'Pre-built standard single sign-on widgets, bridging OAuth attestation frameworks.' },
                   { name: 'AAN Protect', use: 'Military-grade hardware-locked key pairs generated within browser-bound sandboxes.' },
                   { name: 'AAN Proof', use: 'The cryptographic output generation mechanism producing signed, secure attestation tokens.' },
@@ -770,25 +770,25 @@ export default function BrandBook() {
                   {
                     target: '1. Primary Landing Title Marks',
                     title: 'The Digital Trust Axis.',
-                    subtitle: 'Secure human proof without exposing biometric parameters or personal user coordinates.',
+                    subtitle: 'Secure human proof without exposing personal parameters or personal user coordinates.',
                     cta: 'Integrate AAN Gateway'
                   },
                   {
                     target: '2. Value Propositions (Anti-Sybil Proofs)',
                     title: 'Mitigate fraud, trial abuse, and duplicate bots completely pseudonymously.',
-                    subtitle: 'Traditional identity suites require passport scans and driver license storage. AAN extracts only biological uniqueness signals, transforming them into volatile numerical hashes in memory. We do not store raw images. You receive only clean attestation approvals—never liability.',
+                    subtitle: 'Traditional identity suites require passport scans and driver license storage. AAN extracts only hardware-bound uniqueness signals, transforming them into volatile numerical hashes in memory. You receive only clean attestation approvals—never liability.',
                     cta: 'Explore Zero-Knowledge Integration'
                   },
                   {
                     target: '3. Developer Messaging Matrix',
                     title: 'Secure unique users in 3 lines of code.',
-                    subtitle: 'Initialize ephemeral challenge verification links directly via client REST calls. Render highly optimized WebRTC device scanners locally on browser frames. Obtain signed, standard JSON Web Tokens containing human uniqueness confirmations.',
+                    subtitle: 'Initialize ephemeral challenge verification links directly via client REST calls. Render highly optimized device checkers locally on browser frames. Obtain signed, standard JSON Web Tokens containing human uniqueness confirmations.',
                     cta: 'View AAN SDK Reference'
                   },
                   {
                     target: '4. Enterprise Compliance Messaging',
                     title: 'SOC-2, GDPR, CCPA aligned by default.',
-                    subtitle: 'By never holding raw biometrics, state IDs, physical names, or location coords, AAN reduces compliance liability to zero. Partner apps obtain a stateless, permanent attestation index securely.',
+                    subtitle: 'By never holding raw private data, state IDs, physical names, or location coords, AAN reduces compliance liability to zero. Partner apps obtain a stateless, permanent attestation index securely.',
                     cta: 'Download Whitepaper'
                   },
                   {
@@ -850,7 +850,7 @@ export default function BrandBook() {
                   { name: '8. Customers Hub (/customers)', layout: 'Clean grid testimonials, verified success stories, bot volume reduction summaries, and platform scale stats. Case reports.' },
                   { name: '9. About Narrative (/about)', layout: 'Our mission values, timeline milestones, leadership engineering backgrounds, and digital sovereignty commitments.' },
                   { name: '10. Careers Gateway (/careers)', layout: 'Open positions in systems cryptography, backend Express, product design. Zero buzzwords, clear project deliverables, competitive salaries.' },
-                  { name: '11. Blog & Insights (/blog)', layout: 'Articles on the rise of AI synthetic entities, deepfake camera injection vectors, zero-knowledge verification frameworks, and digital sovereignty.' },
+                  { name: '11. Blog & Insights (/blog)', layout: 'Articles on the rise of AI synthetic entities, zero-knowledge verification frameworks, and digital sovereignty.' },
                   { name: '12. Contact Hub (/contact)', layout: 'Secure contact system, volume partner custom pricing proposals, security audit file requests. SLA support channels info.' },
                   { name: '13. Live Status Page (/status)', layout: '99.999% uptime counters, response speed monitoring (global average 120ms), system status history tracking list.' },
                   { name: '14. Trust Center (/trust)', layout: 'Sovereign compliance manuals, GDPR, CCPA data logs, data disposal procedures, and certificate lists.' },
@@ -949,7 +949,7 @@ export default function BrandBook() {
                   In the years leading up to 2026, the internet reached a point of existential structural breakdown. With the advent of generative AI models, synthetic profiles and automated scripts became completely indistinguishable from physical biological agents. Systems were faced with a critical dilemma: either accept total bot compromise (trial leaks, ad fraud, civil syndicate spam) or demand intrusive human verification protocols that forced citizens to yield their personal documents and high-res face files.
                 </p>
                 <p>
-                  This compromise was unacceptable. It treated human citizens as security risks, demanding that they trade sovereign privacy for digital access, creating central biometric databases that acted as targets for malicious hackers.
+                  This compromise was unacceptable. It treated human citizens as security risks, demanding that they trade sovereign privacy for digital access, creating centralized database targets for malicious hackers.
                 </p>
               </div>
 
@@ -1000,7 +1000,7 @@ export default function BrandBook() {
                   {
                     competitor: '3. Fraud Detection Suites',
                     focus: 'Heuristically track IP parameters, cookie history, and typing speed indices.',
-                    aanEdge: 'Heuristics are brittle and generate high rates of false positives. AAN replaces guesswork with local hardware-bound cryptographic biometrics.'
+                    aanEdge: 'Heuristics are brittle and generate high rates of false positives. AAN replaces guesswork with local hardware-bound cryptographic attestation.'
                   },
                   {
                     competitor: '4. Cybersecurity Companies',
@@ -1046,7 +1046,7 @@ export default function BrandBook() {
                   },
                   {
                     phase: 'Phase 2: Edge Hardware Binding Gateway (Years 3 - 4)',
-                    desc: 'Leverage device-bound security modules on smart handsets to pre-authorize user sessions. Completely bypass camera setups for returning trust flows.',
+                    desc: 'Leverage device-bound security modules on smart handsets to pre-authorize user sessions. Completely secure returning trust flows.',
                     status: 'R&D Phase',
                     color: 'text-blue-400 border-blue-500 bg-blue-950/40'
                   },

@@ -8,11 +8,11 @@ create extension if not exists "uuid-ossp";
 
 -- 1. USERS TABLE
 -- Tracks the high-level identity validation status.
--- Do not store SSNs, names, email or raw biometric assets here.
+-- Do not store SSNs, names, email or raw identity assets here.
 create table if not exists public.users (
     id uuid primary key default gen_random_uuid(),
     status text not null check (status in ('pending', 'verified', 'rejected', 'suspended')),
-    human_uid text unique not null, -- Anonymized one-way cryptographic commitment representing a unique person's face
+    human_uid text unique not null, -- Anonymized one-way cryptographic commitment representing a unique person's signature
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -20,20 +20,20 @@ create table if not exists public.users (
 -- Index for human_uid lookup during duplicate check
 create index if not exists idx_users_human_uid on public.users(human_uid);
 
--- 2. BIOMETRIC_TEMPLATES TABLE
--- Stores highly processed, encrypted embedding hashes/templates only.
--- NEVER store raw face snapshots/selfies.
-create table if not exists public.biometric_templates (
+-- 2. SIGNATURE_TEMPLATES TABLE
+-- Stores highly processed, encrypted signature hashes/templates only.
+-- NEVER store raw identifying secrets.
+create table if not exists public.signature_templates (
     id uuid primary key default gen_random_uuid(),
     user_id uuid references public.users(id) on delete cascade not null,
-    template_hash text not null unique, -- Cryptographic hash of the biometric template for O(1) duplicate checks
-    encrypted_template text not null, -- Encrypted biometric embedding (AES-256 or similar, managed at application level)
-    model_version text not null, -- E.g., 'facenet-v3', 'liveness-deepface-v1'
+    template_hash text not null unique, -- Cryptographic hash of the signature template for O(1) duplicate checks
+    encrypted_template text not null, -- Encrypted signature template (AES-256 or similar, managed at application level)
+    model_version text not null, -- E.g., 'signature-v3', 'integrity-deepface-v1'
     confidence_score numeric(5, 2) not null, -- Match or quality confidence score during enrollment
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
-create index if not exists idx_biometric_templates_hash on public.biometric_templates(template_hash);
+create index if not exists idx_signature_templates_hash on public.signature_templates(template_hash);
 
 -- 3. DEVICES TABLE
 -- Tracks registered client hardware public keys. Used in multi-account blocklists.
@@ -131,7 +131,7 @@ create trigger tr_users_update_timestamp
 
 -- Enable Row Level Security on all core tables
 alter table public.users enable row level security;
-alter table public.biometric_templates enable row level security;
+alter table public.signature_templates enable row level security;
 alter table public.devices enable row level security;
 alter table public.partner_apps enable row level security;
 alter table public.partner_user_links enable row level security;
@@ -155,11 +155,11 @@ create policy "Partner apps can select linked users"
         )
     );
 
--- 2. Biometric Templates Security Policies
--- Extremely sensitive. Never expose raw biometric hashes or embeddings.
+-- 2. Signature Templates Security Policies
+-- Extremely sensitive. Never expose raw signature hashes or embeddings.
 -- Strictly restricted to service-role background verification workers. No client/partner selects.
-create policy "Strict service-role only access to biometric templates"
-    on public.biometric_templates
+create policy "Strict service-role only access to signature templates"
+    on public.signature_templates
     for all
     using (auth.jwt()->>'role' = 'service_role')
     with check (auth.jwt()->>'role' = 'service_role');

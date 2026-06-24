@@ -89,21 +89,21 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     plainEnglish: {
       analogy: "Passport Stamp",
       analogyText: "Like an anonymous passport stamp at border check-ins. The officer verifies you are a human but stamps a ticket that doesn't state your name, race, or documents.",
-      simplifiedText: "AAN checks whether you are a real person and whether you have already signed up, but it never stores your social numbers or selfie images permanently."
+      simplifiedText: "AAN checks whether you are a real person and whether you have already signed up, but it never stores your social numbers or personal images permanently."
     },
     technicalExplanation: {
-      inputs: ["Client hardware telemetry", "Secure browser properties", "Transient face biometrics (hashes only)"],
-      processing: ["Liveness and synthetic media determination", "Biometric face signature vector derivation", "Zero-Knowledge Proof (ZKP) computation"],
+      inputs: ["Client hardware telemetry", "Secure browser properties", "Transient signature details (hashes only)"],
+      processing: ["Telemetry and posture determination", "Signature vector derivation", "Zero-Knowledge Proof (ZKP) computation"],
       decisionLogic: ["Assess verification conditions", "Calculate heuristic score metrics", "Validate transaction thresholds"],
       outputs: ["Signed Cryptographic proof token", "Normalized risk rating", "Heuristic anomaly indicators"],
-      dependencies: ["WASM biometric modules", "Supabase Postgres state database"],
-      security: ["SHA-256 state keying", "Ephemeral biometric deletion rules"],
+      dependencies: ["WASM signature modules", "Supabase Postgres state database"],
+      security: ["SHA-256 state keying", "Ephemeral signature deletion rules"],
       dataFlow: ["Client -> SDK -> Secure Middle Agent api -> Post-verification database callback"]
     },
     workflow: [
       "User session initiated",
-      "Camera feeds local non-custodial checks",
-      "Server hashes biometric templates for unique comparison",
+      "Telemetry feeds local non-custodial checks",
+      "Server hashes signature templates for unique comparison",
       "Cryptographic Proof Token generated",
       "Enterprise client consumes validated humanness claim"
     ],
@@ -132,12 +132,12 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       metrics: ["Total onboarding completions", "Success rates", "Average risk distribution"]
     },
     securityModel: {
-      risks: ["Synthetic face injection", "Sybil account generation attempts", "Replay of expiring proof tokens"],
-      hiddenData: ["Raw facial photographic feeds", "Absolute hardware coordinates", "Direct IP listings"],
+      risks: ["Synthetic parameter injection", "Sybil account generation attempts", "Replay of expiring proof tokens"],
+      hiddenData: ["Raw client parameter feeds", "Absolute hardware coordinates", "Direct IP listings"],
       authReq: "Hashed API keys verify external caller identity",
       authzReq: "Access to specific projects strictly checked",
       privacy: ["Zero raw data persistence", "Data localization using memory segments only"],
-      limitations: ["Relying strictly on client device webcam capabilities", "Cannot prevent offline physical camera positioning tricks without deep user context"]
+      limitations: ["Relying strictly on client browser environments", "Cannot prevent deep emulator simulation without custom native applications"]
     },
     enterpriseValue: {
       operational: "Drastically lowers customer onboarding spam fees.",
@@ -146,7 +146,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       developer: "Clean REST endpoints allow visual SDK instantiation in seconds.",
       scalability: "Stateless verification servers scale concurrently via edge architecture."
     },
-    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and biometric providers before any production use.",
+    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before any production use.",
     futureImprovements: [
       { title: "Distributed Zero Knowledge Proofs", phase: "Research", desc: "Compile client-side proofs fully inside browser sandbox." },
       { title: "Certified Hardware Attestation", phase: "Enterprise", desc: "Rely on Android Keystore / iOS Secure Enclave for integrity proofs." }
@@ -352,17 +352,17 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       simplifiedText: "Users inside AAN are recorded entirely as anonymous unique ID numbers. The system knows they are a real unique human without knowing who they actually are."
     },
     technicalExplanation: {
-      inputs: ["Salted device anchors", "Standard ephemeral biometric hashes", "Partner application mapping identifiers"],
-      processing: ["Salted biometric comparisons", "Trust anchor evaluations", "Device binding correlations"],
-      decisionLogic: ["Check for duplicate face vector matches across the network", "Decide account status (active, review, or suspended)"],
+      inputs: ["Salted device anchors", "Standard ephemeral signature hashes", "Partner application mapping identifiers"],
+      processing: ["Salted signature comparisons", "Trust anchor evaluations", "Device binding correlations"],
+      decisionLogic: ["Check for duplicate signature vector matches across the network", "Decide account status (active, review, or suspended)"],
       outputs: ["Anonymized system user keys", "Verification validity statuses"],
-      dependencies: ["Verification sessions log histories", "Biometric template datastores"],
+      dependencies: ["Verification sessions log histories", "Signature template datastores"],
       security: ["Strict hashing of external customer keys", "Automated account lock triggers upon rapid key shifting"],
-      dataFlow: ["Client records webcam feeds -> System matches biometric template hashes -> Returns status claim link to app users"]
+      dataFlow: ["Client records system parameters -> System matches signature template hashes -> Returns status claim link to app users"]
     },
     workflow: [
-      "User completes humanness flow on camera",
-      "System derives face template vector hash",
+      "User completes humanness flow securely",
+      "System derives signature template vector hash",
       "Network verifies uniqueness status",
       "Anonymized AAN User entry created/updated",
       "Secure relationship link maps user with Partner ID"
@@ -372,7 +372,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         name: "users",
         purpose: "Saves high-level anonymized verification profile records.",
         columns: ["id", "identity_status (verified/suspended/pending)", "device_trust_score", "created_at"],
-        relationships: "Has many partner_user_links, has many devices, has one biometric_template"
+        relationships: "Has many partner_user_links, has many devices, has one signature_template"
       }
     ],
     apiEndpoints: [
@@ -381,7 +381,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         path: "/api/v1/verification-sessions/:id",
         purpose: "Fetch the completed humanness status metrics of an onboarding user.",
         auth: "Bearer Hashed Partner API Key",
-        response: '{\n  "session_id": "vss_9a123f4b",\n  "status": "passed",\n  "decision_reason": "LIVENESS_CONFIRMED_AND_TEMPLATES_UNIQUE",\n  "proof_token": "ptk_aa338271e1b2f90a"\n}'
+        response: '{\n  "session_id": "vss_9a123f4b",\n  "status": "passed",\n  "decision_reason": "INTEGRITY_CONFIRMED_AND_TEMPLATES_UNIQUE",\n  "proof_token": "ptk_aa338271e1b2f90a"\n}'
       }
     ],
     dashboardIntegration: {
@@ -391,8 +391,8 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       metrics: ["Total unique active users on platform", "Suspended threat volume percentage"]
     },
     securityModel: {
-      risks: ["Sybil accounts using AI-generated deepfake models", "Cross-app tracing linking user profiles illegally"],
-      hiddenData: ["All physical photos, names, registration document scans, biological markers"],
+      risks: ["Sybil accounts using automated emulator scripts", "Cross-app tracing linking user profiles illegally"],
+      hiddenData: ["All physical details, names, registration document scans, biological markers"],
       authReq: "Enterprise admin credentials",
       authzReq: "Must have global admin scope verification",
       privacy: ["Database utilizes custom salted values for each separate application instance", "User data is localized by default"],
@@ -405,7 +405,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       developer: "Abstracts security logic away from local application databases.",
       scalability: "Maintains rapid read performances using lean, anonymized ledger tables."
     },
-    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and biometric providers before any production use.",
+    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before any production use.",
     futureImprovements: [
       { title: "Verifiable Decentralized Credentials", phase: "Research", desc: "Enable full compliance with decentralized W3C DID standard specifications." }
     ],
@@ -414,13 +414,13 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     ],
     knowledgeCheck: [
       {
-        question: "Does AAN store physical selfie photos inside its default databases?",
-        options: ["Yes, for historical court audit purposes", "No, physical selfies are processed ephemerally and completely discarded immediately", "Yes, encrypted with standard public passwords", "Only on select holiday campaigns"],
+        question: "Does AAN store physical user photos inside its default databases?",
+        options: ["Yes, for historical court audit purposes", "No, physical details are processed ephemerally and completely discarded immediately", "Yes, encrypted with standard public passwords", "Only on select holiday campaigns"],
         answerIndex: 1,
-        explanation: "AAN discards physical visual records instantly. It strictly creates and stores and matches mathematical biometric vectors to protect privacy."
+        explanation: "AAN discards physical parameters instantly. It strictly creates and stores and matches mathematical signature vectors to protect privacy."
       }
     ],
-    relatedLessons: ["organization_members", "roles_permissions", "biometric_templates"]
+    relatedLessons: ["organization_members", "roles_permissions", "signature_templates"]
   },
   {
     id: "organization_members",
@@ -688,25 +688,25 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     status: "Production Ready",
     relatedComponents: ["VerifySessionFlow", "PartnerDashboard", "AdminDashboard"],
     overview: "The lifecycle database record representing a single unique human verification request initiated by a partner app and completed by a client user.",
-    whyExists: "Tracks transaction sequences statefully from creation, through camera liveness validations, onto risk evaluation, up to final token collection.",
+    whyExists: "Tracks transaction sequences statefully from creation, through telemetry posture validations, onto risk evaluation, up to final token collection.",
     plainEnglish: {
       analogy: "Airport boarding pass ticket",
-      analogyText: "Like your airport boarding pass ticket. It is generated at check-in (api session started), gets scanned at the gate (camera verification), and lets you on plane (validated).",
+      analogyText: "Like your airport boarding pass ticket. It is generated at check-in (api session started), gets scanned at the gate (telemetry verification), and lets you on plane (validated).",
       simplifiedText: "A Verification Session is a secure check-in ticket. A partner website starts it, sending the user to AAN to verify they are a unique human, then returns them."
     },
     technicalExplanation: {
       inputs: ["Partner application ID link", "External user database reference ID", "Custom redirection URL parameter"],
-      processing: ["Session identifier generation", "Liveness telemetry validation streams", "Face vector hash matching lookup"],
-      decisionLogic: ["Evaluate liveness scoring results", "Apply unique biometric template comparison rules", "Set session status: passed, failed, or pending_review"],
+      processing: ["Session identifier generation", "Posture telemetry validation streams", "Signature vector hash matching lookup"],
+      decisionLogic: ["Evaluate posture scoring results", "Apply unique signature template comparison rules", "Set session status: passed, failed, or pending_review"],
       outputs: ["Cryptographically signed proof token", "Evaluated project risk score rating", "Status claim string"],
-      dependencies: ["WASM biometric modules", "Supabase Postgres state database"],
+      dependencies: ["WASM signature modules", "Supabase Postgres state database"],
       security: ["Expiring session validity boundaries (typically 15-30 minute window limits)", "Dynamic nonce values protecting session replays"],
-      dataFlow: ["Partner API starts session -> User completes biometric flow on camera -> Server evaluates -> Webhook alerts status -> User returns"]
+      dataFlow: ["Partner API starts session -> User completes telemetry flow securely -> Server evaluates -> Webhook alerts status -> User returns"]
     },
     workflow: [
       "Partner website calls POST api verification-sessions",
       "Server responds with unique ID and interactive URL link",
-      "User navigates to URL and fulfills local device camera tests",
+      "User navigates to URL and fulfills local device posture tests",
       "Risk engine re-evaluates risk metrics across the ledger",
       "Session status transitions, generating verifiable proof claim"
     ],
@@ -743,7 +743,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     },
     securityModel: {
       risks: ["Session hijacking via stolen token URLs", "Re-submitting stale completed sessions using historical footage", "Intercepting redirection callback URL strings"],
-      hiddenData: ["Stale face photographic feeds, precise operating systems metadata logs"],
+      hiddenData: ["Stale signature parameter feeds, precise operating systems metadata logs"],
       authReq: "API calls backed by valid secure keys",
       authzReq: "Checked project identity validation of calling server",
       privacy: ["Session details are unlinked from external databases when expired"],
@@ -753,10 +753,10 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       operational: "Removes developer overhead by hosting scalable humanness verification screens natively.",
       security: "Defends applications against bots in real-time.",
       administrative: "Ensures clear session trails for compliance audits.",
-      developer: "Abstracts camera telemetry collection into a single URL landing.",
+      developer: "Abstracts posture telemetry collection into a single URL landing.",
       scalability: "Stateless verification sessions scale horizontally seamlessly."
     },
-    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and biometric providers before any production use.",
+    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before any production use.",
     futureImprovements: [
       { title: "Dynamic Custom Redirect Targets", phase: "Optional", desc: "Allow partners to specify customized redirection parameters directly within API payloads." }
     ],
@@ -765,7 +765,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     ],
     knowledgeCheck: [
       {
-        question: "What happens when an initiated Verification Session expires before the user completes camera steps?",
+        question: "What happens when an initiated Verification Session expires before the user completes posture steps?",
         options: ["AAN database self-destructs", "Session transitions to 'failed' status and the user must re-initiate a session from partner site", "User is verified automatically as a guest", "Admin is forced to manually override the session"],
         answerIndex: 1,
         explanation: "Expired sessions are rendered fully invalid for security compliance. The partner must initiate a brand-new session."
@@ -780,7 +780,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     version: "v1.0.0",
     status: "Production Ready",
     relatedComponents: ["AdminDashboard"],
-    overview: "Configurable rules defining minimum thresholds of device health and biometric integrity required before a verification session receives approval.",
+    overview: "Configurable rules defining minimum thresholds of device health and signature integrity required before a verification session receives approval.",
     whyExists: "Enables enterprise flexibility. Dynamic businesses can require maximum compliance in sandbox staging while loosening parameters during test events.",
     plainEnglish: {
       analogy: "Nightclub dress code manual",
@@ -798,7 +798,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     },
     workflow: [
       "Admin accesses project policy settings panel",
-      "Adjusts sliders (e.g., minimum liveness confidence score target)",
+      "Adjusts sliders (e.g., minimum trust confidence score target)",
       "Syncs configurations to server database structures",
       "Dynamic engine reads newly saved limits instantly",
       "Subsequent sessions checked against updated rule criteria"
@@ -807,7 +807,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       {
         name: "policy_rules",
         purpose: "Stores configurable security threshold boundaries per project integration.",
-        columns: ["id", "project_id", "min_liveness_score", "block_duplicate_devices", "max_risk_tolerance"],
+        columns: ["id", "project_id", "min_trust_score", "block_duplicate_devices", "max_risk_tolerance"],
         relationships: "Belongs to projects, informs verification_sessions scoring"
       }
     ],
@@ -817,14 +817,14 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         path: "/api/internal/test-snapshot",
         purpose: "Internal verification checks of active platform limits.",
         auth: "Workspace Cookie Session Token",
-        response: '{\n  "policies": [\n    {\n      "id": "pol_core",\n      "project_id": "proj_security_777",\n      "min_liveness_score": 85,\n      "allow_emulators": false\n    }\n  ]\n}'
+        response: '{\n  "policies": [\n    {\n      "id": "pol_core",\n      "project_id": "proj_security_777",\n      "min_trust_score": 85,\n      "allow_emulators": false\n    }\n  ]\n}'
       }
     ],
     dashboardIntegration: {
       location: "Admin Dashboard 'Policies' tab workspace environment",
       actions: ["Modify risk tolerances", "Toggle emulator check flags", "Adjust webhook timeout thresholds"],
       permissions: ["Write accessibility restricted exclusively to workspace Organization Owners and Global Admins"],
-      metrics: ["Target liveness thresholds", "Expected false-positive statistical indicators"]
+      metrics: ["Target trust thresholds", "Expected false-positive statistical indicators"]
     },
     securityModel: {
       risks: ["Malicious changes allowing bots to bypass security checks", "Improper settings locking out authentic high-value users"],
@@ -846,7 +846,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       { title: "Dynamic Machine Learning Policy Tuning", phase: "Research", desc: "Automate policy thresholds adjustments based on geographic anomaly waves safely." }
     ],
     glossary: [
-      { term: "Liveness Score", definition: "A metric estimating the likelihood that a photographic camera feed captures a physical living user rather than a pre-recorded or synthetic feed." }
+      { term: "Trust Score", definition: "A metric estimating the likelihood that an access attempt is genuine, unique, and legitimate rather than automated or malicious." }
     ],
     knowledgeCheck: [
       {
@@ -882,7 +882,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       dataFlow: ["Server validates session -> Assembles payload -> Signs with private key -> Returns JWT string to client"]
     },
     workflow: [
-      "User successfully fulfills liveness verification tests",
+      "User successfully fulfills trust verification tests",
       "Server constructs secure payload stating unique human properties",
       "Private HSM keys compute cryptographic signature",
       "Signed Proof Token returned to verification session record",
@@ -903,7 +903,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         purpose: "Validate/verify a proof token generated by AAN systems.",
         auth: "Bearer Hashed Partner API Key",
         payload: '{\n  "proof_token": "ptk_aa338271e1b2f90a"\n}',
-        response: '{\n  "valid": true,\n  "session_id": "vss_9a123f4b",\n  "completed_at": "2026-06-22T04:51:23Z",\n  "risk_score": 12,\n  "claims": {\n    "uniqueness_status": "unique",\n    "liveness_confirmed": true\n  }\n}'
+        response: '{\n  "valid": true,\n  "session_id": "vss_9a123f4b",\n  "completed_at": "2026-06-22T04:51:23Z",\n  "risk_score": 12,\n  "claims": {\n    "uniqueness_status": "unique",\n    "integrity_confirmed": true\n  }\n}'
       }
     ],
     dashboardIntegration: {
@@ -951,31 +951,31 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     version: "v1.1.0",
     status: "Production Ready",
     relatedComponents: ["AdminDashboard", "PartnerDashboard"],
-    overview: "The central intelligence system that aggregates device metrics, liveness telemetry, and historic template records to calculate user risk ratings.",
-    whyExists: "Automates threat assessments. Instantly flags suspicious emulator indicators, multi-account device bindings, and duplicate biometric submissions.",
+    overview: "The central intelligence system that aggregates device metrics, telemetry signals, and historic template records to calculate user risk ratings.",
+    whyExists: "Automates threat assessments. Instantly flags suspicious emulator indicators, multi-account device bindings, and duplicate signature submissions.",
     plainEnglish: {
       analogy: "Airport Security Red-Flag System",
       analogyText: "Like airport security checking luggage weight, passport stamps, and behavior cues simultaneously. If too many indicators are flagged, you undergo detailed review.",
-      simplifiedText: "The Risk Engine is a smart scoring program. It evaluates indicators like camera feedback, device setups, and sign-up speed, rating overall safety from 0 to 100."
+      simplifiedText: "The Risk Engine is a smart scoring program. It evaluates indicators like telemetry feedback, device setups, and sign-up speed, rating overall safety from 0 to 100."
     },
     technicalExplanation: {
-      inputs: ["Biometric template hashes", "Device fingerprint signatures", "Historical attempt velocities", "Liveness confidence outputs"],
-      processing: ["Risk heuristic weight calculation", "Duplicate template checking database scans", "Emulator marker analysis"],
+      inputs: ["Signature template hashes", "Device fingerprint signatures", "Historical attempt velocities", "Telemetry consistency outputs"],
+      processing: ["Risk heuristic weight calculation", "Duplicate signature checking database scans", "Emulator marker analysis"],
       decisionLogic: [
-        "If liveness fails: Score = 100 (Immediate Deny)",
-        "If duplicate biometric template holds: Score += 45",
+        "If posture checks fail: Score = 100 (Immediate Deny)",
+        "If duplicate signature template holds: Score += 45",
         "If multi-device binding count > 3: Score += 25",
         "If rapid repeated attempt velocity matches: Score += 15"
       ],
       outputs: ["Combined numeric Risk Score (0-100)", "Structured risk reasons list"],
-      dependencies: ["Device indexing tables", "Biometric comparison modules"],
+      dependencies: ["Device indexing tables", "Signature comparison modules"],
       security: ["Score calculations carried out inside sandboxed server memory to prevent client overrides", "Hashed risk keys"],
       dataFlow: ["Client telemetry -> Server computes heuristic weights -> Generates unified score record -> Saves transaction details"]
     },
     workflow: [
-      "Verification session receives camera telemetry inputs",
+      "Verification session receives client telemetry inputs",
       "Risk calculations run through multi-layered weight checks",
-      "Biometric unique databases scanned for duplicate candidate vectors",
+      "Signature unique databases scanned for duplicate candidate vectors",
       "Scores computed and threat reasons mapped inside server structures",
       "Unified score saves to Verification Session, directing state outcomes"
     ],
@@ -990,10 +990,10 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     apiEndpoints: [
       {
         method: "POST",
-        path: "/api/v1/verification-sessions/:id/biometric",
-        purpose: "Process device biometric vectors and analyze security scores.",
+        path: "/api/v1/verification-sessions/:id/signature",
+        purpose: "Process device signature vectors and analyze security scores.",
         auth: "Bearer Hashed Partner API Key",
-        payload: '{\n  "face_template_hash": "f_aa82912a",\n  "liveness_confidence": 98,\n  "device_fingerprint": "dev_win_chrome_104"\n}',
+        payload: '{\n  "signature_hash": "sig_aa82912a",\n  "integrity_confidence": 98,\n  "device_fingerprint": "dev_win_chrome_104"\n}',
         response: '{\n  "session_id": "vss_9a123f4b",\n  "status": "passed",\n  "risk_score": 12,\n  "risk_reasons": []\n}'
       }
     ],
@@ -1028,10 +1028,10 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     ],
     knowledgeCheck: [
       {
-        question: "What status is assigned to a session with failed liveness?",
+        question: "What status is assigned to a session with failed integrity?",
         options: ["Passed", "Review", "Failed", "Pending"],
         answerIndex: 2,
-        explanation: "Sessions with failed liveness validations are automatically set to 'Failed' (stating extremely high risk)."
+        explanation: "Sessions with failed integrity validations are automatically set to 'Failed' (stating extremely high risk)."
       }
     ],
     relatedLessons: ["verification_sessions", "duplicate_detection", "device_trust"]
@@ -1043,33 +1043,33 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     version: "v1.1.0",
     status: "Production Ready",
     relatedComponents: ["AdminDashboard", "VerifySessionFlow"],
-    overview: "Multi-layered biometric vector comparison system engineered to pinpoint whether a human attempt maps to already-registered accounts.",
+    overview: "Multi-layered signature vector comparison system engineered to pinpoint whether an access attempt maps to already-registered accounts.",
     whyExists: "Prevents multi-accounting. Denies Sybil attacks where isolated users register unlimited identities to farm financial rewards.",
     plainEnglish: {
-      analogy: "Gym Membership Fingerprint check",
-      analogyText: "Like a gym scanning your fingerprint when you sign up. If they find your print is already linked to membership keycard X, they block you from creating keycard Y.",
-      simplifiedText: "Duplicate Detection translates your face vectors into numeric hashes. If a hash already exists in the database, the system blocks you from signing up again."
+      analogy: "Gym Membership Security Key check",
+      analogyText: "Like a gym scanning your membership key when you sign up. If they find your key is already linked to membership account X, they block you from creating account Y.",
+      simplifiedText: "Duplicate Detection translates your signature vectors into numeric hashes. If a hash already exists in the database, the system blocks you from signing up again."
     },
     technicalExplanation: {
-      inputs: ["Encrypted biometric face template hash", "Application boundary identifier"],
-      processing: ["Biometric hash mapping checks", "Distance parameter comparisons", "Duplicate event creation"],
-      decisionLogic: ["Compare face hashes across existing biometrics arrays", "Trigger duplicate alerts when similarity values exceed configured security standards"],
+      inputs: ["Encrypted signature template hash", "Application boundary identifier"],
+      processing: ["Signature hash mapping checks", "Distance parameter comparisons", "Duplicate event creation"],
+      decisionLogic: ["Compare signature hashes across existing signature arrays", "Trigger duplicate alerts when similarity values exceed configured security standards"],
       outputs: ["Duplicate candidate flag", "Uniqueness validation indicators"],
-      dependencies: ["Biometric templates tables", "Risk heuristic calculations"],
-      security: ["Biometric mappings utilize high-security salted variables so hashes vary across separate projects to safeguard user anonymity"],
-      dataFlow: ["Camera creates face template -> Server searches match indices -> Matches found? -> Flags are logged -> Score increases"]
+      dependencies: ["Signature templates tables", "Risk heuristic calculations"],
+      security: ["Signature mappings utilize high-security salted variables so hashes vary across separate projects to safeguard user anonymity"],
+      dataFlow: ["Client creates signature template -> Server searches match indices -> Matches found? -> Flags are logged -> Score increases"]
     },
     workflow: [
-      "User completes facial onboarding steps",
-      "Camera modules compile mathematical vector hashes",
-      "Server queries records to match similar biometric representations",
+      "User completes secure onboarding steps",
+      "Telemetry modules compile mathematical vector hashes",
+      "Server queries records to match similar signature representations",
       "If matching records are found, duplicate indices increase",
       "System logs duplicate flags, raising risk score outcomes"
     ],
     databaseTables: [
       {
-        name: "biometric_templates",
-        purpose: "Saves anonymized mathematical face vector indices securely.",
+        name: "signature_templates",
+        purpose: "Saves anonymized mathematical signature vector indices securely.",
         columns: ["id", "user_id", "template_hash", "encrypted_vector", "created_at"],
         relationships: "Belongs to users index"
       }
@@ -1077,26 +1077,26 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     apiEndpoints: [
       {
         method: "POST",
-        path: "/api/v1/verification-sessions/:id/biometric",
-        purpose: "Submit biometric vector indicators for duplicate inspection reviews.",
+        path: "/api/v1/verification-sessions/:id/signature",
+        purpose: "Submit signature vector indicators for duplicate inspection reviews.",
         auth: "Bearer Hashed Partner API Key",
-        payload: '{\n  "face_template_hash": "f_aa82912a",\n  "liveness_confidence": 98\n}',
+        payload: '{\n  "signature_hash": "sig_aa82912a",\n  "integrity_confidence": 98\n}',
         response: '{\n  "session_id": "vss_9a123f4b",\n  "status": "passed",\n  "duplicate_candidate": false\n}'
       }
     ],
     dashboardIntegration: {
-      location: "Admin Dashboard 'Biometrics' tab environment settings",
-      actions: ["View registered biometrics index listings", "Investigate active duplicate candidates statistics"],
+      location: "Admin Dashboard 'Signatures' tab environment settings",
+      actions: ["View registered signature index listings", "Investigate active duplicate candidates statistics"],
       permissions: ["Write accessibility tightly restricted to Workspace Administrators alone"],
-      metrics: ["Total saved face biometric identifiers", "Active blocked duplicate attempt counts"]
+      metrics: ["Total saved signature identifiers", "Active blocked duplicate attempt counts"]
     },
     securityModel: {
       risks: ["Malicious reuse of stolen hashes to impersonate users", "Database lookup maps exposing user networks across applications"],
-      hiddenData: ["Absolute photographic facial characteristics", "Direct identifiers are never correlated here"],
+      hiddenData: ["Absolute system parameters", "Direct identifiers are never correlated here"],
       authReq: "API keys containing high privilege permissions",
       authzReq: "Must have valid database lookup scopes",
-      privacy: ["One-way hashing secures biometric template inputs, preventing facial reconstruction of original users"],
-      limitations: ["Relying fully on camera quality. Blur or compression introduces false positives."]
+      privacy: ["One-way hashing secures signature template inputs, preventing reconstruction of original users"],
+      limitations: ["Relying fully on network stability and browser client parameters."]
     },
     enterpriseValue: {
       operational: "Stops promotion codes, credits, or registration spam abuse completely.",
@@ -1105,22 +1105,22 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       developer: "Eliminates duplicate accounts logic from application backend, abstracting it completely.",
       scalability: "Index hashes support millions of comparisons with sub-second lookups."
     },
-    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and biometric providers before any production use.",
+    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before any production use.",
     futureImprovements: [
-      { title: "Privacy-Preserving Homomorphic Matching", phase: "Research", desc: "Perform biometric face vector comparison while keeping the vectors fully encrypted on server databases." }
+      { title: "Privacy-Preserving Homomorphic Matching", phase: "Research", desc: "Perform signature vector comparison while keeping the vectors fully encrypted on server databases." }
     ],
     glossary: [
-      { term: "Biometric Template", definition: "A mathematical representation of physical user traits extracted from camera readings, formatted to allow rapid computers comparison." }
+      { term: "Signature Template", definition: "A mathematical representation of system traits extracted from browser readings, formatted to allow rapid computers comparison." }
     ],
     knowledgeCheck: [
       {
         question: "How does AAN prevent database compromises from leaking user faces?",
-        options: ["Encrypted ZIP folder storage", "Discarding raw photos instantly, holding only one-way cryptographic biometric hashes", "Storing photos on administrative desktops", "Limiting logins using premium firewalls"],
+        options: ["Encrypted ZIP folder storage", "Discarding raw details instantly, holding only one-way cryptographic signature hashes", "Storing photos on administrative desktops", "Limiting logins using premium firewalls"],
         answerIndex: 1,
-        explanation: "By discarding raw photos immediately and holding only one-way cryptographic hashes, AAN renders database theft useless to reconstruct physical user faces."
+        explanation: "By discarding raw parameters immediately and holding only one-way cryptographic hashes, AAN renders database theft useless to reconstruct physical user identities."
       }
     ],
-    relatedLessons: ["verification_sessions", "risk_engine", "biometric_templates"]
+    relatedLessons: ["verification_sessions", "risk_engine", "signature_templates"]
   },
   {
     id: "device_trust",
@@ -1163,10 +1163,10 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     apiEndpoints: [
       {
         method: "POST",
-        path: "/api/v1/verification-sessions/:id/biometric",
-        purpose: "Process device biometric vectors and analyze security scores.",
+        path: "/api/v1/verification-sessions/:id/signature",
+        purpose: "Process device signature vectors and analyze security scores.",
         auth: "Bearer Hashed Partner API Key",
-        payload: '{\n  "device_fingerprint": "dev_mac_safari_9912",\n  "liveness_confidence": 98\n}',
+        payload: '{\n  "device_fingerprint": "dev_mac_safari_9912",\n  "integrity_confidence": 98\n}',
         response: '{\n  "session_id": "vss_9a123f4b",\n  "status": "passed",\n  "risk_score": 12,\n  "is_emulator": false\n}'
       }
     ],
@@ -1191,7 +1191,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       developer: "Allows standard JS SDK deployments to run advanced fingerprinting out-of-the-box.",
       scalability: "Stateless fingerprint computation minimizes latency impacts."
     },
-    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and biometric providers before any production use.",
+    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before any production use.",
     futureImprovements: [
       { title: "Secure Cryptographic Enclave Attestation", phase: "Enterprise", desc: "Integrate native mobile security checks verifying hardware validity via Apple App Attest / Google Integrity API." }
     ],
@@ -1215,27 +1215,27 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     version: "v1.0.0",
     status: "Production Ready",
     relatedComponents: ["VerifySessionFlow"],
-    overview: "Multi-modal verification suite grouping 3D neural-network camera liveness checks, multi-frame biometric alignment, and client device attestation into one elegant user journey.",
+    overview: "Multi-modal verification suite grouping client device trust, multi-source signature alignment, and client device attestation into one elegant user journey.",
     whyExists: "Ensures versatility. Applications can select which authentication steps are enforced based on the required trust level.",
     plainEnglish: {
       analogy: "Passport control checkpoint",
-      analogyText: "Like a passport control desk having multiple scans. They check your electronic chip (device trust), scan your face (biometrics), and watch your behavior (liveness).",
-      simplifiedText: "Verification Methods are the different tests a user has to pass. It includes taking a quick video selfie to prove they are a real, physical person."
+      analogyText: "Like a passport control desk having multiple scans. They check your electronic chip (device trust), scan your signature (identity), and watch your behavior (posture).",
+      simplifiedText: "Verification Methods are the different tests a user has to pass. It includes submitting a quick device posture to prove they are a real, physical person."
     },
     technicalExplanation: {
-      inputs: ["3D face models", "Device properties metadata", "Active liveness challenge patterns"],
-      processing: ["Liveness determinations", "Hardware validity audits", "Biometric compliance checks"],
-      decisionLogic: ["Ensure liveness measurements and face alignments both pass target thresholds before approving sessions"],
+      inputs: ["Signature models", "Device properties metadata", "Active posture challenge patterns"],
+      processing: ["Posture determinations", "Hardware validity audits", "Signature compliance checks"],
+      decisionLogic: ["Ensure posture measurements and signature alignments both pass target thresholds before approving sessions"],
       outputs: ["Verified user structures", "Detailed compliance logs"],
-      dependencies: ["WASM webcam pipelines", "Internal scoring services"],
-      security: ["Biometric vectors utilize high-security salted variables so hashes vary across separate projects"],
+      dependencies: ["WASM telemetry pipelines", "Internal scoring services"],
+      security: ["Signature vectors utilize high-security salted variables so hashes vary across separate projects"],
       dataFlow: ["Client runs step-by-step validations -> Telemetry streams to server -> Returns verified status indicator"]
     },
     workflow: [
       "User starts verification session",
       "Telemetry systems perform device health audits",
-      "Camera module executes dynamic 3D face scan tests",
-      "Biometric vector templates cross-matched on server databases",
+      "Telemetry module executes dynamic 3D posture tests",
+      "Signature vector templates cross-matched on server databases",
       "If all tests approve, proof signatures generate instantly"
     ],
     databaseTables: [
@@ -1249,26 +1249,26 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     apiEndpoints: [
       {
         method: "POST",
-        path: "/api/v1/verification-sessions/:id/biometric",
+        path: "/api/v1/verification-sessions/:id/signature",
         purpose: "Validate device metrics and resolve user outcome status.",
         auth: "Bearer API Key header",
-        payload: '{\n  "face_template_hash": "f_aa82912a",\n  "liveness_confidence": 98\n}',
+        payload: '{\n  "signature_hash": "sig_aa82912a",\n  "integrity_confidence": 98\n}',
         response: '{\n  "session_id": "vss_9a123f4b",\n  "status": "passed"\n}'
       }
     ],
     dashboardIntegration: {
       location: "Onboarding screen flows & Admin Console statistics displays",
-      actions: ["Test sample user flows", "Inspect active biometric template records"],
+      actions: ["Test sample user flows", "Inspect active signature template records"],
       permissions: ["Write capabilities reserved for Developers and Administrators"],
-      metrics: ["Verification paths completion ratios", "Average liveness score statistics"]
+      metrics: ["Verification paths completion ratios", "Average posture score statistics"]
     },
     securityModel: {
-      risks: ["Webcam spoofing utilizing physical paper masks", "Synthesized video stream injection"],
-      hiddenData: ["Never exposes raw image feeds; all facial metrics saved as mathematical templates"],
+      risks: ["Telemetry spoofing utilizing emulator frames", "Synthesized parameter injection"],
+      hiddenData: ["Never exposes raw parameter feeds; all system metrics saved as mathematical templates"],
       authReq: "Hashed authorization keys",
       authzReq: "Checked project bounds during session execution",
-      privacy: ["One-way biometric encryption guards personal records safely"],
-      limitations: ["Relying fully on client camera resolutions to capture valid biological traits."]
+      privacy: ["One-way signature encryption guards personal records safely"],
+      limitations: ["Relying fully on client system parameters to capture valid non-biometric traits."]
     },
     enterpriseValue: {
       operational: "Delivers zero-friction user onboarding while blocking bots.",
@@ -1277,22 +1277,22 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       developer: "Abstracts hardware details, giving developers clean JS endpoints.",
       scalability: "Operates globally with sub-millisecond API response limits."
     },
-    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and biometric providers before any production use.",
+    mvpLimitations: "MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before any production use.",
     futureImprovements: [
-      { title: "Dynamic Verification Step Routing", phase: "Enterprise", desc: "Require deep iris validation when transaction values exceed extreme limits automatically." }
+      { title: "Dynamic Verification Step Routing", phase: "Enterprise", desc: "Require deep verification validation when transaction values exceed extreme limits automatically." }
     ],
     glossary: [
-      { term: "Liveness Check", definition: "A computer vision technique validating whether a face captured on camera is an active physical user rather than a 2D photograph." }
+      { term: "Posture Check", definition: "A system integrity technique validating whether a posture captured on telemetry is an active physical user rather than a simulated bot." }
     ],
     knowledgeCheck: [
       {
-        question: "Why are raw photos deleted right after template generation?",
-        options: ["To save server hosting space", "To prevent identity tracing and comply with strict user privacy laws", "Because physical images render too slowly on servers", "Only on request of legal staff"],
+        question: "Why are raw parameters deleted right after template generation?",
+        options: ["To save server hosting space", "To prevent identity tracing and comply with strict user privacy laws", "Because physical logs render too slowly on servers", "Only on request of legal staff"],
         answerIndex: 1,
-        explanation: "By discarding raw photo material, AAN eliminates trace-surveillance hazards, complying with leading global user privacy structures."
+        explanation: "By discarding raw parameter material, AAN eliminates trace-surveillance hazards, complying with leading global user privacy structures."
       }
     ],
-    relatedLessons: ["verification_sessions", "risk_engine", "biometric_templates"]
+    relatedLessons: ["verification_sessions", "risk_engine", "signature_templates"]
   },
   {
     id: "sandbox_engine",
@@ -1301,16 +1301,16 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     version: "v1.0.0",
     status: "Production Ready",
     relatedComponents: ["App", "PartnerDashboard"],
-    overview: "The interactive emulation framework allowing developers to simulate different security threat scenarios during evaluation without registering real devices or faces.",
-    whyExists: "Speeds up development. Engineers can mock high-risk alerts, duplicates, and liveness breakdowns instantly to test their apps' exception handling.",
+    overview: "The interactive emulation framework allowing developers to simulate different security threat scenarios during evaluation without registering real devices or identities.",
+    whyExists: "Speeds up development. Engineers can mock high-risk alerts, duplicates, and integrity breakdowns instantly to test their apps' exception handling.",
     plainEnglish: {
       analogy: "Flight Simulator",
       analogyText: "Like using a flight simulator to practice landing in a storm without having to physically risk a real airplane.",
       simplifiedText: "The Sandbox Engine lets you simulate different test cases, like a 'Duplicate Account' or 'Stolen Device,' so you see how your website responds."
     },
     technicalExplanation: {
-      inputs: ["Selected scenario selection (e.g. 'FAILED_LIVENESS')", "Active testing session UUID"],
-      processing: ["Simulation state alterations", "Biometric hashes overlaying", "Session status updates"],
+      inputs: ["Selected scenario selection (e.g. 'FAILED_INTEGRITY')", "Active testing session UUID"],
+      processing: ["Simulation state alterations", "Signature hashes overlaying", "Session status updates"],
       decisionLogic: ["Adjust risk ratings to predefined scenario weights", "Generate mock verification signatures matched to testing choices"],
       outputs: ["Simulated session outputs", "Simulated webhook transmissions"],
       dependencies: ["Internal databases state variables", "API route handlers"],
@@ -1338,7 +1338,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
         path: "/api/v1/verification-sessions",
         purpose: "Generate a sandboxed test session.",
         auth: "Bearer Hashed Sandbox API Key (aan_test_...)",
-        payload: '{\n  "external_user_id": "test_dev_01",\n  "scenario_mode": "MOCK_DUPLICATE_FACE"\n}',
+        payload: '{\n  "external_user_id": "test_dev_01",\n  "scenario_mode": "MOCK_DUPLICATE_SIGNATURE"\n}',
         response: '{\n  "session_id": "vss_9a123f4b",\n  "status": "review",\n  "risk_score": 85\n}'
       }
     ],
@@ -1353,13 +1353,13 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       hiddenData: ["Restricts active mock tools to development projects only"],
       authReq: "Valid sandbox API key verification Checks",
       authzReq: "Checked project boundary validation",
-      privacy: ["Utilizes simulated data vectors; absolutely zero real user biometric inputs are gathered here"],
+      privacy: ["Utilizes simulated data vectors; absolutely zero real user signature inputs are gathered here"],
       limitations: ["Does not emulate physical cellular reception fluctuations or extreme raw network packet loss."]
     },
     enterpriseValue: {
       operational: "Significantly decreases testing timelines from weeks to minutes.",
       security: "Allows robust end-to-end integration testing of rare security exception paths in client apps.",
-      administrative: "Enables code demonstration sessions for stakeholders without using actual face data.",
+      administrative: "Enables code demonstration sessions for stakeholders without using actual user data.",
       developer: "Friendly console controls let engineers focus on simple integration steps.",
       scalability: "Runs locally on light sandbox containers without cloud execution costs."
     },
@@ -1404,7 +1404,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
       dataFlow: ["Verification completes -> Webhook constructor maps event -> Server sends signed POST -> Partner validates signature"]
     },
     workflow: [
-      "User completes active camera verification checks",
+      "User completes active security verification checks",
       "System commits finalized session outcome to Postgres database",
       "Webhook trigger extracts partner's configured endpoint URL",
       "Constructs signed JSON payload containing proof status and risk records",
@@ -1436,7 +1436,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     },
     securityModel: {
       risks: ["Malicious actors sending spoofed webhook packets to partner servers", "Man-in-the-middle sniffing of transaction records"],
-      hiddenData: ["Never transmits raw biometric templates; payload strictly limited to session scores and verification tokens"],
+      hiddenData: ["Never transmits raw signature templates; payload strictly limited to session scores and verification tokens"],
       authReq: "Configured target server validation",
       authzReq: "Checked signature matching controls on destination codes",
       privacy: ["Strict data minimization applies to JSON payload assemblies"],
@@ -1521,7 +1521,7 @@ export const ACADEMY_LESSONS: AcademyLesson[] = [
     },
     securityModel: {
       risks: ["Malicious agents attempting to edit log histories to hide unauthorized parameter changes", "Unintended deletion of log records"],
-      hiddenData: ["Owner secret passwords", "Unchanged raw biometric hash templates"],
+      hiddenData: ["Owner secret passwords", "Unchanged raw signature templates"],
       authReq: "Supabase JWT session token verification",
       authzReq: "Must possess system administrator scope privilege",
       privacy: ["Log values describe administrative actions only; no user PII holds here"],
@@ -1694,7 +1694,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     },
     securityModel: {
       risks: ["Exposing raw system load metrics to external client tools", "Data leakage via incomplete grouping constraints"],
-      hiddenData: ["Individual biometric vectors or user credentials"],
+      hiddenData: ["Individual signature vectors or user credentials"],
       authReq: "Supabase JWT session state",
       authzReq: "Tenant-matched read scopes",
       privacy: ["Data is aggregated before retrieval, erasing specific user behavior traces"],
@@ -1731,32 +1731,32 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     version: "v1.0.0",
     status: "Production Ready",
     relatedComponents: ["AdminDashboard"],
-    overview: "The 'Right to be Forgotten' user privacy portal allowing users or administrative systems to queue cryptographic biometric templates for absolute execution deletion.",
-    whyExists: "Guarantees absolute GDPR / CCPA privacy compliance. Users must possess frictionless tools to immediately delete any biometric trace.",
+    overview: "The 'Right to be Forgotten' user privacy portal allowing users or administrative systems to queue cryptographic signature templates for absolute execution deletion.",
+    whyExists: "Guarantees absolute GDPR / CCPA privacy compliance. Users must possess frictionless tools to immediately delete any signature trace.",
     plainEnglish: {
       analogy: "Incinerator Bin",
       analogyText: "Like throwing a paper key envelope into a locked physical incinerator bin at the bank to guarantee it can never be retrieved or matched.",
-      simplifiedText: "Removal Requests are delete buttons for identity. If you request deletion, AAN immediately and permanently wipes your biometric hashes from the database."
+      simplifiedText: "Removal Requests are delete buttons for identity. If you request deletion, AAN immediately and permanently wipes your signature hashes from the database."
     },
     technicalExplanation: {
       inputs: ["User unique verification hash identifiers", "Removal approval tokens"],
       processing: ["Locating target templates in database", "Absolute physical database record deletion execution", "Pruning transaction metadata references"],
       decisionLogic: ["Ensure target records correspond accurately to requests", "Validate administrative deletion approval checks before wiping values"],
       outputs: ["Deletion confirmation receipt indicators"],
-      dependencies: ["Biometric templates tables", "Audit logging networks"],
+      dependencies: ["Signature templates tables", "Audit logging networks"],
       security: ["Force permanent deletion instead of soft-delete; database records are completely purged"],
-      dataFlow: ["User submits removal request -> Server validates token -> Erases bometric templates -> Logs anonymized audit stamp"]
+      dataFlow: ["User submits removal request -> Server validates token -> Erases signature templates -> Logs anonymized audit stamp"]
     },
     workflow: [
       "User accesses the privacy portal",
       "Submits verified identification code",
-      "System queues biometric vectors for removal processing",
+      "System queues signature vectors for removal processing",
       "Server executes absolute permanent delete commands across database",
       "Emits audit log certifying deletion of user template hashes"
     ],
     databaseTables: [
       {
-        name: "biometric_templates",
+        name: "signature_templates",
         purpose: "Saves cryptographic vectors mapped to delete.",
         columns: ["id", "user_id"],
         relationships: "Permanently purged from parent users records"
@@ -1768,7 +1768,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
         path: "/api/v1/verification-sessions/:id",
         purpose: "Wipe dynamic session vectors permanently.",
         auth: "Bearer Hashed Partner API Key",
-        response: '{\n  "success": true,\n  "message": "Session and all associated biometric templates successfully deleted."\n}'
+        response: '{\n  "success": true,\n  "message": "Session and all associated signature templates successfully deleted."\n}'
       }
     ],
     dashboardIntegration: {
@@ -1779,14 +1779,14 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     },
     securityModel: {
       risks: ["Malicious agents triggering deletion of verified users to bypass sybil detection restrictions", "Incomplete database indexing leaving old data fragments active"],
-      hiddenData: ["All photographic data (deleted instantly of course)"],
+      hiddenData: ["All signature metadata (deleted instantly of course)"],
       authReq: "Supabase high privilege session token",
       authzReq: "System Administrator authorization scopes",
       privacy: ["Enforces permanent hardware hard-deletes, removing data fragments from file records"],
       limitations: ["Cannot retract deletion results once executed."]
     },
     enterpriseValue: {
-      operational: "Removes corporate legal risks regarding biometric privacy liabilities.",
+      operational: "Removes corporate legal risks regarding identity privacy liabilities.",
       security: "Guarantees data cleanliness by purging old unused records.",
       administrative: "Maintains clear certified deletion logs for regional regulators.",
       developer: "Simple DELETE endpoints allow immediate automated integrations in customer portals.",
@@ -1801,13 +1801,13 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     ],
     knowledgeCheck: [
       {
-        question: "Are removed biometric templates retrievable from backups after execution?",
+        question: "Are removed signature templates retrievable from backups after execution?",
         options: ["Yes, using standard reconstruction recovery software", "No, AAN executes absolute physical hard-deletions which are wholly irreversible for compliance reasons", "Only with supervisor permission slips", "Only on select desktop applications"],
         answerIndex: 1,
-        explanation: "To adhere to physical privacy laws, AAN executes irreversible hard deletes. Deleted biometric data can never be returned."
+        explanation: "To adhere to physical privacy laws, AAN executes irreversible hard deletes. Deleted signature data can never be returned."
       }
     ],
-    relatedLessons: ["privacy_model", "users", "biometric_templates"]
+    relatedLessons: ["privacy_model", "users", "signature_templates"]
   },
   {
     id: "developer_sdk",
@@ -1816,27 +1816,27 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     version: "v1.2.0",
     status: "Production Ready",
     relatedComponents: ["VerifySessionFlow"],
-    overview: "Front-end and back-end helper libraries allowing developers to instantiate AAN camera widgets and query sessions effortlessly in their native environments.",
-    whyExists: "Reduces integration times. Developers do not want to build custom raw canvas pipelines and WebRTC camera handlers from scratch.",
+    overview: "Front-end and back-end helper libraries allowing developers to instantiate AAN trust widgets and query sessions effortlessly in their native environments.",
+    whyExists: "Reduces integration times. Developers do not want to build custom browser telemetry and device signal checks from scratch.",
     plainEnglish: {
       analogy: "Pre-Built USB Plug-and-Play Hub",
       analogyText: "Like buying a USB mouse that plugs right in and works immediately, instead of soldering individual wires to your computer motherboard.",
-      simplifiedText: "The Developer SDK is a pre-built toolkit. You drop two lines of code into your website to embed AAN's beautiful camera scanner instantly."
+      simplifiedText: "The Developer SDK is a pre-built toolkit. You drop two lines of code into your website to embed AAN's beautiful trust widget instantly."
     },
     technicalExplanation: {
       inputs: ["Client mount DOM nodes", "Session configuration tokens", "Verification callback parameter functions"],
-      processing: ["Camera media capturing", "Liveness telemetry packaging", "WebAssembly biometric face mesh alignment tracking"],
-      decisionLogic: ["Only active webcam modules when user provides camera permissions", "Dynamically adjust video capture framerates based on client device power properties"],
-      outputs: ["Interactive scanning camera overlays", "Event completion hooks"],
+      processing: ["Client media capturing", "Integrity telemetry packaging", "WebAssembly system fingerprint alignment tracking"],
+      decisionLogic: ["Only active telemetry modules when user initiates checks", "Dynamically adjust signal rates based on client device power properties"],
+      outputs: ["Interactive scanning trust overlays", "Event completion hooks"],
       dependencies: ["React/Vue front-end wrappers", "WASM neural-net configurations", "Tailwind styling classes"],
       security: ["SDK restricts frame capturing strictly inside client browser sandbox contexts", "Limits script payloads to secure CDNs"],
-      dataFlow: ["Host code mounts SDK -> Camera activates on client -> Encrypted vectors stream to APIs -> SDK alerts completion status"]
+      dataFlow: ["Host code mounts SDK -> Telemetry activates on client -> Encrypted signatures stream to APIs -> SDK alerts completion status"]
     },
     workflow: [
       "Developer imports AAN SDK library into project",
       "Calls 'AAN.initialize()' specifying target session security token",
-      "SDK mounts a clean modal overlay displaying camera prompts",
-      "Runs automated frame alignment and local liveness tests",
+      "SDK mounts a clean modal overlay displaying security prompts",
+      "Runs automated posture integrity and local consistency tests",
       "Emits 'onSuccess(proofToken)' callback upon validation"
     ],
     databaseTables: [
@@ -1868,8 +1868,8 @@ export const OTHER_LESSONS: AcademyLesson[] = [
       hiddenData: ["Private keys are never embedded or exposed inside client SDK scripts"],
       authReq: "Signed session tokens verifying client calls",
       authzReq: "Bounded to originating application context domains",
-      privacy: ["Processes webcam tracking in-memory inside client browsers directly, discarding visuals instantly"],
-      limitations: ["Depends wholly on system camera drivers and browser browser permissions."]
+      privacy: ["Processes browser tracking in-memory inside client browsers directly, discarding parameters instantly"],
+      limitations: ["Depends wholly on client system specs and browser capabilities."]
     },
     enterpriseValue: {
       operational: "Accelerates time-to-market for verification setups from weeks to hours.",
@@ -1878,9 +1878,9 @@ export const OTHER_LESSONS: AcademyLesson[] = [
       developer: "Allows rapid custom UI modifications with clean developer parameters.",
       scalability: "Bundles small, optimized library frames that load in fractions of seconds worldwide."
     },
-    mvpLimitations: "MOCK IMPLEMENTATION — Camera telemetry flows are currently simulated inside React. Replace mock frames with real WASM facial alignment checks before production deployment.",
+    mvpLimitations: "MOCK IMPLEMENTATION — Security telemetry flows are currently simulated inside React. Replace mock parameters with production integrity checks before deployment.",
     futureImprovements: [
-      { title: "Native iOS / Android SDK Libraries", phase: "Enterprise", desc: "Build native Swift and Kotlin modules interacting with Apple TrueDepth cameras." }
+      { title: "Native iOS / Android SDK Libraries", phase: "Enterprise", desc: "Build native Swift and Kotlin modules interacting with native device security frameworks." }
     ],
     glossary: [
       { term: "WASM", definition: "WebAssembly. A binary instruction format that runs in modern browsers at near-native speeds, ideal for real-time video math parsing." }
@@ -1888,7 +1888,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     knowledgeCheck: [
       {
         question: "Why does the AAN SDK use WebAssembly (WASM)?",
-        options: ["To translate files into french", "To process complex facial alignment algorithms locally in the client browser at near-native speed", "To trace locations instantly via GPS", "To bypass browser camera permissions"],
+        options: ["To translate files into french", "To process complex cryptographic signing algorithms locally in the client browser at near-native speed", "To trace locations instantly via GPS", "To bypass browser security boundaries"],
         answerIndex: 1,
         explanation: "WebAssembly empowers browsers to execute complex machine-learning algorithms on video frames with high efficiency."
       }
@@ -1998,7 +1998,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     technicalExplanation: {
       inputs: ["SQL database schemas definer files", "Schema structural migration triggers"],
       processing: ["SQL tables partition setup", "Foreign keys constraint mapping", "Unique indexes evaluations"],
-      decisionLogic: ["Enforce unique constraints on biometric template hashes to prevent duplicate accounts", "Block cascade deletes on critical audit history tables"],
+      decisionLogic: ["Enforce unique constraints on signature template hashes to prevent duplicate accounts", "Block cascade deletes on critical audit history tables"],
       outputs: ["Active relational database models structures", "Validated write transaction receipts"],
       dependencies: ["Supabase PostgreSQL engines", "Drizzle ORM schemas"],
       security: ["Schema enforces tenant segregation indexes on all queries by default", "SSL database connection pipelines"],
@@ -2007,7 +2007,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     workflow: [
       "Product system initializes database schema migrations",
       "PostgreSQL tables map relations (Users, Devices, Sessions, Audits)",
-      "Unique database indices lock key parameters (e.g., biometric hashes)",
+      "Unique database indices lock key parameters (e.g., signature hashes)",
       "API backend runs standard parameterized queries against schema",
       "Transaction succeeds statefully, adhering to ACID constraints"
     ],
@@ -2016,7 +2016,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
         name: "users",
         purpose: "Saves anonymized user accounts.",
         columns: ["id", "identity_status", "created_at"],
-        relationships: "Parent table containing linked biometric and session profiles"
+        relationships: "Parent table containing linked signature and session profiles"
       }
     ],
     apiEndpoints: [
@@ -2025,7 +2025,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
         path: "/api/internal/test-snapshot",
         purpose: "Audit dynamic database structural health records.",
         auth: "Workspace Cookie Session token",
-        response: '{\n  "database_tables": ["users", "biometric_templates", "devices", "audit_logs"]\n}'
+        response: '{\n  "database_tables": ["users", "signature_templates", "devices", "audit_logs"]\n}'
       }
     ],
     dashboardIntegration: {
@@ -2039,7 +2039,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
       hiddenData: ["Database host connection passwords, raw structural ports"],
       authReq: "MFA-protected database access tokens",
       authzReq: "Checked administrative tenant rights",
-      privacy: ["One-way hashing secures biometric template inputs, preventing facial reconstruction of original users"],
+      privacy: ["One-way hashing secures signature template inputs, preventing reconstruction of original users"],
       limitations: ["Database nodes must operate in active-standby configurations to protect against regional drops."]
     },
     enterpriseValue: {
@@ -2328,32 +2328,32 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     version: "v1.1.0",
     status: "Production Ready",
     relatedComponents: ["LandingPage", "VerifySessionFlow"],
-    overview: "Formulates the secure, non-custodial privacy architecture of AAN that verifies unique human identity without ever exposing raw biometric traits or PII.",
+    overview: "Formulates the secure, non-custodial privacy architecture of AAN that verifies unique human identity without ever exposing raw user traits or PII.",
     whyExists: "Prevents mass surveillance. Traditional checkers create centralized identity registries, establishing dynamic honey-pots for hackers.",
     plainEnglish: {
       analogy: "Incognito Ticket Scanner",
       analogyText: "Like taking a physical ticket, checking that the barcode is real, and letting you inside the theater without asking your name or tracking your seat.",
-      simplifiedText: "AAN's Privacy Model ensures nobody can trace your internet history from your face scan. It wipes raw images instantly and writes only anonymous numeric hashes."
+      simplifiedText: "AAN's Privacy Model ensures nobody can trace your internet history from your access attempt. It wipes raw logs instantly and writes only anonymous numeric hashes."
     },
     technicalExplanation: {
-      inputs: ["Webcam video streams", "Hardware settings vectors", "System IP identifiers"],
-      processing: ["Extracts mathematical face vectors on client", "Wipes raw face visual frames in memory", "Applies high-entropy salts to hashes"],
+      inputs: ["Client session parameters", "Hardware settings vectors", "System IP identifiers"],
+      processing: ["Extracts mathematical signature vectors on client", "Wipes raw posture frames in memory", "Applies high-entropy salts to hashes"],
       decisionLogic: ["Never write photos to disk", "Enforce separate database salts per project to prevent cross-app user tracking"],
       outputs: ["Anonymized validation claims", "Expired transient states"],
       dependencies: ["WASM image processors", "Crypto utilities"],
       security: ["Private keys secured inside HSM configurations", "Data minimization design principles"],
-      dataFlow: ["Client video -> Math hash generated -> Image deleted -> Hashed vector saved -> Token emitted"]
+      dataFlow: ["Client posture -> Math hash generated -> Telemetry deleted -> Hashed vector saved -> Token emitted"]
     },
     workflow: [
       "User opens verification landing page screen",
-      "Camera captures face frame sequence to run liveness validations",
-      "Local JS engines translate patterns to anonymous numeric hash arrays",
-      "Complete visual images are entirely deleted from RAM",
-      "Server saves only randomized, salted mathematical template indexes"
+      "Client initiates posture parameters sequence to run system integrity validations",
+      "Local JS engines translate parameters to anonymous numeric hash arrays",
+      "Complete transient parameters are entirely deleted from RAM",
+      "Server saves only randomized, salted mathematical signature indexes"
     ],
     databaseTables: [
       {
-        name: "biometric_templates",
+        name: "signature_templates",
         purpose: "Stores math vectors securely, keeping profiles anonymous.",
         columns: ["id", "template_hash"],
         relationships: "Parent relational mappings unlinked to names"
@@ -2365,7 +2365,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
         path: "/api/v1/verification-sessions/:id",
         purpose: "Wipe user session datasets permanently.",
         auth: "Bearer Hashed Partner API Key",
-        response: '{\n  "success": true,\n  "message": "Session and all associated biometric templates successfully deleted."\n}'
+        response: '{\n  "success": true,\n  "message": "Session and all associated signature templates successfully deleted."\n}'
       }
     ],
     dashboardIntegration: {
@@ -2377,7 +2377,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     securityModel: {
       risks: ["Hackers attempting to recreate user photos from math vectors", "Multi-app tracking trails"],
       hiddenData: ["Real names, visual face records, continuous GPS tracing coordinate logs"],
-      authReq: "Explicit user consent before camera activation",
+      authReq: "Explicit user consent before telemetry activation",
       authzReq: "Strict backend bounds checking",
       privacy: ["Zero raw data persistence", "Data localization using memory segments only"],
       limitations: ["Depends on user understanding consent guidelines before starting scans."]
@@ -2391,17 +2391,17 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     },
     mvpLimitations: "MOCK IMPLEMENTATION — Database utilizes soft controls. In enterprise setups, forward logs instantly to an external WORM (Write Once, Read Many) or append-only cloud infrastructure like AWS S3 Glacier.",
     futureImprovements: [
-      { title: "Zero-Knowledge Biometric Matches", phase: "Research", desc: "Run biometrics verifications entirely within encrypted homomorphic client sandboxes." }
+      { title: "Zero-Knowledge Signature Matches", phase: "Research", desc: "Run signature verifications entirely within encrypted homomorphic client sandboxes." }
     ],
     glossary: [
       { term: "Anonymization", definition: "Structuring datasets so that individual target records can never be linked back to real-world identities." }
     ],
     knowledgeCheck: [
       {
-        question: "Can an AAN administrator reconstruct my physical face from my saved database template?",
-        options: ["Yes, using standard graphic editing tools", "No, templates are irreversible one-way mathematical hashes, making image reconstruction impossible", "Only if the user has a high-quality camera", "Only with court-ordered search keys"],
+        question: "Can an AAN administrator reconstruct my physical identity from my saved database template?",
+        options: ["Yes, using standard graphic editing tools", "No, templates are irreversible one-way mathematical hashes, making reconstruction impossible", "Only if the user has a high-quality browser", "Only with court-ordered search keys"],
         answerIndex: 1,
-        explanation: "Biometric templates are one-way vectors. They contain only numeric coordinates used for matching comparisons, and cannot be used to reconstruct human faces."
+        explanation: "Signature templates are one-way vectors. They contain only numeric coordinates used for matching comparisons, and cannot be used to reconstruct human identities."
       }
     ],
     relatedLessons: ["security_model", "removal_requests", "users"]
@@ -2417,7 +2417,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     whyExists: "Protects platform integrity. Identity services are high-value targets for attackers seeking to inject deepfakes, clone sessions, or steal user database files.",
     plainEnglish: {
       analogy: "Military Bunker Checkpoint",
-      analogyText: "Like a military bunker surrounded by separate fences, guard towers, and biometric locks. Passing one lock still requires verification at consecutive steps.",
+      analogyText: "Like a military bunker surrounded by separate fences, guard towers, and secure locks. Passing one lock still requires verification at consecutive steps.",
       simplifiedText: "AAN's Security Model has multiple safety levels—like hashing API keys, signing certificates, and rate limiting requests, ensuring no single point of failure."
     },
     technicalExplanation: {
@@ -2465,7 +2465,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
       hiddenData: ["Plaintext credentials, database configurations, employee direct credentials"],
       authReq: "Mandatory system token verifications",
       authzReq: "Tenant-matched read and write scopes",
-      privacy: ["One-way biometric encryption guards personal records safely"],
+      privacy: ["One-way signature encryption guards personal records safely"],
       limitations: ["No security model guarantees complete invulnerability; we focus on minimizing risk surfaces."]
     },
     enterpriseValue: {
@@ -2554,7 +2554,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
       limitations: ["Relying on database engines executing RLS logic reliably under extreme query volumes."]
     },
     enterpriseValue: {
-      operational: "Removes corporate legal risks regarding biometric privacy liabilities.",
+      operational: "Removes corporate legal risks regarding identity privacy liabilities.",
       security: "SSL encryption ensures data is secure both at rest and in transit.",
       administrative: "Ensures programmatic interactions are cataloged for security records.",
       developer: "Clean JSON and standard HTTP status codes simplify product implementation.",
@@ -2891,7 +2891,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
       hiddenData: ["Cloud service accounts passwords, private VPC ports addresses"],
       authReq: "Mandatory system token verifications",
       authzReq: "Checked project boundary validation",
-      privacy: ["One-way biometric encryption guards personal records safely"],
+      privacy: ["One-way signature encryption guards personal records safely"],
       limitations: ["Disaster recoveries can cause minor data rollback gaps (usually under 1 hour)."]
     },
     enterpriseValue: {
@@ -3043,7 +3043,7 @@ export const OTHER_LESSONS: AcademyLesson[] = [
     apiEndpoints: [
       {
         method: "POST",
-        path: "/api/v1/verification-sessions/:id/biometric",
+        path: "/api/v1/verification-sessions/:id/signature",
         purpose: "Send active device and template metadata for assessment.",
         auth: "Bearer Hashed Partner API Key",
         payload: '{\n  "device_fingerprint_hash": "sha256_df_8a21",\n  "platform": "Android OS"\n}',

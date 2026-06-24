@@ -199,11 +199,11 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
     if (riskEngineInputs.failedLiveness) {
       score += 55;
-      factors.push("Failed liveness parameters indicating possible deepfake or photo injection");
+      factors.push("Failed attestation handshake indicating anomalous or spoofed client request");
     }
     if (riskEngineInputs.duplicateHash) {
       score += 40;
-      factors.push("Biometric duplicate recognized across existing identities");
+      factors.push("Duplicate posture signature recognized across existing identities");
     }
     if (riskEngineInputs.manyDeviceAccounts) {
       score += 25;

@@ -105,7 +105,7 @@ aan.sessions.verify({
   console.log("Action path:", session.recommended_action);
 });`,
       validate: `// Decode cryptographic signature matching
-aan.proofs.validate("eyJhbGciOiJIUzI1Ni...")
+aan.proofs.validate("eyJhbGciOiJIUzI1...")
   .then(res => console.log("Signature active status:", res.valid));`
     },
     python: {
@@ -280,16 +280,16 @@ aan = AanTrustSdk::Client.new(
     <div className="space-y-6 text-slate-300 antialiased font-sans text-left">
       
       {/* Visual Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-900 pb-5">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#1b1e28] pb-5">
         <div className="space-y-1">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-rose-400 font-extrabold bg-rose-950/80 px-2.5 py-0.5 border border-rose-900/40 rounded">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-rose-400 font-extrabold bg-[#111319] px-2.5 py-0.5 border border-[#1b1e28] rounded">
             SANDBOX STAGING ENVIRONMENT ACTIVE
           </span>
           <h2 className="text-xl font-mono tracking-tight font-extrabold text-white flex items-center gap-2">
             <Terminal className="w-5 h-5 text-blue-400 animate-pulse" />
             Developer Portal & Integration Hub
           </h2>
-          <p className="text-xs text-slate-405 max-w-2xl leading-relaxed">
+          <p className="text-xs text-[#78819a] max-w-2xl leading-relaxed">
             Fully offline, zero-production sandbox references. Connect via SDK libraries, query API Explorer, trigger mock event webhooks, and evaluate cryptographic proofs.
           </p>
         </div>
@@ -297,7 +297,7 @@ aan = AanTrustSdk::Client.new(
         {isAcademyEnabled() && (
           <button
             onClick={() => onNavigateToAcademy("developer_sdk")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/40 hover:bg-blue-950 text-blue-400 hover:text-blue-300 border border-blue-900/40 text-[10px] uppercase font-bold font-mono transition-all cursor-pointer shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-955/40 hover:bg-[#111319] text-blue-400 hover:text-blue-300 border border-[#1b1e28] text-[10px] uppercase font-bold font-mono transition-all cursor-pointer shrink-0"
           >
             <GraduationCap className="w-4 h-4 text-blue-400" />
             AAN Academy Docs
@@ -306,13 +306,13 @@ aan = AanTrustSdk::Client.new(
       </div>
 
       {/* Internal Portal Menu Bar */}
-      <div className="flex overflow-x-auto gap-1 border-b border-slate-900/60 pb-1 scrollbar-none font-mono text-[11px] font-bold uppercase">
+      <div className="flex overflow-x-auto gap-1 border-b border-[#1b1e28] pb-1 scrollbar-none font-mono text-[11px] font-bold uppercase">
         <button
           onClick={() => setPortalSection("quickstart")}
           className={`px-4 py-2 border-b-2 rounded-t-lg transition-all cursor-pointer shrink-0 ${
             portalSection === "quickstart" 
-              ? "border-blue-500 text-blue-400 bg-blue-950/20" 
-              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30"
+              ? "border-blue-500 text-blue-400 bg-[#111319]" 
+              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-[#0d0e12]"
           }`}
         >
           Quick Start & Reference
@@ -321,8 +321,8 @@ aan = AanTrustSdk::Client.new(
           onClick={() => setPortalSection("explorer")}
           className={`px-4 py-2 border-b-2 rounded-t-lg transition-all cursor-pointer shrink-0 ${
             portalSection === "explorer" 
-              ? "border-blue-500 text-blue-400 bg-blue-950/20" 
-              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30"
+              ? "border-blue-500 text-blue-400 bg-[#111319]" 
+              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-[#0d0e12]"
           }`}
         >
           Interactive API Explorer
@@ -331,8 +331,8 @@ aan = AanTrustSdk::Client.new(
           onClick={() => setPortalSection("sdks")}
           className={`px-4 py-2 border-b-2 rounded-t-lg transition-all cursor-pointer shrink-0 ${
             portalSection === "sdks" 
-              ? "border-blue-500 text-blue-400 bg-blue-950/20" 
-              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30"
+              ? "border-blue-500 text-blue-400 bg-[#111319]" 
+              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-[#0d0e12]"
           }`}
         >
           Official SDK Libraries ({Object.keys(sdkSpecs).length})
@@ -341,8 +341,8 @@ aan = AanTrustSdk::Client.new(
           onClick={() => setPortalSection("webhooks")}
           className={`px-4 py-2 border-b-2 rounded-t-lg transition-all cursor-pointer shrink-0 ${
             portalSection === "webhooks" 
-              ? "border-blue-500 text-blue-400 bg-blue-950/20" 
-              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30"
+              ? "border-blue-500 text-blue-400 bg-[#111319]" 
+              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-[#0d0e12]"
           }`}
         >
           Webhooks Gateway Specs
@@ -351,8 +351,8 @@ aan = AanTrustSdk::Client.new(
           onClick={() => setPortalSection("changelog")}
           className={`px-4 py-2 border-b-2 rounded-t-lg transition-all cursor-pointer shrink-0 ${
             portalSection === "changelog" 
-              ? "border-blue-500 text-blue-400 bg-blue-950/20" 
-              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-900/30"
+              ? "border-blue-500 text-blue-400 bg-[#111319]" 
+              : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-[#0d0e12]"
           }`}
         >
           Version History & Status
@@ -365,77 +365,77 @@ aan = AanTrustSdk::Client.new(
           
           {/* Main quick start guide */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-5 space-y-3">
-              <h3 className="font-mono text-xs font-black uppercase text-blue-400 tracking-wider">Authentication Protocol</h3>
-              <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                Every API call to AAN servers must include the custom header <code className="text-white font-mono bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">x-api-key</code> containing your secure hash. Authorization is handled at the edge with <span className="text-white underline">HMAC verification</span>.
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-3">
+              <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Authentication Protocol</h3>
+              <p className="text-xs text-[#78819a] leading-relaxed font-sans">
+                Every API call to AAN servers must include the custom header <code className="text-white font-mono bg-[#0d0e12] px-1.5 py-0.5 rounded border border-[#1b1e28]">x-api-key</code> containing your secure hash. Authorization is handled at the edge with <span className="text-white underline font-medium">HMAC verification</span>.
               </p>
               
-              <div className="bg-slate-950 border border-slate-800 rounded p-3 font-mono text-[11px] text-emerald-400">
+              <div className="bg-[#0d0e12] border border-[#1b1e28] rounded p-3 font-mono text-[11px] text-emerald-404">
                 <span>Header standard format:</span>
-                <pre className="mt-1.5 text-slate-400">
+                <pre className="mt-1.5 text-[#78819a]">
 {`x-api-key: poh_key_sandbox_b73ae84abdf34
 Content-Type: application/json`}
                 </pre>
               </div>
             </div>
 
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-5 space-y-3.5">
-              <h3 className="font-mono text-xs font-black uppercase text-blue-400 tracking-wider">Rate Limit Policy Intervals</h3>
-              <p className="text-xs text-slate-400 leading-normal font-sans">
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-3.5">
+              <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Rate Limit Policy Intervals</h3>
+              <p className="text-xs text-[#78819a] leading-normal font-sans">
                 AAN employs strict IP and Organization-level rate filters to prevent denial-of-service attempts and Sybil template mining runs:
               </p>
               
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-slate-950 border border-slate-900 p-2.5 rounded">
-                  <span className="text-[9px] font-mono text-slate-400 block">SANDBOX</span>
-                  <span className="text-xs font-mono font-bold text-slate-350 block mt-0.5">180 Reqs/Min</span>
-                  <span className="text-[8px] text-slate-400">Soft throttling</span>
+                <div className="bg-[#0d0e12] border border-[#1b1e28] p-2.5 rounded">
+                  <span className="text-[9px] font-mono text-[#78819a] block">SANDBOX</span>
+                  <span className="text-xs font-mono font-bold text-slate-300 block mt-0.5">180 Reqs/Min</span>
+                  <span className="text-[8px] text-[#78819a]">Soft throttling</span>
                 </div>
-                <div className="bg-slate-950 border border-slate-900 p-2.5 rounded">
-                  <span className="text-[9px] font-mono text-slate-400 block">STAGING</span>
+                <div className="bg-[#0d0e12] border border-[#1b1e28] p-2.5 rounded">
+                  <span className="text-[9px] font-mono text-[#78819a] block">STAGING</span>
                   <span className="text-xs font-mono font-bold text-blue-400 block mt-0.5">600 Reqs/Min</span>
-                  <span className="text-[8px] text-slate-400">Secure limits</span>
+                  <span className="text-[8px] text-[#78819a]">Secure limits</span>
                 </div>
-                <div className="bg-slate-950 border border-slate-900 p-2.5 rounded">
-                  <span className="text-[9px] font-mono text-slate-400 block">PRODUCTION</span>
+                <div className="bg-[#0d0e12] border border-[#1b1e28] p-2.5 rounded">
+                  <span className="text-[9px] font-mono text-[#78819a] block">PRODUCTION</span>
                   <span className="text-xs font-mono font-bold text-emerald-400 block mt-0.5">3,000+ Reqs/Min</span>
-                  <span className="text-[8px] text-slate-400">Custom dedicated tier</span>
+                  <span className="text-[8px] text-[#78819a]">Custom dedicated tier</span>
                 </div>
               </div>
-              <p className="text-[9px] text-slate-500 font-mono">
+              <p className="text-[9px] text-[#78819a] font-mono">
                 Exceeding triggers HTTP Standard code <span className="text-rose-400">429 (Too Many Requests)</span> with headers detailing retry estimates.
               </p>
             </div>
 
             {/* Error codes dictionary */}
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-5 space-y-3">
-              <h3 className="font-mono text-xs font-black uppercase text-slate-400 tracking-wider">Standard API Error Codes Mapping</h3>
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-3">
+              <h3 className="font-mono text-xs font-black uppercase text-[#78819a] tracking-wider">Standard API Error Codes Mapping</h3>
               
-              <div className="h-44 overflow-y-auto border border-slate-900 rounded p-2.5 bg-slate-950/60 space-y-2 text-[10px] font-mono scrollbar-thin">
-                <div className="flex justify-between border-b border-slate-900 pb-1.5 gap-2">
+              <div className="h-44 overflow-y-auto border border-[#1b1e28] rounded p-2.5 bg-[#0d0e12] space-y-2 text-[10px] font-mono scrollbar-thin">
+                <div className="flex justify-between border-b border-[#1b1e28]/60 pb-1.5 gap-2">
                   <span className="text-rose-400 font-extrabold w-24">400_BAD_PAYLOAD</span>
-                  <span className="text-slate-400 flex-1">Missing partner_user_id unique keys or malformed structures.</span>
+                  <span className="text-[#78819a] flex-1">Missing partner_user_id unique keys or malformed structures.</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-900 pb-1.5 gap-2">
+                <div className="flex justify-between border-b border-[#1b1e28]/60 pb-1.5 gap-2">
                   <span className="text-rose-400 font-extrabold w-24">401_SEC_REVOKED</span>
-                  <span className="text-slate-400 flex-1">API Key missing, inactive, revoked, or failing scope requirements.</span>
+                  <span className="text-[#78819a] flex-1">API Key missing, inactive, revoked, or failing scope requirements.</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-900 pb-1.5 gap-2">
+                <div className="flex justify-between border-b border-[#1b1e28]/60 pb-1.5 gap-2">
                   <span className="text-rose-400 font-extrabold w-24">403_CORS_BLOCKED</span>
-                  <span className="text-slate-400 flex-1">Origin headers do not match allowed domain lists configured.</span>
+                  <span className="text-[#78819a] flex-1">Origin headers do not match allowed domain lists configured.</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-900 pb-1.5 gap-2">
+                <div className="flex justify-between border-b border-[#1b1e28]/60 pb-1.5 gap-2">
                   <span className="text-rose-400 font-extrabold w-24">404_SEC_NOT_FOUND</span>
-                  <span className="text-slate-400 flex-1">Session ID or requested tenant does not exist in relational tables.</span>
+                  <span className="text-[#78819a] flex-1">Session ID or requested tenant does not exist in relational tables.</span>
                 </div>
-                <div className="flex justify-between border-b border-slate-900 pb-1.5 gap-2">
+                <div className="flex justify-between border-b border-[#1b1e28]/60 pb-1.5 gap-2">
                   <span className="text-rose-400 font-extrabold w-24">409_SYBIL_DUP</span>
-                  <span className="text-slate-400 flex-1">Facial template hashes represent a previously authenticated identity.</span>
+                  <span className="text-[#78819a] flex-1">Postures or signatures represent a previously authenticated identity.</span>
                 </div>
                 <div className="flex justify-between pb-0.5 gap-2">
-                  <span className="text-rose-400 font-extrabold w-24">503_BIO_OFFLINE</span>
-                  <span className="text-slate-400 flex-1">Mock biometric provider stream timeouts or temporary outages.</span>
+                  <span className="text-rose-400 font-extrabold w-24">503_SRV_OFFLINE</span>
+                  <span className="text-[#78819a] flex-1">Mock trust provider stream timeouts or temporary outages.</span>
                 </div>
               </div>
             </div>
@@ -444,21 +444,21 @@ Content-Type: application/json`}
 
           {/* Right sidebar FAQs */}
           <div className="lg:col-span-4 space-y-4">
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-4 space-y-3 text-xs leading-relaxed">
-              <h4 className="font-mono text-[10px] font-black uppercase text-slate-400 tracking-wider">Frequently Asked Questions</h4>
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3 text-xs leading-relaxed">
+              <h4 className="font-mono text-[10px] font-black uppercase text-[#78819a] tracking-wider">Frequently Asked Questions</h4>
               
-              <div className="space-y-3">
-                <div className="border-b border-slate-900 pb-2.5">
-                  <span className="font-mono font-bold text-slate-350 block text-[11px]">Does AAN store biometric assets?</span>
-                  <span className="text-slate-500 mt-1 block">No. Raw selfie face frames compile locally into mathematical hashes (template hashes) before being destroyed forever.</span>
+              <div className="space-y-3 font-sans">
+                <div className="border-b border-[#1b1e28] pb-2.5">
+                  <span className="font-mono font-bold text-slate-300 block text-[11px]">Does AAN store personal assets?</span>
+                  <span className="text-[#78819a] mt-1 block">No. Raw hardware credentials compile locally into mathematical hashes before being destroyed forever.</span>
                 </div>
-                <div className="border-b border-slate-900 pb-2.5">
-                  <span className="font-mono font-bold text-slate-350 block text-[11px]">Can we build a custom app UI?</span>
-                  <span className="text-slate-500 mt-1 block">Yes. Utilize official Javascript SDK endpoints inside iframes, or style with standard brand manuals.</span>
+                <div className="border-b border-[#1b1e28] pb-2.5">
+                  <span className="font-mono font-bold text-slate-300 block text-[11px]">Can we build a custom app UI?</span>
+                  <span className="text-[#78819a] mt-1 block">Yes. Utilize official Javascript SDK endpoints inside iframes, or style with standard brand manuals.</span>
                 </div>
                 <div>
-                  <span className="font-mono font-bold text-slate-350 block text-[11px]">What is the typical SLA response?</span>
-                  <span className="text-slate-500 mt-1 block">Edge pipelines evaluate risk structures in under 45ms. Interactive scanning telemetry takes 3-5 seconds.</span>
+                  <span className="font-mono font-bold text-slate-300 block text-[11px]">What is the typical SLA response?</span>
+                  <span className="text-[#78819a] mt-1 block">Edge pipelines evaluate risk structures in under 45ms. Interactive posture checks take under 1 second.</span>
                 </div>
               </div>
             </div>
@@ -472,19 +472,19 @@ Content-Type: application/json`}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn items-start">
           
           {/* Controls column (5 cols) */}
-          <div className="lg:col-span-5 bg-slate-900/30 border border-slate-900 rounded-xl p-5 space-y-4">
-            <h3 className="font-mono text-xs font-black uppercase text-blue-400 tracking-wider flex items-center gap-1.5">
+          <div className="lg:col-span-5 bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4 text-left">
+            <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider flex items-center gap-1.5">
               <Settings className="w-4 h-4 text-blue-400" />
               API Shell Play Parameters
             </h3>
 
             {/* Select Endpoint */}
             <div className="space-y-1 text-left">
-              <label className="text-[9px] font-mono text-slate-500 uppercase font-black">Target Endpoint</label>
+              <label className="text-[9px] font-mono text-[#78819a] uppercase font-black">Target Endpoint</label>
               <select
                 value={explorerEndpoint}
                 onChange={(e) => setExplorerEndpoint(e.target.value as any)}
-                className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
+                className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
               >
                 <option value="verify-session">POST /api/v1/verify-session</option>
                 <option value="verify-proof-token">POST /api/v1/verify-proof-token</option>
@@ -494,12 +494,12 @@ Content-Type: application/json`}
 
             {/* Secret key input */}
             <div className="space-y-1 text-left">
-              <label className="text-[9px] font-mono text-slate-500 uppercase font-black">Custom Header Authorization</label>
+              <label className="text-[9px] font-mono text-[#78819a] uppercase font-black">Custom Header Authorization</label>
               <input
                 type="text"
                 value={explorerApiKey}
                 onChange={(e) => setExplorerApiKey(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none placeholder-slate-651"
+                className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none placeholder-slate-651"
                 placeholder="x-api-key standard key"
               />
             </div>
@@ -508,21 +508,21 @@ Content-Type: application/json`}
             {explorerEndpoint === "verify-session" && (
               <>
                 <div className="space-y-1 text-left">
-                  <label className="text-[9px] font-mono text-slate-500 uppercase font-black">Partner User Identifier</label>
+                  <label className="text-[9px] font-mono text-[#78819a] uppercase font-black">Partner User Identifier</label>
                   <input
                     type="text"
                     value={explorerUserId}
                     onChange={(e) => setExplorerUserId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
+                    className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
                   />
                 </div>
                 <div className="space-y-1 text-left">
-                  <label className="text-[9px] font-mono text-slate-500 uppercase font-black">Privacy Hash (Email Hash)</label>
+                  <label className="text-[9px] font-mono text-[#78819a] uppercase font-black">Privacy Hash (Email Hash)</label>
                   <input
                     type="text"
                     value={explorerEmailHash}
                     onChange={(e) => setExplorerEmailHash(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
+                    className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
                   />
                 </div>
               </>
@@ -530,20 +530,20 @@ Content-Type: application/json`}
 
             {explorerEndpoint === "verify-proof-token" && (
               <div className="space-y-1 text-left">
-                <label className="text-[9px] font-mono text-slate-500 uppercase font-black">Proof JWT string</label>
+                <label className="text-[9px] font-mono text-[#78819a] uppercase font-black">Proof JWT string</label>
                 <textarea
                   value={explorerToken}
                   onChange={(e) => setExplorerToken(e.target.value)}
                   rows={4}
-                  className="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-[10px] text-slate-300 focus:outline-none break-all"
+                  className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 font-mono text-[10px] text-slate-300 focus:outline-none break-all"
                 />
               </div>
             )}
 
             {explorerEndpoint === "device-risk" && (
-              <div className="p-3 bg-slate-950 border border-slate-900 rounded-lg text-xs leading-normal font-sans">
+              <div className="p-3 bg-[#0d0e12] border border-[#1b1e28] rounded-lg text-xs leading-normal font-sans">
                 <span className="text-[9px] font-mono text-blue-400 font-extrabold uppercase">AUTO EVAL</span>
-                <span className="text-slate-500 mt-1 block">Simulates device profiling parameters evaluation such as browser plugins, canvas models, and screen coordinates.</span>
+                <span className="text-[#78819a] mt-1 block">Simulates device profiling parameters evaluation such as browser plugins, canvas models, and screen coordinates.</span>
               </div>
             )}
 
@@ -561,8 +561,8 @@ Content-Type: application/json`}
           <div className="lg:col-span-7 space-y-4">
             
             {/* Request CURL display */}
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl overflow-hidden text-left">
-              <div className="bg-slate-950 px-4 py-2 border-b border-slate-900/60 flex justify-between items-center font-mono text-[9px] text-slate-500 font-bold">
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden text-left">
+              <div className="bg-[#0d0e12] px-4 py-2 border-b border-[#1b1e28]/60 flex justify-between items-center font-mono text-[9px] text-[#78819a] font-bold">
                 <span>COMPILED CURL SHELL SCHEME</span>
                 <button
                   onClick={() => copyToClipboard(`curl -X POST https://sandbox-api.aan.trust/v1/${explorerEndpoint === "verify-session" ? "verify-session" : explorerEndpoint === "verify-proof-token" ? "verify-proof-token" : "device-risk-score"}`, "curl")}
@@ -573,7 +573,7 @@ Content-Type: application/json`}
                 </button>
               </div>
               
-              <pre className="p-4 font-mono text-[10px] text-slate-300 overflow-x-auto whitespace-pre">
+              <pre className="p-4 font-mono text-[10px] text-slate-350 overflow-x-auto whitespace-pre">
 {`curl -X POST https://sandbox-api.aan.trust/v1/${explorerEndpoint === "verify-session" ? "verify-session" : explorerEndpoint === "verify-proof-token" ? "verify-proof-token" : "device-risk-score"} \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: ${explorerApiKey || "YOUR_KEY"}" \\
@@ -589,12 +589,12 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
             </div>
 
             {/* Response Area */}
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl overflow-hidden text-left">
-              <div className="bg-slate-950 px-4 py-2 border-b border-slate-900/60 font-mono text-[9px] text-slate-500 font-bold">
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden text-left">
+              <div className="bg-[#0d0e12] px-4 py-2 border-b border-[#1b1e28]/60 font-mono text-[9px] text-[#78819a] font-bold">
                 <span>SANDBOX RESPONSE JSON SCHEMAS</span>
               </div>
               
-              <div className="p-4 bg-slate-950 min-h-[160px] flex flex-col justify-between font-mono text-[10px]">
+              <div className="p-4 bg-[#0d0e12] min-h-[160px] flex flex-col justify-between font-mono text-[10px]">
                 {isRequesting ? (
                   <div className="flex flex-col items-center justify-center py-6 text-slate-500">
                     <RefreshCw className="w-5 h-5 animate-spin text-blue-500 mb-1.5" />
@@ -630,7 +630,7 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
                 className={`py-2 px-1 rounded border transition-all cursor-pointer capitalize text-center ${
                   sdkLanguage === lang 
                     ? "bg-blue-600 border-blue-500 text-white shadow" 
-                    : "bg-slate-900/40 border-slate-850 text-slate-400 hover:text-slate-200"
+                    : "bg-[#111319] border border-[#1b1e28] text-[#78819a] hover:text-slate-200"
                 }`}
               >
                 {lang}
@@ -639,15 +639,15 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
           </div>
 
           {/* Active selection */}
-          <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-5 space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-900 pb-3">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#1b1e28] pb-3">
               <div>
                 <h4 className="text-sm font-mono font-extrabold text-white capitalize">{sdkLanguage} Client Setup Guide</h4>
-                <p className="text-[11px] text-slate-500 font-sans">Official library distributions compiled from verified OpenAPI specs.</p>
+                <p className="text-[11px] text-[#78819a] font-sans">Official library distributions compiled from verified OpenAPI specs.</p>
               </div>
               <button
                 onClick={() => alert(`Beginning download stream for: library_poh_sdk_${sdkLanguage}.tar.gz`)}
-                className="px-3 py-1.5 bg-blue-950 text-blue-400 hover:bg-blue-900 hover:text-blue-300 border border-blue-900/40 font-mono text-[10px] font-black uppercase rounded flex items-center gap-1 cursor-pointer transition-all"
+                className="px-3 py-1.5 bg-blue-955 text-blue-404 hover:bg-blue-900 hover:text-blue-300 border border-[#1b1e28] font-mono text-[10px] font-black uppercase rounded flex items-center gap-1 cursor-pointer transition-all"
               >
                 <Download className="w-3.5 h-3.5" />
                 Download package
@@ -655,14 +655,14 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
             </div>
 
             {/* SDK Code grids */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start text-left">
               
               {/* Left Install & Init */}
               <div className="space-y-5">
                 {/* 1. Installation */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-wider block">1. CLI Installation</span>
-                  <div className="bg-slate-950 border border-slate-850 rounded-lg p-3 font-mono text-[11px] text-emerald-400 flex justify-between items-center group">
+                  <span className="text-[10px] font-mono font-black text-[#78819a] uppercase tracking-wider block">1. CLI Installation</span>
+                  <div className="bg-[#0d0e12] border border-[#1b1e28] rounded-lg p-3 font-mono text-[11px] text-emerald-400 flex justify-between items-center group">
                     <pre className="overflow-x-auto truncate max-w-[85%]">{sdkSpecs[sdkLanguage].install}</pre>
                     <button
                       onClick={() => copyToClipboard(sdkSpecs[sdkLanguage].install, "inst")}
@@ -675,8 +675,8 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
 
                 {/* 2. Authentication / Init */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-wider block">2. Security Initialization</span>
-                  <div className="bg-slate-950 border border-slate-850 rounded-lg p-3.5 font-mono text-[10px] text-slate-350 relative group">
+                  <span className="text-[10px] font-mono font-black text-[#78819a] uppercase tracking-wider block">2. Security Initialization</span>
+                  <div className="bg-[#0d0e12] border border-[#1b1e28] rounded-lg p-3.5 font-mono text-[10px] text-slate-300 relative group">
                     <button
                       onClick={() => copyToClipboard(sdkSpecs[sdkLanguage].init, "init")}
                       className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-200 cursor-pointer text-xs"
@@ -692,8 +692,8 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
               <div className="space-y-5">
                 {/* 3. Verification Request */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-custom block">3. Creation of verify session request</span>
-                  <div className="bg-slate-950 border border-slate-850 rounded-lg p-3.5 font-mono text-[10px] text-blue-305 relative group">
+                  <span className="text-[10px] font-mono font-black text-[#78819a] uppercase block">3. Creation of verify session request</span>
+                  <div className="bg-[#0d0e12] border border-[#1b1e28] rounded-lg p-3.5 font-mono text-[10px] text-blue-300 relative group">
                     <button
                       onClick={() => copyToClipboard(sdkSpecs[sdkLanguage].request, "req")}
                       className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-200 cursor-pointer text-xs"
@@ -706,8 +706,8 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
 
                 {/* 4. Validate proofs */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-mono font-black text-slate-500 uppercase tracking-custom block font-black">4. Cryptographic Proof token Check</span>
-                  <div className="bg-slate-950 border border-slate-850 rounded-lg p-3.5 font-mono text-[10px] text-emerald-305 relative group">
+                  <span className="text-[10px] font-mono font-black text-[#78819a] uppercase block font-black">4. Cryptographic Proof token Check</span>
+                  <div className="bg-[#0d0e12] border border-[#1b1e28] rounded-lg p-3.5 font-mono text-[10px] text-emerald-300 relative group">
                     <button
                       onClick={() => copyToClipboard(sdkSpecs[sdkLanguage].validate, "val")}
                       className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-200 cursor-pointer"
@@ -731,15 +731,15 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn items-start">
           
           {/* Detailed Specs (8 cols) */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-5 space-y-4">
-              <h3 className="font-mono text-xs font-black uppercase text-blue-400 tracking-wider">Payload signature validation guide</h3>
-              <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                AAN signs every outgoing webhook POST bundle using your cryptographic webhook secret. Secure systems check the header <code className="text-white bg-slate-950 px-1 border border-slate-850 p-0.5 rounded">x-aan-signature</code> with HMAC-SHA256 protocol.
+          <div className="lg:col-span-8 space-y-6 text-left">
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4">
+              <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Payload signature validation guide</h3>
+              <p className="text-xs text-[#78819a] leading-relaxed font-sans">
+                AAN signs every outgoing webhook POST bundle using your cryptographic webhook secret. Secure systems check the header <code className="text-white bg-[#0d0e12] px-1 border border-[#1b1e28] p-0.5 rounded">x-aan-signature</code> with HMAC-SHA256 protocol.
               </p>
               
-              <div className="bg-slate-950 border border-slate-800 rounded p-4 font-mono text-[10px]">
-                <div className="text-[9px] text-slate-500 uppercase font-black border-b border-slate-900 pb-2 mb-2">Node.js Webhook integrity Checker</div>
+              <div className="bg-[#0d0e12] border border-[#1b1e28] rounded p-4 font-mono text-[10px]">
+                <div className="text-[9px] text-[#78819a] uppercase font-black border-b border-[#1b1e28] pb-2 mb-2">Node.js Webhook integrity Checker</div>
                 <pre className="text-blue-300 overflow-x-auto">
 {`const crypto = require("crypto");
 
@@ -767,19 +767,19 @@ app.post("/v1/auth/aan-status", (req, res) => {
 
           {/* Webhook events whitelists (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-4 space-y-3.5 text-xs text-left">
-              <h4 className="font-mono text-[10px] font-black uppercase text-slate-400 tracking-wider">Available Event Triggers</h4>
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3.5 text-xs text-left">
+              <h4 className="font-mono text-[10px] font-black uppercase text-[#78819a] tracking-wider">Available Event Triggers</h4>
               
               <div className="space-y-3 font-mono text-[9px]">
-                <div className="p-2.5 bg-slate-950 rounded border border-slate-900">
+                <div className="p-2.5 bg-[#0d0e12] rounded border border-[#1b1e28]">
                   <span className="text-emerald-400 font-extrabold block">aan.verification.completed</span>
-                  <span className="text-slate-500 block mt-1">Fires instantly when user facial liveness scan successfully matches privacy thresholds.</span>
+                  <span className="text-slate-500 block mt-1">Fires instantly when user trust signature successfully matches privacy thresholds.</span>
                 </div>
-                <div className="p-2.5 bg-slate-950 rounded border border-slate-900">
+                <div className="p-2.5 bg-[#0d0e12] rounded border border-[#1b1e28]">
                   <span className="text-rose-400 font-extrabold block">aan.verification.failed</span>
-                  <span className="text-slate-500 block mt-1">Fires if scanning fails multiple times due to liveness timeouts or structural anomalies.</span>
+                  <span className="text-slate-500 block mt-1">Fires if validation fails multiple times due to signature timeouts or structural anomalies.</span>
                 </div>
-                <div className="p-2.5 bg-slate-950 rounded border border-slate-900">
+                <div className="p-2.5 bg-[#0d0e12] rounded border border-[#1b1e28]">
                   <span className="text-purple-400 font-extrabold block">aan.removal.approved</span>
                   <span className="text-slate-500 block mt-1">Fires when user deletes credentials securely in self-serve claiming panel.</span>
                 </div>
@@ -796,22 +796,22 @@ app.post("/v1/auth/aan-status", (req, res) => {
           
           {/* Version logs (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-5 space-y-5">
-              <h3 className="font-mono text-xs font-black uppercase text-blue-400 tracking-wider">Release Version History</h3>
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-5">
+              <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Release Version History</h3>
               
               <div className="space-y-4">
                 <div className="border-l-2 border-emerald-500 pl-4 space-y-1 text-left">
                   <span className="text-[10px] font-mono font-black text-emerald-400 uppercase">v1.2.4 (Latest Stable Release - Active)</span>
                   <span className="text-xs font-mono font-bold text-white block">Zero-Trust proof validator upgrades</span>
-                  <span className="text-xs text-slate-400 block font-normal font-sans leading-normal">
+                  <span className="text-xs text-[#78819a] block font-normal font-sans leading-normal">
                     Implemented cryptographic JWT certificate checks utilizing public/private signing keys. Upgraded rate filtering protocols to protect against automated Sybil scripts.
                   </span>
                 </div>
 
-                <div className="border-l-2 border-slate-800 pl-4 space-y-1 text-left">
+                <div className="border-l-2 border-[#1b1e28] pl-4 space-y-1 text-left">
                   <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">v1.1.9 (Archived Release - Deprecated)</span>
                   <span className="text-xs font-mono font-bold text-white block">Improved hardware fingerprint scopes</span>
-                  <span className="text-xs text-slate-505 block font-normal font-sans leading-normal">
+                  <span className="text-xs text-[#78819a] block font-normal font-sans leading-normal">
                     Added canvas tracking and screen coordinate analytics in local telemetry checks to prevent framework emulator bypasses.
                   </span>
                 </div>
@@ -821,26 +821,26 @@ app.post("/v1/auth/aan-status", (req, res) => {
 
           {/* Platform status indicator (4 cols) */}
           <div className="lg:col-span-4 space-y-4">
-            <div className="bg-slate-900/30 border border-slate-900 rounded-xl p-4 space-y-3.5 text-xs text-left">
-              <h4 className="font-mono text-[10px] font-black uppercase text-slate-400 tracking-wider">Live System Status Monitor</h4>
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3.5 text-xs text-left">
+              <h4 className="font-mono text-[10px] font-black uppercase text-[#78819a] tracking-wider">Live System Status Monitor</h4>
               
               <div className="space-y-3 font-mono text-[9px]">
-                <div className="flex justify-between border-b border-slate-900 pb-1.5">
-                  <span className="text-slate-500">API Gateway Response:</span>
-                  <span className="text-emerald-400 font-extrabold flex items-center gap-1">
+                <div className="flex justify-between border-b border-[#1b1e28] pb-1.5">
+                  <span className="text-[#78819a]">API Gateway Response:</span>
+                  <span className="text-emerald-404 font-extrabold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                     99.98% / ONLINE
                   </span>
                 </div>
-                <div className="flex justify-between border-b border-slate-900 pb-1.5">
-                  <span className="text-slate-500">Webhooks gateway dispatch:</span>
-                  <span className="text-emerald-400 font-extrabold flex items-center gap-1">
+                <div className="flex justify-between border-b border-[#1b1e28] pb-1.5">
+                  <span className="text-[#78819a]">Webhooks gateway dispatch:</span>
+                  <span className="text-emerald-404 font-extrabold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                     99.94% / OPERATIONAL
                   </span>
                 </div>
                 <div className="flex justify-between pb-0.5">
-                  <span className="text-slate-500">Sandbox simulation core:</span>
+                  <span className="text-[#78819a]">Sandbox simulation core:</span>
                   <span className="text-amber-400 font-extrabold flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
                     100.00% / SANDBOX

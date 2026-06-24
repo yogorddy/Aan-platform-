@@ -119,7 +119,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             status: "started",
             risk_score: 15,
             duplicate_candidate: false,
-            result_reason: "Session initialized/awaiting biometric upload.",
+            result_reason: "Session initialized/awaiting trust verification.",
             risk_reasons: [],
             proof_token: "",
             created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
@@ -132,7 +132,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             status: "passed",
             risk_score: 8,
             duplicate_candidate: false,
-            result_reason: "Biometric match unique; confidence 98.4%. Liveness passed.",
+            result_reason: "Trust signature unique; attestation checks passed.",
             risk_reasons: [],
             proof_token: "proof_claims_b71_sig_93f82e11ac0b",
             created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
@@ -145,8 +145,8 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             status: "failed",
             risk_score: 95,
             duplicate_candidate: true,
-            result_reason: "Critical: Duplicate biometric face template identified matching user usr_b710ef67. Liveness score low.",
-            risk_reasons: ["duplicate_biometric_template_hash", "many_accounts_on_one_device", "failed_liveness"],
+            result_reason: "Critical: Duplicate signature template identified matching user usr_b710ef67. Integrity checks failed.",
+            risk_reasons: ["duplicate_signature_template_hash", "many_accounts_on_one_device", "failed_integrity_handshake"],
             proof_token: "",
             created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
             completed_at: new Date(Date.now() - 11.9 * 3600 * 1000).toISOString()
@@ -171,7 +171,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             status: "passed",
             risk_score: 4,
             duplicate_candidate: false,
-            result_reason: "Same returning user on trusted hardware; biometric integrity intact.",
+            result_reason: "Same returning user on trusted hardware; signature integrity intact.",
             risk_reasons: [],
             proof_token: "proof_claims_bc4_sig_66a7b3c2ee10",
             created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
@@ -263,7 +263,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             project_id: "proj_security_777",
             session_id: "vss_session_failed_df9",
             external_user_id: "fintech_external_charlie_12",
-            biometric_template_id: "tmpl_102",
+            signature_template_id: "tmpl_102",
             matched_user_id: "usr_b710ef67",
             matched_template_id: "tmpl_101",
             confidence_score: 99.1,
@@ -529,19 +529,19 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
   };
 
   return (
-    <div className="min-h-screen bg-[#080b11] font-sans text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#0d0e12] font-sans text-[#e3e5eb] flex flex-col selection:bg-[#202533]">
       
       {/* Horiz Header */}
-      <header className="bg-[#0c0f16] border-b border-slate-900 px-6 py-4 flex items-center justify-between z-10">
+      <header className="bg-[#111319] border-b border-[#1b1e28] px-6 py-4 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-600/15 text-blue-400 p-2 rounded-lg border border-blue-500/10">
-            <Shield className="w-5 h-5 animate-pulse" />
+          <div className="bg-[#171a23] text-blue-500 p-2 rounded border border-[#232a3b]">
+            <Shield className="w-5 h-5" />
           </div>
           <div>
-            <span className="font-mono text-[9px] text-blue-400 font-bold uppercase tracking-widest">{activeOrg.name}</span>
-            <h1 className="font-bold text-base text-white tracking-tight flex items-center gap-2">
+            <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-widest">{activeOrg.name}</span>
+            <h1 className="font-bold text-sm text-white tracking-tight flex items-center gap-2">
               Partner Identity Integration Console
-              <span className="text-[10px] bg-slate-800 border border-slate-700 font-mono text-slate-400 font-semibold px-2 py-0.5 rounded-full uppercase">
+              <span className="text-[10px] bg-[#171a23] border border-[#232a3b] font-mono text-[#78819a] font-semibold px-2 py-0.5 rounded uppercase">
                 {activeProject.enforcement_mode}
               </span>
             </h1>
@@ -553,25 +553,25 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             <>
               <button 
                 onClick={() => onNavigate('academy', undefined, mapTabToLesson(activeTab))} 
-                className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-blue-950/80 hover:bg-blue-900 px-3.5 py-1.5 rounded-lg border border-blue-900/40 cursor-pointer font-bold font-mono uppercase tracking-wider blink-subtle"
+                className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-[#171a23] hover:bg-[#1f2431] px-3.5 py-1.5 rounded border border-[#232a3b] cursor-pointer font-bold font-mono uppercase tracking-wider blink-subtle"
                 title="Open contextual explanation for this feature inside the learning Academy"
               >
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>Explain This View</span>
               </button>
-              <span className="text-slate-800 font-mono text-xs">|</span>
+              <span className="text-[#1b1e28] font-mono text-xs">|</span>
             </>
           )}
           <button 
             onClick={() => onNavigate('landing')} 
-            className="text-xs text-slate-400 hover:text-white transition-all bg-slate-950/50 hover:bg-slate-800 px-3 py-1.5 rounded border border-slate-800 cursor-pointer"
+            className="text-xs text-[#78819a] hover:text-white transition-all bg-[#171a23] hover:bg-[#1f2431] px-3 py-1.5 rounded border border-[#232a3b] cursor-pointer"
           >
              Public Center
           </button>
-          <span className="text-slate-800 font-mono text-xs">|</span>
+          <span className="text-[#1b1e28] font-mono text-xs">|</span>
           <button 
             onClick={() => onNavigate('admin')} 
-            className="text-xs text-slate-300 hover:text-white transition-all bg-blue-600 hover:bg-blue-500 font-semibold px-3 py-1.5 rounded cursor-pointer"
+            className="text-xs text-white hover:bg-[#e2e5eb] hover:text-[#0d0e12] transition-all bg-[#171a23] border border-[#232a3b] font-semibold px-3 py-1.5 rounded cursor-pointer"
           >
             Admin Verification Platform 
           </button>
@@ -582,12 +582,12 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         
         {/* Left Side menu */}
-        <aside className="w-full md:w-64 bg-[#0c0f16]/95 border-r border-slate-900 p-4 space-y-1.5 shrink-0">
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block px-3 mb-2 font-bold">Workspace Navigation</span>
+        <aside className="w-full md:w-64 bg-[#111319]/95 border-r border-[#1b1e28] p-4 space-y-1.5 shrink-0">
+          <span className="text-[10px] font-mono text-[#5d6780] uppercase tracking-widest block px-3 mb-2 font-bold">Workspace Navigation</span>
           
           <button 
             onClick={() => { setActiveTab('overview'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'overview' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'overview' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Activity className="w-4 h-4" />
             Overview
@@ -595,7 +595,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('organizations'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'organizations' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'organizations' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Layers className="w-4 h-4 text-indigo-400" />
             Organizations
@@ -603,7 +603,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('verification-activity'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'verification-activity' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'verification-activity' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Database className="w-4 h-4" />
             Verification Activity
@@ -611,18 +611,18 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('security-center'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'security-center' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'security-center' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Shield className="w-4 h-4 text-red-400" />
             Security Center
             {(sessions.filter(s => s.risk_score >= 70).length > 0 || duplicateSignals.length > 0) && (
-              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-red-500" />
             )}
           </button>
 
           <button 
             onClick={() => { setActiveTab('trust-analytics'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'trust-analytics' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'trust-analytics' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Activity className="w-4 h-4 text-emerald-400" />
             Trust Analytics
@@ -630,7 +630,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('api-keys'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'api-keys' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'api-keys' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Key className="w-4 h-4" />
             API Keys
@@ -638,7 +638,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('webhooks'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'webhooks' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'webhooks' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Webhook className="w-4 h-4" />
             Webhooks
@@ -646,7 +646,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('audit-logs'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'audit-logs' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'audit-logs' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <ClipboardList className="w-4 h-4 text-teal-400" />
             Audit Logs
@@ -654,7 +654,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('developers'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'developers' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'developers' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Terminal className="w-4 h-4 text-emerald-400" />
             Developers
@@ -662,7 +662,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('documentation'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'documentation' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'documentation' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <BookOpen className="w-4 h-4 text-blue-400" />
             Documentation
@@ -670,7 +670,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
           <button 
             onClick={() => { setActiveTab('settings'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded-lg transition-all text-left ${activeTab === 'settings' ? 'bg-blue-600/15 text-blue-400 font-bold border-l-2 border-blue-500' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-853'}`}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'settings' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Settings className="w-4 h-4" />
             Settings
@@ -679,21 +679,21 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         </aside>
 
         {/* Right workspace view */}
-        <main className="flex-1 overflow-y-auto p-8 bg-[#080b11]">
+        <main className="flex-1 overflow-y-auto p-8 bg-[#0d0e12]">
           
           {/* Global MVP Mock Disclaimer */}
-          <div className="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4 mb-6 text-xs text-amber-200/90 leading-relaxed font-sans flex gap-3">
-            <span className="text-amber-500 font-bold shrink-0 text-sm">⚠️ MVP Sandbox Notice:</span>
+          <div className="bg-[#1a1412] border border-amber-900/30 rounded-lg p-4 mb-6 text-xs text-[#d2ab6c] leading-relaxed font-sans flex gap-3">
+            <span className="text-[#d2ab6c] font-bold shrink-0 text-xs">⚠️ SANDBOX ADVISORY:</span>
             <div>
-              <p className="font-semibold mb-0.5">MOCK IMPLEMENTATION — Replace with certified identity, biometric, fraud, and security providers before production use.</p>
-              <p className="text-amber-400/80">
-                AAN Platform operates in sandbox mode for testing and demonstration. This interface simulates live biometric and threat signals. Connect a certified HSM signing system and authorized verification SDKs prior to production release.
+              <p className="font-semibold mb-0.5">MOCK ATTESTATION PREVIEW — Administrative Sandbox Mode</p>
+              <p className="text-[#78819a]">
+                AAN Platform operates in sandbox mode for testing and demonstration. This interface simulates live trust signals and system postures. Connect a certified HSM signing system and authorized verification SDKs prior to production release.
               </p>
             </div>
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-96 text-slate-400">
+            <div className="flex flex-col items-center justify-center h-96 text-[#78819a]">
               <RefreshCw className="w-8 h-8 animate-spin text-blue-500 mb-2" />
               <p className="text-xs font-mono">Synchronizing workspace metadata streams...</p>
             </div>
@@ -702,13 +702,12 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== OVERVIEW TAB ==================== */}
               {activeTab === 'overview' && (
                 <div className="space-y-8 animate-fadeIn">
-                  
-                  {/* Alert banner for active project settings info */}
-                  <div className="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-start gap-3.5">
+                               {/* Alert banner for active project settings info */}
+                  <div className="bg-[#111319] border border-[#1b1e28] p-4 rounded-xl flex items-start gap-3.5">
                     <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
                     <div>
                       <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Platform Integration Policy Active</h4>
-                      <p className="text-xs text-slate-400 mt-1 leading-normal">
+                      <p className="text-xs text-[#78819a] mt-1 leading-normal">
                         Your workspace is configured under the <b className="text-white">“{activeProject.name}”</b> project blueprint. 
                         Active enforcement mechanism is <span className="text-white underline font-mono">{activeProject.enforcement_mode}</span>.
                       </p>
@@ -717,86 +716,86 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
                   {/* 7 core dashboard metrics requested */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-xl">
-                      <span className="font-mono text-[9px] text-slate-500 font-bold uppercase tracking-wider block">Total Enrollments</span>
+                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl">
+                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Total Enrollments</span>
                       <div className="text-2xl font-bold font-sans text-white mt-1">{sessions.length}</div>
-                      <span className="text-[10px] text-slate-500 block mt-1">Incoming REST evaluations</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Incoming REST evaluations</span>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-xl">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl">
                       <span className="font-mono text-[9px] text-emerald-400 font-bold uppercase tracking-wider block">Verified Humans</span>
                       <div className="text-2xl font-bold font-sans text-white mt-1">
                         {sessions.filter(s => s.status === 'passed').length}
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-1">Active verified proof certificates</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Active verified proof certificates</span>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-xl">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl">
                       <span className="font-mono text-[9px] text-yellow-500 font-bold uppercase tracking-wider block">Suspicious Sessions</span>
                       <div className="text-2xl font-bold font-sans text-white mt-1">
                         {sessions.filter(s => s.status === 'review' || (s.risk_score >= 35 && s.risk_score < 70)).length}
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-1">Grades requiring manual override</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Grades requiring manual override</span>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-xl font-mono">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl font-mono">
                       <span className="font-mono text-[9px] text-red-500 font-bold uppercase tracking-wider block">High-Risk Blocked</span>
                       <div className="text-2xl font-bold font-sans text-white mt-1">
                         {sessions.filter(s => s.status === 'failed' || s.risk_score >= 70).length}
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-1">Automated threat restrictions</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Automated threat restrictions</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-xl lg:col-span-1">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl lg:col-span-1">
                       <span className="font-mono text-[9px] text-blue-400 font-bold uppercase tracking-wider block">Duplicate Sybil Signals</span>
                       <div className="text-2xl font-bold font-sans text-white mt-1">{duplicateSignals.length}</div>
-                      <span className="text-[10px] text-slate-500 block mt-1">Faces linked multiple profile ids</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Faces linked multiple profile ids</span>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-xl lg:col-span-1">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl lg:col-span-1">
                       <span className="font-mono text-[9px] text-purple-400 font-bold uppercase tracking-wider block">Removal Workflow Approval</span>
                       <div className="text-xs font-semibold text-white mt-2">
                         {removalRequests.length > 0 ? "Workflow Approved & Active" : "No workflow registered"}
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-1">Hard purge user data clearance status</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Hard purge user data clearance status</span>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-850 p-5 rounded-xl lg:col-span-1 font-mono">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl lg:col-span-1 font-mono">
                       <span className="font-mono text-[9px] text-emerald-400 font-bold uppercase tracking-wider block">Webhook Delivery Rate</span>
                       <div className="text-2xl font-bold font-sans text-white mt-1">
                         {webhookDeliveries.length > 0 ? "100.00%" : "No dispatches"}
                       </div>
-                      <span className="text-[10px] text-slate-500 block mt-1">Cryptographic post callbacks OK</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Cryptographic post callbacks OK</span>
                     </div>
                   </div>
 
                   {/* Quick-Start block for developers */}
-                  <div className="bg-slate-900 border border-slate-850 p-6 rounded-xl space-y-4">
+                  <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4">
                     <h3 className="font-bold text-white text-sm flex items-center gap-2">
                       <Code className="text-blue-400 w-4.5 h-4.5" />
                       Platform integration Quickstart Gateway
                     </h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">
+                    <p className="text-xs text-[#78819a] leading-relaxed">
                       AAN operates as an autonomous cryptographic trust gate sitting seamlessly between user signup actions and secure account dashboard entries.
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                      <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs">
+                      <div className="bg-[#0d0e12] p-4 rounded-lg border border-[#1b1e28] text-xs">
                         <b className="text-blue-400 block mb-1">Step 1: REST Challenge</b>
-                        <p className="text-slate-400 leading-normal">
+                        <p className="text-[#78819a] leading-normal">
                           Upon account registration, initiate the checkpoint pipeline by dispatching email & device hashes to <code className="text-emerald-400">/api/v1/verify-session</code>.
                         </p>
                       </div>
-                      <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs">
-                        <b className="text-blue-400 block mb-1">Step 2: Biometric Verification</b>
-                        <p className="text-slate-400 leading-normal">
+                      <div className="bg-[#0d0e12] p-4 rounded-lg border border-[#1b1e28] text-xs">
+                        <b className="text-blue-400 block mb-1">Step 2: Trust Assertion Check</b>
+                        <p className="text-[#78819a] leading-normal">
                           If re-verification is required, redirect the browser to the secure verification page <code className="text-emerald-400">/verify/session/[id]</code>.
                         </p>
                       </div>
-                      <div className="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs">
+                      <div className="bg-[#0d0e12] p-4 rounded-lg border border-[#1b1e28] text-xs">
                         <b className="text-blue-400 block mb-1">Step 3: Signature Validation</b>
-                        <p className="text-slate-400 leading-normal">
+                        <p className="text-[#78819a] leading-normal">
                           On verification complete callback, confirm the signed web token validity with <code className="text-emerald-400">/api/v1/verify-proof-token</code> before granting entry.
                         </p>
                       </div>
@@ -809,73 +808,73 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== ORGANIZATIONS TAB: SETTINGS ==================== */}
               {activeTab === 'organizations' && orgSubTab === 'settings' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                  <div className="flex border-b border-[#1b1e28] gap-1.5 mb-6 font-mono text-[11px]">
                     <button
                       onClick={() => setOrgSubTab('settings')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Project Settings
                     </button>
                     <button
                       onClick={() => setOrgSubTab('policies')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       MFA Login Policies
                     </button>
                     <button
                       onClick={() => setOrgSubTab('profiles')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Verification Profiles
                     </button>
                   </div>
-                  <div className="border-b border-slate-800 pb-4">
+                  <div className="border-b border-[#1b1e28] pb-4">
                     <h2 className="text-lg font-bold text-white">Project Identity & Enforcement Policy blueprint</h2>
-                    <p className="text-xs text-slate-400">Manage API origin restrictions, allowed domains and automation enforcement modes.</p>
+                    <p className="text-xs text-[#78819a]">Manage API origin restrictions, allowed domains and automation enforcement modes.</p>
                   </div>
 
-                  <form onSubmit={handleUpdateConfig} className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-5 max-w-2xl">
+                  <form onSubmit={handleUpdateConfig} className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-5 max-w-2xl text-left">
                     <div className="grid grid-cols-1 gap-4">
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Organization Label Name</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Organization Label Name</label>
                         <input 
                           type="text"
                           required
                           value={orgNameInput}
                           onChange={(e) => setOrgNameInput(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                          className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Project Integration Label</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Project Integration Label</label>
                         <input 
                           type="text"
                           required
                           value={projNameInput}
                           onChange={(e) => setProjNameInput(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                          className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Allowed Domain Origins (comma separated list)</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Allowed Domain Origins (comma separated list)</label>
                         <input 
                           type="text"
                           required
                           value={allowedDomainsInput}
                           onChange={(e) => setAllowedDomainsInput(e.target.value)}
                           placeholder="localhost:3000, yourdomain.com, api.yourdomain.com"
-                          className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                          className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Policy Enforcement Mode (Required)</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Policy Enforcement Mode (Required)</label>
                         <select
                           value={enforcementModeInput}
                           onChange={(e) => setEnforcementModeInput(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 text-xs p-2 rounded text-slate-300 focus:outline-none font-mono"
+                          className="w-full bg-[#0d0e12] border border-[#1b1e28] text-xs p-2 rounded text-slate-300 focus:outline-none font-mono"
                         >
                           <option value="monitor_only">Monitor only (Passive observability logging)</option>
                           <option value="flag_suspicious">Flag suspicious accounts (Permissive verification prompts)</option>
@@ -886,7 +885,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       </div>
                     </div>
 
-                    <div className="border-t border-slate-800 pt-4 flex justify-end">
+                    <div className="border-t border-[#1b1e28] pt-4 flex justify-end">
                       <button
                         type="submit"
                         disabled={isUpdatingConfig}
@@ -902,18 +901,18 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== API KEYS TAB ==================== */}
               {activeTab === 'api-keys' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-slate-800 pb-4">
+                  <div className="border-b border-[#1b1e28] pb-4">
                     <h2 className="text-lg font-bold text-white">Cryptographic API Key Credentials</h2>
-                    <p className="text-xs text-slate-400">Generate hashed enterprise access keys to connect your server-side framework.</p>
+                    <p className="text-xs text-[#78819a]">Generate hashed enterprise access keys to connect your server-side framework.</p>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start text-left">
                     
-                    <form onSubmit={handleCreateApiKey} className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
+                    <form onSubmit={handleCreateApiKey} className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4">
                       <h3 className="font-bold text-white text-sm">Generate credential API Key</h3>
                       
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">Key descriptor name</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1">Key descriptor name</label>
                         <input 
                           type="text"
                           required
@@ -925,13 +924,13 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">Webhook Target Endpoints Url (Optional)</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1">Webhook Target Endpoints Url (Optional)</label>
                         <input 
                           type="url"
                           placeholder="https://api.yourdomain.com/aan-webhooks"
                           value={newWebhookUrl}
                           onChange={(e) => setNewWebhookUrl(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                          className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                         />
                       </div>
 
@@ -948,23 +947,23 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       {createdApiKeyResponse && (
                         <div className="p-4 bg-emerald-950/20 border border-emerald-900/40 rounded-lg text-xs font-mono">
                           <span className="text-emerald-400 font-bold block mb-1 text-[10px] uppercase">Plaintext Access Key Created (Reveal Warn)</span>
-                          <div className="bg-slate-950 p-3 rounded border border-slate-850 break-all select-all font-bold text-slate-100 flex items-center justify-between">
+                          <div className="bg-[#0d0e12] p-3 rounded border border-[#1b1e28] break-all select-all font-bold text-slate-100 flex items-center justify-between">
                             <code>{createdApiKeyResponse.plain_text_key_warning}</code>
                           </div>
-                          <p className="text-[10px] text-slate-400 mt-2 leading-relaxed italic">
+                          <p className="text-[10px] text-[#78819a] mt-2 leading-relaxed italic">
                             * Safety Policy: Record this key immediately. It is permanently hashed using SHA-255 inside database directories and cannot be displayed again.
                           </p>
                         </div>
                       )}
 
-                      <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
-                        <span className="font-mono text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Active Hashed Access Keys</span>
+                      <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4 text-left">
+                        <span className="font-mono text-[9px] text-[#78819a] font-bold uppercase tracking-wider block">Active Hashed Access Keys</span>
                         <div className="space-y-3">
                           {partnerApps.map(app => (
-                            <div key={app.id} className="bg-slate-950 p-3 rounded-lg border border-slate-850 flex items-center justify-between text-xs">
+                            <div key={app.id} className="bg-[#0d0e12] p-3 rounded-lg border border-[#1b1e28] flex items-center justify-between text-xs">
                               <div>
                                 <h4 className="font-bold text-white mb-0.5">{app.name}</h4>
-                                <span className="font-mono text-[9px] text-slate-500 block truncate max-w-xs">SHA-256 Hash: {app.api_key_hash}</span>
+                                <span className="font-mono text-[9px] text-[#5d6780] block truncate max-w-xs">SHA-256 Hash: {app.api_key_hash}</span>
                                 {app.webhook_url && (
                                   <span className="text-blue-500 block font-mono text-[10px] mt-1">Target Webhook: {app.webhook_url}</span>
                                 )}
@@ -985,34 +984,34 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== ORGANIZATIONS TAB: POLICIES ==================== */}
               {activeTab === 'organizations' && orgSubTab === 'policies' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                  <div className="flex border-b border-[#1b1e28] gap-1.5 mb-6 font-mono text-[11px]">
                     <button
                       onClick={() => setOrgSubTab('settings')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Project Settings
                     </button>
                     <button
                       onClick={() => setOrgSubTab('policies')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       MFA Login Policies
                     </button>
                     <button
                       onClick={() => setOrgSubTab('profiles')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Verification Profiles
                     </button>
                   </div>
-                  <div className="border-b border-slate-800 pb-4">
+                  <div className="border-b border-[#1b1e28] pb-4 text-left">
                     <h2 className="text-lg font-bold text-white">Automation Rules & Threat Risk Thresholds Policies</h2>
-                    <p className="text-xs text-slate-400">Configure conditional rules triggered by device reputations and Sybil anomalies.</p>
+                    <p className="text-xs text-[#78819a]">Configure conditional rules triggered by device reputations and Sybil anomalies.</p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                  <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden text-left">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-950 text-slate-400 font-mono uppercase text-[9px] tracking-wider border-b border-slate-800">
+                      <thead className="bg-[#0d0e12] text-[#78819a] font-mono uppercase text-[9px] tracking-wider border-b border-[#1b1e28]">
                         <tr>
                           <th className="py-4 px-6">Rule Label</th>
                           <th className="py-4 px-4">Evaluation Pattern</th>
@@ -1021,19 +1020,19 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                           <th className="py-4 px-6 text-right">Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-850 text-slate-300">
+                      <tbody className="divide-y divide-[#1b1e28] text-slate-300">
                         {policies.map(p => (
                           <tr key={p.id}>
                             <td className="py-4 px-6 font-bold text-white">{p.name}</td>
                             <td className="py-4 px-4 font-mono text-blue-400">{p.conditions}</td>
                             <td className="py-4 px-4 text-center">
-                              <span className="bg-slate-950 text-red-400 border border-red-900/40 font-mono text-[9px] font-bold uppercase rounded px-2.5 py-0.5">
+                              <span className="bg-[#0d0e12] text-red-400 border border-red-900/40 font-mono text-[9px] font-bold uppercase rounded px-2.5 py-0.5">
                                 {p.thenAction}
                               </span>
                             </td>
-                            <td className="py-4 px-4 text-slate-400">{p.description}</td>
+                            <td className="py-4 px-4 text-[#78819a]">{p.description}</td>
                             <td className="py-4 px-6 text-right font-mono text-[10px]">
-                              <span className={`font-bold uppercase ${p.active ? 'text-emerald-400' : 'text-slate-500'}`}>
+                              <span className={`font-bold uppercase ${p.active ? 'text-emerald-400' : 'text-[#5d6780]'}`}>
                                 {p.active ? "● ACTIVE_ENFORCED" : "○ INACTIVE"}
                               </span>
                             </td>
@@ -1048,10 +1047,10 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== VERIFICATION SESSIONS TAB ==================== */}
               {activeTab === 'verification-activity' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="border-b border-[#1b1e28] pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-left">
                     <div>
                       <h2 className="text-lg font-bold text-white">Verification Sessions Audit Log</h2>
-                      <p className="text-xs text-slate-400">Continuous risk engine grades for incoming platform integrations.</p>
+                      <p className="text-xs text-[#78819a]">Continuous risk engine grades for incoming platform integrations.</p>
                     </div>
 
                     <div className="flex flex-wrap gap-2 items-center">
@@ -1060,13 +1059,13 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                         placeholder="Search session or user ID..."
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
-                        className="bg-slate-900 border border-slate-800 text-xs px-3 py-1.5 rounded focus:outline-none focus:border-blue-500 font-mono w-48"
+                        className="bg-[#111319] border border-[#1b1e28] text-xs px-3 py-1.5 rounded focus:outline-none focus:border-blue-500 font-mono w-48 text-white"
                       />
 
                       <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-slate-900 border border-slate-800 text-xs p-1.5 rounded text-slate-300 focus:outline-none font-mono"
+                        className="bg-[#111319] border border-[#1b1e28] text-xs p-1.5 rounded text-slate-300 focus:outline-none font-mono"
                       >
                         <option value="all">ALL VERDICTS</option>
                         <option value="started">STARTED</option>
@@ -1077,15 +1076,15 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     </div>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-850 rounded-xl overflow-hidden shadow-lg">
+                  <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden shadow-lg text-left">
                     {filteredSessions.length === 0 ? (
-                      <div className="p-12 text-center text-slate-500 text-xs font-mono">
+                      <div className="p-12 text-center text-[#78819a] text-xs font-mono">
                         No active verification sessions listed matching filters.
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full text-left text-xs">
-                          <thead className="bg-slate-950 text-slate-400 font-mono uppercase text-[9px] tracking-wider border-b border-slate-805">
+                          <thead className="bg-[#0d0e12] text-[#78819a] font-mono uppercase text-[9px] tracking-wider border-b border-[#1b1e28]">
                             <tr>
                               <th className="py-4 px-6">Session ID</th>
                               <th className="py-4 px-4">Partner User ID</th>
@@ -1095,9 +1094,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                               <th className="py-4 px-6 text-right">Verification Flow</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-850 text-slate-300">
+                          <tbody className="divide-y divide-[#1b1e28] text-slate-300">
                             {filteredSessions.map(session => (
-                              <tr key={session.id} className="hover:bg-slate-950/20">
+                              <tr key={session.id} className="hover:bg-[#0d0e12]/30">
                                 <td className="py-4 px-6 font-mono text-[11px] text-blue-400 font-semibold">{session.id}</td>
                                 <td className="py-4 px-4 font-mono text-[11px]">{session.external_user_id}</td>
                                 <td className="py-4 px-4 text-center">
@@ -1145,35 +1144,35 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
               {/* ==================== SECURITY CENTER: THREATS ==================== */}
               {activeTab === 'security-center' && securitySubTab === 'threats' && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                <div className="space-y-6 animate-fadeIn text-left">
+                  <div className="flex border-b border-[#1b1e28] gap-1.5 mb-6 font-mono text-[11px]">
                     <button
                       onClick={() => setSecuritySubTab('threats')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Threat Events
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('sybils')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Duplicate Sybil Signals
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('removals')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Removal Claims Queue
                     </button>
                   </div>
-                  <div className="border-b border-slate-800 pb-4">
+                  <div className="border-b border-[#1b1e28] pb-4">
                     <h2 className="text-lg font-bold text-white">Anomalous Engine Threat Risk Events</h2>
-                    <p className="text-xs text-slate-400">Reviews and override queries targeting high-risk emulators, proxy networks, and bot structures.</p>
+                    <p className="text-xs text-[#78819a]">Reviews and override queries targeting high-risk emulators, proxy networks, and bot structures.</p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                  <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden text-left">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-950 text-slate-500 font-mono uppercase text-[9px] tracking-wider border-b border-slate-800">
+                      <thead className="bg-[#0d0e12] text-[#78819a] font-mono uppercase text-[9px] tracking-wider border-b border-[#1b1e28]">
                         <tr>
                           <th className="py-3.5 px-6">Session</th>
                           <th className="py-3.5 px-4">Integrator id</th>
@@ -1182,7 +1181,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                           <th className="py-3.5 px-6 text-right">Score</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-850 text-slate-300">
+                      <tbody className="divide-y divide-[#1b1e28] text-slate-300">
                         {sessions.filter(s => s.risk_score >= 35).map(s => (
                           <tr key={s.id}>
                             <td className="py-4 px-6 font-mono text-blue-400">{s.id}</td>
@@ -1206,47 +1205,47 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
               {/* ==================== SECURITY CENTER: SYBILS ==================== */}
               {activeTab === 'security-center' && securitySubTab === 'sybils' && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                <div className="space-y-6 animate-fadeIn text-left">
+                  <div className="flex border-b border-[#1b1e28] gap-1.5 mb-6 font-mono text-[11px]">
                     <button
                       onClick={() => setSecuritySubTab('threats')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Threat Events
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('sybils')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Duplicate Sybil Signals
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('removals')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Removal Claims Queue
                     </button>
                   </div>
-                  <div className="border-b border-slate-800 pb-4">
-                    <h2 className="text-lg font-bold text-white">Sybil Biometric Duplicate Twins Signals (Anti-Collusion)</h2>
-                    <p className="text-xs text-slate-400">Detections where processed biometric embeddings target multiple decoupled external partner credentials.</p>
+                  <div className="border-b border-[#1b1e28] pb-4 text-left">
+                    <h2 className="text-lg font-bold text-white">Sybil Signature Duplicate Twins Signals (Anti-Collusion)</h2>
+                    <p className="text-xs text-[#78819a]">Detections where processed hardware signatures target multiple decoupled external partner credentials.</p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl flex items-start gap-3 bg-yellow-950/10 border-yellow-900/25 mb-6">
+                  <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl flex items-start gap-3 bg-yellow-950/10 border-yellow-900/25 mb-6 text-left">
                     <AlertTriangle className="text-yellow-500 w-5 h-5 shrink-0" />
                     <p className="text-xs leading-normal text-yellow-400">
-                      <b>Sybil Duplicate Warning:</b> Standard Sybil twins are registered when users attempt to allocate multiple discount rewards or duplicate credentials using the same face templates. Our privacy preservation system alerts your workspace immediately without showing their private details.
+                      <b>Sybil Duplicate Warning:</b> Standard Sybil twins are registered when users attempt to allocate multiple discount rewards or duplicate credentials using identical device signatures. Our privacy preservation system alerts your workspace immediately without showing their private details.
                     </p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                  <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden text-left">
                     {duplicateSignals.length === 0 ? (
-                      <div className="p-12 text-center text-slate-500 text-xs font-mono">
-                        No biometric twin collusion signals currently registered.
+                      <div className="p-12 text-center text-[#78819a] text-xs font-mono">
+                        No signature twin collusion signals currently registered.
                       </div>
                     ) : (
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-950 text-slate-500 font-mono uppercase text-[9px] tracking-wider border-b border-slate-800">
+                        <thead className="bg-[#0d0e12] text-[#78819a] font-mono uppercase text-[9px] tracking-wider border-b border-[#1b1e28]">
                           <tr>
                             <th className="py-4 px-6">Twin Hash Link ID</th>
                             <th className="py-4 px-4">Primary User profile</th>
@@ -1275,28 +1274,27 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== WEBHOOKS TAB ==================== */}
               {activeTab === 'webhooks' && (
                 <div className="space-y-8 animate-fadeIn">
-                  
-                  <div className="border-b border-slate-800 pb-4">
+                       <div className="border-b border-[#1b1e28] pb-4 text-left">
                     <h2 className="text-lg font-bold text-white">Cryptographic Webhook Broadcasting Gateway</h2>
-                    <p className="text-xs text-slate-400">Configure asynchronous post event receivers with HMAC-SHA256 headers verification.</p>
+                    <p className="text-xs text-[#78819a]">Configure asynchronous post event receivers with HMAC-SHA256 headers verification.</p>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start text-left">
                     
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4">
                       <h3 className="font-bold text-white text-sm flex items-center gap-2">
                         <Webhook className="w-4 h-4 text-emerald-400" />
                         Configure Broadcast Target
                       </h3>
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5">Webhook Shared Signature Secret (whsec)</label>
-                        <div className="bg-slate-950 p-3 rounded font-mono text-slate-300 border border-slate-850 text-xs flex justify-between items-center bg-zinc-950">
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Webhook Shared Signature Secret (whsec)</label>
+                        <div className="bg-[#0d0e12] p-3 rounded font-mono text-slate-300 border border-[#1b1e28] text-xs flex justify-between items-center">
                           <code>{activeProject.webhook_secret}</code>
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between">
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5 flex justify-between">
                           <span>Target Broadcast Url</span>
                           <span className="text-emerald-400 text-[9px]">POST JSON PAYLOAD</span>
                         </label>
@@ -1306,7 +1304,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                           placeholder="https://api.yourdomain.com/aan-hook"
                           value={newWebhookUrl}
                           onChange={(e) => setNewWebhookUrl(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                          className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
                         />
                       </div>
 
@@ -1322,16 +1320,16 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     </div>
 
                     {/* Interactive webhook simulation playground requested for partners */}
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4">
                       <h3 className="font-bold text-white text-sm">Send Webhook Test sandbox</h3>
-                      <p className="text-xs text-slate-400">Trigger standard mockup verification events to testing payloads integration.</p>
+                      <p className="text-xs text-[#78819a]">Trigger standard mockup verification events to testing payloads integration.</p>
                       
                       <div>
-                        <label className="block text-[10px] font-mono text-slate-400 mb-1.5">Select session resource to simulate</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] mb-1.5">Select session resource to simulate</label>
                         <select
                           value={activeSimSessionId}
                           onChange={(e) => setActiveSimSessionId(e.target.value)}
-                          className="w-full bg-slate-950 border border-slate-800 text-xs p-2 rounded text-slate-200 focus:outline-none font-mono"
+                          className="w-full bg-[#0d0e12] border border-[#1b1e28] text-xs p-2 rounded text-slate-250 focus:outline-none font-mono"
                         >
                           <option value="">-- Choose active session --</option>
                           {sessions.map(s => (
@@ -1362,16 +1360,16 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   </div>
 
                   {/* Dispatched logs table */}
-                  <div className="space-y-4">
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Dispatched Webhooks Gate Log</span>
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                  <div className="space-y-4 text-left">
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#78819a]">Dispatched Webhooks Gate Log</span>
+                    <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden">
                       {webhookDeliveries.length === 0 ? (
-                        <div className="p-8 text-center text-slate-500 text-xs font-mono">
+                        <div className="p-8 text-center text-[#78819a] text-xs font-mono">
                           No webhook payloads dispatched.
                         </div>
                       ) : (
                         <table className="w-full text-left text-xs">
-                          <thead className="bg-slate-950 text-slate-500 font-mono uppercase text-[9px] tracking-wider border-b border-slate-800">
+                          <thead className="bg-[#0d0e12] text-[#78819a] font-mono uppercase text-[9px] tracking-wider border-b border-[#1b1e28]">
                             <tr>
                               <th className="py-3 px-6">Log ID</th>
                               <th className="py-3 px-4">Dispatched Event Type</th>
@@ -1380,9 +1378,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                               <th className="py-3 px-6 text-right">Status</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-850 text-slate-300 font-mono">
+                          <tbody className="divide-y divide-[#1b1e28] text-slate-300 font-mono">
                             {webhookDeliveries.map(d => (
-                              <tr key={d.id} className="hover:bg-slate-950/20">
+                              <tr key={d.id} className="hover:bg-[#0d0e12]/30">
                                 <td className="py-4 px-6 text-blue-400">{d.id}</td>
                                 <td className="py-4 px-4 text-emerald-400 font-bold text-[11px]">{d.event_type}</td>
                                 <td className="py-4 px-4 text-slate-300 truncate max-w-xs">{d.url}</td>
@@ -1436,7 +1434,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl flex items-start gap-3 bg-purple-950/10 border-purple-900/25 mb-6">
                     <Info className="text-purple-400 w-5 h-5 shrink-0" />
                     <p className="text-xs leading-normal text-purple-300">
-                      <b>Privacy Restoration Hard Purge:</b> Standard AAN compliance strictly forbids the automatic deletion of biometric user data without explicit partner review and instruction. Use this workspace block to review requested purges, then click "Approve Purge" to execute a hard, cryptographic wipe of all template profiles.
+                      <b>Privacy Restoration Hard Purge:</b> Standard AAN compliance strictly forbids the automatic deletion of user trust data without explicit partner review and instruction. Use this workspace block to review requested purges, then click "Approve Purge" to execute a hard, cryptographic wipe of all template profiles.
                     </p>
                   </div>
 
@@ -1610,7 +1608,7 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
                       <code className="text-sm font-bold text-white font-mono">/api/v1/verify-session</code>
                     </div>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Main integration pipeline endpoint. Triggered by platform servers on user login state initialization to verify risk anomalies without exposing private biometric assets.
+                      Main integration pipeline endpoint. Triggered by platform servers on user login state initialization to verify risk anomalies without exposing private credentials or signatures.
                     </p>
                     
                     <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">

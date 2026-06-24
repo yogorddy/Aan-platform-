@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { supabaseService } from "./src/lib/supabaseService";
 import { 
   User, 
-  BiometricTemplate, 
+  SignatureTemplate, 
   Device, 
   PartnerApp, 
   PartnerUserLink, 
@@ -18,7 +18,7 @@ import {
 } from "./src/types";
 
 // ============================================================================
-// MOCK IMPLEMENTATION — Replace with certified identity, biometric, fraud, and security providers before production use.
+// MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before production use.
 // STATEFUL IN-MEMORY DATABASE WITH PERSISTENT STRUCTURE FOR THE MVP MODEL
 // ============================================================================
 
@@ -80,31 +80,31 @@ const mockUsers: User[] = [
   }
 ];
 
-const mockBiometricTemplates: BiometricTemplate[] = [
+const mockSignatureTemplates: SignatureTemplate[] = [
   {
     id: "tmpl_101",
     user_id: "usr_b710ef67",
-    template_hash: "bio_hash_b710ef67",
-    encrypted_template: "U2FsdGVkX18mZ9/X2dGzW/8nZ9+kLd8M=...[encrypted_vector_facenet_v3]",
-    model_version: "facenet-v3",
+    template_hash: "sig_hash_b710ef67",
+    encrypted_template: "U2FsdGVkX18mZ9/X2dGzW/8nZ9+kLd8M=...[encrypted_vector_signaturenet_v3]",
+    model_version: "signaturenet-v3",
     confidence_score: 98.40,
     created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString()
   },
   {
     id: "tmpl_102",
     user_id: "usr_df990a31",
-    template_hash: "bio_hash_b710ef67", // DUPLICATE TO FIT DETECT CRITERIA
-    encrypted_template: "U2FsdGVkX18mZ9/X2dGzW/8nZ9+kLd8M=...[encrypted_vector_facenet_v3_copy]",
-    model_version: "facenet-v3",
+    template_hash: "sig_hash_b710ef67", // DUPLICATE TO FIT DETECT CRITERIA
+    encrypted_template: "U2FsdGVkX18mZ9/X2dGzW/8nZ9+kLd8M=...[encrypted_vector_signaturenet_v3_copy]",
+    model_version: "signaturenet-v3",
     confidence_score: 92.10,
     created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString()
   },
   {
     id: "tmpl_103",
     user_id: "usr_bc4477ee",
-    template_hash: "bio_hash_bc4477ee",
-    encrypted_template: "U2FsdGVkX18mZ9/X2dGzW/8nZ9+kLd8I=...[encrypted_vector_facenet_v3_unique]",
-    model_version: "facenet-v3",
+    template_hash: "sig_hash_bc4477ee",
+    encrypted_template: "U2FsdGVkX18mZ9/X2dGzW/8nZ9+kLd8I=...[encrypted_vector_signaturenet_v3_unique]",
+    model_version: "signaturenet-v3",
     confidence_score: 99.10,
     created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString()
   }
@@ -209,7 +209,7 @@ const mockVerificationSessions: VerificationSession[] = [
     status: "started",
     risk_score: 15,
     duplicate_candidate: false,
-    result_reason: "Session initialized/awaiting biometric upload.",
+    result_reason: "Session initialized/awaiting signature upload.",
     risk_reasons: [],
     proof_token: "",
     created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
@@ -222,7 +222,7 @@ const mockVerificationSessions: VerificationSession[] = [
     status: "passed",
     risk_score: 8,
     duplicate_candidate: false,
-    result_reason: "Biometric match unique; confidence 98.4%. Liveness passed.",
+    result_reason: "Signature match unique; confidence 98.4%. Integrity passed.",
     risk_reasons: [],
     proof_token: "proof_claims_b71_sig_93f82e11ac0b",
     created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
@@ -235,8 +235,8 @@ const mockVerificationSessions: VerificationSession[] = [
     status: "failed",
     risk_score: 95,
     duplicate_candidate: true,
-    result_reason: "Critical: Duplicate biometric face template identified matching user usr_b710ef67. Liveness score low.",
-    risk_reasons: ["duplicate_biometric_template_hash", "many_accounts_on_one_device", "failed_liveness"],
+    result_reason: "Critical: Duplicate signature template identified matching user usr_b710ef67. Integrity score low.",
+    risk_reasons: ["duplicate_signature_template_hash", "many_accounts_on_one_device", "failed_integrity"],
     proof_token: "",
     created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
     completed_at: new Date(Date.now() - 11.9 * 3600 * 1000).toISOString()
@@ -261,7 +261,7 @@ const mockVerificationSessions: VerificationSession[] = [
     status: "passed",
     risk_score: 4,
     duplicate_candidate: false,
-    result_reason: "Same returning user on trusted hardware; biometric integrity intact.",
+    result_reason: "Same returning user on trusted hardware; signature integrity intact.",
     risk_reasons: [],
     proof_token: "proof_claims_bc4_sig_66a7b3c2ee10",
     created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
@@ -283,11 +283,11 @@ const mockAuditLogs: AuditLog[] = [
   {
     id: "log_2",
     actor_type: "system",
-    actor_id: "biometric_engine_v3",
-    action: "biometric.liveness_success",
+    actor_id: "signature_engine_v3",
+    action: "signature.integrity_success",
     target_type: "session",
     target_id: "vss_session_verified_b71",
-    metadata: { liveness_score: 0.992, model_v: "facenet-v3" },
+    metadata: { integrity_score: 0.992, model_v: "signaturenet-v3" },
     created_at: new Date(Date.now() - 23.97 * 3600 * 1000).toISOString()
   },
   {
@@ -307,7 +307,7 @@ const mockAuditLogs: AuditLog[] = [
     action: "risk.alert_high",
     target_type: "session",
     target_id: "vss_session_failed_df9",
-    metadata: { risk_score: 95, anomalies: ["duplicate_biometric_template_hash", "many_accounts_on_one_device"] },
+    metadata: { risk_score: 95, anomalies: ["duplicate_signature_template_hash", "many_accounts_on_one_device"] },
     created_at: new Date(Date.now() - 11.95 * 3600 * 1000).toISOString()
   },
   {
@@ -317,7 +317,7 @@ const mockAuditLogs: AuditLog[] = [
     action: "user.suspend",
     target_type: "user",
     target_id: "usr_df990a31",
-    metadata: { reason: "Automated biometric sybil detection flag confirmed by administrative review." },
+    metadata: { reason: "Automated signature sybil detection flag confirmed by administrative review." },
     created_at: new Date(Date.now() - 11.8 * 3600 * 1000).toISOString()
   },
   {
@@ -347,7 +347,7 @@ const mockPolicies: Policy[] = [
     conditions: "Duplicate Probability > 95%",
     thenAction: "remove_fraud",
     active: true,
-    description: "Based on security clearance, automatically deletes duplicate and fraudulent secondary profiles sharing identical facial credentials."
+    description: "Based on security clearance, automatically deletes duplicate and fraudulent secondary profiles sharing identical signature credentials."
   },
   {
     id: "pol_3",
@@ -355,7 +355,7 @@ const mockPolicies: Policy[] = [
     conditions: "Device Trust < 60 && Location Risk == High",
     thenAction: "challenge",
     active: true,
-    description: "Defers direct access authorization to prompt for out-of-band mobile verification and liveness checks."
+    description: "Defers direct access authorization to prompt for out-of-band mobile verification and integrity checks."
   }
 ];
 
@@ -470,8 +470,8 @@ const mockSecurityEvents: SecurityEvent[] = [
     user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0",
     session_id: "vss_session_failed_df9",
     partner_app_id: "partner_apps_fintech_123",
-    request_path: "/api/v1/verification-sessions/vss_session_failed_df9/biometric",
-    detection_reason: "Defensive Transition Enforcer Blocked: Direct state jump request attempted from created to proof_issued bypassing active consent & liveness verification.",
+    request_path: "/api/v1/verification-sessions/vss_session_failed_df9/signature",
+    detection_reason: "Defensive Transition Enforcer Blocked: Direct state jump request attempted from created to proof_issued bypassing active consent & integrity verification.",
     raw_metadata: {
       current_status: "created",
       failed_target_status: "proof_issued"
@@ -821,7 +821,7 @@ function verifyHardwareProofToken(proofToken: string, req: any): { valid: boolea
 const db = {
   partnerApps: [...mockPartnerApps],
   users: [...mockUsers],
-  biometricTemplates: [...mockBiometricTemplates],
+  signatureTemplates: [...mockSignatureTemplates],
   devices: [...mockDevices],
   partnerUserLinks: [...mockPartnerUserLinks],
   verificationSessions: [...mockVerificationSessions],
@@ -890,7 +890,7 @@ const db = {
       project_id: "proj_security_777",
       external_user_id: "fintech_external_charlie_12",
       status: "pending",
-      reason: "High-risk duplicate biometric scan flagged under security policy standard review.",
+      reason: "High-risk duplicate signature scan flagged under security policy standard review.",
       created_at: new Date(Date.now() - 11 * 3600 * 1000).toISOString(),
       approved_at: null
     }
@@ -917,7 +917,7 @@ function appendAuditLog(actorType: AuditLog['actor_type'], actorId: string, acti
 // RISK SCORING ENGINE IMPLEMENTATION
 // ============================================================================
 export function evaluateRisk(params: {
-  livenessPassed: boolean;
+  integrityPassed: boolean;
   templateHash: string;
   deviceFingerprintHash: string;
   hasConsent: boolean;
@@ -941,21 +941,21 @@ export function evaluateRisk(params: {
     reasons.push("expired_session");
   }
 
-  // 3. Failed Biometric Liveness check
-  if (!params.livenessPassed) {
+  // 3. Failed Integrity check
+  if (!params.integrityPassed) {
     score += 85;
-    reasons.push("failed_liveness");
+    reasons.push("failed_integrity");
   }
 
-  // 4. Duplicate Biometric Template Hash
-  // See if anyone else already possesses this biometric template
-  const isDuplicateBiometric = db.biometricTemplates.some(t => 
+  // 4. Duplicate Signature Template Hash
+  // See if anyone else already possesses this signature template
+  const isDuplicateSignature = db.signatureTemplates.some(t => 
     t.template_hash === params.templateHash && 
     (!params.userId || t.user_id !== params.userId)
   );
-  if (isDuplicateBiometric) {
+  if (isDuplicateSignature) {
     score += 90;
-    reasons.push("duplicate_biometric_template_hash");
+    reasons.push("duplicate_signature_template_hash");
   }
 
   // 5. Sybil Trap: Many accounts on some single physical device fingerprint
@@ -1224,11 +1224,11 @@ async function startServer() {
     });
   });
 
-  // 3. POST /api/v1/verification-sessions/:id/biometric
-  // MOCK IMPLEMENTATION — Replace with certified identity, biometric, fraud, and security providers before production use.
-  // Processes encrypted face payloads using mock biometric logic
-  app.post("/api/v1/verification-sessions/:id/biometric", (req, res) => {
-    const { liveness_token, face_embedding, device_public_key, device_fingerprint_hash } = req.body;
+  // 3. POST /api/v1/verification-sessions/:id/signature
+  // MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before production use.
+  // Processes encrypted signature payloads using mock signature logic
+  app.post("/api/v1/verification-sessions/:id/signature", (req, res) => {
+    const { integrity_token, signature_hash, device_public_key, device_fingerprint_hash } = req.body;
     const session = db.verificationSessions.find(s => s.id === req.params.id);
 
     if (!session) {
@@ -1242,7 +1242,7 @@ async function startServer() {
     }
 
     // Defensive State Transition Guard: Step 2 (consent_given -> verification_started)
-    const tStarted = transitionSession(session, 'verification_started', req, "Biometric active verification started.");
+    const tStarted = transitionSession(session, 'verification_started', req, "Signature active verification started.");
     if (!tStarted.allowed) {
       return res.status(400).json({ error: "Bypass Blocked: Invalid session state transition sequence" });
     }
@@ -1284,16 +1284,16 @@ async function startServer() {
     const isNewDevice = !db.devices.some(d => d.user_id === targetUserId && d.device_fingerprint_hash === device_fingerprint_hash);
 
     // Evaluate Risk Signals
-    const livenessPassed = liveness_token === "liveness_passed_token" || liveness_token === "mock_face_verified_true";
+    const integrityPassed = integrity_token === "integrity_passed_token" || integrity_token === "mock_face_verified_true" || integrity_token === "signature_passed_token";
     
-    // Evaluate if the duplicate embedding mimics someone else
-    const isDuplicateBiometric = db.biometricTemplates.some(t => 
-      t.template_hash === face_embedding && t.user_id !== targetUserId
+    // Evaluate if the duplicate signature mimics someone else
+    const isDuplicateSignature = db.signatureTemplates.some(t => 
+      t.template_hash === signature_hash && t.user_id !== targetUserId
     );
 
     const riskResult = evaluateRisk({
-      livenessPassed,
-      templateHash: face_embedding || "unknown_embedding",
+      integrityPassed,
+      templateHash: signature_hash || "unknown_signature",
       deviceFingerprintHash: device_fingerprint_hash || "unknown_fingerprint",
       hasConsent: true,
       isNewDevice,
@@ -1304,7 +1304,7 @@ async function startServer() {
 
     // Update Session Fields Statefully
     session.risk_score = riskResult.risk_score;
-    session.duplicate_candidate = isDuplicateBiometric;
+    session.duplicate_candidate = isDuplicateSignature;
     session.risk_reasons = riskResult.reasons;
 
     // Register Device
@@ -1320,19 +1320,19 @@ async function startServer() {
     };
     db.devices.push(newDevice);
 
-    // Enroll in biometric database if low risk and passed liveness
-    if (livenessPassed && !isDuplicateBiometric) {
+    // Enroll in signature database if low risk and passed integrity
+    if (integrityPassed && !isDuplicateSignature) {
       const templateId = `tmpl_${crypto.randomBytes(4).toString('hex')}`;
-      const newTemplate: BiometricTemplate = {
+      const newTemplate: SignatureTemplate = {
         id: templateId,
         user_id: targetUserId,
-        template_hash: face_embedding || `bio_hash_${crypto.randomBytes(4).toString('hex')}`,
-        encrypted_template: `U2FsdGVkX18BFE72F...[encrypted_embedding_vector_version_facenet_v3]`,
-        model_version: "facenet-v3",
+        template_hash: signature_hash || `sig_hash_${crypto.randomBytes(4).toString('hex')}`,
+        encrypted_template: `U2FsdGVkX18BFE72F...[encrypted_signature_vector_version_signaturenet_v3]`,
+        model_version: "signaturenet-v3",
         confidence_score: 97.2,
         created_at: new Date().toISOString()
       };
-      db.biometricTemplates.push(newTemplate);
+      db.signatureTemplates.push(newTemplate);
     }
 
     // Final state evaluation
@@ -1352,9 +1352,9 @@ async function startServer() {
         risk_reasons: riskResult.reasons
       });
 
-      if (isDuplicateBiometric) {
+      if (isDuplicateSignature) {
         dispatchWebhook('aan.duplicate.detected', session.external_user_id, riskResult.risk_level, 'deny', {
-          face_embedding_summary: face_embedding ? face_embedding.substring(0, 12) + "..." : "unknown"
+          signature_hash_summary: signature_hash ? signature_hash.substring(0, 12) + "..." : "unknown"
         });
       }
     } else if (riskResult.risk_score >= 35) {
@@ -1371,7 +1371,7 @@ async function startServer() {
       
       if (passTransition.allowed) {
         session.completed_at = new Date().toISOString();
-        const uniquenessStatus = isDuplicateBiometric ? 'duplicate' : 'unique';
+        const uniquenessStatus = isDuplicateSignature ? 'duplicate' : 'unique';
         
         // cryptographic JWT-structured proof token signing
         session.proof_token = issueProofToken(session.external_user_id, session.id, 'verified', uniquenessStatus, riskResult.risk_level);
@@ -1395,8 +1395,8 @@ async function startServer() {
 
     appendAuditLog(
       'system',
-      'biometric_engine_v3',
-      'biometric.verify_outcome',
+      'signature_engine_v3',
+      'signature.verify_outcome',
       'session',
       session.id,
       { risk_level: riskResult.risk_level, score: riskResult.risk_score, reasons: riskResult.reasons }
@@ -1478,7 +1478,7 @@ async function startServer() {
     if (duplicateSignalsFound) {
       riskScore = 85;
       riskLevel = 'high';
-      riskReasons.push("duplicate_biometric_template_hash");
+      riskReasons.push("duplicate_signature_template_hash");
     }
 
     if (device_fingerprint && user) {
@@ -1654,9 +1654,9 @@ async function startServer() {
     res.json(db.devices);
   });
 
-  app.get("/api/internal/biometrics", (req, res) => {
+  app.get("/api/internal/signatures", (req, res) => {
     // Expose metadata stats only for security compliance audits
-    const complianceStats = db.biometricTemplates.map(t => ({
+    const complianceStats = db.signatureTemplates.map(t => ({
       id: t.id,
       user_id: t.user_id,
       template_hash: t.template_hash,
@@ -2211,8 +2211,8 @@ async function startServer() {
       const userIdx = db.users.findIndex(u => u.id === user_id);
       if (userIdx !== -1) db.users.splice(userIdx, 1);
       
-      // Delete their biometric templates
-      db.biometricTemplates = db.biometricTemplates.filter(t => t.user_id !== user_id);
+      // Delete their signature templates
+      db.signatureTemplates = db.signatureTemplates.filter(t => t.user_id !== user_id);
       // Delete their known devices
       db.devices = db.devices.filter(d => d.user_id !== user_id);
     } else {
@@ -2264,7 +2264,7 @@ async function startServer() {
     user.status = "pending";
     user.updated_at = new Date().toISOString();
 
-    const desc = "Administrative core challenge requested. Biometric liveness validation required at next session entry.";
+    const desc = "Administrative core challenge requested. Cryptographic signature integrity validation required at next session entry.";
     
     // Add timeline & audit
     db.trustTimelines.unshift({
@@ -2388,7 +2388,7 @@ async function startServer() {
 
     // Perform permanent relational deletion of all associated profile files
     db.users = db.users.filter(u => u.id !== user_id);
-    db.biometricTemplates = db.biometricTemplates.filter(t => t.user_id !== user_id);
+    db.signatureTemplates = db.signatureTemplates.filter(t => t.user_id !== user_id);
     db.devices = db.devices.filter(d => d.user_id !== user_id);
     
     const associatedLinks = db.partnerUserLinks.filter(l => l.user_id === user_id);
@@ -2397,14 +2397,14 @@ async function startServer() {
     // Generate permanent security immutable audit trail log
     appendAuditLog('admin', 'admin_super_user_one', 'account.purge_deleted', 'user', user_id, {
       approved_by: "Institutional Security Operator Clearance Token",
-      biometric_purged: true,
+      signature_purged: true,
       devices_purged: true,
       partner_links_revokedCount: associatedLinks.length
     });
 
     res.json({
       success: true,
-      message: "COMPLETELY PURGED Profile. All biometric hashes, physical device signatures, and platform user links have been permanently deleted from storage.",
+      message: "COMPLETELY PURGED Profile. All signature hashes, physical device signatures, and platform user links have been permanently deleted from storage.",
       purged_id: user_id,
       remediation: "DATABASE_CLEANSE_COMPLETE"
     });
@@ -2471,7 +2471,7 @@ async function startServer() {
     if (link) {
       const userId = link.user_id;
       db.users = db.users.filter(u => u.id !== userId);
-      db.biometricTemplates = db.biometricTemplates.filter(t => t.user_id !== userId);
+      db.signatureTemplates = db.signatureTemplates.filter(t => t.user_id !== userId);
       db.devices = db.devices.filter(d => d.user_id !== userId);
       db.partnerUserLinks = db.partnerUserLinks.filter(l => l.user_id !== userId);
     }

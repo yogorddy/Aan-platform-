@@ -129,7 +129,7 @@ const DEFAULT_PROFILES: VerificationProfile[] = [
   {
     id: "prof_basic",
     name: "Basic Verification",
-    description: "Lightweight, privacy-preserving profile designed to verify identity status with minimal collection. Disables biometrics and requests only standard hashes.",
+    description: "Lightweight, privacy-preserving profile designed to verify identity status with minimal collection. Minimizes stored variables and requests only standard hashes.",
     isCustom: false,
     signals: {
       email_hash: { enabled: true, required: true },
@@ -229,7 +229,6 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
   const [auditReason, setAuditReason] = useState<string>("");
   const [selectedSignalId, setSelectedSignalId] = useState<string>("email_hash");
   const [assignProjectIds, setAssignProjectIds] = useState<string[]>([]);
-  const [selectedDemoProject, setSelectedDemoProject] = useState<string>("all");
 
   // Editable temporary profile state
   const [tempProfile, setTempProfile] = useState<VerificationProfile | null>(null);
@@ -403,8 +402,6 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
           updatedAt: new Date().toISOString()
         };
       }
-      // If project assignments changed, and assignments must be unique or shared format:
-      // Let's allow sharing profiles, but let's make sure assignments are clean.
       return p;
     });
 
@@ -444,7 +441,6 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
     const target = profiles.find(p => p.id === id);
     if (!target) return;
     if (!target.isCustom) {
-      alert("System preconfigured profiles cannot be deleted.");
       return;
     }
 
@@ -590,17 +586,17 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
   const metricsObj = getProfileMockMetrics(activeProfile.id);
 
   return (
-    <div className="space-y-6 text-slate-300 max-w-6xl animate-fadeIn">
+    <div className="space-y-6 text-slate-300 max-w-6xl animate-fadeIn text-left">
       
       {/* Title Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-800 pb-4 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#1b1e28] pb-4 gap-4">
         <div>
           <div className="flex items-center gap-2">
             <Sliders className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-xl font-bold text-white leading-tight">Configurable Verification Profiles</h2>
+            <h2 className="text-xl font-mono tracking-tight font-extrabold text-white leading-tight">Configurable Verification Profiles</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-1 max-w-xl">
-            AAN is signal-driven, not data-hungry. Prevent over-collection of sensitive biometrics by enabling only the minimum evidence parameters required.
+          <p className="text-xs text-[#78819a] mt-1 max-w-xl">
+            AAN is signal-driven, not data-hungry. Prevent over-collection of sensitive user parameters by enabling only the minimum evidence parameters required.
           </p>
         </div>
         
@@ -608,7 +604,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
           {isAcademyEnabled() && (
             <button
               onClick={() => onNavigateToAcademy("verification_profiles")}
-              className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-lg cursor-pointer"
+              className="flex items-center gap-1.5 text-xs text-blue-404 hover:text-white transition-all bg-[#111319] border border-[#1b1e28] px-3.5 py-2 rounded-lg cursor-pointer"
             >
               <BookOpen className="w-4 h-4" />
               <span>Profiles Academy</span>
@@ -629,10 +625,10 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
         
         {/* ===================== PROFILES LIST SIDE (4 cols) ===================== */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 space-y-3.5">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3.5">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">Active Profiles</span>
-              <span className="text-[9px] font-mono bg-slate-900 px-2 py-0.5 rounded text-emerald-400 font-bold border border-emerald-900/30">
+              <span className="text-[10px] font-mono font-bold text-[#78819a] uppercase tracking-widest">Active Profiles</span>
+              <span className="text-[9px] font-mono bg-[#0d0e12] px-2 py-0.5 rounded text-emerald-400 font-bold border border-emerald-900/30">
                 {profiles.length} TOTAL
               </span>
             </div>
@@ -648,7 +644,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                     className={`p-3 rounded-lg border text-left cursor-pointer transition-all ${
                       isSelected 
                         ? 'bg-blue-600/10 border-blue-500/80' 
-                        : 'bg-slate-900/50 border-slate-850 hover:bg-slate-850/40'
+                        : 'bg-[#0d0e12] border-[#1b1e28] hover:bg-slate-850/40'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -656,16 +652,16 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                       {p.isCustom ? (
                         <span className="text-[8px] bg-emerald-950 text-emerald-400 px-1 py-0.1 rounded font-bold border border-emerald-900/40">CUSTOM</span>
                       ) : (
-                        <span className="text-[8px] bg-slate-900 text-slate-500 px-1 py-0.1 rounded font-bold">SYSTEM</span>
+                        <span className="text-[8px] bg-[#111319] text-slate-500 px-1 py-0.1 rounded font-bold">SYSTEM</span>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">{p.description}</p>
+                    <p className="text-[10px] text-[#78819a] mt-1 line-clamp-2 leading-relaxed">{p.description}</p>
                     
-                    <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-850/40 text-[9px] font-mono">
-                      <span className="text-slate-500">
+                    <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-[#1b1e28]/40 text-[9px] font-mono">
+                      <span className="text-[#78819a]">
                         {Object.values(p.signals).filter((s: any) => s.enabled).length} Enabled Signals
                       </span>
-                      <span className={assignedCount > 0 ? "text-blue-400" : "text-slate-500"}>
+                      <span className={assignedCount > 0 ? "text-blue-400" : "text-[#78819a]"}>
                         {assignedCount === 0 ? 'No apps' : `${assignedCount} app${assignedCount > 1 ? 's' : ''}`}
                       </span>
                     </div>
@@ -676,41 +672,41 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
           </div>
 
           {/* MOCK USAGE STATISTICS PANEL */}
-          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 space-y-3">
-            <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3">
+            <span className="text-[10px] font-mono font-bold text-[#78819a] uppercase tracking-widest flex items-center gap-1.5">
               <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
               Profile Usage (30D)
             </span>
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-slate-900/60 p-2.5 rounded border border-slate-850">
-                <span className="text-[9px] text-slate-500 block">Total Evaluations</span>
+              <div className="bg-[#0d0e12] p-2.5 rounded border border-[#1b1e28]">
+                <span className="text-[9px] text-[#78819a] block">Total Evaluations</span>
                 <span className="text-sm font-extrabold text-white mt-1 block font-mono">
                   {metricsObj.total.toLocaleString()}
                 </span>
               </div>
-              <div className="bg-slate-900/60 p-2.5 rounded border border-slate-850">
-                <span className="text-[9px] text-slate-500 block">Pass Rate</span>
+              <div className="bg-[#0d0e12] p-2.5 rounded border border-[#1b1e28]">
+                <span className="text-[9px] text-[#78819a] block">Pass Rate</span>
                 <span className="text-sm font-extrabold text-emerald-400 mt-1 block font-mono">
                   {((metricsObj.passed / metricsObj.total) * 100).toFixed(1)}%
                 </span>
               </div>
             </div>
             
-            <div className="space-y-1.5 pt-1.5 border-t border-slate-850 text-xs">
+            <div className="space-y-1.5 pt-1.5 border-t border-[#1b1e28] text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500">Failed / Blocked</span>
+                <span className="text-[#78819a]">Failed / Blocked</span>
                 <span className="font-mono text-white text-[11px]">{metricsObj.failed.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Anomalous Risk Rate</span>
+                <span className="text-[#78819a]">Anomalous Risk Rate</span>
                 <span className="font-mono text-red-400 text-[11px]">{metricsObj.risk}%</span>
               </div>
             </div>
           </div>
 
           {/* PROJECT ASSIGNMENT MATRIX */}
-          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 space-y-3">
-            <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest block">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3">
+            <span className="text-[10px] font-mono font-bold text-[#78819a] uppercase tracking-widest block">
               Assign to Sandbox Apps
             </span>
             {partnerApps.length === 0 ? (
@@ -728,8 +724,8 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                       className={`flex items-center justify-between p-2 rounded text-xs transition-all ${
                         isAssigned 
                           ? 'bg-blue-900/10 border border-blue-900/40 text-blue-300' 
-                          : 'bg-slate-900/40 border border-slate-850 text-slate-400'
-                      } ${editMode ? 'cursor-pointer hover:bg-slate-800/40' : 'opacity-85 pointer-events-none'}`}
+                          : 'bg-[#0d0e12] border border-[#1b1e28] text-[#78819a]'
+                      } ${editMode ? 'cursor-pointer hover:bg-[#111319]' : 'opacity-85 pointer-events-none'}`}
                     >
                       <span className="truncate font-medium">{app.name}</span>
                       {isAssigned && (
@@ -742,7 +738,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
             )}
             
             {editMode && (
-              <p className="text-[10px] text-slate-500 leading-normal italic mt-1.5">
+              <p className="text-[10px] text-[#78819a] leading-normal italic mt-1.5">
                 Click apps above to bind them statefully to this profile. Saving will update routing targets.
               </p>
             )}
@@ -754,24 +750,24 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
         <div className="lg:col-span-8 space-y-6">
           
           {/* PROFILE CONTROL PANEL HEADER CARD */}
-          <div className="bg-slate-950 border border-slate-850 rounded-xl p-6 space-y-4">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-6 space-y-4">
             
-            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-850 pb-4 gap-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-[#1b1e28] pb-4 gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h3 className="text-base font-extrabold text-white">{activeProfile.name}</h3>
-                  <span className="text-[9px] font-mono text-zinc-500 bg-slate-900 px-2 py-0.5 rounded">
+                  <span className="text-[9px] font-mono text-zinc-500 bg-[#0d0e12] px-2 py-0.5 rounded">
                     ID: {activeProfile.id}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed max-w-xl">{activeProfile.description}</p>
+                <p className="text-xs text-[#78819a] leading-relaxed max-w-xl">{activeProfile.description}</p>
               </div>
 
               {!editMode ? (
                 <div className="flex gap-2">
                   <button
                     onClick={handleDuplicateProfile}
-                    className="flex items-center gap-1 text-xs bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:text-white px-3 py-1.5 rounded cursor-pointer transition-all"
+                    className="flex items-center gap-1 text-xs bg-[#0d0e12] border border-[#1b1e28] hover:bg-[#111319] hover:text-white px-3 py-1.5 rounded cursor-pointer transition-all"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     <span>Duplicate</span>
@@ -801,7 +797,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                 <div className="flex gap-2">
                   <button
                     onClick={() => { setEditMode(false); setTempProfile(null); }}
-                    className="text-xs bg-slate-900 border border-slate-800 px-3 py-1.5 rounded cursor-pointer transition-all hover:bg-slate-800"
+                    className="text-xs bg-[#0d0e12] border border-[#1b1e28] px-3 py-1.5 rounded cursor-pointer transition-all hover:bg-[#111319]"
                   >
                     Cancel
                   </button>
@@ -819,8 +815,8 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
 
             {/* AUDIT WRITE REASON FIELD */}
             {editMode && (
-              <div className="bg-slate-900/60 p-4 border border-slate-800 rounded-lg space-y-2 animate-fadeIn">
-                <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block">
+              <div className="bg-[#0d0e12] p-4 border border-[#1b1e28] rounded-lg space-y-2 animate-fadeIn">
+                <span className="text-[10px] font-mono text-[#78819a] font-bold uppercase tracking-wider block">
                   Mandatory Modification Audit Reason
                 </span>
                 <input
@@ -828,9 +824,9 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                   placeholder="e.g., Minimizing compliance overhead by disabling browser metrics hashes, as requested by legal."
                   value={auditReason}
                   onChange={(e) => setAuditReason(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-xs text-white px-3 py-2.5 rounded focus:outline-none placeholder-slate-600 font-mono"
+                  className="w-full bg-[#111319] border border-[#1b1e28] text-xs text-white px-3 py-2.5 rounded focus:outline-none placeholder-slate-600 font-mono"
                 />
-                <span className="text-[9px] text-slate-500 block italic leading-normal">
+                <span className="text-[9px] text-[#78819a] block italic leading-normal">
                   Your team will see this audit log reason in compliance logs. Leaving blank defaults logging references.
                 </span>
               </div>
@@ -838,7 +834,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
 
             {/* ===================== DYNAMIC INTERACTIVE REQUEST BUILDER GRID ===================== */}
             <div className="space-y-4">
-              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block">
+              <span className="text-[10px] font-mono font-bold text-[#78819a] uppercase tracking-widest block">
                 {editMode ? "INTERACTIVE SIGNAL BUILDER EDITOR" : "ACTIVE PROFILE SIGNALS MATRIX"}
               </span>
 
@@ -857,8 +853,8 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                       onClick={() => setSelectedSignalId(sig.id)}
                       className={`p-3 rounded-lg border flex flex-col justify-between transition-all cursor-pointer ${
                         isSelectedForDocs 
-                          ? 'border-slate-500 bg-slate-900/30' 
-                          : 'border-slate-850 hover:border-slate-700 bg-slate-900/10'
+                          ? 'border-slate-500 bg-[#0d0e12]' 
+                          : 'border-[#1b1e28] hover:border-slate-700 bg-slate-900/10'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-1.5">
@@ -877,7 +873,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                               className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded cursor-pointer transition-all ${
                                 config.enabled 
                                   ? 'bg-emerald-600 text-white' 
-                                  : 'bg-slate-950 text-slate-500 hover:bg-slate-800'
+                                  : 'bg-[#0d0e12] text-slate-500 hover:bg-[#111319]'
                               }`}
                             >
                               {config.enabled ? 'ENABLED' : 'DISABLED'}
@@ -888,10 +884,10 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                               disabled={!config.enabled}
                               className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded transition-all ${
                                 !config.enabled 
-                                  ? 'opacity-40 cursor-not-allowed bg-slate-950 text-slate-600' 
+                                  ? 'opacity-40 cursor-not-allowed bg-[#0d0e12] text-slate-600' 
                                   : config.required 
                                     ? 'bg-blue-600 text-white cursor-pointer' 
-                                    : 'bg-slate-950 text-slate-500 hover:bg-slate-800 cursor-pointer'
+                                    : 'bg-[#0d0e12] text-slate-500 hover:bg-[#111319] cursor-pointer'
                               }`}
                             >
                               {config.required ? 'REQUIRED' : 'OPTIONAL'}
@@ -905,7 +901,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                                 {config.required ? 'REQUIRED' : 'OPTIONAL'}
                               </span>
                             ) : (
-                              <span className="text-[9px] font-mono font-medium text-slate-600 bg-slate-950 px-2 py-0.5 rounded pr-2.5">
+                              <span className="text-[9px] font-mono font-medium text-slate-600 bg-[#0d0e12] px-2 py-0.5 rounded pr-2.5">
                                 IGNORED
                               </span>
                             )}
@@ -913,7 +909,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                         )}
                       </div>
 
-                      <p className="text-[10.5px] text-slate-400 mt-2.5 line-clamp-1 leading-normal italic">{sig.description}</p>
+                      <p className="text-[10.5px] text-[#78819a] mt-2.5 line-clamp-1 leading-normal italic">{sig.description}</p>
                     </div>
                   );
                 })}
@@ -921,7 +917,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
             </div>
 
             {/* DYNAMIC DOCUMENTATION OF SELECTED SIGNAL UNDER BULLET CHIPS */}
-            <div className="bg-slate-900/60 p-4 border border-slate-850 rounded-xl space-y-2.5 animate-fadeIn">
+            <div className="bg-[#0d0e12] p-4 border border-[#1b1e28] rounded-xl space-y-2.5 animate-fadeIn">
               <div className="flex items-center gap-1.5">
                 <Info className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span className="text-[11px] font-mono text-white font-bold uppercase tracking-wider">
@@ -932,22 +928,22 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1.5">
                   <div>
-                    <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Functional Purpose:</span>
+                    <span className="text-[10px] text-[#78819a] block uppercase tracking-wider">Functional Purpose:</span>
                     <p className="text-slate-300 leading-relaxed font-medium">{activeSignal.purpose}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Privacy-Preserving Footprint:</span>
-                    <p className="text-slate-400 leading-relaxed">{activeSignal.privacyImpact}</p>
+                    <span className="text-[10px] text-[#78819a] block uppercase tracking-wider">Privacy-Preserving Footprint:</span>
+                    <p className="text-[#78819a] leading-relaxed">{activeSignal.privacyImpact}</p>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <div>
-                    <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Recommended Use Case:</span>
+                    <span className="text-[10px] text-[#78819a] block uppercase tracking-wider">Recommended Use Case:</span>
                     <p className="text-slate-300 leading-relaxed">{activeSignal.recommendedUse}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 block uppercase tracking-wider">Enterprise Roadmap Guideline:</span>
+                    <span className="text-[10px] text-[#78819a] block uppercase tracking-wider">Enterprise Roadmap Guideline:</span>
                     <p className="text-blue-300 leading-relaxed font-mono">{activeSignal.enterpriseRec}</p>
                   </div>
                 </div>
@@ -960,39 +956,39 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* JSON Schema Previews */}
-            <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 flex flex-col justify-between shadow-lg">
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 flex flex-col justify-between shadow-lg">
               <div>
-                <div className="flex items-center justify-between border-b border-slate-900 pb-2 mb-2">
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-bold font-mono">
-                    <FileCode className="text-blue-400 w-4 h-4" />
+                <div className="flex items-center justify-between border-b border-[#1b1e28] pb-2 mb-2">
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#78819a] font-bold font-mono">
+                    <FileCode className="text-blue-404 w-4 h-4" />
                     DYNAMIC_PAYLOAD_BODY.JSON
                   </div>
-                  <span className="text-[9px] text-zinc-500 font-bold font-mono uppercase">API BODY PREVIEW</span>
+                  <span className="text-[9px] text-[#78819a] font-bold font-mono uppercase">API BODY PREVIEW</span>
                 </div>
-                <pre className="p-2 bg-slate-950 rounded text-[10.5px] font-mono text-emerald-400 overflow-x-auto max-h-56 leading-tight select-all">
+                <pre className="p-2 bg-[#0d0e12] rounded text-[10.5px] font-mono text-emerald-400 overflow-x-auto max-h-56 leading-tight select-all">
                   {renderLivePayloadPreview()}
                 </pre>
               </div>
-              <div className="border-t border-slate-900 pt-2 text-[9px] text-slate-500 italic mt-3 font-mono">
+              <div className="border-t border-[#1b1e28] pt-2 text-[9px] text-[#78819a] italic mt-3 font-mono">
                 Only active signals in this profile are parsed by AAN's gateway router middleware.
               </div>
             </div>
 
             {/* CURL PREVIEWS */}
-            <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 flex flex-col justify-between shadow-lg">
+            <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 flex flex-col justify-between shadow-lg">
               <div>
-                <div className="flex items-center justify-between border-b border-slate-900 pb-2 mb-2">
-                  <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-bold font-mono">
-                    <Terminal className="text-emerald-400 w-4 h-4" />
+                <div className="flex items-center justify-between border-b border-[#1b1e28] pb-2 mb-2">
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#78819a] font-bold font-mono">
+                    <Terminal className="text-emerald-404 w-4 h-4" />
                     SECURED_EXPRESS_REQUEST.SH
                   </div>
-                  <span className="text-[9px] text-zinc-500 font-bold font-mono uppercase">CURL SCRIPT PREVIEW</span>
+                  <span className="text-[9px] text-[#78819a] font-bold font-mono uppercase">CURL SCRIPT PREVIEW</span>
                 </div>
-                <pre className="p-2 bg-slate-950 rounded text-[10.5px] font-mono text-blue-300 overflow-x-auto max-h-56 whitespace-pre-wrap leading-normal select-all break-all">
+                <pre className="p-2 bg-[#0d0e12] rounded text-[10.5px] font-mono text-blue-300 overflow-x-auto max-h-56 whitespace-pre-wrap leading-normal select-all break-all">
                   {renderCurlPreview()}
                 </pre>
               </div>
-              <div className="border-t border-slate-900 pt-2 text-[9px] text-slate-500 mt-3 flex justify-between font-mono">
+              <div className="border-t border-[#1b1e28] pt-2 text-[9px] text-[#78819a] mt-3 flex justify-between font-mono">
                 <span>API VERSION: v1.2</span>
                 <span className="text-emerald-500">MOCK_SANDBOX_STAGING</span>
               </div>
@@ -1001,26 +997,26 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
           </div>
 
           {/* ===================== AUDIT LOG HISTORY OF THE INSTANCE ===================== */}
-          <div className="bg-slate-950 border border-slate-850 rounded-xl p-4 space-y-3 shadow-lg">
-            <div className="flex items-center justify-between border-b border-slate-900 pb-2">
-              <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 space-y-3 shadow-lg">
+            <div className="flex items-center justify-between border-b border-[#1b1e28] pb-2">
+              <span className="text-[10px] font-mono font-bold text-[#78819a] uppercase tracking-widest flex items-center gap-1.5">
                 <History className="w-4 h-4 text-purple-400" />
                 Profile Immutable Change Audit History
               </span>
-              <span className="text-[9px] font-mono text-slate-500 font-bold">MUTABILITY INDEX</span>
+              <span className="text-[9px] font-mono text-[#78819a] font-bold">MUTABILITY INDEX</span>
             </div>
 
             <div className="space-y-3.5 max-h-48 overflow-y-auto pr-1">
               {history.length === 0 ? (
-                <p className="text-xs text-slate-500 italic py-2">No historical change logs recorded for profiles.</p>
+                <p className="text-xs text-[#78819a] italic py-2">No historical change logs recorded for profiles.</p>
               ) : (
                 history
                   .filter(h => h.profileId === selectedProfileId)
                   .map(entry => (
-                    <div key={entry.id} className="text-xs space-y-1 bg-slate-900/30 p-2.5 rounded border border-slate-900/60 leading-normal">
+                    <div key={entry.id} className="text-xs space-y-1 bg-[#0d0e12] p-2.5 rounded border border-[#1b1e28] leading-normal">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                         <span className="font-mono text-zinc-400 font-bold">{entry.changedBy}</span>
-                        <span className="text-[9.5px] font-mono text-slate-500">
+                        <span className="text-[9.5px] font-mono text-[#78819a]">
                           {new Date(entry.timestamp).toLocaleString()}
                         </span>
                       </div>
@@ -1029,7 +1025,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                       
                       {/* Configuration Diff Preview if any */}
                       {Object.keys(entry.previousConfig || {}).length > 0 && (
-                        <div className="pt-1.5 border-t border-slate-900/40 text-[9.5px] font-mono text-slate-500 space-y-0.5">
+                        <div className="pt-1.5 border-t border-[#1b1e28] text-[9.5px] font-mono text-[#78819a] space-y-0.5">
                           <span className="uppercase font-bold block text-[8px] text-zinc-600 mb-0.5">MODIFICATION DIFF FLAGS:</span>
                           {Object.keys(entry.newConfig).map(key => {
                             const prev = entry.previousConfig[key];
@@ -1068,7 +1064,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
       {/* CREATE NEW PROFILE MODAL DIALOG */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="relative bg-slate-900 border border-slate-800 text-slate-300 rounded-xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+          <div className="relative bg-[#111319] border border-[#1b1e28] text-slate-300 rounded-xl p-6 w-full max-w-md space-y-4 shadow-2xl">
             <button
               onClick={() => setShowCreateModal(false)}
               className="absolute top-4 right-4 text-slate-500 hover:text-white transition-all cursor-pointer"
@@ -1077,35 +1073,35 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
             </button>
             
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+              <h3 className="text-base font-bold text-white flex items-center gap-1.5 font-mono">
                 <Sliders className="w-4 h-4 text-emerald-400" />
                 Create New Custom Profile
               </h3>
-              <p className="text-xs text-slate-400 leading-normal">
+              <p className="text-xs text-[#78819a] leading-normal font-sans">
                 Declare a brand new Verification Profile ruleset. This customized layout can be assigned dynamically to any registered sandboxed project.
               </p>
             </div>
 
             <div className="space-y-3.5">
               <div>
-                <label className="block text-[10px] font-mono text-slate-500 uppercase font-bold mb-1.5">Profile Name</label>
+                <label className="block text-[10px] font-mono text-[#78819a] uppercase font-bold mb-1.5">Profile Name</label>
                 <input
                   type="text"
                   placeholder="e.g., Gaming High Friction Profile"
                   value={newProfileName}
                   onChange={(e) => setNewProfileName(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-xs text-white p-2.5 rounded focus:outline-none placeholder-slate-600 font-sans"
+                  className="w-full bg-[#0d0e12] border border-[#1b1e28] text-xs text-white p-2.5 rounded focus:outline-none placeholder-slate-600 font-sans"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-mono text-slate-500 uppercase font-bold mb-1.5">Description (SLA / Compliance Target)</label>
+                <label className="block text-[10px] font-mono text-[#78819a] uppercase font-bold mb-1.5">Description (SLA / Compliance Target)</label>
                 <textarea
                   rows={2}
                   placeholder="Explain why this profile is configured and where in the customer onboarding flow this checklist is enforced."
                   value={newProfileDesc}
                   onChange={(e) => setNewProfileDesc(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 text-xs text-white p-2.5 rounded focus:outline-none placeholder-slate-600 resize-none font-sans"
+                  className="w-full bg-[#0d0e12] border border-[#1b1e28] text-xs text-white p-2.5 rounded focus:outline-none placeholder-slate-600 resize-none font-sans"
                 />
               </div>
             </div>
@@ -1113,7 +1109,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
             <div className="flex gap-2 justify-end pt-2">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-xs bg-slate-950 hover:bg-slate-800 border border-slate-850 text-slate-400 px-4 py-2 rounded-lg cursor-pointer transition-all"
+                className="text-xs bg-[#0d0e12] hover:bg-[#111319] border border-[#1b1e28] text-[#78819a] px-4 py-2 rounded-lg cursor-pointer transition-all"
               >
                 Cancel
               </button>

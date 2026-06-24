@@ -42,16 +42,16 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
     <div className="space-y-6 text-slate-300 font-sans text-left">
       
       {/* Visual Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-900 pb-5">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#1b1e28] pb-5">
         <div className="space-y-1">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 font-extrabold bg-blue-950/80 px-2.5 py-0.5 border border-blue-900/30 rounded">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 font-extrabold bg-[#111319] px-2.5 py-0.5 border border-[#1b1e28] rounded">
             Enterprise Health Telemetry
           </span>
           <h2 className="text-xl font-mono tracking-tight font-extrabold text-white flex items-center gap-2">
             <Activity className="w-5 h-5 text-emerald-400" />
             Integration Health & SLA Metrics
           </h2>
-          <p className="text-xs text-slate-404 max-w-2xl leading-relaxed">
+          <p className="text-xs text-[#78819a] max-w-2xl leading-relaxed">
             Monitor real-time gateway uptimes, dispatch performance thresholds, and cryptographic validation failures to maintain pristine connectivity across distributed services.
           </p>
         </div>
@@ -70,8 +70,8 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
       {/* Grid STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {healthStats.map((stat) => (
-          <div key={stat.label} className="bg-slate-900/40 border border-slate-900 p-5 rounded-xl space-y-2">
-            <span className="font-mono text-[9px] text-slate-500 font-extrabold uppercase tracking-wider block">
+          <div key={stat.label} className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl space-y-2">
+            <span className="font-mono text-[9px] text-[#78819a] font-extrabold uppercase tracking-wider block">
               {stat.label}
             </span>
             <div className="flex items-baseline justify-between">
@@ -84,7 +84,7 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
                 {stat.trend}
               </span>
             </div>
-            <p className="text-[10px] text-slate-500 leading-normal">{stat.desc}</p>
+            <p className="text-[10px] text-[#78819a] leading-normal">{stat.desc}</p>
           </div>
         ))}
       </div>
@@ -93,30 +93,30 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Verification volume trends (7 cols) */}
-        <div className="lg:col-span-8 bg-slate-900/35 border border-slate-900 p-5 rounded-xl space-y-6">
-          <div className="flex justify-between items-center pb-2 border-b border-slate-900">
+        <div className="lg:col-span-8 bg-[#111319] border border-[#1b1e28] p-5 rounded-xl space-y-6">
+          <div className="flex justify-between items-center pb-2 border-b border-[#1b1e28]">
             <div>
               <h3 className="font-mono text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 REST verification request volume trend
               </h3>
-              <p className="text-[10px] text-slate-505 font-sans">Visual request peaks mapped across recent service intervals.</p>
+              <p className="text-[10px] text-[#78819a] font-sans">Visual request peaks mapped across recent service intervals.</p>
             </div>
-            <span className="text-[10px] font-mono text-slate-500 font-black uppercase">Recent 24 Hours</span>
+            <span className="text-[10px] font-mono text-[#78819a] font-black uppercase">Recent 24 Hours</span>
           </div>
 
           {/* Spark bar chart model */}
-          <div className="h-44 flex items-end justify-between gap-3 pt-6 border-b border-slate-900 pb-2">
+          <div className="h-44 flex items-end justify-between gap-3 pt-6 border-b border-[#1b1e28] pb-2">
             {volumeDataTrend.map((data, idx) => {
               const pct = (data.count / 910) * 100;
               return (
                 <div key={data.hour} className="flex-1 flex flex-col items-center gap-2 group cursor-pointer">
-                  <span className="text-[9px] font-mono text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
+                  <span className="text-[9px] font-mono text-[#78819a] opacity-0 group-hover:opacity-100 transition-opacity mb-1 font-bold">
                     {data.count} reqs
                   </span>
                   
                   {/* CSS Visual Column Bar */}
-                  <div className="w-full bg-slate-950 rounded-t-md h-32 flex items-end overflow-hidden">
+                  <div className="w-full bg-[#0d0e12] rounded-t-md h-32 flex items-end overflow-hidden">
                     <div 
                       style={{ height: `${pct}%` }}
                       className={`w-full rounded-t-md transition-all duration-300 ${
@@ -127,34 +127,34 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
                     />
                   </div>
 
-                  <span className="text-[9px] font-mono text-slate-500 font-black">{data.hour}</span>
+                  <span className="text-[9px] font-mono text-[#78819a] font-black">{data.hour}</span>
                 </div>
               );
             })}
           </div>
 
           {/* Chart info summary */}
-          <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 pt-1">
+          <div className="flex justify-between items-center text-[10px] font-mono text-[#78819a] pt-1">
             <span>Peak capacity load: <b className="text-white">910 reqs/hr</b></span>
             <span>Total integrated endpoints certified: <b className="text-blue-400">9</b></span>
           </div>
         </div>
 
         {/* Latency list and status tracker (4 cols) */}
-        <div className="lg:col-span-4 bg-slate-900/35 border border-slate-900 p-5 rounded-xl space-y-5">
-          <div className="pb-2 border-b border-slate-900">
+        <div className="lg:col-span-4 bg-[#111319] border border-[#1b1e28] p-5 rounded-xl space-y-5">
+          <div className="pb-2 border-b border-[#1b1e28]">
             <h3 className="font-mono text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
               <Zap className="w-4 h-4 text-yellow-400 animate-pulse" />
               Edge Response Latency Trend
             </h3>
-            <p className="text-[10px] text-slate-505 font-sans">Standard global route execution latency.</p>
+            <p className="text-[10px] text-[#78819a] font-sans">Standard global route execution latency.</p>
           </div>
 
           {/* Simple sparks line display */}
           <div className="space-y-2 font-mono text-[10px]">
             {latencyTrend.map((lat, idx) => (
-              <div key={idx} className="flex justify-between items-center border-b border-slate-905 pb-1.5">
-                <span className="text-slate-500">Interval Bucket #{idx + 1}:</span>
+              <div key={idx} className="flex justify-between items-center border-b border-[#1b1e28] pb-1.5">
+                <span className="text-[#78819a]">Interval Bucket #{idx + 1}:</span>
                 <span className="text-white font-bold flex items-center gap-1">
                   {lat}ms
                   <span className={`w-1.5 h-1.5 rounded-full ${lat < 40 ? "bg-emerald-500" : lat < 43 ? "bg-amber-500" : "bg-red-500"}`} />
@@ -163,7 +163,7 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
             ))}
           </div>
 
-          <div className="p-3 bg-slate-950 border border-slate-900 rounded text-[9px] font-mono text-slate-500 leading-normal">
+          <div className="p-3 bg-[#0d0e12] border border-[#1b1e28] rounded text-[9px] font-mono text-[#78819a] leading-normal">
             Latency counts verify raw speed indices. AAN uses highly secure server-side routes ensuring immediate verification actions is delivered.
           </div>
         </div>
@@ -171,32 +171,32 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
       </div>
 
       {/* Recent Failure Logs */}
-      <div className="bg-slate-900/35 border border-slate-900 rounded-xl p-5 space-y-4">
-        <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+      <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4">
+        <div className="flex justify-between items-center border-b border-[#1b1e28] pb-2">
           <div>
             <h3 className="font-mono text-xs font-black uppercase text-white tracking-wider flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-rose-450" />
               Edge integration threat & exception logs
             </h3>
-            <p className="text-[10px] text-slate-505 font-sans">Recent security exceptions flagged by domain CORS filters or Sybil blocks.</p>
+            <p className="text-[10px] text-[#78819a] font-sans">Recent security exceptions flagged by domain CORS filters or Sybil blocks.</p>
           </div>
-          <span className="text-[10px] font-mono text-slate-500 uppercase font-bold">Past 30 Days</span>
+          <span className="text-[10px] font-mono text-[#78819a] uppercase font-bold">Past 30 Days</span>
         </div>
 
         <div className="space-y-2 font-mono text-[10.5px]">
           {recentFailures.map((fail) => (
-            <div key={fail.id} className="p-3 bg-slate-950 border border-slate-905 rounded-lg flex flex-col sm:flex-row justify-between gap-2 text-left">
+            <div key={fail.id} className="p-3 bg-[#0d0e12] border border-[#1b1e28] rounded-lg flex flex-col sm:flex-row justify-between gap-2 text-left">
               <div className="space-y-1 max-w-xl">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="bg-rose-950 border border-rose-900/40 text-rose-400 font-extrabold text-[9px] px-1.5 py-0.2 rounded">
                     {fail.type}
                   </span>
-                  <span className="text-slate-500 text-[10px]">Origin: <b className="text-slate-300">{fail.origin}</b></span>
+                  <span className="text-[#78819a] text-[10px]">Origin: <b className="text-slate-300">{fail.origin}</b></span>
                 </div>
                 <p className="text-slate-400 leading-relaxed text-[11px] font-sans">{fail.desc}</p>
               </div>
 
-              <span className="text-[9px] text-slate-500 font-bold shrink-0 uppercase sm:text-right">
+              <span className="text-[9px] text-[#78819a] font-bold shrink-0 uppercase sm:text-right">
                 {fail.time}
               </span>
             </div>

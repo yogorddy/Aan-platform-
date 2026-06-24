@@ -23,12 +23,12 @@ export interface SecurityEvent {
 export interface User {
   id: string; // uuid
   status: UserStatus;
-  human_uid: string; // privacy-safe identifier, e.g. biometric hash
+  human_uid: string; // privacy-safe identifier, e.g. unique signature hash
   created_at: string;
   updated_at: string;
 }
 
-export interface BiometricTemplate {
+export interface SignatureTemplate {
   id: string;
   user_id: string;
   template_hash: string;
@@ -98,8 +98,8 @@ export interface RiskResult {
   reasons: string[];
 }
 
-// Biometric service mocks
-export interface LivenessCheckMockResult {
+// Integrity service mocks
+export interface IntegrityCheckMockResult {
   passed: boolean;
   confidence: number;
   reasons: string[];
@@ -131,15 +131,15 @@ export interface GetSessionResultResponse {
   proof_token: string;
 }
 
-export interface SubmitBiometricRequest {
-  liveness_token: string;
-  face_embedding: string;
+export interface SubmitSignatureRequest {
+  integrity_token: string;
+  signature_hash: string;
   device_public_key: string;
   device_fingerprint_hash: string;
   platform?: string;
 }
 
-export interface SubmitBiometricResponse {
+export interface SubmitSignatureResponse {
   status: 'processing' | 'completed' | 'failed';
   error?: string;
 }
