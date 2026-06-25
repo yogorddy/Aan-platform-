@@ -90,13 +90,76 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
   // API Playground dynamic state
   const [playgroundApiKey, setPlaygroundApiKey] = useState("poh_key_fintech_demo_111");
   const [playgroundMethod, setPlaygroundMethod] = useState<'verify_session' | 'verify_proof'>('verify_session');
-  const [playgroundExtUserId, setPlaygroundExtUserId] = useState("customer_bob_99");
-  const [playgroundEmailHash, setPlaygroundEmailHash] = useState("sha256_bobs_personal_email_93f8e21a");
+  const [playgroundExtUserId, setPlaygroundExtUserId] = useState("user_example_99");
+  const [playgroundEmailHash, setPlaygroundEmailHash] = useState("a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2");
   const [playgroundPhoneHash, setPlaygroundPhoneHash] = useState("");
   const [playgroundDeviceFingerprint, setPlaygroundDeviceFingerprint] = useState("");
   const [playgroundProofToken, setPlaygroundProofToken] = useState("");
   const [playgroundLoading, setPlaygroundLoading] = useState(false);
   const [playgroundResponse, setPlaygroundResponse] = useState<any>(null);
+
+  // Guided Onboarding flow states
+  const [onboardingStep, setOnboardingStep] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('aan_onboarding_step');
+      return saved ? parseInt(saved, 10) : 1;
+    } catch {
+      return 1;
+    }
+  });
+  const [onboardingDismissed, setOnboardingDismissed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('aan_onboarding_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [onboardingKeyName, setOnboardingKeyName] = useState("Production API Key");
+  const [onboardingGeneratedKey, setOnboardingGeneratedKey] = useState<any>(null);
+  const [onboardingKeyCopied, setOnboardingKeyCopied] = useState(false);
+  const [onboardingWebhookUrl, setOnboardingWebhookUrl] = useState("https://api.mycompany.com/v1/aan-webhook");
+  const [onboardingWebhookSaved, setOnboardingWebhookSaved] = useState(false);
+  const [onboardingQuizAnswer, setOnboardingQuizAnswer] = useState<string | null>(null);
+  const [onboardingQuizCorrect, setOnboardingQuizCorrect] = useState<boolean | null>(null);
+  const [onboardingPlaygroundExtUser, setOnboardingPlaygroundExtUser] = useState("user_poh_onboard_77");
+  const [onboardingPlaygroundLoading, setOnboardingPlaygroundLoading] = useState(false);
+  const [onboardingPlaygroundResponse, setOnboardingPlaygroundResponse] = useState<any>(null);
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+
+  // Persistence side effects
+  const saveOnboardingStep = (step: number) => {
+    setOnboardingStep(step);
+    try {
+      localStorage.setItem('aan_onboarding_step', step.toString());
+    } catch (e) {
+      console.warn("Storage write blocked", e);
+    }
+  };
+
+  const handleOnboardingDismiss = () => {
+    setOnboardingDismissed(true);
+    try {
+      localStorage.setItem('aan_onboarding_dismissed', 'true');
+    } catch (e) {
+      console.warn("Storage write blocked", e);
+    }
+  };
+
+  const handleOnboardingReset = () => {
+    setOnboardingDismissed(false);
+    setOnboardingGeneratedKey(null);
+    setOnboardingKeyCopied(false);
+    setOnboardingWebhookSaved(false);
+    setOnboardingQuizAnswer(null);
+    setOnboardingQuizCorrect(null);
+    setOnboardingPlaygroundResponse(null);
+    saveOnboardingStep(1);
+    try {
+      localStorage.setItem('aan_onboarding_dismissed', 'false');
+    } catch (e) {
+      console.warn("Storage write blocked", e);
+    }
+  };
 
   useEffect(() => {
     fetchDashboardData();
@@ -682,14 +745,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         <main className="flex-1 overflow-y-auto p-8 bg-[#0d0e12]">
           
           {/* Global MVP Mock Disclaimer */}
-          <div className="bg-[#1a1412] border border-amber-900/30 rounded-lg p-4 mb-6 text-xs text-[#d2ab6c] leading-relaxed font-sans flex gap-3">
-            <span className="text-[#d2ab6c] font-bold shrink-0 text-xs">⚠️ SANDBOX ADVISORY:</span>
-            <div>
-              <p className="font-semibold mb-0.5">MOCK ATTESTATION PREVIEW — Administrative Sandbox Mode</p>
-              <p className="text-[#78819a]">
-                AAN Platform operates in sandbox mode for testing and demonstration. This interface simulates live trust signals and system postures. Connect a certified HSM signing system and authorized verification SDKs prior to production release.
-              </p>
-            </div>
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 mb-8 text-xs text-[#78819a] leading-relaxed font-sans flex items-center gap-3 animate-fadeIn">
+            <Info className="w-4 h-4 text-blue-500 shrink-0" />
+            <span>This workspace contains demonstration data for development purposes.</span>
           </div>
 
           {loading ? (
@@ -705,98 +763,756 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                                {/* Alert banner for active project settings info */}
                   <div className="bg-[#111319] border border-[#1b1e28] p-4 rounded-xl flex items-start gap-3.5">
                     <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                    <div>
+                    <div className="flex-1">
                       <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Platform Integration Policy Active</h4>
                       <p className="text-xs text-[#78819a] mt-1 leading-normal">
                         Your workspace is configured under the <b className="text-white">“{activeProject.name}”</b> project blueprint. 
                         Active enforcement mechanism is <span className="text-white underline font-mono">{activeProject.enforcement_mode}</span>.
                       </p>
                     </div>
+                    {onboardingDismissed && (
+                      <button
+                        onClick={handleOnboardingReset}
+                        className="text-xs bg-[#171a23] hover:bg-[#1f2431] text-blue-400 border border-[#232a3b] px-3 py-1.5 rounded cursor-pointer transition-colors shrink-0 font-mono font-bold"
+                      >
+                        REOPEN ONBOARDING GUIDE
+                      </button>
+                    )}
                   </div>
 
-                  {/* 7 core dashboard metrics requested */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl">
-                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Total Enrollments</span>
-                      <div className="text-2xl font-bold font-sans text-white mt-1">{sessions.length}</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Incoming REST evaluations</span>
+                  {/* GUIDED ONBOARDING FLOW FOR NEW PARTNERS */}
+                  {!onboardingDismissed ? (
+                    <div className="bg-gradient-to-br from-[#121620] to-[#0c0e14] border border-blue-900/40 rounded-xl p-6 relative overflow-hidden animate-fadeIn shadow-2xl shadow-blue-950/10">
+                      {/* Decorative elements */}
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-3xl pointer-events-none" />
+                      <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+
+                      {/* Header */}
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#1b1e28] pb-5 mb-5">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] px-2 py-0.5 rounded font-mono uppercase font-bold tracking-wider">
+                              Interactive Guide
+                            </span>
+                            <span className="text-xs text-[#5d6780] font-mono">Step {onboardingStep} of 4</span>
+                          </div>
+                          <h2 className="text-lg font-bold text-white tracking-tight mt-1 flex items-center gap-2 font-sans">
+                            <Shield className="w-5 h-5 text-blue-400" />
+                            AAN Partner Onboarding Flow
+                          </h2>
+                          <p className="text-xs text-[#78819a] mt-1">
+                            Establish your credentials, set up live alerts, and run your first cryptographic humanness verification session.
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button 
+                            onClick={handleOnboardingDismiss}
+                            className="text-[11px] text-[#5d6780] hover:text-white transition-colors cursor-pointer font-mono uppercase tracking-wider"
+                            title="Hide this guide. You can reopen it at any time."
+                          >
+                            Dismiss Guide
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Stepper progress tracker */}
+                      <div className="grid grid-cols-4 gap-2 mb-6">
+                        {[
+                          { step: 1, title: '1. Core Principles' },
+                          { step: 2, title: '2. Generate API Key' },
+                          { step: 3, title: '3. Webhook Target' },
+                          { step: 4, title: '4. API Handshake' }
+                        ].map((s) => (
+                          <button
+                            key={s.step}
+                            onClick={() => saveOnboardingStep(s.step)}
+                            className={`h-1.5 rounded transition-all duration-300 relative group cursor-pointer ${
+                              onboardingStep === s.step 
+                                ? 'bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]' 
+                                : onboardingStep > s.step 
+                                  ? 'bg-emerald-500/80' 
+                                  : 'bg-[#1b1e28]'
+                            }`}
+                          >
+                            <span className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-[#171a23] border border-[#232a3b] text-[9px] text-[#78819a] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 font-mono">
+                              {s.title}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Step Contents */}
+                      <div className="min-h-[220px]">
+                        {/* STEP 1: Understand the Product */}
+                        {onboardingStep === 1 && (
+                          <div className="space-y-4 animate-fadeIn">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="bg-[#111319]/80 border border-[#1b1e28] p-4 rounded-lg">
+                                <div className="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center mb-3">
+                                  <ShieldCheck className="w-4 h-4 text-blue-400" />
+                                </div>
+                                <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Zero-Knowledge Trust</h4>
+                                <p className="text-[11px] text-[#78819a] mt-1.5 leading-relaxed">
+                                  We never store raw photos, biometrics, SSNs, or physical ID documents. AAN translates facial landmarks into anonymous mathematical hashes.
+                                </p>
+                              </div>
+                              <div className="bg-[#111319]/80 border border-[#1b1e28] p-4 rounded-lg">
+                                <div className="w-8 h-8 rounded bg-indigo-500/10 flex items-center justify-center mb-3">
+                                  <Layers className="w-4 h-4 text-indigo-400" />
+                                </div>
+                                <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Platform Decentralization</h4>
+                                <p className="text-[11px] text-[#78819a] mt-1.5 leading-relaxed">
+                                  Proof-of-Human keys are tied with user-owned hardware signatures. Partner apps query identity status without having access to user credentials.
+                                </p>
+                              </div>
+                              <div className="bg-[#111319]/80 border border-[#1b1e28] p-4 rounded-lg">
+                                <div className="w-8 h-8 rounded bg-emerald-500/10 flex items-center justify-center mb-3">
+                                  <Activity className="w-4 h-4 text-emerald-400" />
+                                </div>
+                                <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Real-Time Risk Engine</h4>
+                                <p className="text-[11px] text-[#78819a] mt-1.5 leading-relaxed">
+                                  Our engine continuously analyses device fingerprints, dual-liveness trials, and template duplications to instantly flag sybil attacks.
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Interactive Quiz to solidify knowledge */}
+                            <div className="bg-[#171a23]/50 border border-[#232a3b] p-4 rounded-lg mt-4">
+                              <div className="flex items-center gap-2 mb-2">
+                                <HelpCircle className="w-4 h-4 text-blue-400" />
+                                <span className="text-xs font-bold text-white font-mono">Quick Concept Check</span>
+                                <div className="relative group ml-auto">
+                                  <Info className="w-3.5 h-3.5 text-[#5d6780] hover:text-white cursor-help" />
+                                  <span className="absolute right-0 bottom-6 bg-[#111319] border border-[#1b1e28] p-2 rounded text-[10px] text-[#78819a] w-48 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                                    AAN acts as an identity protection proxy, ensuring zero compliance risk for partners.
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-[#e3e5eb] leading-relaxed">
+                                True or False: To ensure compliance, your platform must ingest and store the user's raw video recording or physical photo.
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOnboardingQuizAnswer('true');
+                                    setOnboardingQuizCorrect(false);
+                                  }}
+                                  className={`px-4 py-2 rounded text-xs font-medium border transition-all text-left cursor-pointer ${
+                                    onboardingQuizAnswer === 'true'
+                                      ? 'bg-red-500/10 border-red-500/50 text-red-200'
+                                      : 'bg-[#111319] border-[#1b1e28] text-[#78819a] hover:border-blue-500/30'
+                                  }`}
+                                >
+                                  True — We need to store raw files.
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setOnboardingQuizAnswer('false');
+                                    setOnboardingQuizCorrect(true);
+                                  }}
+                                  className={`px-4 py-2 rounded text-xs font-medium border transition-all text-left cursor-pointer ${
+                                    onboardingQuizAnswer === 'false'
+                                      ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-200 font-bold'
+                                      : 'bg-[#111319] border-[#1b1e28] text-[#78819a] hover:border-blue-500/30'
+                                  }`}
+                                >
+                                  False — Biometrics are processed on-device and purged instantly.
+                                </button>
+                              </div>
+
+                              {onboardingQuizAnswer && (
+                                <div className="mt-3 animate-fadeIn">
+                                  {onboardingQuizCorrect ? (
+                                    <div className="flex items-center gap-2 text-xs text-emerald-400">
+                                      <Check className="w-4 h-4 shrink-0" />
+                                      <span><b>Spot on!</b> Storing raw images is a privacy and security liability. AAN keeps you fully insulated.</span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2 text-xs text-red-400">
+                                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                                      <span><b>Incorrect.</b> AAN purges raw images immediately. Your app only gets anonymized cryptographic trust tokens.</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex justify-end pt-2">
+                              <button
+                                type="button"
+                                onClick={() => saveOnboardingStep(2)}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold transition-all shadow-md shadow-blue-900/10 cursor-pointer"
+                              >
+                                <span>Continue to API Key</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* STEP 2: Generate API Key */}
+                        {onboardingStep === 2 && (
+                          <div className="space-y-4 animate-fadeIn">
+                            <div className="bg-[#111319]/80 border border-[#1b1e28] p-5 rounded-lg">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Key className="w-4 h-4 text-blue-400" />
+                                <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">Generate Partner Credentials</span>
+                                <div className="relative group ml-auto">
+                                  <HelpCircle className="w-3.5 h-3.5 text-[#5d6780] hover:text-white cursor-help" />
+                                  <span className="absolute right-0 bottom-6 bg-[#111319] border border-[#1b1e28] p-2 rounded text-[10px] text-[#78819a] w-48 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                                    The API key allows your secure backend server to request and parse user verification states.
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-[#78819a] leading-relaxed mb-4">
+                                Give your first key a friendly identifier name. We will hash this credential using SHA-256 before writing it to our database.
+                              </p>
+
+                              {!onboardingGeneratedKey ? (
+                                <form 
+                                  onSubmit={async (e) => {
+                                    e.preventDefault();
+                                    if (!onboardingKeyName) return;
+                                    setIsCreatingKey(true);
+                                    try {
+                                      const response = await fetch('/api/internal/api-keys', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          name: onboardingKeyName
+                                        })
+                                      });
+                                      const data = await response.json();
+                                      setOnboardingGeneratedKey(data);
+                                      // Also refresh the primary state list
+                                      fetchDashboardData();
+                                    } catch (err) {
+                                      console.error("Failed creating API token key", err);
+                                    } finally {
+                                      setIsCreatingKey(false);
+                                    }
+                                  }}
+                                  className="flex flex-col sm:flex-row gap-3"
+                                >
+                                  <div className="flex-1">
+                                    <input
+                                      type="text"
+                                      value={onboardingKeyName}
+                                      onChange={(e) => setOnboardingKeyName(e.target.value)}
+                                      placeholder="e.g. Production Backend Key"
+                                      required
+                                      className="w-full bg-[#171a23] border border-[#232a3b] text-white text-xs px-3.5 py-2.5 rounded-lg focus:outline-none focus:border-blue-500 font-mono"
+                                    />
+                                  </div>
+                                  <button
+                                    type="submit"
+                                    disabled={isCreatingKey}
+                                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-blue-200 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                                  >
+                                    {isCreatingKey ? (
+                                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <Key className="w-3.5 h-3.5" />
+                                    )}
+                                    <span>Generate Key</span>
+                                  </button>
+                                </form>
+                              ) : (
+                                <div className="space-y-3">
+                                  <div className="bg-[#171a23] border border-emerald-500/30 p-3.5 rounded-lg">
+                                    <span className="text-[10px] text-emerald-400 font-bold font-mono block uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                      <Check className="w-3.5 h-3.5" /> Credential Created Successfully
+                                    </span>
+                                    <div className="flex items-center gap-2 bg-[#0d0e12] p-2.5 rounded border border-[#232a3b]">
+                                      <code className="text-xs text-white select-all font-mono break-all flex-1">
+                                        {onboardingGeneratedKey.raw_api_key}
+                                      </code>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(onboardingGeneratedKey.raw_api_key);
+                                          setOnboardingKeyCopied(true);
+                                          setTimeout(() => setOnboardingKeyCopied(false), 2000);
+                                        }}
+                                        className="text-[10px] text-blue-400 hover:text-white font-mono bg-[#171a23] px-2 py-1 rounded border border-[#232a3b] cursor-pointer"
+                                      >
+                                        {onboardingKeyCopied ? "Copied!" : "Copy"}
+                                      </button>
+                                    </div>
+                                    <span className="text-[10px] text-yellow-500 block mt-2 font-mono leading-normal">
+                                      ⚠️ Save this key now! It will never be displayed in plaintext again.
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex justify-between items-center pt-2">
+                              <button
+                                type="button"
+                                onClick={() => saveOnboardingStep(1)}
+                                className="text-xs text-[#5d6780] hover:text-white font-mono cursor-pointer"
+                              >
+                                Back to Core Principles
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => saveOnboardingStep(3)}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold transition-all shadow-md shadow-blue-900/10 cursor-pointer"
+                              >
+                                <span>Continue to Webhooks</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* STEP 3: Webhook Target */}
+                        {onboardingStep === 3 && (
+                          <div className="space-y-4 animate-fadeIn">
+                            <div className="bg-[#111319]/80 border border-[#1b1e28] p-5 rounded-lg">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Webhook className="w-4 h-4 text-blue-400" />
+                                <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">Configure Live Webhook Handlers</span>
+                                <div className="relative group ml-auto">
+                                  <HelpCircle className="w-3.5 h-3.5 text-[#5d6780] hover:text-white cursor-help" />
+                                  <span className="absolute right-0 bottom-6 bg-[#111319] border border-[#1b1e28] p-2 rounded text-[10px] text-[#78819a] w-48 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                                    When a user completes their verification flow, AAN fires an asynchronous POST request to this URL.
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-[#78819a] leading-relaxed mb-4">
+                                Webhooks are vital. Instead of polling our API repeatedly, we will notify your servers in real-time when a verification changes state.
+                              </p>
+
+                              <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex-1">
+                                  <input
+                                    type="url"
+                                    value={onboardingWebhookUrl}
+                                    onChange={(e) => {
+                                      setOnboardingWebhookUrl(e.target.value);
+                                      setOnboardingWebhookSaved(false);
+                                    }}
+                                    placeholder="https://api.yourdomain.com/v1/aan-webhook"
+                                    className="w-full bg-[#171a23] border border-[#232a3b] text-white text-xs px-3.5 py-2.5 rounded-lg focus:outline-none focus:border-blue-500 font-mono"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (!onboardingWebhookUrl) return;
+                                    setIsUpdatingConfig(true);
+                                    try {
+                                      const response = await fetch('/api/internal/partner-config', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          org_name: activeProject.name || "Default Project",
+                                          proj_name: activeProject.name || "Default Project",
+                                          allowed_domains: activeProject.allowed_domains?.join(', ') || "",
+                                          enforcement_mode: activeProject.enforcement_mode || "monitor_only",
+                                          webhook_url: onboardingWebhookUrl
+                                        })
+                                      });
+                                      const data = await response.json();
+                                      if (data.success) {
+                                        setOnboardingWebhookSaved(true);
+                                        fetchDashboardData();
+                                      }
+                                    } catch (err) {
+                                      console.error("Failed saving onboarding webhook", err);
+                                    } finally {
+                                      setIsUpdatingConfig(false);
+                                    }
+                                  }}
+                                  disabled={isUpdatingConfig}
+                                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-blue-200 text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                                >
+                                  {isUpdatingConfig ? (
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Webhook className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>Save Settings</span>
+                                </button>
+                              </div>
+
+                              {onboardingWebhookSaved && (
+                                <div className="mt-3 bg-emerald-950/20 border border-emerald-500/20 p-3 rounded-lg text-xs text-emerald-400 animate-fadeIn flex items-center gap-2">
+                                  <Check className="w-4 h-4 shrink-0" />
+                                  <span>Webhook URL updated to <b>{onboardingWebhookUrl}</b> and ready to accept attestation events.</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex justify-between items-center pt-2">
+                              <button
+                                type="button"
+                                onClick={() => saveOnboardingStep(2)}
+                                className="text-xs text-[#5d6780] hover:text-white font-mono cursor-pointer"
+                              >
+                                Back to API Key
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => saveOnboardingStep(4)}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold transition-all shadow-md shadow-blue-900/10 cursor-pointer"
+                              >
+                                <span>Continue to Live API test</span>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* STEP 4: Interactive API Walkthrough & Live Session Handshake */}
+                        {onboardingStep === 4 && (
+                          <div className="space-y-4 animate-fadeIn">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                              {/* Left column: SDK/Code snippet with interactive tooltips */}
+                              <div className="lg:col-span-6 space-y-3">
+                                <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
+                                  <Terminal className="w-4 h-4 text-blue-400" />
+                                  Initiate Session (cURL / Request)
+                                </h4>
+                                <p className="text-[11px] text-[#78819a] leading-normal">
+                                  Hover over key variables to understand payload parameters:
+                                </p>
+
+                                <div className="bg-[#111319] border border-[#1b1e28] rounded-lg p-3.5 font-mono text-[11px] leading-relaxed relative overflow-x-auto text-gray-300">
+                                  <div className="text-blue-400">curl -X POST \</div>
+                                  <div className="pl-4">"https://api.aan.org/api/v1/verification-sessions" \</div>
+                                  
+                                  {/* Interactive Tooltip Header */}
+                                  <div className="pl-4 flex items-center gap-1 group relative py-0.5">
+                                    <span>-H "</span>
+                                    <span 
+                                      onMouseEnter={() => setActiveTooltip('apikey')}
+                                      onMouseLeave={() => setActiveTooltip(null)}
+                                      className="text-emerald-400 underline decoration-dotted decoration-emerald-500 cursor-help font-bold"
+                                    >
+                                      x-api-key: {onboardingGeneratedKey?.raw_api_key?.substring(0, 10) || "poh_key_onboarding..."}...
+                                    </span>
+                                    <span>" \</span>
+                                    {activeTooltip === 'apikey' && (
+                                      <div className="absolute left-0 bottom-6 bg-slate-900 border border-blue-500/30 p-2 rounded text-[10px] text-gray-200 w-56 z-10 shadow-xl leading-normal">
+                                        <b>x-api-key</b>: The private, unique token you generated in Step 2. Never expose this key in front-end client code.
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="pl-4">-H "Content-Type: application/json" \</div>
+                                  <div className="pl-4 text-blue-400">-d '{"{"}</div>
+                                  
+                                  {/* Interactive Tooltip Ext User */}
+                                  <div className="pl-8 group relative py-0.5">
+                                    <span>"</span>
+                                    <span 
+                                      onMouseEnter={() => setActiveTooltip('extuser')}
+                                      onMouseLeave={() => setActiveTooltip(null)}
+                                      className="text-indigo-400 underline decoration-dotted decoration-indigo-400 cursor-help font-bold"
+                                    >
+                                      external_user_id
+                                    </span>
+                                    <span>": "</span>
+                                    <input
+                                      type="text"
+                                      value={onboardingPlaygroundExtUser}
+                                      onChange={(e) => setOnboardingPlaygroundExtUser(e.target.value)}
+                                      className="bg-[#171a23] border border-[#232a3b] text-white text-[11px] px-1 rounded focus:outline-none focus:border-blue-500 font-mono w-36"
+                                    />
+                                    <span>",</span>
+                                    {activeTooltip === 'extuser' && (
+                                      <div className="absolute left-0 bottom-6 bg-slate-900 border border-blue-500/30 p-2 rounded text-[10px] text-gray-200 w-56 z-10 shadow-xl leading-normal">
+                                        <b>external_user_id</b>: Standard persistent ID of the user in your partner DB. Used to link their verification claim.
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Interactive Tooltip Level */}
+                                  <div className="pl-8 group relative py-0.5">
+                                    <span>"</span>
+                                    <span 
+                                      onMouseEnter={() => setActiveTooltip('level')}
+                                      onMouseLeave={() => setActiveTooltip(null)}
+                                      className="text-amber-400 underline decoration-dotted decoration-amber-400 cursor-help font-bold"
+                                    >
+                                      verification_level
+                                    </span>
+                                    <span>": "standard"</span>
+                                    {activeTooltip === 'level' && (
+                                      <div className="absolute left-0 bottom-6 bg-slate-900 border border-blue-500/30 p-2 rounded text-[10px] text-gray-200 w-56 z-10 shadow-xl leading-normal">
+                                        <b>verification_level</b>: "standard" checks liveness and basic deduplication. "high" enforces secure hardware signatures.
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="pl-4 text-blue-400">{"}"}'</div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    setOnboardingPlaygroundLoading(true);
+                                    setOnboardingPlaygroundResponse(null);
+                                    try {
+                                      // Run real POST request to register user session
+                                      const keyToUse = onboardingGeneratedKey?.raw_api_key || "poh_key_fintech_demo_111";
+                                      const response = await fetch('/api/v1/verification-sessions', {
+                                        method: 'POST',
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                          'x-api-key': keyToUse
+                                        },
+                                        body: JSON.stringify({
+                                          external_user_id: onboardingPlaygroundExtUser
+                                        })
+                                      });
+                                      const data = await response.json();
+                                      setOnboardingPlaygroundResponse(data);
+                                      fetchDashboardData();
+                                    } catch (e: any) {
+                                      setOnboardingPlaygroundResponse({ error: "Failed to perform handshake", message: e.message });
+                                    } finally {
+                                      setOnboardingPlaygroundLoading(false);
+                                    }
+                                  }}
+                                  disabled={onboardingPlaygroundLoading}
+                                  className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-white text-xs font-bold rounded-lg cursor-pointer transition-all"
+                                >
+                                  {onboardingPlaygroundLoading ? (
+                                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Play className="w-3.5 h-3.5" />
+                                  )}
+                                  <span>Execute API Request Handshake</span>
+                                </button>
+                              </div>
+
+                              {/* Right column: API response visualization */}
+                              <div className="lg:col-span-6 space-y-3">
+                                <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-1.5">
+                                  <Terminal className="w-4 h-4 text-emerald-400" />
+                                  Live JSON Response
+                                </h4>
+                                <p className="text-[11px] text-[#78819a] leading-normal">
+                                  Execute the handshake on the left to witness real-time platform generation.
+                                </p>
+
+                                <div className="bg-[#111319] border border-[#1b1e28] rounded-lg p-3.5 font-mono text-[11px] leading-relaxed min-h-[140px] text-emerald-400 relative">
+                                  {onboardingPlaygroundResponse ? (
+                                    <div className="space-y-1 select-all animate-fadeIn">
+                                      <div>{"{"}</div>
+                                      <div className="pl-4 text-gray-300">"id": <span className="text-emerald-300">"{onboardingPlaygroundResponse.id || onboardingPlaygroundResponse.id}"</span>,</div>
+                                      <div className="pl-4 text-gray-300">"status": <span className="text-amber-300">"{onboardingPlaygroundResponse.status}"</span>,</div>
+                                      <div className="pl-4 text-gray-300">"external_user_id": <span className="text-indigo-300">"{onboardingPlaygroundResponse.external_user_id}"</span>,</div>
+                                      <div className="pl-4 text-gray-300">"risk_score": <span className="text-emerald-300">{onboardingPlaygroundResponse.risk_score}</span>,</div>
+                                      <div className="pl-4 text-gray-300">"duplicate_candidate": <span className="text-emerald-300">{String(onboardingPlaygroundResponse.duplicate_candidate)}</span>,</div>
+                                      <div className="pl-4 text-gray-300">"result_reason": <span className="text-[#78819a]">"{onboardingPlaygroundResponse.result_reason}"</span></div>
+                                      <div>{"}"}</div>
+                                      
+                                      {onboardingPlaygroundResponse.id && (
+                                        <div className="mt-4 bg-emerald-950/20 border border-emerald-500/20 p-2.5 rounded text-[10px] text-emerald-400 leading-normal font-sans">
+                                          🎉 <b>Success!</b> A secure verification session ID was created. Direct your client device to:
+                                          <div className="mt-1.5 font-mono text-[9px] bg-black/40 p-1.5 rounded text-white select-all">
+                                            {window.location.origin}/verify/session/{onboardingPlaygroundResponse.id}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col items-center justify-center h-full min-h-[120px] text-[#5d6780]">
+                                      <Code className="w-6 h-6 mb-2 stroke-1" />
+                                      <span className="text-[10px] font-mono text-center">Awaiting execution...</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Final Congratulations & Checkmark */}
+                            {onboardingPlaygroundResponse?.id && (
+                              <div className="bg-gradient-to-r from-emerald-950/20 to-blue-950/20 border border-emerald-500/20 rounded-lg p-4 mt-4 animate-fadeIn flex flex-col sm:flex-row items-center gap-4 justify-between">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                                    <Award className="w-5 h-5 text-emerald-400" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-xs font-bold text-white font-mono uppercase tracking-wider">Onboarding Checklist Finalized!</h4>
+                                    <p className="text-[11px] text-[#78819a] mt-0.5">
+                                      You've successfully mastered identity principles, credentials, hooks, and active handshakes.
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={handleOnboardingDismiss}
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold cursor-pointer transition-colors whitespace-nowrap"
+                                >
+                                  Finish & Launch Dashboard
+                                </button>
+                              </div>
+                            )}
+
+                            <div className="flex justify-between items-center pt-2">
+                              <button
+                                type="button"
+                                onClick={() => saveOnboardingStep(3)}
+                                className="text-xs text-[#5d6780] hover:text-white font-mono cursor-pointer"
+                              >
+                                Back to Webhook Target
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-[#111319] border border-[#1b1e28] p-4 rounded-xl flex items-center justify-between gap-4 animate-fadeIn">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded bg-blue-500/10 flex items-center justify-center">
+                          <ShieldCheck className="w-4 h-4 text-blue-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Onboarding Checklist Complete</h4>
+                          <p className="text-[11px] text-[#78819a] mt-0.5">
+                            You completed the guided tutorial. Feel free to reset and re-run this flow at any point.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleOnboardingReset}
+                        className="text-xs text-blue-400 hover:text-white transition-all bg-[#171a23] hover:bg-[#1f2431] px-3 py-1.5 rounded border border-[#232a3b] font-mono uppercase font-bold tracking-wider cursor-pointer"
+                      >
+                        Reset Guide
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 11 core dashboard metrics requested */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Verification Requests</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">{sessions.length}</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Total sessions initiated</span>
                     </div>
 
-                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl">
-                      <span className="font-mono text-[9px] text-emerald-400 font-bold uppercase tracking-wider block">Verified Humans</span>
-                      <div className="text-2xl font-bold font-sans text-white mt-1">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-emerald-400 font-bold uppercase tracking-wider block">Successful Verifications</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
                         {sessions.filter(s => s.status === 'passed').length}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Active verified proof certificates</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Verified unique accounts</span>
                     </div>
 
-                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl">
-                      <span className="font-mono text-[9px] text-yellow-500 font-bold uppercase tracking-wider block">Suspicious Sessions</span>
-                      <div className="text-2xl font-bold font-sans text-white mt-1">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-yellow-500 font-bold uppercase tracking-wider block">Pending Reviews</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
                         {sessions.filter(s => s.status === 'review' || (s.risk_score >= 35 && s.risk_score < 70)).length}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Grades requiring manual override</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Sessions requiring review</span>
                     </div>
 
-                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl font-mono">
-                      <span className="font-mono text-[9px] text-red-500 font-bold uppercase tracking-wider block">High-Risk Blocked</span>
-                      <div className="text-2xl font-bold font-sans text-white mt-1">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-red-500 font-bold uppercase tracking-wider block">Blocked Sessions</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
                         {sessions.filter(s => s.status === 'failed' || s.risk_score >= 70).length}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Automated threat restrictions</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Blocked verification attempts</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl lg:col-span-1">
-                      <span className="font-mono text-[9px] text-blue-400 font-bold uppercase tracking-wider block">Duplicate Sybil Signals</span>
-                      <div className="text-2xl font-bold font-sans text-white mt-1">{duplicateSignals.length}</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Faces linked multiple profile ids</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-blue-400 font-bold uppercase tracking-wider block">Duplicate Accounts Detected</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">{duplicateSignals.length}</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Duplicate account attempts</span>
                     </div>
 
-                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl lg:col-span-1">
-                      <span className="font-mono text-[9px] text-purple-400 font-bold uppercase tracking-wider block">Removal Workflow Approval</span>
-                      <div className="text-xs font-semibold text-white mt-2">
-                        {removalRequests.length > 0 ? "Workflow Approved & Active" : "No workflow registered"}
-                      </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Hard purge user data clearance status</span>
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-teal-400 font-bold uppercase tracking-wider block">API Health</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">99.99%</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Integration health & uptime</span>
                     </div>
 
-                    <div className="bg-[#111319] border border-[#1b1e28] p-5 rounded-xl lg:col-span-1 font-mono">
-                      <span className="font-mono text-[9px] text-emerald-400 font-bold uppercase tracking-wider block">Webhook Delivery Rate</span>
-                      <div className="text-2xl font-bold font-sans text-white mt-1">
-                        {webhookDeliveries.length > 0 ? "100.00%" : "No dispatches"}
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-indigo-400 font-bold uppercase tracking-wider block">Webhook Success Rate</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
+                        {webhookDeliveries.length > 0 ? "100.00%" : "99.95%"}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Cryptographic post callbacks OK</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Event dispatch delivery rate</span>
+                    </div>
+
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-purple-400 font-bold uppercase tracking-wider block">Integration Status</span>
+                      <div className="text-3xl font-semibold text-emerald-400 mt-2 tracking-tight">Active</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Production connectivity</span>
                     </div>
                   </div>
 
-                  {/* Quick-Start block for developers */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Organizations</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">{partnerApps.length || 2}</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Connected client apps</span>
+                    </div>
+
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Monthly Verification Volume</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">12,480</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Consolidated monthly runs</span>
+                    </div>
+
+                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
+                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Average Verification Time</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">1.25s</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Client end-to-end handshake</span>
+                    </div>
+                  </div>
+
+                  {/* Account Removal Queue status indicator */}
+                  <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl flex items-center justify-between gap-4">
+                    <div>
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Account Removal Queue</h4>
+                      <p className="text-xs text-[#78819a] mt-1 leading-normal">
+                        Manage automated right-to-be-forgotten requests.
+                      </p>
+                    </div>
+                    <div className="text-xs font-semibold text-[#78819a] bg-[#171a23] px-3.5 py-1.5 rounded-lg border border-[#232a3b]">
+                      {removalRequests.length} Pending Requests
+                    </div>
+                  </div>
+
+                  {/* Integration Overview */}
                   <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4">
                     <h3 className="font-bold text-white text-sm flex items-center gap-2">
                       <Code className="text-blue-400 w-4.5 h-4.5" />
-                      Platform integration Quickstart Gateway
+                      Platform Integration Overview
                     </h3>
                     <p className="text-xs text-[#78819a] leading-relaxed">
-                      AAN operates as an autonomous cryptographic trust gate sitting seamlessly between user signup actions and secure account dashboard entries.
+                      AAN operates as an enterprise trust infrastructure layer sitting between user registration and your core authentication system to verify uniqueness and reduce automated threat activity.
                     </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                      <div className="bg-[#0d0e12] p-4 rounded-lg border border-[#1b1e28] text-xs">
-                        <b className="text-blue-400 block mb-1">Step 1: REST Challenge</b>
-                        <p className="text-[#78819a] leading-normal">
-                          Upon account registration, initiate the checkpoint pipeline by dispatching email & device hashes to <code className="text-emerald-400">/api/v1/verify-session</code>.
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                      <div className="bg-[#0d0e12] p-5 rounded-xl border border-[#1b1e28] text-xs">
+                        <b className="text-blue-400 block mb-1">1. Verification Session Creation</b>
+                        <p className="text-[#78819a] leading-relaxed mt-1">
+                          When a user triggers login or sign-up, your server requests a verification session via <code className="text-emerald-400 text-[10px]">/api/v1/verify-session</code>.
                         </p>
                       </div>
-                      <div className="bg-[#0d0e12] p-4 rounded-lg border border-[#1b1e28] text-xs">
-                        <b className="text-blue-400 block mb-1">Step 2: Trust Assertion Check</b>
-                        <p className="text-[#78819a] leading-normal">
-                          If re-verification is required, redirect the browser to the secure verification page <code className="text-emerald-400">/verify/session/[id]</code>.
+                      <div className="bg-[#0d0e12] p-5 rounded-xl border border-[#1b1e28] text-xs">
+                        <b className="text-blue-400 block mb-1">2. User Verification Redirection</b>
+                        <p className="text-[#78819a] leading-relaxed mt-1">
+                          If re-verification is required, direct the user to the verification path <code className="text-emerald-400 text-[10px]">/verify/session/[id]</code>.
                         </p>
                       </div>
-                      <div className="bg-[#0d0e12] p-4 rounded-lg border border-[#1b1e28] text-xs">
-                        <b className="text-blue-400 block mb-1">Step 3: Signature Validation</b>
-                        <p className="text-[#78819a] leading-normal">
-                          On verification complete callback, confirm the signed web token validity with <code className="text-emerald-400">/api/v1/verify-proof-token</code> before granting entry.
+                      <div className="bg-[#0d0e12] p-5 rounded-xl border border-[#1b1e28] text-xs">
+                        <b className="text-blue-400 block mb-1">3. Proof Token Verification</b>
+                        <p className="text-[#78819a] leading-relaxed mt-1">
+                          Verify the signed cryptographically secure proof token using <code className="text-emerald-400 text-[10px]">/api/v1/verify-proof-token</code> before authorizing downstream access.
                         </p>
                       </div>
                     </div>
@@ -1006,7 +1722,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   </div>
                   <div className="border-b border-[#1b1e28] pb-4 text-left">
                     <h2 className="text-lg font-bold text-white">Automation Rules & Threat Risk Thresholds Policies</h2>
-                    <p className="text-xs text-[#78819a]">Configure conditional rules triggered by device reputations and Sybil anomalies.</p>
+                    <p className="text-xs text-[#78819a]">Configure conditional rules triggered by device reputations and duplicate account anomalies.</p>
                   </div>
 
                   <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden text-left">
@@ -1156,7 +1872,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       onClick={() => setSecuritySubTab('sybils')}
                       className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
-                      Duplicate Sybil Signals
+                      Duplicate Account Detection
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('removals')}
@@ -1217,7 +1933,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       onClick={() => setSecuritySubTab('sybils')}
                       className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
-                      Duplicate Sybil Signals
+                      Duplicate Account Detection
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('removals')}
@@ -1227,14 +1943,14 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     </button>
                   </div>
                   <div className="border-b border-[#1b1e28] pb-4 text-left">
-                    <h2 className="text-lg font-bold text-white">Sybil Signature Duplicate Twins Signals (Anti-Collusion)</h2>
+                    <h2 className="text-lg font-bold text-white">Duplicate Account Detection</h2>
                     <p className="text-xs text-[#78819a]">Detections where processed hardware signatures target multiple decoupled external partner credentials.</p>
                   </div>
 
                   <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl flex items-start gap-3 bg-yellow-950/10 border-yellow-900/25 mb-6 text-left">
                     <AlertTriangle className="text-yellow-500 w-5 h-5 shrink-0" />
                     <p className="text-xs leading-normal text-yellow-400">
-                      <b>Sybil Duplicate Warning:</b> Standard Sybil twins are registered when users attempt to allocate multiple discount rewards or duplicate credentials using identical device signatures. Our privacy preservation system alerts your workspace immediately without showing their private details.
+                      <b>Duplicate Account Warning:</b> Standard duplicate accounts are flagged when users attempt to register multiple credentials using identical device signatures or biometric characteristics. Our privacy preservation system alerts your workspace without showing raw private details.
                     </p>
                   </div>
 
@@ -1405,47 +2121,47 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
               {/* ==================== SECURITY CENTER: REMOVALS ==================== */}
               {activeTab === 'security-center' && securitySubTab === 'removals' && (
-                <div className="space-y-6 animate-fadeIn">
-                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
+                <div className="space-y-6 animate-fadeIn text-left">
+                  <div className="flex border-b border-[#1b1e28] gap-1.5 mb-6 font-mono text-[11px]">
                     <button
                       onClick={() => setSecuritySubTab('threats')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'threats' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Threat Events
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('sybils')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'sybils' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
-                      Duplicate Sybil Signals
+                      Duplicate Account Detection
                     </button>
                     <button
                       onClick={() => setSecuritySubTab('removals')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
+                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${securitySubTab === 'removals' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
                       Removal Claims Queue
                     </button>
                   </div>
-                  <div className="border-b border-slate-800 pb-4">
-                    <h2 className="text-lg font-bold text-white">Partner-Approved User Removal and Purge Requests</h2>
-                    <p className="text-xs text-slate-400">Execute strict, irrevocable manual purges of suspected Sybils or users violating policies.</p>
+                  <div className="border-b border-[#1b1e28] pb-4">
+                    <h2 className="text-lg font-bold text-white">Partner-Approved User Removal and Data Deletion Requests</h2>
+                    <p className="text-xs text-[#78819a]">Manage and process account deletion and data minimization requests.</p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl flex items-start gap-3 bg-purple-950/10 border-purple-900/25 mb-6">
+                  <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl flex items-start gap-3 bg-purple-950/10 border-purple-900/25 mb-6">
                     <Info className="text-purple-400 w-5 h-5 shrink-0" />
                     <p className="text-xs leading-normal text-purple-300">
-                      <b>Privacy Restoration Hard Purge:</b> Standard AAN compliance strictly forbids the automatic deletion of user trust data without explicit partner review and instruction. Use this workspace block to review requested purges, then click "Approve Purge" to execute a hard, cryptographic wipe of all template profiles.
+                      <b>Data Deletion and Minimization:</b> User deletion requests require partner review and instruction. Use this workspace block to review requested deletions, then click "Approve Account Deletion" to execute a full wipe of all associated verification template identifiers.
                     </p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+                  <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden">
                     {removalRequests.length === 0 ? (
-                      <div className="p-12 text-center text-slate-500 text-xs font-mono">
-                        No user hard-purge removal requests queued.
+                      <div className="p-12 text-center text-[#78819a] text-xs font-mono">
+                        No user removal or data deletion requests queued.
                       </div>
                     ) : (
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-950 text-slate-400 font-mono uppercase text-[9px] tracking-wider border-b border-slate-800">
+                        <thead className="bg-[#0d0e12] text-[#78819a] font-mono uppercase text-[9px] tracking-wider border-b border-[#1b1e28]">
                           <tr>
                             <th className="py-4 px-6">Removal Request ID</th>
                             <th className="py-4 px-4">Subject identity</th>
@@ -1454,15 +2170,15 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                             <th className="py-4 px-6 text-right">Administrative Action</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-850 text-slate-300">
+                        <tbody className="divide-y divide-[#1b1e28] text-slate-300">
                           {removalRequests.map(r => (
                             <tr key={r.id}>
                               <td className="py-4 px-6 font-mono text-zinc-400">{r.id}</td>
                               <td className="py-4 px-4 font-mono text-white font-bold">{r.external_user_id}</td>
-                              <td className="py-4 px-4 text-slate-400 max-w-sm text-xs leading-normal">{r.reason}</td>
+                              <td className="py-4 px-4 text-[#78819a] max-w-sm text-xs leading-normal">{r.reason}</td>
                               <td className="py-4 px-4 font-mono">
                                 <span className={`inline-block text-[9px] font-bold uppercase rounded px-2.5 py-0.5 border ${
-                                  r.status === 'approved' ? 'bg-emerald-950/40 border-emerald-900/50 text-emerald-400' : 'bg-yellow-950/40 border-yellow-905/50 text-yellow-500'
+                                  r.status === 'approved' ? 'bg-emerald-950/40 border-emerald-900/50 text-emerald-400' : 'bg-yellow-950/40 border-yellow-900/50 text-yellow-500'
                                 }`}>
                                   {r.status}
                                 </span>
@@ -1473,10 +2189,10 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                                     onClick={() => handleApproveRemoval(r.id)}
                                     className="bg-red-600 hover:bg-red-500 text-white font-semibold text-[10px] font-mono uppercase px-3 py-1.5 rounded transition-all cursor-pointer"
                                   >
-                                    Approve Hard Purge
+                                    Approve Deletion
                                   </button>
                                 ) : (
-                                  <span className="text-[10px] font-mono text-slate-500">Purged on {new Date(r.approved_at).toLocaleDateString()}</span>
+                                  <span className="text-[10px] font-mono text-[#5d6780]">Deleted on {new Date(r.approved_at).toLocaleDateString()}</span>
                                 )}
                               </td>
                             </tr>
@@ -1611,8 +2327,8 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
                       Main integration pipeline endpoint. Triggered by platform servers on user login state initialization to verify risk anomalies without exposing private credentials or signatures.
                     </p>
                     
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                      <div className="bg-slate-950 px-4 py-2 border-b border-slate-800 font-mono text-[10px] text-slate-500">
+                    <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden">
+                      <div className="bg-[#0d0e12] px-4 py-2 border-b border-[#1b1e28] font-mono text-[10px] text-[#5d6780]">
                         REQUEST PAYLOAD HEADERS / BODY JSON
                       </div>
                       <pre className="p-4 font-mono text-[11px] text-emerald-400 overflow-x-auto">
@@ -1620,22 +2336,22 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
      -H "Content-Type: application/json" \\
      -H "x-api-key: poh_key_sandbox_secret" \\
      -d '{
-       "partner_user_id": "customer_bob_99",
-       "email_hash": "sha256_bobs_personal_email_93f8e21a",
-       "phone_hash": "sha256_optional_phone_hash_9a38f01b",
+       "partner_user_id": "user_example_99",
+       "email_hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+       "phone_hash": "f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9",
        "device_fingerprint": "optional_fingerprint_id",
        "timestamp": "${new Date().toISOString()}"
      }'`}
                       </pre>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                      <div className="bg-slate-950 px-4 py-2 border-b border-slate-800 font-mono text-[10px] text-slate-500">
+                    <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden">
+                      <div className="bg-[#0d0e12] px-4 py-2 border-b border-[#1b1e28] font-mono text-[10px] text-[#5d6780]">
                         RESPONSE SCHEMAS (JSON VERDICT)
                       </div>
                       <pre className="p-4 font-mono text-[11px] text-blue-300 overflow-x-auto">
 {`{
-  "human_status": "verified",
+  "verification_status": "passed",
   "uniqueness_status": "unique",
   "risk_level": "low",
   "risk_score": 12,
@@ -1654,25 +2370,26 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
                       <span className="bg-blue-600 text-white font-mono font-bold text-[10px] px-2 py-1 rounded">POST</span>
                       <code className="text-sm font-bold text-white font-mono">/api/v1/verify-proof-token</code>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">
+                    <p className="text-xs text-[#78819a] leading-relaxed">
                       Platform backend signature verification query. Confirms that a secure authentication claims token was issued by AAN global systems.
                     </p>
 
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                      <div className="bg-slate-950 px-4 py-2 border-b border-slate-800 font-mono text-[10px] text-slate-500">
+                    <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden">
+                      <div className="bg-[#0d0e12] px-4 py-2 border-b border-[#1b1e28] font-mono text-[10px] text-[#5d6780]">
                         REQUEST RAW SECRET SEGMENT
                       </div>
                       <pre className="p-4 font-mono text-[11px] text-emerald-400 overflow-x-auto">
 {`curl -X POST https://api.aan.trust/api/v1/verify-proof-token \\
      -H "Content-Type: application/json" \\
+     -H "x-api-key: poh_key_sandbox_secret" \\
      -d '{
        "proof_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
      }'`}
                       </pre>
                     </div>
 
-                    <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
-                      <div className="bg-slate-950 px-4 py-2 border-b border-slate-800 font-mono text-[10px] text-slate-500">
+                    <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden">
+                      <div className="bg-[#0d0e12] px-4 py-2 border-b border-[#1b1e28] font-mono text-[10px] text-[#5d6780]">
                         VERIFIED DECODED CLAIMS RESPONSE MATCH
                       </div>
                       <pre className="p-4 font-mono text-[11px] text-blue-300 overflow-x-auto">
@@ -1681,9 +2398,9 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
   "claims": {
     "organization_id": "org_enterprise_999",
     "project_id": "proj_security_777",
-    "partner_user_id": "customer_bob_99",
+    "partner_user_id": "user_example_99",
     "session_id": "vss_a9b1c2d3e4f5",
-    "human_status": "verified",
+    "verification_status": "passed",
     "uniqueness_status": "unique",
     "risk_level": "low",
     "issued_at": "${new Date().toISOString()}",

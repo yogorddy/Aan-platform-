@@ -21,7 +21,7 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
 
   const recentFailures = [
     { id: "err_sb_009", type: "403_CORS_BLOCKED", origin: "https://unknownvisitor.io", desc: "Blocked client script call from unregistered origin domain.", time: "4 mins ago" },
-    { id: "err_sb_008", type: "409_SYBIL_DUP", origin: "Client Scans", desc: "Disallowed duplicate facial signature templates matches cached signatures.", time: "19 mins ago" },
+    { id: "err_sb_008", type: "409_DUPLICATE_ID", origin: "Client Scans", desc: "Disallowed duplicate facial signature templates matches cached signatures.", time: "19 mins ago" },
     { id: "err_sb_007", type: "401_SEC_REVOKED", origin: "Platform Auth", desc: "Missing key authorizations. Target proxy requested empty parameter header.", time: "1 hour ago" }
   ];
 
@@ -178,7 +178,7 @@ export default function HealthMonitorTab({ onNavigateToAcademy }: HealthMonitorT
               <AlertTriangle className="w-4 h-4 text-rose-450" />
               Edge integration threat & exception logs
             </h3>
-            <p className="text-[10px] text-[#78819a] font-sans">Recent security exceptions flagged by domain CORS filters or Sybil blocks.</p>
+            <p className="text-[10px] text-[#78819a] font-sans">Recent security exceptions flagged by domain CORS filters or duplicate account blocks.</p>
           </div>
           <span className="text-[10px] font-mono text-[#78819a] uppercase font-bold">Past 30 Days</span>
         </div>

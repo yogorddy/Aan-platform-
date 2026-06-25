@@ -216,7 +216,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                 </h2>
                 <div className="text-xs text-slate-400 space-y-3 leading-relaxed">
                   <p>
-                    AAN (Adaptive Assurance Network) is a modern digital identity middleware infrastructure. Modern platforms are plagued by automated botnets, duplicate registrations, sybil account networks, and credential stuffing vectors. Traditional MFA processes are cumbersome, and heavyweight document-based checks (government IDs) introduce high drop-off and severe privacy risks.
+                    AAN (Adaptive Assurance Network) is a modern digital identity middleware infrastructure. Modern platforms are plagued by automated botnets, duplicate registrations, duplicate account networks, and credential stuffing vectors. Traditional MFA processes are cumbersome, and heavyweight document-based checks (government IDs) introduce high drop-off and severe privacy risks.
                   </p>
                   <p>
                     AAN bridges this gap. By evaluating device-bound credentials and contextual telemetry (residential proxy routing, browser execution layers, fast action tempos), AAN provides deterministic assurance of returning unique human status.
@@ -959,7 +959,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
               <div>
                 <span className="font-mono text-[10px] text-blue-400 font-bold uppercase tracking-widest block mb-1">CRYPTO ARCHITECTURE</span>
                 <h1 className="text-2xl font-sans font-bold text-white tracking-tight">Identity Research Center</h1>
-                <p className="text-sm text-slate-400 mt-1">A collection of research abstractions on privacy-first systems, telemetry index matching, and sybil prevention.</p>
+                <p className="text-sm text-slate-400 mt-1">A collection of research abstractions on privacy-first systems, telemetry index matching, and duplicate account detection.</p>
               </div>
 
               <div className="space-y-6">

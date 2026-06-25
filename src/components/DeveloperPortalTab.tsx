@@ -17,9 +17,9 @@ export default function DeveloperPortalTab({ onNavigateToAcademy }: DeveloperPor
   // API Explorer dynamic request testing state
   const [explorerEndpoint, setExplorerEndpoint] = useState<"verify-session" | "verify-proof-token" | "device-risk">("verify-session");
   const [explorerApiKey, setExplorerApiKey] = useState("poh_key_sandbox_secret_99");
-  const [explorerUserId, setExplorerUserId] = useState("customer_bob_99");
-  const [explorerEmailHash, setExplorerEmailHash] = useState("sha256_bobs_personal_email_93f8e21a");
-  const [explorerToken, setExplorerToken] = useState("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiJvcmdfZW50ZXJwcmlzZV85OTkiLCJwcm9qZWN0X2lkIjoicHJval9zZWN1cml0eV83NzciLCJwYXJ0bmVyX3VzZXJfaWQiOiJjdXN0b21lcl9ib2JfOTkiLCJzZXNzaW9uX2lkIjoidnNzX2E5YjFjMmQzZTRmNSIsImh1bWFuX3N0YXR1cyI6InZlcmlmaWVkIiwidW5pcXVlbmVzc19zdGF0dXMiOiJ1bmlxdWUiLCJyaXNrX2xldmVsIjoibG93IiwiaXNzdWVkX2F0IjoiMjAyNi0wNi0yMVQyMjo0MTo0MFoiLCJleHBpcmVzX2F0IjoiMjAyNi0wNy0yMVQyMjo0MTo0MFoifQ.MockSignatureCheckingDone");
+  const [explorerUserId, setExplorerUserId] = useState("user_example_99");
+  const [explorerEmailHash, setExplorerEmailHash] = useState("a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2");
+  const [explorerToken, setExplorerToken] = useState("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcmdfaWQiOiJvcmdfZW50ZXJwcmlzZV85OTkiLCJwcm9qZWN0X2lkIjoicHJval9zZWN1cml0eV83NzciLCJwYXJ0bmVyX3VzZXJfaWQiOiJ1c2VyX2V4YW1wbGVfOTkiLCJzZXNzaW9uX2lkIjoidnNzX2E5YjFjMmQzZTRmNSIsInZlcmlmaWNhdGlvbl9zdGF0dXMiOiJwYXNzZWQiLCJ1bmlxdWVuZXNzX3N0YXR1cyI6InVuaXF1ZSIsInJpc2tfbGV2ZWwiOiJsb3ciLCJpc3N1ZWRfYXQiOiIyMDI2LTA2LTIxVDIyOjQxOjQwWiIsImV4cGlyZXNfYXQiOiIyMDI2LTA3LTIxVDIyOjQxOjQwWiJ9.MockSignatureCheckingDone");
   const [isRequesting, setIsRequesting] = useState(false);
   const [explorerResponse, setExplorerResponse] = useState<any>(null);
 
@@ -42,12 +42,12 @@ const aan = new AanClient({
 });`,
       request: `// Creating a new verification trust evaluation session
 const session = await aan.sessions.verify({
-  partner_user_id: "customer_bob_99",
-  email_hash: "sha256_bobs_personal_email_93f8e21a",
+  partner_user_id: "user_example_99",
+  email_hash: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
   device_fingerprint: "device_laptop_win_1092e"
 });
 
-console.log(\`Verdict: \${session.human_status}. Risk score: \${session.risk_score}%\`);
+console.log(\`Verdict: \${session.verification_status}. Risk score: \${session.risk_score}%\`);
 if (session.recommended_action === "require_reverification") {
   // Redirect visitor to verification scanning flow URL
   console.log(\`Redirect to check: \${session.verification_url}\`);
@@ -59,7 +59,7 @@ try {
   });
   
   if (proof.valid) {
-    console.log("Human status confirmed safely:", proof.claims.human_status);
+    console.log("Verification status confirmed safely:", proof.claims.verification_status);
   }
 } catch (error) {
   console.error("Cryptographic sign validation failed:", error.message);
@@ -118,13 +118,13 @@ aan = AanClient(
     api_key=os.environ.get("AAN_API_KEY", "poh_key_sandbox_secret"),
     sandbox=True
 )`,
-      request: `# Create verification request stream
+       request: `# Create verification request stream
 session = aan.sessions.verify(
-    partner_user_id="customer_bob_99",
-    email_hash="sha256_bobs_personal_email_93f8e21a"
+    partner_user_id="user_example_99",
+    email_hash="a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
 )
 
-print(f"Verdict: {session.human_status}. Score: {session.risk_score}")`,
+print(f"Verdict: {session.verification_status}. Score: {session.risk_score}")`,
       validate: `# Validate signed proof signature
 proof = aan.proofs.validate(proof_token="eyJhbGciOiJIUz...")
 if proof.is_valid:
@@ -146,8 +146,8 @@ AanClient aan = new AanClient(
       request: `import trust.aan.sdk.models.SessionVerification;
 
 SessionVerification session = aan.sessions().verify(
-    "customer_bob_99", 
-    "sha256_bobs_personal_email_93f8e21a"
+    "user_example_99", 
+    "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
 );
 
 System.out.println("Enforcement suggested: " + session.getRecommendedAction());`,
@@ -168,8 +168,8 @@ func main() {
 }`,
       request: `// Verify incoming signups risk index
 session, err := client.Sessions.Verify(ctx, aan.VerifyParams{
-	PartnerUserID: "customer_bob_99",
-	EmailHash:     "sha256_bobs_personal_email_93f8e21a",
+	PartnerUserID: "user_example_99",
+	EmailHash:     "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
 })`,
       validate: `// Validate cryptographically signed claims
 valid, claims, err := client.Proofs.Validate("eyJhbG...")`
@@ -185,14 +185,14 @@ $aan = new AanClient([
     'sandbox' => true
 ]);`,
       request: `$session = $aan->sessions->verify([
-    'partner_user_id' => 'customer_bob_99',
-    'email_hash' => 'sha256_bobs_personal_email_93f8e21a'
+    'partner_user_id' => 'user_example_99',
+    'email_hash' => 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
 ]);
 
 echo "Recommended protocol: " . $session->recommended_action;`,
       validate: `$proof = $aan->proofs->validate("eyJhbGciOiJIUz...");
 if ($proof->valid) {
-    echo "Privacy-preserving user humanness verified.";
+    echo "Privacy-preserving user status verified.";
 }`
     },
     csharp: {
@@ -205,8 +205,8 @@ var aan = new AanClient(new AanConfig {
     UseSandbox = true
 });`,
       request: `var session = await aan.Sessions.VerifyAsync(new VerifyRequest {
-    PartnerUserId = "customer_bob_99",
-    EmailHash = "sha256_bobs_personal_email_93f8e21a"
+    PartnerUserId = "user_example_99",
+    EmailHash = "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
 });`,
       validate: `var validStatus = await aan.Proofs.ValidateAsync("eyJhbGciOi...");`
     },
@@ -220,8 +220,8 @@ aan = AanTrustSdk::Client.new(
   sandbox: true
 )`,
       request: `session = aan.sessions.verify(
-  partner_user_id: "customer_bob_99",
-  email_hash: "sha256_bobs_personal_email_93f8e21a"
+  partner_user_id: "user_example_99",
+  email_hash: "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
 )`,
       validate: `is_valid = aan.proofs.validate("eyJhbGciOiJIUzI1...")`
     }
@@ -383,7 +383,7 @@ Content-Type: application/json`}
             <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-3.5">
               <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Rate Limit Policy Intervals</h3>
               <p className="text-xs text-[#78819a] leading-normal font-sans">
-                AAN employs strict IP and Organization-level rate filters to prevent denial-of-service attempts and Sybil template mining runs:
+                AAN employs strict IP and Organization-level rate filters to prevent denial-of-service attempts and duplicate account validation abuse:
               </p>
               
               <div className="grid grid-cols-3 gap-3">
@@ -430,8 +430,8 @@ Content-Type: application/json`}
                   <span className="text-[#78819a] flex-1">Session ID or requested tenant does not exist in relational tables.</span>
                 </div>
                 <div className="flex justify-between border-b border-[#1b1e28]/60 pb-1.5 gap-2">
-                  <span className="text-rose-400 font-extrabold w-24">409_SYBIL_DUP</span>
-                  <span className="text-[#78819a] flex-1">Postures or signatures represent a previously authenticated identity.</span>
+                  <span className="text-rose-400 font-extrabold w-24">409_DUPLICATE_ID</span>
+                  <span className="text-[#78819a] flex-1">Signatures represent a previously registered and authenticated unique identity.</span>
                 </div>
                 <div className="flex justify-between pb-0.5 gap-2">
                   <span className="text-rose-400 font-extrabold w-24">503_SRV_OFFLINE</span>
@@ -797,22 +797,22 @@ app.post("/v1/auth/aan-status", (req, res) => {
           {/* Version logs (8 cols) */}
           <div className="lg:col-span-8 space-y-6">
             <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-5">
-              <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Release Version History</h3>
+              <h3 className="font-mono text-xs font-black uppercase text-blue-440 tracking-wider">Release Version History</h3>
               
               <div className="space-y-4">
                 <div className="border-l-2 border-emerald-500 pl-4 space-y-1 text-left">
                   <span className="text-[10px] font-mono font-black text-emerald-400 uppercase">v1.2.4 (Latest Stable Release - Active)</span>
-                  <span className="text-xs font-mono font-bold text-white block">Zero-Trust proof validator upgrades</span>
+                  <span className="text-xs font-mono font-bold text-white block">Proof validator upgrades</span>
                   <span className="text-xs text-[#78819a] block font-normal font-sans leading-normal">
-                    Implemented cryptographic JWT certificate checks utilizing public/private signing keys. Upgraded rate filtering protocols to protect against automated Sybil scripts.
+                    Implemented cryptographic JWT certificate checks utilizing public/private signing keys. Upgraded rate filtering protocols to protect against automated duplicate account creation scripts.
                   </span>
                 </div>
 
                 <div className="border-l-2 border-[#1b1e28] pl-4 space-y-1 text-left">
                   <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">v1.1.9 (Archived Release - Deprecated)</span>
-                  <span className="text-xs font-mono font-bold text-white block">Improved hardware fingerprint scopes</span>
+                  <span className="text-xs font-mono font-bold text-white block">Improved device fingerprint scopes</span>
                   <span className="text-xs text-[#78819a] block font-normal font-sans leading-normal">
-                    Added canvas tracking and screen coordinate analytics in local telemetry checks to prevent framework emulator bypasses.
+                    Added browser device fingerprint consistency checks to improve liveness evaluation precision.
                   </span>
                 </div>
               </div>

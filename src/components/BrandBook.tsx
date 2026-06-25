@@ -184,7 +184,7 @@ export default function BrandBook() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">Brand Purpose</span>
                     <span className="col-span-2 leading-relaxed text-slate-300">
-                      To establish the definitive trust consensus layer of the internet, allowing software developers to operate global platforms with safe, anonymous anti-sybil safeguards.
+                      To establish the definitive trust consensus layer of the internet, allowing software developers to operate global platforms with safe, anonymous uniqueness safeguards.
                     </span>
                   </div>
 
@@ -443,7 +443,7 @@ export default function BrandBook() {
                 {[
                   {
                     phase: 'Phase 1: Seed & Uniqueness Consensus (Years 1 - 2)',
-                    desc: 'Validate user uniqueness and integrate anti-sybil safeguards. Secure partnerships with major SaaS and gaming channels. Release robust, headless developer client integration SDKs.',
+                    desc: 'Validate user uniqueness and integrate uniqueness safeguards. Secure partnerships with major SaaS and gaming channels. Release robust, headless developer client integration SDKs.',
                     status: 'Active Launch Window',
                     color: 'text-emerald-400 border-emerald-500 bg-emerald-950/40'
                   },

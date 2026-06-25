@@ -238,7 +238,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           {
             id: "usr_df990a31",
             status: "suspended",
-            human_uid: "human_hash_b710ef67_sybil",
+            human_uid: "human_hash_b710ef67_duplicate",
             created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
             updated_at: new Date(Date.now() - 11.8 * 3600 * 1000).toISOString()
           }

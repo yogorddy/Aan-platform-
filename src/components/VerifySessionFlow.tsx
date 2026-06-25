@@ -29,74 +29,79 @@ interface VerifySessionFlowProps {
 interface SecurityScenario {
   id: string;
   name: string;
-  description: string;
-  simulatedRiskScore: number;
-  signals: {
-    deviceReputation: 'clean' | 'suspicious' | 'emulator' | 'known_primary';
-    proxyDetected: boolean;
-    impossibleTravel: boolean;
-    locationMatch: 'matched' | 'unusual_node' | 'foreign_datacenter';
-    browserIntegrityIndex: number;
-    behaviorRating: 'natural' | 'high_velocity' | 'mismatch';
-  };
+  decision: string;
+  confidence: 'High' | 'Medium';
+  summary: string;
+  recommendedAction: string;
+  policyUsed: string;
+  auditRef: string;
+  timestamp: string;
+  colorClass: string;
+  borderClass: string;
+  badgeColorClass: string;
+  dotColorClass: string;
 }
 
 const SECURITY_SCENARIOS: SecurityScenario[] = [
   {
-    id: 'score_low',
-    name: 'Low Risk — Legitimate Primary User',
-    description: 'Matches known household device signatures, local residential ISP node, and standard historical velocity.',
-    simulatedRiskScore: 12,
-    signals: {
-      deviceReputation: 'known_primary',
-      proxyDetected: false,
-      impossibleTravel: false,
-      locationMatch: 'matched',
-      browserIntegrityIndex: 98,
-      behaviorRating: 'natural'
-    }
+    id: 'approved',
+    name: 'Verified Returning User',
+    decision: 'Approved',
+    confidence: 'High',
+    summary: 'This authentication request matches a previously trusted account pattern. No unusual behavioral or environmental changes were detected.',
+    recommendedAction: 'Grant access.',
+    policyUsed: 'Default Uniqueness Posture Policy',
+    auditRef: 'AUD-992-881X',
+    timestamp: '2026-06-24 15:16:52 UTC',
+    colorClass: 'text-emerald-400',
+    borderClass: 'border-emerald-500/20 bg-emerald-950/10',
+    badgeColorClass: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+    dotColorClass: 'bg-emerald-500'
   },
   {
-    id: 'score_med',
-    name: 'Medium Risk — Suspicious Session Drift',
-    description: 'An unrecognized hardware environment detected from an unusual network route, requiring challenge attestation.',
-    simulatedRiskScore: 48,
-    signals: {
-      deviceReputation: 'suspicious',
-      proxyDetected: false,
-      impossibleTravel: false,
-      locationMatch: 'unusual_node',
-      browserIntegrityIndex: 82,
-      behaviorRating: 'natural'
-    }
+    id: 'step_up',
+    name: 'Additional Verification Required',
+    decision: 'Step-Up Verification',
+    confidence: 'Medium',
+    summary: 'The authentication request differs from previous trusted activity and requires additional confirmation before access is granted.',
+    recommendedAction: 'Request secondary verification.',
+    policyUsed: 'Adaptive Authentication Threshold Policy',
+    auditRef: 'AUD-104-399D',
+    timestamp: '2026-06-24 15:16:52 UTC',
+    colorClass: 'text-yellow-400',
+    borderClass: 'border-yellow-500/20 bg-yellow-950/10',
+    badgeColorClass: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
+    dotColorClass: 'bg-yellow-500'
   },
   {
-    id: 'score_high',
-    name: 'High Risk — Coordinated Proxy Network',
-    description: 'Unregistered user-agent headers coupled with active VPN/proxy tunnels and altered keystroke dynamics.',
-    simulatedRiskScore: 78,
-    signals: {
-      deviceReputation: 'suspicious',
-      proxyDetected: true,
-      impossibleTravel: false,
-      locationMatch: 'foreign_datacenter',
-      browserIntegrityIndex: 61,
-      behaviorRating: 'high_velocity'
-    }
+    id: 'review',
+    name: 'Manual Review Recommended',
+    decision: 'Pending Review',
+    confidence: 'Medium',
+    summary: 'Multiple trust indicators conflict with established account history. Automated approval cannot be confidently issued.',
+    recommendedAction: 'Queue for administrator or platform review.',
+    policyUsed: 'Anomalous Activity Threshold Policy',
+    auditRef: 'AUD-773-412K',
+    timestamp: '2026-06-24 15:16:52 UTC',
+    colorClass: 'text-orange-400',
+    borderClass: 'border-orange-500/20 bg-orange-950/10',
+    badgeColorClass: 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
+    dotColorClass: 'bg-orange-500'
   },
   {
-    id: 'score_crit',
-    name: 'Critical Threat — Emulated Automation Bot',
-    description: 'Automated headless framework detected inside a virtualized physical device environment.',
-    simulatedRiskScore: 96,
-    signals: {
-      deviceReputation: 'emulator',
-      proxyDetected: true,
-      impossibleTravel: true,
-      locationMatch: 'foreign_datacenter',
-      browserIntegrityIndex: 12,
-      behaviorRating: 'high_velocity'
-    }
+    id: 'rejected',
+    name: 'Authentication Rejected',
+    decision: 'Rejected',
+    confidence: 'High',
+    summary: 'The authentication request demonstrates characteristics inconsistent with trusted user behavior according to configured organizational trust policies.',
+    recommendedAction: 'Deny access and record the event in the audit log.',
+    policyUsed: 'Strict Anti-Duplication Rule Policy',
+    auditRef: 'AUD-889-103Z',
+    timestamp: '2026-06-24 15:16:52 UTC',
+    colorClass: 'text-red-400',
+    borderClass: 'border-red-500/20 bg-red-950/10',
+    badgeColorClass: 'bg-red-500/10 text-red-400 border border-red-500/20',
+    dotColorClass: 'bg-red-500'
   }
 ];
 
@@ -106,8 +111,8 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
   const [primaryMethod, setPrimaryMethod] = useState<'password' | 'passkey' | 'sso' | 'saml'>('passkey');
   const [password, setPassword] = useState<string>("••••••••••••");
   
-  // Custom Flow routing states: 'username' -> 'primary_auth' -> 'evaluating' -> 'challenge_gate' -> 'final_auth_success' | 'final_auth_blocked'
-  const [flowState, setFlowState] = useState<'username' | 'primary_auth' | 'evaluating' | 'challenge_gate' | 'final_auth_success' | 'final_auth_blocked'>('username');
+  // Custom Flow routing states: 'username' -> 'primary_auth' -> 'evaluating' -> 'challenge_gate' -> 'final_auth_success' | 'final_auth_blocked' | 'final_auth_review'
+  const [flowState, setFlowState] = useState<'username' | 'primary_auth' | 'evaluating' | 'challenge_gate' | 'final_auth_success' | 'final_auth_blocked' | 'final_auth_review'>('username');
   
   // Simulation Control Center States
   const [activeScenario, setActiveScenario] = useState<SecurityScenario>(SECURITY_SCENARIOS[0]);
@@ -163,14 +168,13 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
     setTelemetryLogs([]);
 
     const logPoints = [
-      `[INIT] Booting AAN Protocol attestation layers for session ${sessionId}`,
+      `[INIT] Booting privacy-preserving AAN trust evaluation for session ${sessionId}`,
       `[CLAIM] Processing identity claim identifier: ${username}`,
-      `[HARDWARE] Evaluating device rep signatures: [${activeScenario.signals.deviceReputation.toUpperCase()}]`,
-      `[INTEGRITY] Analyzing system posture rating: ${activeScenario.signals.browserIntegrityIndex}/100`,
-      `[LOCATION] Correlating route travel constraints: ${activeScenario.signals.locationMatch.toUpperCase()}`,
-      activeScenario.signals.proxyDetected ? `[WARN] Proxy / VPN routing endpoint observed` : `[NETWORK] Clean residential IP address verified`,
-      activeScenario.signals.impossibleTravel ? `[THREAT] Impossible spatial-velocity travel sequence logged` : `[LOCATION] Localized travel timeline approved`,
-      `[CALCULATE] Compiling multi-signal posture score against enterprise threshold templates...`
+      `[POLICY] Enforcing policy context: ${activeScenario.policyUsed}`,
+      `[EVALUATE] Checking device hardware authenticity status...`,
+      `[EVALUATE] Verifying location travel velocity consistency...`,
+      `[EVALUATE] Checking cryptographic signature template cache for duplicates...`,
+      `[CALCULATE] Compiling multi-indicator trust decision against enterprise threshold template...`
     ];
 
     let currentLogIndex = 0;
@@ -189,19 +193,22 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
   };
 
   const assessRiskOutcome = () => {
-    const score = activeScenario.simulatedRiskScore;
+    const scenarioId = activeScenario.id;
     
-    if (score >= riskThresholdCrit) {
+    if (scenarioId === 'rejected') {
       setFlowState('final_auth_blocked');
-      appendActionLog("Critical Risk Authentication Blocked", `Session login attempted by ${username} blocked due to critical risk factors (${score}/100).`, "Suspended");
-    } else if (score >= riskThresholdHigh || score >= riskThresholdMed) {
+      appendActionLog("Authentication Rejected", `Session login attempted by ${username} was rejected.`, "Suspended");
+    } else if (scenarioId === 'review') {
+      setFlowState('final_auth_review');
+      appendActionLog("Manual Review Queued", `Session login attempted by ${username} was queued for administrative review.`, "Pending");
+    } else if (scenarioId === 'step_up') {
       setFlowState('challenge_gate');
       setChallengeStep('choose');
       const firstEnabled = getFirstEnabledChallenge();
       setSelectedChallengeType(firstEnabled);
     } else {
       setFlowState('final_auth_success');
-      appendActionLog("Dynamic Zero-Friction Authentication Approved", `Session login completed instantly by verified user ${username} under normal risk tolerances (${score}/100).`, "Neutral");
+      appendActionLog("Authentication Approved", `Session login completed instantly by verified user ${username}.`, "Neutral");
     }
   };
 
@@ -458,13 +465,13 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
               <div className="p-8 space-y-6">
                 <div className="text-center space-y-2">
                   <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" />
-                  <h3 className="font-mono text-xs text-white uppercase tracking-wider">Processing Posture Signals...</h3>
-                  <p className="text-[11px] text-[#78819a] font-sans">AAN is computing non-fingerprinting network & travel velocities.</p>
+                  <h3 className="font-mono text-xs text-white uppercase tracking-wider">Processing Trust Evaluation...</h3>
+                  <p className="text-[11px] text-[#78819a] font-sans">Evaluating multi-indicator trust indicators under privacy-preserving rules.</p>
                 </div>
 
                 <div className="bg-[#0d0e12] border border-[#1b1e28] rounded-lg p-5 font-mono text-[10.5px] text-[#a5b0cb] space-y-1.5 h-48 overflow-y-auto">
                   <div className="flex items-center justify-between border-b border-[#1b1e28] pb-2 mb-2 text-[#5d6780] font-bold uppercase tracking-wider text-[9px]">
-                    <span>POSTURE SIGNAL COMPILATION</span>
+                    <span>TRUST ENGINE VERIFICATION LOG</span>
                     <span className="text-blue-500">LIVE FEED</span>
                   </div>
                   {telemetryLogs.map((log, lIdx) => (
@@ -482,20 +489,20 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                 <div className="bg-[#1a1412] border border-amber-900/30 p-4 rounded-lg flex items-start gap-3">
                   <AlertTriangle className="w-4 h-4 text-[#d2ab6c] shrink-0 mt-0.5" />
                   <div className="space-y-1">
-                    <span className="text-[10px] text-[#d2ab6c] font-mono font-bold uppercase tracking-wider block">Elevated Threat Triggered ({activeScenario.simulatedRiskScore}/100)</span>
+                    <span className="text-[10px] text-[#d2ab6c] font-mono font-bold uppercase tracking-wider block">Additional Verification Required</span>
                     <p className="text-xs text-[#a5b0cb] font-sans leading-relaxed">
-                      Primary credentials accepted, but anomalous environmental parameters (proxy usage or unknown hardware profile) warrant explicit verification.
+                      The authentication request differs from previous trusted activity and requires additional confirmation before access is granted.
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   {challengeStep === 'choose' && (
-                    <div className="space-y-4">
-                      <div>
-                        <span className="text-[10px] uppercase font-mono text-[#5d6780] font-black tracking-widest block">Allowed Attestation Protocols</span>
-                        <p className="text-[11px] text-[#78819a] font-sans">Select any active system parameter checkpoint to resolve the session block.</p>
-                      </div>
+                     <div className="space-y-4">
+                       <div>
+                         <span className="text-[10px] uppercase font-mono text-[#5d6780] font-black tracking-widest block">Allowed Verification Protocols</span>
+                         <p className="text-[11px] text-[#78819a] font-sans">Select a verification method to confirm identity and complete authentication.</p>
+                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 font-mono text-xs">
                         {enabledMethods.deviceConsistency && (
@@ -725,33 +732,45 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                 </div>
                 
                 <div className="space-y-2">
-                  <span className="font-mono text-[9px] text-emerald-500 font-black uppercase tracking-widest block">SESSION SECURED</span>
-                  <h2 className="text-xl font-bold font-sans text-white">Identity Assured</h2>
+                  <span className="font-mono text-[9px] text-emerald-400 font-black uppercase tracking-widest block">AUTHENTICATION SECURED</span>
+                  <h2 className="text-xl font-bold font-sans text-white">Authentication Approved</h2>
                   <p className="text-xs text-[#78819a] max-w-sm mx-auto leading-relaxed">
-                    AAN Protocol evaluated the session signature to authenticate <strong className="text-white font-mono select-all">{username}</strong> without risk flags.
+                    This authentication request matches a previously trusted account pattern. Access is securely granted.
                   </p>
                 </div>
 
-                <div className="bg-[#0d0e12] border border-[#1b1e28] p-4 rounded-lg text-left font-mono text-[10.5px] space-y-2 select-all text-[#78819a]">
+                <div className="bg-[#0d0e12] border border-[#1b1e28] p-4 rounded-lg text-left font-mono text-[10.5px] space-y-2 text-[#78819a]">
                   <div className="flex justify-between text-[#5d6780] text-[9px] uppercase font-bold border-b border-[#1b1e28] pb-1.5 mb-1">
-                    <span>SECURITY PROOF ATTESTATION</span>
-                    <span className="text-emerald-500">AUTHORIZED</span>
+                    <span>DECISION SUMMARY RECORD</span>
+                    <span className="text-emerald-500">APPROVED</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Account Claim:</span>
+                    <span>Identifier:</span>
                     <span className="text-[#e3e5eb]">{username}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Evaluated Posture Score:</span>
-                    <span className="text-emerald-400 font-bold">{activeScenario.simulatedRiskScore}/100</span>
+                    <span>Decision:</span>
+                    <span className="text-emerald-400 font-bold">{activeScenario.decision}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Dynamic Attestation Factor:</span>
-                    <span className="text-blue-400 font-bold uppercase">{selectedChallengeType || "NONE (PASSED)"}</span>
+                    <span>Confidence:</span>
+                    <span className="text-emerald-400 font-bold">{activeScenario.confidence}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Proof Session Key:</span>
+                    <span>Policy Used:</span>
+                    <span className="text-[#a5b0cb]">{activeScenario.policyUsed}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Audit Reference:</span>
+                    <span className="text-[#a5b0cb]">{activeScenario.auditRef}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Session ID:</span>
                     <span className="text-[#a5b0cb] truncate max-w-[140px]">{sessionId}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-[#1b1e28] pt-1.5 mt-1.5">
+                    <span>Recommended Action:</span>
+                    <span className="text-white font-sans">{activeScenario.recommendedAction}</span>
                   </div>
                 </div>
 
@@ -780,19 +799,42 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                 </div>
 
                 <div className="space-y-2">
-                  <span className="font-mono text-[9px] text-red-400 font-bold uppercase tracking-widest block">MALICIOUS SIGNATURE BLOCKED</span>
+                  <span className="font-mono text-[9px] text-red-400 font-bold uppercase tracking-widest block">AUTHENTICATION BLOCKED</span>
                   <h2 className="text-lg font-bold text-white tracking-tight">Access Request Denied</h2>
                   <p className="text-xs text-[#78819a] max-w-sm mx-auto leading-relaxed">
-                    AAN Protocol registered severe postural anomalies scoring <strong className="text-red-500">{activeScenario.simulatedRiskScore}/100</strong>. Access blocked due to emulators, automated scripting, or key mismatch.
+                    The authentication request demonstrates characteristics inconsistent with trusted user behavior according to configured organizational trust policies.
                   </p>
                 </div>
 
                 <div className="bg-[#0d0e12] border border-[#1b1e28] p-4 rounded-lg text-left font-mono text-[10.5px] space-y-2 text-[#78819a]">
-                  <div className="text-[#5d6780] font-bold uppercase text-[9px] border-b border-[#1b1e28] pb-1.5 mb-1">INCIDENT SUMMARY RECORD</div>
-                  <div>• Identifier: {username}</div>
-                  <div>• Violation: System virtualization frame detected</div>
-                  <div>• Geo Posture: Suspicious datacenter routing route</div>
-                  <div>• Resolve: Hardware key revocation; address blocked</div>
+                  <div className="flex justify-between text-[#5d6780] text-[9px] uppercase font-bold border-b border-[#1b1e28] pb-1.5 mb-1">
+                    <span>DECISION SUMMARY RECORD</span>
+                    <span className="text-red-500">REJECTED</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Identifier:</span>
+                    <span className="text-[#e3e5eb]">{username}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Decision:</span>
+                    <span className="text-red-400 font-bold">{activeScenario.decision}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Confidence:</span>
+                    <span className="text-red-400 font-bold">{activeScenario.confidence}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Policy Used:</span>
+                    <span className="text-[#a5b0cb]">{activeScenario.policyUsed}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Audit Reference:</span>
+                    <span className="text-[#a5b0cb]">{activeScenario.auditRef}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-[#1b1e28] pt-1.5 mt-1.5">
+                    <span>Recommended Action:</span>
+                    <span className="text-white font-sans">{activeScenario.recommendedAction}</span>
+                  </div>
                 </div>
 
                 <div className="pt-2 font-mono text-xs">
@@ -800,7 +842,64 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
                     onClick={() => setFlowState('username')}
                     className="w-full bg-[#0d0e12] border border-[#1b1e28] hover:bg-[#111319] text-[#78819a] py-3 rounded transition-colors"
                   >
-                    Restart Attestation Pipeline
+                    Restart Authentication Flow
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* STATE G: MANUAL REVIEW RECOMMENDED */}
+            {flowState === 'final_auth_review' && (
+              <div className="p-8 space-y-6 text-center">
+                <div className="bg-orange-950/40 border border-orange-900/50 text-orange-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+
+                <div className="space-y-2">
+                  <span className="font-mono text-[9px] text-orange-400 font-bold uppercase tracking-widest block">MANUAL REVIEW RECOMMENDED</span>
+                  <h2 className="text-xl font-bold font-sans text-white">Manual Review Queued</h2>
+                  <p className="text-xs text-[#78819a] max-w-sm mx-auto leading-relaxed">
+                    Multiple trust indicators conflict with established account history. Automated approval cannot be confidently issued.
+                  </p>
+                </div>
+
+                <div className="bg-[#0d0e12] border border-[#1b1e28] p-4 rounded-lg text-left font-mono text-[10.5px] space-y-2 text-[#78819a]">
+                  <div className="flex justify-between text-[#5d6780] text-[9px] uppercase font-bold border-b border-[#1b1e28] pb-1.5 mb-1">
+                    <span>DECISION SUMMARY RECORD</span>
+                    <span className="text-orange-400 font-bold">PENDING REVIEW</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Identifier:</span>
+                    <span className="text-[#e3e5eb]">{username}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Decision:</span>
+                    <span className="text-orange-400 font-bold">{activeScenario.decision}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Confidence:</span>
+                    <span className="text-orange-400 font-bold">{activeScenario.confidence}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Policy Used:</span>
+                    <span className="text-[#a5b0cb]">{activeScenario.policyUsed}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Audit Reference:</span>
+                    <span className="text-[#a5b0cb]">{activeScenario.auditRef}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-[#1b1e28] pt-1.5 mt-1.5">
+                    <span>Recommended Action:</span>
+                    <span className="text-white font-sans">{activeScenario.recommendedAction}</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 font-mono text-xs">
+                  <button 
+                    onClick={() => setFlowState('username')}
+                    className="w-full bg-[#0d0e12] border border-[#1b1e28] hover:bg-[#111319] text-[#78819a] py-3 rounded transition-colors"
+                  >
+                    Restart Authentication Flow
                   </button>
                 </div>
               </div>
@@ -812,164 +911,70 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
         <div className="lg:col-span-5 space-y-6">
           
           {/* Controls: Presets */}
-          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <Sliders className="w-4 h-4 text-blue-500" />
-                <h3 className="font-mono font-bold text-white text-xs uppercase tracking-wider">Threat Simulation Controls</h3>
-              </div>
-              <p className="text-[11px] text-[#78819a] font-sans leading-relaxed">Toggle physical client signals to test how the AAN posture comparator dynamically triggers security challenges.</p>
+          {/* Authentication Decisions Control Center */}
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-6 space-y-6">
+            <div className="space-y-2">
+              <h3 className="font-sans font-semibold text-white text-base">Authentication Decisions</h3>
+              <p className="text-[12px] text-[#78819a] font-sans leading-relaxed">
+                Every authentication request is evaluated using AAN’s privacy-preserving trust engine. The system returns a clear decision that organizations can act on while exposing no personal identity information.
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-2.5">
+            <div className="space-y-4">
               {SECURITY_SCENARIOS.map((scen) => {
                 const isActive = activeScenario.id === scen.id;
                 return (
                   <button
                     key={scen.id}
                     onClick={() => selectScenario(scen)}
-                    className={`p-3.5 rounded border text-left text-xs font-mono transition-all flex justify-between items-start cursor-pointer ${
+                    className={`w-full p-5 rounded-lg border text-left transition-all duration-200 cursor-pointer flex flex-col gap-4 ${
                       isActive 
-                        ? 'bg-[#0d0e12] border-blue-600 shadow-lg' 
-                        : 'bg-[#111319] border-[#1b1e28] hover:bg-[#0d0e12]'
+                        ? `bg-[#0d0e12] border-blue-600/60 shadow-xl ring-1 ring-blue-500/20` 
+                        : 'bg-[#111319]/80 border-[#1b1e28] hover:bg-[#0d0e12] hover:border-[#2b3143]'
                     }`}
                   >
-                    <div className="space-y-1.5 max-w-[85%]">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${
-                          scen.simulatedRiskScore < 25 ? 'bg-emerald-500' :
-                          scen.simulatedRiskScore < 65 ? 'bg-yellow-500' : 'bg-red-500'
-                        }`} />
-                        <span className="font-bold text-white block">{scen.name}</span>
+                    {/* Header */}
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2.5">
+                        <span className={`w-2 h-2 rounded-full ${scen.dotColorClass}`} />
+                        <span className="font-sans font-medium text-white text-sm">{scen.name}</span>
                       </div>
-                      <p className="text-[11px] text-[#78819a] normal-case leading-relaxed font-sans">{scen.description}</p>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded font-medium ${scen.badgeColorClass}`}>
+                        {scen.decision}
+                      </span>
                     </div>
 
-                    <div className="text-right">
-                      <span className="text-[9px] text-[#5d6780] font-bold block leading-none uppercase">Risk</span>
-                      <span className={`text-sm font-black ${
-                        scen.simulatedRiskScore < 25 ? 'text-emerald-400' :
-                        scen.simulatedRiskScore < 65 ? 'text-yellow-400' : 'text-red-400'
-                      }`}>{scen.simulatedRiskScore}%</span>
+                    {/* Detailed Spec / Metadata */}
+                    <div className="grid grid-cols-2 gap-y-2 gap-x-4 border-t border-[#1b1e28] pt-3 text-[11px] font-mono text-[#78819a] w-full">
+                      <div>
+                        <span className="text-[#5d6780] block text-[9px] uppercase font-bold mb-0.5">Confidence Level</span>
+                        <span className="text-[#e3e5eb] font-medium">{scen.confidence}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#5d6780] block text-[9px] uppercase font-bold mb-0.5">Recommended Action</span>
+                        <span className="text-[#e3e5eb] font-sans leading-snug block">{scen.recommendedAction}</span>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-[#5d6780] block text-[9px] uppercase font-bold mb-0.5">Policy Used</span>
+                        <span className="text-[#e3e5eb]">{scen.policyUsed}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#5d6780] block text-[9px] uppercase font-bold mb-0.5">Audit Log Reference</span>
+                        <span className="text-[#a5b0cb] select-all">{scen.auditRef}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#5d6780] block text-[9px] uppercase font-bold mb-0.5">Timestamp</span>
+                        <span className="text-[#8e98b0]">{scen.timestamp}</span>
+                      </div>
                     </div>
+
+                    {/* Brief description summary */}
+                    <p className="text-[11px] text-[#78819a] font-sans leading-relaxed pt-1 border-t border-[#1b1e28]/50 w-full">
+                      {scen.summary}
+                    </p>
                   </button>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Controls: Policies */}
-          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4 font-mono text-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1.5">
-                <Sliders className="w-4 h-4 text-blue-500" />
-                <h3 className="font-mono font-bold text-white text-xs uppercase tracking-wider">Verification Policies</h3>
-              </div>
-              <p className="text-[11px] text-[#78819a] font-sans">Enforce required validation metrics for current sessions.</p>
-            </div>
-
-            <div className="space-y-3">
-              <span className="text-[9px] text-[#5d6780] uppercase font-bold block border-b border-[#1b1e28] pb-1">Enabled Verification Factors</span>
-              
-              <div className="grid grid-cols-2 gap-2.5 text-[10px]">
-                <label className="flex items-center gap-2 text-[#a5b0cb] cursor-pointer select-none">
-                  <input 
-                    type="checkbox" 
-                    checked={enabledMethods.deviceConsistency}
-                    onChange={(e) => setEnabledMethods({ ...enabledMethods, deviceConsistency: e.target.checked })}
-                    className="accent-blue-600"
-                  />
-                  <span>Device Posture</span>
-                </label>
-
-                <label className="flex items-center gap-2 text-[#a5b0cb] cursor-pointer select-none">
-                  <input 
-                    type="checkbox" 
-                    checked={enabledMethods.hardwareKey}
-                    onChange={(e) => setEnabledMethods({ ...enabledMethods, hardwareKey: e.target.checked })}
-                    className="accent-blue-600"
-                  />
-                  <span>FIDO2 Keys</span>
-                </label>
-
-                <label className="flex items-center gap-2 text-[#a5b0cb] cursor-pointer select-none">
-                  <input 
-                    type="checkbox" 
-                    checked={enabledMethods.authenticator}
-                    onChange={(e) => setEnabledMethods({ ...enabledMethods, authenticator: e.target.checked })}
-                    className="accent-blue-600"
-                  />
-                  <span>TOTP Code</span>
-                </label>
-
-                <label className="flex items-center gap-2 text-[#a5b0cb] cursor-pointer select-none">
-                  <input 
-                    type="checkbox" 
-                    checked={enabledMethods.emailToken}
-                    onChange={(e) => setEnabledMethods({ ...enabledMethods, emailToken: e.target.checked })}
-                    className="accent-blue-600"
-                  />
-                  <span>Email Access</span>
-                </label>
-
-                <label className="flex items-center gap-2 text-[#a5b0cb] cursor-pointer select-none col-span-2 border-t border-[#1b1e28] pt-2.5 mt-1">
-                  <input 
-                    type="checkbox" 
-                    checked={enabledMethods.sessionIntegrity}
-                    onChange={(e) => setEnabledMethods({ ...enabledMethods, sessionIntegrity: e.target.checked })}
-                    className="accent-blue-600"
-                  />
-                  <span className="font-bold text-white flex items-center gap-1.5">
-                    Session Integrity Handshake <span className="bg-blue-950 text-blue-400 font-mono text-[8px] px-1.5 py-0.5 rounded border border-blue-900/40">RECOMMENDED</span>
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            {/* Thresholds */}
-            <div className="space-y-2 border-t border-[#1b1e28] pt-3">
-              <span className="text-[9px] text-[#5d6780] uppercase font-bold block">Risk Threshold Tiers</span>
-              
-              <div className="space-y-2.5 text-[10px] text-[#78819a]">
-                <div className="flex justify-between items-center">
-                  <span>Medium Risk (Gate Factor):</span>
-                  <span className="text-yellow-400 font-bold font-mono">{riskThresholdMed}%</span>
-                </div>
-                <input 
-                  type="range" 
-                  min={10} 
-                  max={50} 
-                  value={riskThresholdMed} 
-                  onChange={(e) => setRiskThresholdMed(Number(e.target.value))}
-                  className="w-full h-1 accent-blue-600 bg-[#0d0e12] rounded" 
-                />
-
-                <div className="flex justify-between items-center">
-                  <span>High Risk (Stricter Challenges):</span>
-                  <span className="text-red-400 font-bold font-mono">{riskThresholdHigh}%</span>
-                </div>
-                <input 
-                  type="range" 
-                  min={51} 
-                  max={80} 
-                  value={riskThresholdHigh} 
-                  onChange={(e) => setRiskThresholdHigh(Number(e.target.value))}
-                  className="w-full h-1 accent-blue-600 bg-[#0d0e12] rounded" 
-                />
-
-                <div className="flex justify-between items-center">
-                  <span>Critical Risk (Force Shutdown):</span>
-                  <span className="text-red-600 font-bold font-mono">{riskThresholdCrit}%</span>
-                </div>
-                <input 
-                  type="range" 
-                  min={81} 
-                  max={99} 
-                  value={riskThresholdCrit} 
-                  onChange={(e) => setRiskThresholdCrit(Number(e.target.value))}
-                  className="w-full h-1 accent-blue-600 bg-[#0d0e12] rounded" 
-                />
-              </div>
             </div>
           </div>
         </div>
@@ -977,7 +982,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
       {/* Compliance footer note */}
       <div className="text-center mt-10 text-[10.5px] text-[#5d6780] max-w-lg mx-auto leading-relaxed font-mono">
-        <span className="text-[#78819a]">Regulatory Audit Compliance:</span> System actions, dynamic challenges, and posture computations execute securely under sandbox specifications without physical identification logs.
+        <span className="text-[#78819a]">Regulatory Audit Compliance:</span> System actions, dynamic challenges, and cryptographic trust evaluations execute securely under sandbox specifications without physical identification logs.
       </div>
     </div>
   );

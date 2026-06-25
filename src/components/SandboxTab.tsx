@@ -14,8 +14,8 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
   // Simulated State Engine
   const [simulatedUsers, setSimulatedUsers] = useState<any[]>([
     { id: "usr_sb_01", alias: "Alice Coleman", status: "verified", risk: "low", score: 8, device: "iPhone 15 iOS" },
-    { id: "usr_sb_02", alias: "Sybil Bot Machine #9", status: "rejected", risk: "critical", score: 98, device: "Emulator Chrome Headless" },
-    { id: "usr_sb_03", alias: "Returning Bob", status: "passed", risk: "medium", score: 45, device: "Pixel 7 Pro Android" }
+    { id: "usr_sb_02", alias: "Automated Request #9", status: "rejected", risk: "critical", score: 98, device: "Emulator Chrome Headless" },
+    { id: "usr_sb_03", alias: "Returning User", status: "passed", risk: "medium", score: 45, device: "Pixel 7 Pro Android" }
   ]);
 
   const [simName, setSimName] = useState("");
@@ -171,7 +171,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
             AAN Simulated Playground
           </h2>
           <p className="text-xs text-[#78819a] max-w-2xl leading-relaxed">
-            Manipulate security triggers, trigger sybil duplicates, and review webhooks in a fully static playground context without affecting your live production user directories.
+            Manipulate security triggers, simulate duplicate accounts, and review webhooks in a fully static playground context without affecting your live production user directories.
           </p>
         </div>
 
@@ -255,7 +255,7 @@ export default function SandboxTab({ onAddAuditLog }: SandboxTabProps) {
                 onClick={simulateDuplicateAttempt}
                 className="p-4 rounded-xl border border-red-900/30 bg-red-950/15 hover:bg-red-950/20 text-left transition-all cursor-pointer group"
               >
-                <span className="font-mono text-[10px] uppercase font-black text-red-400 block mb-1">Simulate Sybil Replica Attack</span>
+                <span className="font-mono text-[10px] uppercase font-black text-red-400 block mb-1">Simulate Duplicate Identity Attack</span>
                 <p className="text-[11px] text-[#78819a] font-sans leading-normal group-hover:text-slate-300">
                   Submits face signature matches already stored inside AAN vault registries to trigger duplication alarms.
                 </p>
