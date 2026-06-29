@@ -653,42 +653,31 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'overview' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Activity className="w-4 h-4" />
-            Overview
+            Dashboard
           </button>
 
           <button 
-            onClick={() => { setActiveTab('organizations'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'organizations' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
+            onClick={() => { setActiveTab('organizations'); setOrgSubTab('settings'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${(activeTab === 'organizations' && orgSubTab === 'settings') ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Layers className="w-4 h-4 text-indigo-400" />
-            Organizations
+            Projects
           </button>
 
           <button 
-            onClick={() => { setActiveTab('verification-activity'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'verification-activity' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
+            onClick={() => { setActiveTab('organizations'); setOrgSubTab('policies'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${(activeTab === 'organizations' && orgSubTab === 'policies') ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
-            <Database className="w-4 h-4" />
-            Verification Activity
+            <Sliders className="w-4 h-4 text-amber-500" />
+            Trust Rules
           </button>
 
           <button 
-            onClick={() => { setActiveTab('security-center'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'security-center' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
+            onClick={() => { setActiveTab('organizations'); setOrgSubTab('profiles'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${(activeTab === 'organizations' && orgSubTab === 'profiles') ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <Shield className="w-4 h-4 text-red-400" />
-            Security Center
-            {(sessions.filter(s => s.risk_score >= 70).length > 0 || duplicateSignals.length > 0) && (
-              <span className="ml-auto w-1.5 h-1.5 rounded-full bg-red-500" />
-            )}
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('trust-analytics'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'trust-analytics' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
-          >
-            <Activity className="w-4 h-4 text-emerald-400" />
-            Trust Analytics
+            Trust Profiles
           </button>
 
           <button 
@@ -712,15 +701,15 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'audit-logs' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <ClipboardList className="w-4 h-4 text-teal-400" />
-            Audit Logs
+            Activity
           </button>
 
           <button 
-            onClick={() => { setActiveTab('developers'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'developers' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
+            onClick={() => { setActiveTab('verification-activity'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'verification-activity' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
-            <Terminal className="w-4 h-4 text-emerald-400" />
-            Developers
+            <Database className="w-4 h-4" />
+            Decisions
           </button>
 
           <button 
@@ -742,10 +731,10 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         </aside>
 
         {/* Right workspace view */}
-        <main className="flex-1 overflow-y-auto p-8 bg-[#0d0e12]">
+        <main className="flex-1 overflow-y-auto p-5 bg-[#0d0e12]">
           
           {/* Global MVP Mock Disclaimer */}
-          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 mb-8 text-xs text-[#78819a] leading-relaxed font-sans flex items-center gap-3 animate-fadeIn">
+          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-4 mb-4 text-xs text-[#78819a] leading-relaxed font-sans flex items-center gap-3 animate-fadeIn">
             <Info className="w-4 h-4 text-blue-500 shrink-0" />
             <span>This workspace contains demonstration data for development purposes.</span>
           </div>
@@ -759,7 +748,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             <>
               {/* ==================== OVERVIEW TAB ==================== */}
               {activeTab === 'overview' && (
-                <div className="space-y-8 animate-fadeIn">
+                <div className="space-y-5 animate-fadeIn">
                                {/* Alert banner for active project settings info */}
                   <div className="bg-[#111319] border border-[#1b1e28] p-4 rounded-xl flex items-start gap-3.5">
                     <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
@@ -853,7 +842,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                                 </div>
                                 <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Zero-Knowledge Trust</h4>
                                 <p className="text-[11px] text-[#78819a] mt-1.5 leading-relaxed">
-                                  We never store raw photos, biometrics, SSNs, or physical ID documents. AAN translates facial landmarks into anonymous mathematical hashes.
+                                  We never store raw passwords, SSNs, or physical ID documents. AAN translates trust signals into anonymous mathematical hashes.
                                 </p>
                               </div>
                               <div className="bg-[#111319]/80 border border-[#1b1e28] p-4 rounded-lg">
@@ -871,7 +860,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                                 </div>
                                 <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">Real-Time Risk Engine</h4>
                                 <p className="text-[11px] text-[#78819a] mt-1.5 leading-relaxed">
-                                  Our engine continuously analyses device fingerprints, dual-liveness trials, and template duplications to instantly flag sybil attacks.
+                                  Our engine continuously analyses device fingerprints, trusted hardware keys, and credential velocity to instantly flag sybil attacks.
                                 </p>
                               </div>
                             </div>
@@ -1245,7 +1234,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                                     <span>": "standard"</span>
                                     {activeTooltip === 'level' && (
                                       <div className="absolute left-0 bottom-6 bg-slate-900 border border-blue-500/30 p-2 rounded text-[10px] text-gray-200 w-56 z-10 shadow-xl leading-normal">
-                                        <b>verification_level</b>: "standard" checks liveness and basic deduplication. "high" enforces secure hardware signatures.
+                                        <b>verification_level</b>: "standard" checks credential and device trust indicators. "high" enforces secure hardware signatures.
                                       </div>
                                     )}
                                   </div>
@@ -1393,84 +1382,64 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     </div>
                   )}
 
-                  {/* 11 core dashboard metrics requested */}
+                  {/* Main Dashboard trust metrics */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Verification Requests</span>
+                      <span className="font-mono text-[9px] text-blue-400 font-bold uppercase tracking-wider block">Trust Decisions Today</span>
                       <div className="text-3xl font-semibold text-white mt-2 tracking-tight">{sessions.length}</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Total sessions initiated</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Total trust sessions evaluated today</span>
                     </div>
 
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-emerald-400 font-bold uppercase tracking-wider block">Successful Verifications</span>
+                      <span className="font-mono text-[9px] text-emerald-400 font-bold uppercase tracking-wider block">Trusted Users</span>
                       <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
                         {sessions.filter(s => s.status === 'passed').length}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Verified unique accounts</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Legitimate humans verified</span>
                     </div>
 
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-yellow-500 font-bold uppercase tracking-wider block">Pending Reviews</span>
+                      <span className="font-mono text-[9px] text-yellow-500 font-bold uppercase tracking-wider block">Suspicious Sessions</span>
                       <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
                         {sessions.filter(s => s.status === 'review' || (s.risk_score >= 35 && s.risk_score < 70)).length}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Sessions requiring review</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Sessions flagged for potential risk</span>
                     </div>
 
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-red-500 font-bold uppercase tracking-wider block">Blocked Sessions</span>
+                      <span className="font-mono text-[9px] text-red-500 font-bold uppercase tracking-wider block">High-Risk Attempts</span>
                       <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
                         {sessions.filter(s => s.status === 'failed' || s.risk_score >= 70).length}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Blocked verification attempts</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Prevented bot or malicious access</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-blue-400 font-bold uppercase tracking-wider block">Duplicate Accounts Detected</span>
+                      <span className="font-mono text-[9px] text-blue-400 font-bold uppercase tracking-wider block">Duplicate Accounts Prevented</span>
                       <div className="text-3xl font-semibold text-white mt-2 tracking-tight">{duplicateSignals.length}</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Duplicate account attempts</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Sybil or multi-account attempts stopped</span>
                     </div>
 
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-teal-400 font-bold uppercase tracking-wider block">API Health</span>
-                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">99.99%</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Integration health & uptime</span>
+                      <span className="font-mono text-[9px] text-teal-400 font-bold uppercase tracking-wider block">Platform Health</span>
+                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">Active</div>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Uptime and API services functional</span>
                     </div>
 
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-indigo-400 font-bold uppercase tracking-wider block">Webhook Success Rate</span>
+                      <span className="font-mono text-[9px] text-indigo-400 font-bold uppercase tracking-wider block">Active Integrations</span>
                       <div className="text-3xl font-semibold text-white mt-2 tracking-tight">
-                        {webhookDeliveries.length > 0 ? "100.00%" : "99.95%"}
+                        {partnerApps.length || 2}
                       </div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Event dispatch delivery rate</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Connected customer applications</span>
                     </div>
 
                     <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-purple-400 font-bold uppercase tracking-wider block">Integration Status</span>
-                      <div className="text-3xl font-semibold text-emerald-400 mt-2 tracking-tight">Active</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Production connectivity</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Organizations</span>
-                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">{partnerApps.length || 2}</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Connected client apps</span>
-                    </div>
-
-                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Monthly Verification Volume</span>
-                      <div className="text-3xl font-semibold text-white mt-2 tracking-tight">12,480</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Consolidated monthly runs</span>
-                    </div>
-
-                    <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl">
-                      <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase tracking-wider block">Average Verification Time</span>
+                      <span className="font-mono text-[9px] text-purple-400 font-bold uppercase tracking-wider block">Average Response Time</span>
                       <div className="text-3xl font-semibold text-white mt-2 tracking-tight">1.25s</div>
-                      <span className="text-[10px] text-[#5d6780] block mt-1">Client end-to-end handshake</span>
+                      <span className="text-[10px] text-[#5d6780] block mt-1">Mean trust evaluation duration</span>
                     </div>
                   </div>
 
@@ -1535,18 +1504,18 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       onClick={() => setOrgSubTab('policies')}
                       className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
-                      MFA Login Policies
+                      Trust Rules
                     </button>
                     <button
                       onClick={() => setOrgSubTab('profiles')}
                       className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
-                      Verification Profiles
+                      Trust Profiles
                     </button>
                   </div>
                   <div className="border-b border-[#1b1e28] pb-4">
-                    <h2 className="text-lg font-bold text-white">Project Identity & Enforcement Policy blueprint</h2>
-                    <p className="text-xs text-[#78819a]">Manage API origin restrictions, allowed domains and automation enforcement modes.</p>
+                    <h2 className="text-lg font-bold text-white">Project Security</h2>
+                    <p className="text-xs text-[#78819a]">Manage origin restrictions, allowed domains, and platform protection modes.</p>
                   </div>
 
                   <form onSubmit={handleUpdateConfig} className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-5 max-w-2xl text-left">
@@ -1586,17 +1555,17 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       </div>
 
                       <div>
-                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Policy Enforcement Mode (Required)</label>
+                        <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Protection Mode (Required)</label>
                         <select
                           value={enforcementModeInput}
                           onChange={(e) => setEnforcementModeInput(e.target.value)}
                           className="w-full bg-[#0d0e12] border border-[#1b1e28] text-xs p-2 rounded text-slate-300 focus:outline-none font-mono"
                         >
-                          <option value="monitor_only">Monitor only (Passive observability logging)</option>
-                          <option value="flag_suspicious">Flag suspicious accounts (Permissive verification prompts)</option>
-                          <option value="require_reverification">Require re-verification (Strict session verification loops)</option>
-                          <option value="block_untrusted">Block high-risk accounts (Immediate programmatic API denies)</option>
-                          <option value="partner_removal">Partner-approved removal mode (Dispatches queues for hard purges)</option>
+                          <option value="monitor_only">Monitor only (Passive logging)</option>
+                          <option value="flag_suspicious">Flag suspicious accounts (Permissive checks)</option>
+                          <option value="require_reverification">Require re-verification (Strict loops)</option>
+                          <option value="block_untrusted">Block high-risk accounts (Immediate programmatic API block)</option>
+                          <option value="partner_removal">Partner-approved removal mode (Purge queues)</option>
                         </select>
                       </div>
                     </div>
@@ -1607,7 +1576,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                         disabled={isUpdatingConfig}
                         className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded transition-all cursor-pointer"
                       >
-                        {isUpdatingConfig ? "Saving Policy Settings..." : "Save Policy Blueprint"}
+                        {isUpdatingConfig ? "Saving Protection Settings..." : "Save Protection Settings"}
                       </button>
                     </div>
                   </form>
@@ -1765,7 +1734,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 <div className="space-y-6 animate-fadeIn">
                   <div className="border-b border-[#1b1e28] pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-left">
                     <div>
-                      <h2 className="text-lg font-bold text-white">Verification Sessions Audit Log</h2>
+                      <h2 className="text-lg font-bold text-white">Trust Decisions</h2>
                       <p className="text-xs text-[#78819a]">Continuous risk engine grades for incoming platform integrations.</p>
                     </div>
 
@@ -1795,7 +1764,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden shadow-lg text-left">
                     {filteredSessions.length === 0 ? (
                       <div className="p-12 text-center text-[#78819a] text-xs font-mono">
-                        No active verification sessions listed matching filters.
+                        No active trust sessions match filters.
                       </div>
                     ) : (
                       <div className="overflow-x-auto">
@@ -1807,7 +1776,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                               <th className="py-4 px-4 text-center">Status</th>
                               <th className="py-4 px-4 text-right">Anomaly Score</th>
                               <th className="py-4 px-4">Signals / Evaluation flags</th>
-                              <th className="py-4 px-6 text-right">Verification Flow</th>
+                              <th className="py-4 px-6 text-right">Trust Flow</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[#1b1e28] text-slate-300">
@@ -1950,7 +1919,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl flex items-start gap-3 bg-yellow-950/10 border-yellow-900/25 mb-6 text-left">
                     <AlertTriangle className="text-yellow-500 w-5 h-5 shrink-0" />
                     <p className="text-xs leading-normal text-yellow-400">
-                      <b>Duplicate Account Warning:</b> Standard duplicate accounts are flagged when users attempt to register multiple credentials using identical device signatures or biometric characteristics. Our privacy preservation system alerts your workspace without showing raw private details.
+                      <b>Duplicate Account Warning:</b> Standard duplicate accounts are flagged when users attempt to register multiple credentials using identical device signatures or cryptographic keys. Our privacy preservation system alerts your workspace without showing raw private details.
                     </p>
                   </div>
 
@@ -2602,17 +2571,17 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
 
       </div>
 
-      {/* Interactive Active REST API Sandbox console playground panel */}
+      {/* Interactive API Explorer playground panel */}
       <section className="bg-slate-900 border-t border-slate-850 p-6 z-10 shrink-0">
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
           
           <div className="lg:w-1/2 space-y-4">
             <h3 className="font-bold text-white text-xs flex items-center gap-1.5 uppercase font-mono tracking-tight">
               <Terminal className="text-blue-400 w-4.5 h-4.5" />
-              Dynamic REST API Gateway Sandbox Console
+              API Explorer
             </h3>
             <p className="text-xs text-slate-400 leading-normal">
-              Test server-side queries statefully in real time. Choose your parameters and dispatch payloads to verify immediate risk scores outputs.
+              Test server-side queries statefully in real time. Choose your parameters and dispatch payloads to verify immediate risk scores and validate trust tokens.
             </p>
 
             <div className="grid grid-cols-2 gap-2">

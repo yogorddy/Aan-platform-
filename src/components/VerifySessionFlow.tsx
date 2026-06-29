@@ -111,8 +111,9 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
   const [primaryMethod, setPrimaryMethod] = useState<'password' | 'passkey' | 'sso' | 'saml'>('passkey');
   const [password, setPassword] = useState<string>("••••••••••••");
   
-  // Custom Flow routing states: 'username' -> 'primary_auth' -> 'evaluating' -> 'challenge_gate' -> 'final_auth_success' | 'final_auth_blocked' | 'final_auth_review'
-  const [flowState, setFlowState] = useState<'username' | 'primary_auth' | 'evaluating' | 'challenge_gate' | 'final_auth_success' | 'final_auth_blocked' | 'final_auth_review'>('username');
+  // Custom Flow routing states: 'permission_consent' -> 'username' -> 'primary_auth' -> 'evaluating' -> 'challenge_gate' -> 'final_auth_success' | 'final_auth_blocked' | 'final_auth_review'
+  const [flowState, setFlowState] = useState<'permission_consent' | 'username' | 'primary_auth' | 'evaluating' | 'challenge_gate' | 'final_auth_success' | 'final_auth_blocked' | 'final_auth_review'>('permission_consent');
+  const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   
   // Simulation Control Center States
   const [activeScenario, setActiveScenario] = useState<SecurityScenario>(SECURITY_SCENARIOS[0]);
@@ -321,16 +322,72 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
       </div>
 
       {/* Main Column Split */}
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 my-auto items-start">
+      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto items-start">
         
         {/* LEFT COLUMN: THE LOGIN VIEWPORT */}
         <div className="lg:col-span-7 flex flex-col justify-center">
           <div className="bg-[#111319] border border-[#1b1e28] rounded-xl relative overflow-hidden max-w-xl mx-auto w-full shadow-2xl">
             <div className="h-1 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500" />
             
+            {/* STATE 00: USER PERMISSION CONSENT */}
+            {flowState === 'permission_consent' && (
+              <div className="p-6 space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-[#5d6780] uppercase tracking-wider font-bold font-black">STAGE 00 — USER CONSENT</span>
+                    <span className="text-[10px] text-emerald-500 font-mono flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      PRIVACY STANDARD
+                    </span>
+                  </div>
+                  
+                  <h2 className="text-xl font-bold text-white tracking-tight">Trust Verification</h2>
+                  <p className="text-sm text-[#a5b0cb] leading-relaxed font-sans">
+                    This platform uses AAN to verify trust and reduce bots, duplicate accounts, and abuse.
+                  </p>
+                </div>
+
+                {learnMoreOpen && (
+                  <div className="bg-[#141822] border border-[#232a3b] p-4 rounded-lg space-y-2.5 text-xs text-[#78819a] leading-relaxed animate-fadeIn">
+                    <h4 className="text-white font-semibold font-sans">Privacy Guard Principles:</h4>
+                    <ul className="list-disc pl-4 space-y-1 font-sans">
+                      <li><strong>No Identity Documents:</strong> AAN does not scan, store, or process raw government ID cards or drivers licenses.</li>
+                      <li><strong>No Facial Recognition:</strong> No raw selfies, photos, or facial biometric maps are permanently recorded or stored.</li>
+                      <li><strong>Zero Data Monetization:</strong> Your technical trust indicators are processed ephemerally and never sold to third parties.</li>
+                    </ul>
+                  </div>
+                )}
+
+                <div className="space-y-3 pt-2">
+                  <button
+                    onClick={() => setFlowState('username')}
+                    className="w-full bg-white hover:bg-[#e2e5eb] text-[#0d0e12] font-mono text-xs font-bold py-3.5 rounded transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <span>Continue</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setLearnMoreOpen(!learnMoreOpen)}
+                      className="bg-[#141822] hover:bg-[#1b202e] text-[#a5b0cb] border border-[#232a3b] font-mono text-xs py-2.5 rounded transition-colors cursor-pointer"
+                    >
+                      {learnMoreOpen ? "Hide Info" : "Learn More"}
+                    </button>
+                    <button
+                      onClick={() => onNavigate('landing')}
+                      className="bg-[#141822]/40 hover:bg-[#1b202e]/40 text-[#78819a] border border-[#1b1e28] font-mono text-xs py-2.5 rounded transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* STATE A: IDENTITY INTAKE */}
             {flowState === 'username' && (
-              <div className="p-8 space-y-6">
+              <div className="p-6 space-y-4">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-[10px] text-[#5d6780] uppercase tracking-wider font-bold">STAGE 01 — IDENTITY STATEMENT</span>
@@ -374,7 +431,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
             {/* STATE B: PRIMARY AUTHORIZATION FACTORS */}
             {flowState === 'primary_auth' && (
-              <div className="p-8 space-y-6">
+              <div className="p-6 space-y-4">
                 <div className="space-y-1">
                   <span className="font-mono text-[10px] text-[#5d6780] uppercase tracking-wider font-bold">STAGE 02 — PRIMARY SECURITY CHECK</span>
                   <h3 className="font-bold text-white text-lg tracking-tight">Select Primary Authentication Method</h3>
@@ -462,7 +519,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
             {/* STATE C: LOG TERMINAL */}
             {flowState === 'evaluating' && (
-              <div className="p-8 space-y-6">
+              <div className="p-6 space-y-4">
                 <div className="text-center space-y-2">
                   <Loader2 className="w-8 h-8 text-blue-500 animate-spin mx-auto" />
                   <h3 className="font-mono text-xs text-white uppercase tracking-wider">Processing Trust Evaluation...</h3>
@@ -485,7 +542,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
             {/* STATE D: ADAPTIVE CHALLENGE CHANNELS */}
             {flowState === 'challenge_gate' && (
-              <div className="p-8 space-y-6">
+              <div className="p-6 space-y-4">
                 <div className="bg-[#1a1412] border border-amber-900/30 p-4 rounded-lg flex items-start gap-3">
                   <AlertTriangle className="w-4 h-4 text-[#d2ab6c] shrink-0 mt-0.5" />
                   <div className="space-y-1">
@@ -726,7 +783,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
             {/* STATE E: VERIFICATION SUCCESS */}
             {flowState === 'final_auth_success' && (
-              <div className="p-8 space-y-6 text-center">
+              <div className="p-6 space-y-4 text-center">
                 <div className="bg-emerald-950/40 border border-emerald-800/60 text-emerald-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
                   <Check className="w-6 h-6" />
                 </div>
@@ -793,7 +850,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
             {/* STATE F: VERIFICATION TERMINATED */}
             {flowState === 'final_auth_blocked' && (
-              <div className="p-8 space-y-6 text-center">
+              <div className="p-6 space-y-4 text-center">
                 <div className="bg-red-950/40 border border-red-900/50 text-red-500 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
                   <Lock className="w-5 h-5" />
                 </div>
@@ -850,7 +907,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
             {/* STATE G: MANUAL REVIEW RECOMMENDED */}
             {flowState === 'final_auth_review' && (
-              <div className="p-8 space-y-6 text-center">
+              <div className="p-6 space-y-4 text-center">
                 <div className="bg-orange-950/40 border border-orange-900/50 text-orange-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
                   <AlertTriangle className="w-5 h-5" />
                 </div>

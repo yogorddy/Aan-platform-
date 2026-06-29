@@ -7,6 +7,7 @@ import {
   HelpCircle, AlertCircle, Sparkles, MessageSquare, Globe, ArrowUpRight, CheckCircle2,
   Trash2, Send, Info
 } from 'lucide-react';
+import { isBrandEnabled } from '../brandConfig';
 
 interface TrustDocsPortalProps {
   activeSubSection?: string;
@@ -97,7 +98,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
       title: "COMPANY",
       items: [
         { id: "mission", label: "Mission Statement", icon: HeartHandshake },
-        { id: "brand", label: "Brand Manual", icon: FileText },
+        ...(isBrandEnabled() ? [{ id: "brand", label: "Brand Manual", icon: FileText }] : []),
         { id: "research", label: "Research Center", icon: Compass },
         { id: "roadmap", label: "Product Roadmap", icon: Sliders }
       ]
@@ -490,7 +491,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                     <span className="text-slate-500 font-mono text-[10px] ml-auto">Auth: Admin / Deletion Token</span>
                   </div>
                   <p className="text-xs text-slate-405 leading-relaxed">
-                    Purges all records of account claims, telemetry links, and verification sessions associated with a specific user profile instantly.
+                    Purges all records of account claims, telemetry links, and trust sessions associated with a specific user profile instantly.
                   </p>
                   <pre className="bg-slate-950 p-2.5 rounded border border-slate-850 font-mono text-[10px] text-slate-350 max-w-sm">
 {`{
@@ -771,7 +772,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                 <div className="space-y-2">
                   <h3 className="font-sans font-bold text-white text-sm">4. Data Retention & Purge Rules</h3>
                   <p>
-                    Verification session telemetry logs are purged automatically and completely from active volatile database registries exactly 24 hours following session resolution or expiration. Organizations maintain options to trigger instant <code>DELETE /verification</code> instructions on behalf of users at any interval.
+                    Trust session telemetry logs are purged automatically and completely from active volatile database registries exactly 24 hours following session resolution or expiration. Organizations maintain options to trigger instant <code>DELETE /verification</code> instructions on behalf of users at any interval.
                   </p>
                 </div>
 

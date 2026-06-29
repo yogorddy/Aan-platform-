@@ -27,99 +27,99 @@ const STATIC_SIGNALS: SignalMetadata[] = [
   {
     id: "email_hash",
     name: "Email Hash (SHA-256)",
-    description: "Hashed version of the user's primary email address.",
-    purpose: "Verifies whether this email has been used for duplicate accounts across the network without storing the raw email address.",
-    privacyImpact: "Extremely Low. The raw email is never sent or stored.",
+    description: "Verifies unique user presence using anonymized identifiers.",
+    purpose: "Allows us to recognize returning humans and prevent duplicate accounts without storing plain text emails.",
+    privacyImpact: "The raw email is hashed locally on your device and never stored or sent in plain text.",
     recommendedUse: "Standard signup, account creation, and user enrollment pipelines.",
     enterpriseRec: "Mandatory for general anti-abuse and multi-account threat prevention."
   },
   {
     id: "phone_hash",
     name: "Phone Hash (SHA-256)",
-    description: "Hashed version of the user's verified phone number.",
-    purpose: "Proves uniqueness of the associated human account via global telecommunication binding lookups.",
-    privacyImpact: "Low. No plain phone records are ever logged or held.",
+    description: "Connects trust verification to a unique mobile network identifier.",
+    purpose: "Helps confirm the existence of a real, unique human backed by a mobile carrier subscription.",
+    privacyImpact: "Converts phone numbers into mathematical hashes, ensuring plain phone records are never logged.",
     recommendedUse: "High-fraud gateways, financial withdrawals, and secure passwordless verification.",
     enterpriseRec: "Highly recommended for verification flows that offer transactional value, credits, or premium incentives."
   },
   {
     id: "partner_user_id",
-    name: "Partner User Identifier",
-    description: "An obfuscated unique identifier matching this customer in your application database.",
-    purpose: "Securely maps human verification outcomes with your login states to allow seamless suspension updates.",
-    privacyImpact: "Zero. External ID is entirely contextless outside your local workspace.",
+    name: "Partner User ID",
+    description: "Securely links trust status directly to your user database.",
+    purpose: "Lets your platform reconcile session results with accounts while keeping the actual user profile anonymous to AAN.",
+    privacyImpact: "Entirely obfuscated from any external platform or database.",
     recommendedUse: "All standard production verification pipelines.",
     enterpriseRec: "Required to establish database mappings."
   },
   {
     id: "session_id",
-    name: "Verification Session ID",
-    description: "Secure, time-bound transaction token created when the verification sequence begins.",
-    purpose: "Prevents replay attacks or session hijack attempts, mapping client handshakes.",
-    privacyImpact: "Zero.",
+    name: "Trust Session ID",
+    description: "A single-use transaction token that secures the active session.",
+    purpose: "Secures the trust handoff and prevents replay attacks while the session is processed.",
+    privacyImpact: "Strictly transient, leaving no permanent user footprint.",
     recommendedUse: "All integration pipelines.",
     enterpriseRec: "Mandatory core security mechanism."
   },
   {
     id: "device_identifier",
-    name: "Cryptographical Device Fingerprint",
-    description: "Unique hardware footprint calculated via local secure system parameters.",
-    purpose: "Identifies whether numerous automated bots are generating duplicate registration attempts from a single machine cluster.",
-    privacyImpact: "Low. No persistent cookie tracking is required.",
+    name: "Device Trust Signal",
+    description: "Identifies unique user devices without cookies or persistent hardware tracking.",
+    purpose: "Allows platforms to detect when a single automated bot or emulator is generating hundreds of fake accounts.",
+    privacyImpact: "Evaluated using local browser sandboxes, meaning zero cookies or cross-site tracking files are used.",
     recommendedUse: "Rapid verification attempts, public registration endpoints.",
     enterpriseRec: "Highly recommended to combat device emulators and scripted botnets."
   },
   {
     id: "ip_address",
     name: "Truncated IP Address",
-    description: "The client connection network origin, truncated for domicile privacy.",
-    purpose: "Heuristically identifies residential proxies, malicious VPN grids, and geographical timing anomalies.",
-    privacyImpact: "Medium. Limits database log entries to overall /24 network blocks to prevent tracking precise residency.",
+    description: "Geographic network verification, truncated to protect home locations.",
+    purpose: "Recognizes trusted residential connections and detects malicious proxies or automated server farms.",
+    privacyImpact: "Truncated to broad subnet ranges (like /24) to mask precise locations while retaining security signals.",
     recommendedUse: "Real-time automated risk grading.",
     enterpriseRec: "Recommended for secure checkout checkpoints and transactional routing."
   },
   {
     id: "browser_metadata",
-    name: "Browser Fingerprint Metadata",
-    description: "Dynamic properties of user-agent, device screen, language, OS version and canvas engines.",
-    purpose: "Detects headless bot utilities like automated Selenium, Puppeteer, or Playwright scripts.",
-    privacyImpact: "Low. Extracted entirely on-the-fly and evaluated ephemerally.",
+    name: "Browser Signals",
+    description: "Used to recognize trusted browsers and detect suspicious changes without storing personal browsing history.",
+    purpose: "Identifies automated testing scripts, emulators, and headless bots attempting to mimic genuine human browsers.",
+    privacyImpact: "Analyzed ephemerally on-the-fly without persistent tracing or tracking cookies.",
     recommendedUse: "General fraud mitigation.",
     enterpriseRec: "Indispensable signal defending against simple scripting attacks."
   },
   {
     id: "operating_system",
     name: "Operating System Signatures",
-    description: "Client host operating system name and version parameters.",
-    purpose: "Uncovers OS-to-hardware telemetry spoofing or emulated platform mismatches.",
-    privacyImpact: "None.",
+    description: "Confirms basic device system configurations.",
+    purpose: "Helps verify device authenticity by checking if OS characteristics align with browser characteristics.",
+    privacyImpact: "Standard technical headers only, containing no personal files or settings.",
     recommendedUse: "Standard diagnostic support.",
     enterpriseRec: "Basic telemetry validation benchmark."
   },
   {
     id: "passkey_webauthn",
-    name: "Passkey / WebAuthn Attestation (Mock/Future)",
-    description: "Hardware-bound asymmetric keypair proving presence of high-security physical keys.",
-    purpose: "Provides passwordless authenticity while confirming possession of standard hardware components.",
-    privacyImpact: "Zero. Only verifies cryptographic challenge solutions.",
+    name: "Passkey / WebAuthn Attestation",
+    description: "Uses cryptographic keypairs to establish strong device presence.",
+    purpose: "Allows secure, frictionless passwordless login that proves possession of a real physical device.",
+    privacyImpact: "Relies entirely on standard local authentication; no private biometric keys ever leave the device.",
     recommendedUse: "High-security financial portals, administrator dashboards.",
     enterpriseRec: "Leading cryptographic signal for maximum enterprise security."
   },
   {
     id: "verified_id_provider",
-    name: "Verified Identity Provider (Mock/Future)",
-    description: "Federated SAML or OIDC assertion from verified global enterprise ID networks.",
-    purpose: "Confirms user possesses certified corporate compliance clearance.",
-    privacyImpact: "Medium.",
+    name: "Verified Identity Provider",
+    description: "Connects verified external enterprise or institutional clearing networks.",
+    purpose: "Verifies high-assurance organization or regulatory trust compliance for specialized applications.",
+    privacyImpact: "Securely scoped assertions containing only the essential verification status.",
     recommendedUse: "B2B client platforms.",
     enterpriseRec: "Outstanding signal for corporate partner onboarding configurations."
   },
   {
     id: "custom_org_signal",
-    name: "Organization Custom Signal",
-    description: "Bespoke metadata parameter tailored directly by the enterprise.",
-    purpose: "Enables enterprise teams to map custom threat data strings to AAN analytics.",
-    privacyImpact: "User-defined.",
+    name: "Organization Signal",
+    description: "Allows custom platform signals tailored to specific business logic.",
+    purpose: "Enables integrations to map custom threat data or legacy metadata to the AAN trust decision engine.",
+    privacyImpact: "Completely configured and governed by your organization.",
     recommendedUse: "Bespoke business rulesets.",
     enterpriseRec: "Ideal for integrations requiring legacy CRM alignment."
   }
@@ -128,8 +128,8 @@ const STATIC_SIGNALS: SignalMetadata[] = [
 const DEFAULT_PROFILES: VerificationProfile[] = [
   {
     id: "prof_basic",
-    name: "Basic Verification",
-    description: "Lightweight, privacy-preserving profile designed to verify identity status with minimal collection. Minimizes stored variables and requests only standard hashes.",
+    name: "Basic Trust",
+    description: "Fast, privacy-first verification for everyday applications.",
     isCustom: false,
     signals: {
       email_hash: { enabled: true, required: true },
@@ -150,8 +150,8 @@ const DEFAULT_PROFILES: VerificationProfile[] = [
   },
   {
     id: "prof_standard",
-    name: "Standard Verification",
-    description: "Our recommended balanced verification profile. Configured with standard risk indicators and network fingerprint telemetry to keep bots out smoothly.",
+    name: "Standard Trust",
+    description: "Balanced protection for most platforms. Helps prevent duplicate accounts and common automated abuse while keeping the user experience smooth.",
     isCustom: false,
     signals: {
       email_hash: { enabled: true, required: true },
@@ -172,8 +172,8 @@ const DEFAULT_PROFILES: VerificationProfile[] = [
   },
   {
     id: "prof_high_security",
-    name: "High Security Profile",
-    description: "Strict security model demanding complete evidence chains including phone hashes and mechanical browser fingerprints. Perfect for high-incentive registrations.",
+    name: "High Security",
+    description: "Designed for environments requiring stronger trust decisions and additional evidence before access is granted.",
     isCustom: false,
     signals: {
       email_hash: { enabled: true, required: true },
@@ -194,8 +194,8 @@ const DEFAULT_PROFILES: VerificationProfile[] = [
   },
   {
     id: "prof_financial",
-    name: "Financial Verification",
-    description: "Highly compliant regulatory layout tailored for institutional payments. Sets phone hashes and devices as mandatory requirements while preparing future passkeys.",
+    name: "Financial",
+    description: "Recommended for regulated financial services requiring higher assurance and stricter risk evaluation.",
     isCustom: false,
     signals: {
       email_hash: { enabled: true, required: true },
@@ -593,7 +593,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
         <div>
           <div className="flex items-center gap-2">
             <Sliders className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-xl font-mono tracking-tight font-extrabold text-white leading-tight">Configurable Verification Profiles</h2>
+            <h2 className="text-xl font-mono tracking-tight font-extrabold text-white leading-tight">Configurable Trust Profiles</h2>
           </div>
           <p className="text-xs text-[#78819a] mt-1 max-w-xl">
             AAN is signal-driven, not data-hungry. Prevent over-collection of sensitive user parameters by enabling only the minimum evidence parameters required.
@@ -921,7 +921,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
               <div className="flex items-center gap-1.5">
                 <Info className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                 <span className="text-[11px] font-mono text-white font-bold uppercase tracking-wider">
-                  Signal Context: {activeSignal.name} (${activeSignal.id})
+                  Why We Use This: {activeSignal.name} (${activeSignal.id})
                 </span>
               </div>
               
@@ -1078,7 +1078,7 @@ export default function VerificationProfilesTab({ partnerApps, onAddAuditLog, on
                 Create New Custom Profile
               </h3>
               <p className="text-xs text-[#78819a] leading-normal font-sans">
-                Declare a brand new Verification Profile ruleset. This customized layout can be assigned dynamically to any registered sandboxed project.
+                Declare a brand new Trust Profile ruleset. This customized layout can be assigned dynamically to any registered project.
               </p>
             </div>
 

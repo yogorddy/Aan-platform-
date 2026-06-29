@@ -28,6 +28,7 @@ import {
   Sliders,
   Database
 } from 'lucide-react';
+import { isBrandEnabled } from '../brandConfig';
 
 interface LandingPageProps {
   onNavigate: (page: string, customPath?: string) => void;
@@ -37,56 +38,63 @@ interface LandingPageProps {
 const INTEGRATION_CODE_EXAMPLES: Record<string, { desc: string; filename: string; code: string; lang: string }> = {
   curl: {
     lang: "cURL",
-    desc: "Initiate an anonymous verification session via secure server-to-server TLS request.",
-    filename: "initiate_session.sh",
-    code: `curl -X POST https://api.aan.com/v1/verification-sessions \\
+    desc: "Step 1: Create a Trust Session when a user takes a critical action or starts signing up.",
+    filename: "create_trust_session.sh",
+    code: `curl -X POST https://api.aan.com/v1/trust-sessions \\
   -H "Authorization: Bearer aan_key_live_d8134fa" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "external_user_id": "usr_9941a_customer",
-    "verification_policy": "strict_uniqueness",
-    "required_attestations": ["system_integrity", "hardware_signature"]
+    "user_id": "usr_9941a_customer",
+    "profile": "standard_trust"
   }'`
   },
   typescript: {
     lang: "TypeScript",
-    desc: "Register verification sessions and retrieve cryptographic proof handshakes.",
-    filename: "verify_session.ts",
-    code: `import { AANProtocol } from '@aan-protocol/node-sdk';
+    desc: "Step 2 & 3: Create the session, redirect the user, and validate the Trust Token returned upon completion.",
+    filename: "verify_flow.ts",
+    code: `import { AANClient } from '@aan-protocol/node-sdk';
 
-const aan = new AANProtocol({
-  apiKey: process.env.AAN_API_KEY,
-  environment: 'production'
+const aan = new AANClient({ apiKey: process.env.AAN_API_KEY });
+
+// 1. Create a Trust Session
+const session = await aan.sessions.create({
+  userId: 'usr_9941a_customer',
+  profile: 'standard_trust'
 });
 
-async function requestTrustHandshake(userId: string): Promise<string> {
-  const session = await aan.sessions.create({
-    externalUserId: userId,
-    requirePosturalAttestation: true,
-    policy: 'unique_human_returning'
-  });
-  
-  // Returns single-use anonymous verification URL
-  return session.verificationUrl;
+// 2. Redirect the user when needed (to session.url)
+// 3. Validate the Trust Token once the user returns
+const result = await aan.tokens.validate({
+  sessionId: session.id,
+  token: req.body.trustToken
+});
+
+// 4. Continue your authentication flow with confidence
+if (result.isHuman && !result.isSuspicious) {
+  await loginUser(userId);
 }`
   },
   python: {
     lang: "Python",
-    desc: "Query verification proofs server-side to authorize critical action checkpoints.",
-    filename: "verify_proof.py",
+    desc: "Step 3: Validate the Trust Token server-side to inspect the final trust status and risk score.",
+    filename: "validate_token.py",
     code: `import requests
 
-def verify_token_resolution(session_id: str, proof_token: str):
-    response = requests.post(
-        "https://api.aan.com/v1/proofs/verify",
-        headers={"Authorization": f"Bearer {API_KEY}"},
-        json={
-            "session_id": session_id,
-            "proof_token": proof_token
-        }
-    )
-    # Returns verification status, risk scores, and signed proof tokens
-    return response.json()`
+# 3. Validate the Trust Token
+response = requests.post(
+    "https://api.aan.com/v1/proofs/verify",
+    headers={"Authorization": f"Bearer {API_KEY}"},
+    json={
+        "session_id": "vss_session_b71",
+        "trust_token": "token_sig_93f82e11ac0b"
+    }
+)
+
+# 4. Inspect status and proceed
+result = response.json()
+if result["status"] == "passed":
+    # Legitimate human returning
+    proceed_with_auth()`
   }
 };
 
@@ -444,7 +452,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
           { label: "Average package payload size", value: "1.42 KB" }
         ],
         sessionDetails: selectedSession ? [
-          { label: "Verification Session ID", value: selectedSession.id },
+          { label: "Trust Session ID", value: selectedSession.id },
           { label: "Partner Application ID", value: selectedSession.partner_app_id },
           { label: "Ingress User identifier", value: selectedSession.external_user_id },
           { label: "Request initialized at", value: new Date(selectedSession.created_at).toLocaleString() }
@@ -462,7 +470,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
           { label: "Ingress error rate", value: "0.00%" }
         ],
         sessionDetails: selectedSession ? [
-          { label: "Matched API Route", value: `/api/v1/verification-sessions/${selectedSession.id}` },
+          { label: "Matched API Route", value: `/api/v1/trust-sessions/${selectedSession.id}` },
           { label: "Client Ingress IP", value: selectedSession.status === 'failed' ? "198.51.100.12" : "203.0.113.88" },
           { label: "Request User Agent", value: selectedSession.status === 'failed' ? "Mozilla/5.0 (Windows NT)" : "AAN-Partner-Client/v1" },
           { label: "Verification Level", value: "human_unique_returning" }
@@ -482,7 +490,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
         sessionDetails: selectedSession ? [
           { label: "API Client state", value: "AUTHORIZED" },
           { label: "Consent registered", value: selectedSession.status !== 'started' ? "CONFIRMED" : "PENDING" },
-          { label: "Required disclosures", value: "Liveness Check, Duplicate Account Detection" },
+          { label: "Required disclosures", value: "Device Trust Signal, Uniqueness Check" },
           { label: "Privacy protection class", value: "Zero Identity Exposure (ZIE)" }
         ] : null
       };
@@ -610,14 +618,14 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
 
       {/* Main Structural Navigation bar */}
       <nav className="border-b border-[#1b1e28] bg-[#0d0e12]">
-        <div className="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-[#141822] border border-[#232a3b] p-1.5 rounded">
               <Shield className="w-5 h-5 text-blue-500" />
             </div>
             <div>
               <span className="font-mono text-[9px] tracking-widest text-[#5d6780] uppercase leading-none block font-black">Trust Layer Standard</span>
-              <span className="font-bold text-sm tracking-tight text-white">Anonymous Authentication Network</span>
+              <span className="font-bold text-sm tracking-tight text-white">Anonymous Attestation Network</span>
             </div>
           </div>
 
@@ -634,42 +642,44 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
             >
               Compliance Ledger
             </button>
-            <button 
-              onClick={() => onNavigate('brand')} 
-              className="text-[#a5b0cb] hover:text-white transition-colors cursor-pointer"
-            >
-              System Spec
-            </button>
+            {isBrandEnabled() && (
+              <button 
+                onClick={() => onNavigate('brand')} 
+                className="text-[#a5b0cb] hover:text-white transition-colors cursor-pointer"
+              >
+                System Spec
+              </button>
+            )}
           </div>
         </div>
       </nav>
 
       {/* MVP Sandbox Advisory */}
-      <div className="max-w-7xl mx-auto px-8 mt-8">
+      <div className="max-w-7xl mx-auto px-8 mt-4">
         <div className="bg-[#14151b] border border-amber-900/30 rounded-lg p-4 text-xs text-[#d2ab6c] leading-relaxed font-sans flex items-start gap-3">
           <AlertTriangle className="w-4 h-4 text-[#d2ab6c] shrink-0 mt-0.5" />
           <div className="space-y-1">
             <p className="font-bold">MOCK INTEGRATION PREVIEW — Administrative Sandbox Mode</p>
             <p className="text-[#7f889c]">
-              This portal demonstrates the complete architectural flow of the Anonymous Authentication Network. All cryptographic signature checks and liveness audits are processed inside the local sandbox environment. In production, connect real hardware, device reputation, and enterprise storage vaults.
+              This portal demonstrates the complete architectural flow of the Anonymous Attestation Network. All cryptographic signature checks and device security checks are processed inside the local sandbox environment. In production, connect real hardware, device reputation, and enterprise storage vaults.
             </p>
           </div>
         </div>
       </div>
 
       {/* Hero Section */}
-      <header className="max-w-7xl mx-auto px-8 pt-20 pb-16 text-left space-y-8 border-b border-[#1b1e28]">
-        <div className="space-y-4 max-w-4xl">
+      <header className="max-w-7xl mx-auto px-8 pt-10 pb-8 text-left space-y-5 border-b border-[#1b1e28]">
+        <div className="space-y-3 max-w-4xl">
           <span className="inline-flex items-center gap-1.5 bg-[#141822] border border-[#232a3b] px-3 py-1 rounded text-[10px] font-mono text-blue-400 font-semibold tracking-wider uppercase">
             Protocol Specification v4.12
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight text-white font-sans leading-[1.1]">
-            Anonymous Authentication Network<br />
+            Anonymous Attestation Network<br />
             <span className="text-[#78819a]">Internet Trust Infrastructure.</span>
           </h1>
           
           {/* Confident core tagline */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 pb-2 border-y border-[#1b1e28]/60 max-w-3xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 pb-1.5 border-y border-[#1b1e28]/60 max-w-3xl">
             <div className="p-1">
               <span className="font-mono text-[10px] text-[#5d6780] block uppercase tracking-wider font-bold">IDENTITY MODEL</span>
               <span className="text-white text-base font-semibold mt-1 block">One Human.</span>
@@ -707,7 +717,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
       </header>
 
       {/* Trust Network Visualization Grid */}
-      <section className="max-w-7xl mx-auto px-8 py-16 space-y-12 border-b border-[#1b1e28]">
+      <section className="max-w-7xl mx-auto px-8 py-10 space-y-8 border-b border-[#1b1e28]">
         
         {/* Real Operational Header */}
         <div className="space-y-3">
@@ -1021,7 +1031,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
       </section>
 
       {/* Redesigned Clean Infrastructure-Oriented Blocks Section */}
-      <section className="max-w-7xl mx-auto px-8 py-16 space-y-12">
+      <section className="max-w-7xl mx-auto px-8 py-10 space-y-8">
         <div className="text-left space-y-2">
           <span className="font-mono text-[10px] tracking-widest text-blue-500 uppercase block font-black">Technical Capability Architecture</span>
           <h2 className="text-3xl font-semibold tracking-tight text-white font-sans">
@@ -1135,7 +1145,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
       </section>
 
       {/* Developer API Console Integration Section */}
-      <section className="max-w-7xl mx-auto px-8 py-16 border-t border-[#1b1e28] grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <section className="max-w-7xl mx-auto px-8 py-10 border-t border-[#1b1e28] grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-5 space-y-6">
           <span className="font-mono text-[10px] tracking-widest text-[#5d6780] uppercase block font-black">Developer Reference</span>
           <h3 className="text-2xl font-semibold tracking-tight text-white leading-snug">
@@ -1187,7 +1197,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
       </section>
 
       {/* Compliance & Trust Architecture Section */}
-      <section className="max-w-7xl mx-auto px-8 py-16 border-t border-[#1b1e28] space-y-8">
+      <section className="max-w-7xl mx-auto px-8 py-10 border-t border-[#1b1e28] space-y-6">
         <div className="space-y-3 max-w-3xl">
           <span className="font-mono text-[10px] tracking-widest text-[#5d6780] uppercase block font-black">Trust & Compliance</span>
           <h2 className="text-xl font-bold text-white tracking-tight">Compliance & Enterprise Trust Architecture</h2>
@@ -1233,31 +1243,111 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
       </section>
 
       {/* Corporate Footprint Info */}
-      <footer className="max-w-7xl mx-auto px-8 mt-16 pt-8 pb-12 border-t border-[#1b1e28] font-mono leading-relaxed space-y-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-left space-y-2">
+      <footer className="max-w-7xl mx-auto px-8 mt-24 pt-12 pb-12 border-t border-[#1b1e28] font-mono leading-relaxed space-y-12">
+        {/* Resource Directory Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          {/* Logo & Description */}
+          <div className="space-y-4 md:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-blue-500" />
-              <span className="font-bold text-xs text-white tracking-tight">Anonymous Authentication Network (AAN)</span>
+              <span className="font-bold text-xs text-white tracking-tight">AAN Trust & Resource Center</span>
             </div>
-            <p className="text-[10px] text-[#78819a] max-w-md font-sans leading-normal">
+            <p className="text-[10px] text-[#78819a] font-sans leading-normal">
               Privacy-preserving trust infrastructure for human verification, account integrity, and secure platform access.
             </p>
+            <div className="flex items-center gap-1.5 text-[9px] text-[#5d6780]">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Operational (Sandbox)</span>
+            </div>
           </div>
 
-          {/* Footer links */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[10px] text-[#78819a]">
-            <a href="#privacy" onClick={(e) => { e.preventDefault(); onNavigate('brand'); }} className="hover:text-white transition-colors">Privacy</a>
-            <a href="#security" onClick={(e) => { e.preventDefault(); onNavigate('brand'); }} className="hover:text-white transition-colors">Security</a>
-            <a href="#terms" onClick={(e) => { e.preventDefault(); onNavigate('brand'); }} className="hover:text-white transition-colors">Terms</a>
-            <a href="#status" onClick={(e) => { e.preventDefault(); onNavigate('brand'); }} className="hover:text-white transition-colors">Status</a>
-            <a href="#docs" onClick={(e) => { e.preventDefault(); onNavigate('brand'); }} className="hover:text-white transition-colors">Documentation</a>
-            <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('brand'); }} className="hover:text-white transition-colors">Contact</a>
+          {/* DEVELOPERS Category */}
+          <div className="space-y-3">
+            <span className="font-mono text-[9px] text-[#5d6780] tracking-widest font-extrabold block">DEVELOPERS</span>
+            <ul className="space-y-2 text-[10px]">
+              <li>
+                <a href="#docs" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/docs'); }} className="text-[#78819a] hover:text-white transition-colors">Documentation</a>
+              </li>
+              <li>
+                <a href="#api-ref" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/api-ref'); }} className="text-[#78819a] hover:text-white transition-colors">API Reference</a>
+              </li>
+              <li>
+                <a href="#sdks" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/sdks'); }} className="text-[#78819a] hover:text-white transition-colors">SDK Downloads</a>
+              </li>
+              <li>
+                <a href="#changelog" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/changelog'); }} className="text-[#78819a] hover:text-white transition-colors">Changelog</a>
+              </li>
+              <li>
+                <a href="#github" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/github'); }} className="text-[#78819a] hover:text-white transition-colors">GitHub Repository</a>
+              </li>
+            </ul>
+          </div>
+
+          {/* SECURITY Category */}
+          <div className="space-y-3">
+            <span className="font-mono text-[9px] text-[#5d6780] tracking-widest font-extrabold block">SECURITY & PRIVACY</span>
+            <ul className="space-y-2 text-[10px]">
+              <li>
+                <a href="#security" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/security'); }} className="text-[#78819a] hover:text-white transition-colors">Security Standards</a>
+              </li>
+              <li>
+                <a href="#privacy" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/privacy'); }} className="text-[#78819a] hover:text-white transition-colors">Privacy Policy</a>
+              </li>
+              <li>
+                <a href="#trust" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/trust'); }} className="text-[#78819a] hover:text-white transition-colors">Trust Center Matrix</a>
+              </li>
+              <li>
+                <a href="#disclosure" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/disclosure'); }} className="text-[#78819a] hover:text-white transition-colors">Responsible Disclosure</a>
+              </li>
+              <li>
+                <a href="#status" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/status'); }} className="text-[#78819a] hover:text-white transition-colors">System Status</a>
+              </li>
+            </ul>
+          </div>
+
+          {/* COMPANY Category */}
+          <div className="space-y-3">
+            <span className="font-mono text-[9px] text-[#5d6780] tracking-widest font-extrabold block">COMPANY</span>
+            <ul className="space-y-2 text-[10px]">
+              <li>
+                <a href="#mission" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/mission'); }} className="text-[#78819a] hover:text-white transition-colors">Mission Statement</a>
+              </li>
+              {isBrandEnabled() && (
+                <li>
+                  <a href="#brand" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/brand'); }} className="text-[#78819a] hover:text-white transition-colors">Brand Manual</a>
+                </li>
+              )}
+              <li>
+                <a href="#research" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/research'); }} className="text-[#78819a] hover:text-white transition-colors">Research Center</a>
+              </li>
+              <li>
+                <a href="#roadmap" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/roadmap'); }} className="text-[#78819a] hover:text-white transition-colors">Product Roadmap</a>
+              </li>
+            </ul>
+          </div>
+
+          {/* ENTERPRISE Category */}
+          <div className="space-y-3">
+            <span className="font-mono text-[9px] text-[#5d6780] tracking-widest font-extrabold block">ENTERPRISE</span>
+            <ul className="space-y-2 text-[10px]">
+              <li>
+                <a href="#pricing" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/pricing'); }} className="text-[#78819a] hover:text-white transition-colors">Pricing Matrix</a>
+              </li>
+              <li>
+                <a href="#support" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/support'); }} className="text-[#78819a] hover:text-white transition-colors">Support Portal</a>
+              </li>
+              <li>
+                <a href="#contact" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/contact'); }} className="text-[#78819a] hover:text-white transition-colors">Contact Sales</a>
+              </li>
+              <li>
+                <a href="#terms" onClick={(e) => { e.preventDefault(); onNavigate('trustdocs', '/terms'); }} className="text-[#78819a] hover:text-white transition-colors">Terms & Conditions</a>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[#1b1e28]/50 pt-4 text-[9px] text-[#5d6780]">
-          <span>&copy; 2026 Anonymous Authentication Network (AAN). All rights reserved.</span>
+        <div className="flex flex-col sm:flex-row items-center justify-between border-t border-[#1b1e28]/50 pt-6 text-[9px] text-[#5d6780]">
+          <span>&copy; 2026 Anonymous Attestation Network (AAN). All rights reserved.</span>
           <span>Designed with high-integrity telemetry alignment & enterprise standards.</span>
         </div>
       </footer>

@@ -8,6 +8,7 @@ import TrustDocsPortal from './components/TrustDocsPortal';
 import AANAcademy from './components/AANAcademy';
 import { Shield, Hammer, Users, HeartHandshake, FileText, Settings, Code, BookOpen, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import { isAcademyEnabled } from './academyConfig';
+import { isBrandEnabled } from './brandConfig';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -37,7 +38,11 @@ export default function App() {
       } else if (path === '/admin' || path.startsWith('/admin/')) {
         setCurrentPage('admin');
       } else if (path === '/brand' || path.startsWith('/brand/')) {
-        setCurrentPage('brand');
+        if (isBrandEnabled()) {
+          setCurrentPage('brand');
+        } else {
+          setCurrentPage('landing');
+        }
       } else if (path === '/academy' || path.startsWith('/academy/')) {
         const lessonId = path.replace('/academy/', '') || "intro";
         setAcademySelectedId(lessonId);
@@ -167,8 +172,16 @@ export default function App() {
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="relative z-40 max-h-[60vh] sm:max-h-[75vh] md:max-h-none overflow-y-auto bg-slate-950/95 border-b border-blue-900/40 backdrop-blur-md shadow-[inset_0_16px_20px_-12px_rgba(0,0,0,0.95),inset_0_-16px_20px_-12px_rgba(0,0,0,0.95),inset_0_8px_16px_-8px_rgba(30,58,138,0.35),inset_0_-8px_16px_-8px_rgba(30,58,138,0.35)]"
           >
-            <div className={`max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${isAcademyEnabled() ? 'lg:grid-cols-6' : 'lg:grid-cols-5'} gap-4 animate-fadeIn`}>
-              {menuItems.filter(item => item.id !== 'academy' || isAcademyEnabled()).map((item) => {
+            <div className={`max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-${
+              menuItems.filter(item => 
+                (item.id !== 'academy' || isAcademyEnabled()) && 
+                (item.id !== 'brand' || isBrandEnabled())
+              ).length
+            } gap-4 animate-fadeIn`}>
+              {menuItems.filter(item => 
+                (item.id !== 'academy' || isAcademyEnabled()) && 
+                (item.id !== 'brand' || isBrandEnabled())
+              ).map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
                 return (

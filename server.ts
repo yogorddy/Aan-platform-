@@ -1011,15 +1011,21 @@ export function issueProofToken(partnerUserId: string, sessionId: string, humanS
 
   const header = { alg: "HS256", typ: "JWT" };
   const claims = {
+    // Blueprint fields
+    partner_id: project.id,
+    session_id: sessionId,
+    verification_status: humanStatus === 'verified' ? 'passed' : 'failed',
+    risk_level: riskLevel,
+    timestamp: issuedAt,
+    expires_at: expiresAt,
+
+    // Legacy fields (retained safely)
     organization_id: org.id,
     project_id: project.id,
     partner_user_id: partnerUserId,
-    session_id: sessionId,
     human_status: humanStatus,
     uniqueness_status: uniquenessStatus,
-    risk_level: riskLevel,
-    issued_at: issuedAt,
-    expires_at: expiresAt
+    issued_at: issuedAt
   };
 
   const stringifiedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
@@ -1224,6 +1230,12 @@ async function startServer() {
     });
   });
 
+  // 3b. POST /api/v1/verification-sessions/:id/biometric (Alias/Wrapper for blueprint completeness)
+  app.post("/api/v1/verification-sessions/:id/biometric", (req, res, next) => {
+    req.url = req.url.replace('/biometric', '/signature');
+    next();
+  });
+
   // 3. POST /api/v1/verification-sessions/:id/signature
   // MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before production use.
   // Processes encrypted signature payloads using mock signature logic
@@ -1408,10 +1420,10 @@ async function startServer() {
   // 4. POST /api/v1/proofs/verify
   // Third party check: Cryptographic signed proof validator matching returning tokens
   app.post("/api/v1/proofs/verify", (req, res) => {
-    const { proof_token } = req.body;
+    const proof_token = req.body.proof_token || req.body.trust_token;
 
     if (!proof_token) {
-      return res.status(400).json({ error: "Missing required string parameter: proof_token" });
+      return res.status(400).json({ error: "Missing required string parameter: proof_token or trust_token" });
     }
 
     const verificationResult = verifyHardwareProofToken(proof_token, req);
@@ -1424,13 +1436,23 @@ async function startServer() {
       });
     }
 
+    const cl = verificationResult.claims || {};
+
     res.json({
       valid: true,
       claims: {
-        human_verified: verificationResult.claims.human_status === 'verified',
-        unique_human: verificationResult.claims.uniqueness_status === 'unique',
-        issued_at: verificationResult.claims.issued_at,
-        expires_at: verificationResult.claims.expires_at
+        // Blueprint fields
+        partner_id: cl.partner_id || cl.project_id,
+        session_id: cl.session_id,
+        verification_status: cl.verification_status || (cl.human_status === 'verified' ? 'passed' : 'failed'),
+        risk_level: cl.risk_level,
+        timestamp: cl.timestamp || cl.issued_at,
+        expires_at: cl.expires_at,
+
+        // Legacy compatibility fields
+        human_verified: cl.human_status === 'verified',
+        unique_human: cl.uniqueness_status === 'unique',
+        issued_at: cl.issued_at
       }
     });
   });
@@ -1600,15 +1622,29 @@ async function startServer() {
       uniqueness_status: uniquenessStatus
     });
 
+    let decision: 'ALLOW' | 'REVIEW' | 'CHALLENGE' | 'DENY' = 'ALLOW';
+    if (recommendedAction === 'allow') decision = 'ALLOW';
+    else if (recommendedAction === 'manual_review' || recommendedAction === 'flag') decision = 'REVIEW';
+    else if (recommendedAction === 'require_reverification') decision = 'CHALLENGE';
+    else if (recommendedAction === 'deny') decision = 'DENY';
+
     res.json({
+      // Blueprint Fields
+      human_verified: humanStatus === 'verified',
+      returning_user: !!user,
+      risk_score: riskScore,
+      uniqueness_score: duplicateSignalsFound ? 15 : (riskScore > 50 ? 65 : 98),
+      decision: decision,
+      proof_token: proofToken,
+      reason_codes: riskReasons,
+      expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+
+      // Legacy Compatibility Fields
       human_status: humanStatus,
       uniqueness_status: uniquenessStatus,
       risk_level: riskLevel,
-      risk_score: riskScore,
-      proof_token: proofToken,
       recommended_action: recommendedAction,
-      session_id: verificationSessionId,
-      expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString()
+      session_id: verificationSessionId
     });
   });
 

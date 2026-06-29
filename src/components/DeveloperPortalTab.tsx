@@ -59,7 +59,7 @@ try {
   });
   
   if (proof.valid) {
-    console.log("Verification status confirmed safely:", proof.claims.verification_status);
+    console.log("Trust status confirmed safely:", proof.claims.verification_status);
   }
 } catch (error) {
   console.error("Cryptographic sign validation failed:", error.message);
@@ -812,7 +812,7 @@ app.post("/v1/auth/aan-status", (req, res) => {
                   <span className="text-[10px] font-mono font-bold text-slate-500 uppercase">v1.1.9 (Archived Release - Deprecated)</span>
                   <span className="text-xs font-mono font-bold text-white block">Improved device fingerprint scopes</span>
                   <span className="text-xs text-[#78819a] block font-normal font-sans leading-normal">
-                    Added browser device fingerprint consistency checks to improve liveness evaluation precision.
+                    Added browser device fingerprint consistency checks to improve trust evaluation precision.
                   </span>
                 </div>
               </div>

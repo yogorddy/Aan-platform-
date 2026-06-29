@@ -26,8 +26,8 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
     });
     isConfigured = true;
     console.log("[AAN INFRASTRUCTURE] Database Status: SECURE REMOTE SUPABASE DB CONNECTED (Service-Role Client Initialized)");
-  } catch (err) {
-    console.error("[AAN INFRASTRUCTURE] Failed to initialize Supabase client:", err);
+  } catch (err: any) {
+    console.warn("[AAN INFRASTRUCTURE] Failed to initialize Supabase client (using local state fallback):", err.message || err);
   }
 } else {
   console.log(
@@ -76,7 +76,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.error("[AAN DB ERROR] Failed to save session to Supabase. Fallback to memory:", error.message);
+        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to save session to Supabase. Fallback to memory:", error.message);
         localStore.unshift(session);
         return session;
       }
@@ -109,7 +109,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.error("[AAN DB ERROR] Failed to update session in Supabase. Fallback to memory:", error.message);
+        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to update session in Supabase. Fallback to memory:", error.message);
         return fallbackUpdate(sessionId, updates, localStore);
       }
       return data as VerificationSession;
@@ -143,7 +143,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.error("[AAN DB ERROR] Failed to record audit log to Supabase. Fallback to memory:", error.message);
+        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to record audit log to Supabase. Fallback to memory:", error.message);
         localStore.unshift(log);
         return log;
       }
@@ -184,7 +184,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.error("[AAN DB ERROR] Failed to record security event to Supabase. Fallback to memory:", error.message);
+        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to record security event to Supabase. Fallback to memory:", error.message);
         localStore.unshift(event);
         return event;
       }
@@ -218,7 +218,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.error("[AAN DB ERROR] Failed to upsert partner app to Supabase. Fallback to memory:", error.message);
+        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to upsert partner app to Supabase. Fallback to memory:", error.message);
         localStore.unshift(partnerApp);
         return partnerApp;
       }

@@ -661,7 +661,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       </header>
 
       {/* Primary Dashboard Grid with Side-Sub Navigation tab links */}
-      <main className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <main className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-4 gap-5">
         
         {/* Left mini Sidebar links */}
         <div className="lg:col-span-1 space-y-4">
