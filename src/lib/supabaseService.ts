@@ -42,6 +42,26 @@ export function isSupabaseConnected(): boolean {
 }
 
 /**
+ * Centralized DB Error and Table Missing handler to guarantee graceful fallback
+ */
+function handleDbError(error: any, operationName: string) {
+  const msg = error.message || "";
+  if (
+    msg.includes("relation") || 
+    msg.includes("table") || 
+    msg.includes("schema cache") || 
+    msg.includes("does not exist") || 
+    msg.includes("not found")
+  ) {
+    console.warn(`[AAN DB NOTICE] Required table or relation is missing in remote database during "${operationName}": "${msg}".`);
+    console.warn("[AAN DB NOTICE] Switching AAN Platform to offline sandbox memory mode. Please run supabase_schema.sql in your Supabase SQL Editor to link remote tables.");
+    isConfigured = false; // Gracefully switch to memory state to prevent continuous error logging
+  } else {
+    console.warn(`[AAN DB GRACEFUL FALLBACK] Failed during ${operationName}:`, msg);
+  }
+}
+
+/**
  * Service/Repository layer wrapping data access for AAN Identity Platform.
  * If Supabase variables are set, writes and reads from Postgres tables.
  * Otherwise, routes to local memory state fallback (passed in or resolved).
@@ -76,7 +96,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to save session to Supabase. Fallback to memory:", error.message);
+        handleDbError(error, "createVerificationSession");
         localStore.unshift(session);
         return session;
       }
@@ -109,7 +129,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to update session in Supabase. Fallback to memory:", error.message);
+        handleDbError(error, "updateVerificationSession");
         return fallbackUpdate(sessionId, updates, localStore);
       }
       return data as VerificationSession;
@@ -143,7 +163,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to record audit log to Supabase. Fallback to memory:", error.message);
+        handleDbError(error, "recordAuditEvent");
         localStore.unshift(log);
         return log;
       }
@@ -184,7 +204,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to record security event to Supabase. Fallback to memory:", error.message);
+        handleDbError(error, "recordSecurityEvent");
         localStore.unshift(event);
         return event;
       }
@@ -218,7 +238,7 @@ export const supabaseService = {
         .single();
 
       if (error) {
-        console.warn("[AAN DB GRACEFUL FALLBACK] Failed to upsert partner app to Supabase. Fallback to memory:", error.message);
+        handleDbError(error, "savePartnerApp");
         localStore.unshift(partnerApp);
         return partnerApp;
       }

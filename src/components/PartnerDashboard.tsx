@@ -2251,6 +2251,31 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       <span className="text-white font-bold truncate max-w-[200px]">{activeProject.webhook_secret}</span>
                     </div>
                   </div>
+
+                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 max-w-xl font-mono text-xs text-slate-300">
+                    <span className="text-slate-400 block font-bold text-[10px] uppercase tracking-wide">Database Connectivity & Schema Integrity</span>
+                    <div className="flex justify-between border-b border-slate-850 pb-2">
+                      <span>Connection Status:</span>
+                      {partnerConfig?.supabase_connected ? (
+                        <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          Active Secure Cloud DB (Postgres)
+                        </span>
+                      ) : (
+                        <span className="text-amber-400 font-bold flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          Simulated Local Sandbox (In-Memory Fallback)
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-sans leading-normal">
+                      {partnerConfig?.supabase_connected ? (
+                        "Your cloud database is connected and active. Row level security policies and tables are synchronized in real-time."
+                      ) : (
+                        "The platform is operating in secure local memory fallback. To synchronize data persistently in a remote database, verify your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env variables, and execute the SQL declarations found in supabase_schema.sql in your Supabase SQL Editor."
+                      )}
+                    </p>
+                  </div>
                 </div>
               )}
 

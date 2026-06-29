@@ -2,7 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import crypto from "crypto";
-import { supabaseService } from "./src/lib/supabaseService";
+import { supabaseService, isSupabaseConnected } from "./src/lib/supabaseService";
 import { 
   User, 
   SignatureTemplate, 
@@ -2455,7 +2455,8 @@ async function startServer() {
     const org = db.organizations[0];
     res.json({
       organization: org,
-      project: project
+      project: project,
+      supabase_connected: isSupabaseConnected()
     });
   });
 
