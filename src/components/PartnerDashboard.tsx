@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Key, Webhook, Activity, Code, Shield, User, CornerDownRight, Check, AlertTriangle, 
   Search, Play, ArrowRight, RefreshCw, Send, HelpCircle, Eye, EyeOff, Sliders,
-  Database, BookOpen, Trash2, FolderSync, Info, Settings, ShieldCheck, Terminal, Award, HelpCircle as HelpIcon, Layers, ClipboardList
+  Database, BookOpen, Trash2, FolderSync, Info, Settings, ShieldCheck, Terminal, Award, HelpCircle as HelpIcon, Layers, ClipboardList, Sparkles
 } from 'lucide-react';
 import { VerificationSession, PartnerApp } from '@/src/types';
 import IntegrationWizardTab from './IntegrationWizardTab';
@@ -12,6 +12,7 @@ import HealthMonitorTab from './HealthMonitorTab';
 import CertificationTab from './CertificationTab';
 import VerificationProfilesTab from './VerificationProfilesTab';
 import { isAcademyEnabled } from '../academyConfig';
+import DashboardTour from './DashboardTour';
 
 interface PartnerDashboardProps {
   onNavigate: (page: string, path?: string, lessonId?: string) => void;
@@ -56,7 +57,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
   // Layout sidebar tab state
   const [activeTab, setActiveTab] = useState<
     'overview' | 'organizations' | 'verification-activity' | 'security-center' | 'trust-analytics' | 'api-keys' | 'webhooks' | 'audit-logs' | 'developers' | 'documentation' | 'settings'
-  >('overview');
+  >('organizations');
 
   // Sub-tab toggles inside advanced hubs
   const [orgSubTab, setOrgSubTab] = useState<'settings' | 'policies' | 'profiles'>('settings');
@@ -125,6 +126,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
   const [onboardingPlaygroundLoading, setOnboardingPlaygroundLoading] = useState(false);
   const [onboardingPlaygroundResponse, setOnboardingPlaygroundResponse] = useState<any>(null);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
+  const [isTourOpen, setIsTourOpen] = useState(false);
 
   // Persistence side effects
   const saveOnboardingStep = (step: number) => {
@@ -163,6 +165,16 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
   useEffect(() => {
     fetchDashboardData();
+    
+    // Automatically open tour for first-time visitors
+    try {
+      const tourCompleted = localStorage.getItem('aan_dashboard_tour_completed');
+      if (!tourCompleted) {
+        setIsTourOpen(true);
+      }
+    } catch (e) {
+      console.warn("Storage read blocked", e);
+    }
   }, []);
 
   const fetchDashboardData = async () => {
@@ -595,7 +607,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
     <div className="min-h-screen bg-[#0d0e12] font-sans text-[#e3e5eb] flex flex-col selection:bg-[#202533]">
       
       {/* Horiz Header */}
-      <header className="bg-[#111319] border-b border-[#1b1e28] px-6 py-4 flex items-center justify-between z-10">
+      <header id="tour-header" className="bg-[#111319] border-b border-[#1b1e28] px-6 py-4 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
           <div className="bg-[#171a23] text-blue-500 p-2 rounded border border-[#232a3b]">
             <Shield className="w-5 h-5" />
@@ -612,9 +624,19 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         </div>
 
         <div className="flex gap-4 items-center select-none">
+          <button 
+            onClick={() => setIsTourOpen(true)} 
+            className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-[#171a23] hover:bg-[#1f2431] px-3.5 py-1.5 rounded border border-blue-500/20 cursor-pointer font-bold font-mono uppercase tracking-wider hover:shadow-[0_0_8px_rgba(59,130,246,0.2)]"
+            title="Start Interactive Getting Started Tour"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-pulse" />
+            <span>Quick Tour</span>
+          </button>
+          <span className="text-[#1b1e28] font-mono text-xs">|</span>
           {isAcademyEnabled() && (
             <>
               <button 
+                id="tour-academy-btn"
                 onClick={() => onNavigate('academy', undefined, mapTabToLesson(activeTab))} 
                 className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-[#171a23] hover:bg-[#1f2431] px-3.5 py-1.5 rounded border border-[#232a3b] cursor-pointer font-bold font-mono uppercase tracking-wider blink-subtle"
                 title="Open contextual explanation for this feature inside the learning Academy"
@@ -649,14 +671,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           <span className="text-[10px] font-mono text-[#5d6780] uppercase tracking-widest block px-3 mb-2 font-bold">Workspace Navigation</span>
           
           <button 
-            onClick={() => { setActiveTab('overview'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'overview' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
-          >
-            <Activity className="w-4 h-4" />
-            Dashboard
-          </button>
-
-          <button 
+            id="tour-projects-btn"
             onClick={() => { setActiveTab('organizations'); setOrgSubTab('settings'); setSearchValue(""); }}
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${(activeTab === 'organizations' && orgSubTab === 'settings') ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
@@ -665,22 +680,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           </button>
 
           <button 
-            onClick={() => { setActiveTab('organizations'); setOrgSubTab('policies'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${(activeTab === 'organizations' && orgSubTab === 'policies') ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
-          >
-            <Sliders className="w-4 h-4 text-amber-500" />
-            Trust Rules
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('organizations'); setOrgSubTab('profiles'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${(activeTab === 'organizations' && orgSubTab === 'profiles') ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
-          >
-            <Shield className="w-4 h-4 text-red-400" />
-            Trust Profiles
-          </button>
-
-          <button 
+            id="tour-apikeys-btn"
             onClick={() => { setActiveTab('api-keys'); setSearchValue(""); }}
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'api-keys' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
@@ -689,11 +689,21 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           </button>
 
           <button 
-            onClick={() => { setActiveTab('webhooks'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'webhooks' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
+            id="tour-events-btn"
+            onClick={() => { setActiveTab('verification-activity'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'verification-activity' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
-            <Webhook className="w-4 h-4" />
-            Webhooks
+            <Database className="w-4 h-4" />
+            Trust Events
+          </button>
+
+          <button 
+            id="tour-profiles-btn"
+            onClick={() => { setActiveTab('organizations'); setOrgSubTab('profiles'); setSearchValue(""); }}
+            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${(activeTab === 'organizations' && orgSubTab === 'profiles') ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
+          >
+            <Shield className="w-4 h-4 text-red-400" />
+            Trust Profiles
           </button>
 
           <button 
@@ -701,23 +711,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'audit-logs' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
           >
             <ClipboardList className="w-4 h-4 text-teal-400" />
-            Activity
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('verification-activity'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'verification-activity' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
-          >
-            <Database className="w-4 h-4" />
-            Decisions
-          </button>
-
-          <button 
-            onClick={() => { setActiveTab('documentation'); setSearchValue(""); }}
-            className={`w-full flex items-center gap-2.5 text-xs font-medium px-3.5 py-2.5 rounded transition-all text-left ${activeTab === 'documentation' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold' : 'text-[#78819a] hover:text-[#e3e5eb] hover:bg-[#171a23]/40'}`}
-          >
-            <BookOpen className="w-4 h-4 text-blue-400" />
-            Documentation
+            Audit Log
           </button>
 
           <button 
@@ -1493,29 +1487,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== ORGANIZATIONS TAB: SETTINGS ==================== */}
               {activeTab === 'organizations' && orgSubTab === 'settings' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="flex border-b border-[#1b1e28] gap-1.5 mb-6 font-mono text-[11px]">
-                    <button
-                      onClick={() => setOrgSubTab('settings')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
-                    >
-                      Project Settings
-                    </button>
-                    <button
-                      onClick={() => setOrgSubTab('policies')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
-                    >
-                      Trust Rules
-                    </button>
-                    <button
-                      onClick={() => setOrgSubTab('profiles')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
-                    >
-                      Trust Profiles
-                    </button>
-                  </div>
-                  <div className="border-b border-[#1b1e28] pb-4">
-                    <h2 className="text-lg font-bold text-white">Project Security</h2>
-                    <p className="text-xs text-[#78819a]">Manage origin restrictions, allowed domains, and platform protection modes.</p>
+                  <div className="border-b border-[#1b1e28] pb-4 text-left">
+                    <h2 className="text-lg font-bold text-white">Projects</h2>
+                    <p className="text-xs text-[#78819a]">Which digital platforms are currently integrated with AAN?</p>
                   </div>
 
                   <form onSubmit={handleUpdateConfig} className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-5 max-w-2xl text-left">
@@ -1586,9 +1560,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== API KEYS TAB ==================== */}
               {activeTab === 'api-keys' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-[#1b1e28] pb-4">
-                    <h2 className="text-lg font-bold text-white">Cryptographic API Key Credentials</h2>
-                    <p className="text-xs text-[#78819a]">Generate hashed enterprise access keys to connect your server-side framework.</p>
+                  <div className="border-b border-[#1b1e28] pb-4 text-left">
+                    <h2 className="text-lg font-bold text-white">API Keys</h2>
+                    <p className="text-xs text-[#78819a]">How do our applications authenticate secure handshakes with the Trust Engine?</p>
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start text-left">
@@ -1680,7 +1654,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       onClick={() => setOrgSubTab('policies')}
                       className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-[#78819a] hover:text-white'}`}
                     >
-                      MFA Login Policies
+                      Organization Trust Policies
                     </button>
                     <button
                       onClick={() => setOrgSubTab('profiles')}
@@ -1734,8 +1708,8 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 <div className="space-y-6 animate-fadeIn">
                   <div className="border-b border-[#1b1e28] pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-left">
                     <div>
-                      <h2 className="text-lg font-bold text-white">Trust Decisions</h2>
-                      <p className="text-xs text-[#78819a]">Continuous risk engine grades for incoming platform integrations.</p>
+                      <h2 className="text-lg font-bold text-white">Trust Events</h2>
+                      <p className="text-xs text-[#78819a]">Who has requested trust evaluations, and what decisions were rendered?</p>
                     </div>
 
                     <div className="flex flex-wrap gap-2 items-center">
@@ -2176,10 +2150,10 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               {/* ==================== AUDIT LOGS TAB ==================== */}
               {activeTab === 'audit-logs' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-left">
                     <div>
-                      <h2 className="text-lg font-bold text-white">Immutable Operational Audit logs trail</h2>
-                      <p className="text-xs text-slate-400">Strict chronological accounting files detailing organizational configurations updates and webhook deliveries.</p>
+                      <h2 className="text-lg font-bold text-white">Audit Log</h2>
+                      <p className="text-xs text-slate-400">When were administrative actions and keys modified on our account?</p>
                     </div>
 
                     <input 
@@ -2226,56 +2200,184 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
               {/* ==================== SETTINGS TAB ==================== */}
               {activeTab === 'settings' && (
-                <div className="space-y-6 animate-fadeIn">
+                <div className="space-y-8 animate-fadeIn text-left">
                   <div className="border-b border-slate-800 pb-4">
-                    <h2 className="text-lg font-bold text-white">Workspace & Corporate Organization Settings</h2>
-                    <p className="text-xs text-slate-400 font-mono">Manage credential tokens ownership, whsec rotations, and corporate labels metadata.</p>
+                    <h2 className="text-lg font-bold text-white">Settings</h2>
+                    <p className="text-xs text-slate-400">Where are system notifications, webhook payloads, and environment values routed?</p>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 max-w-xl font-mono text-xs text-slate-300">
-                    <span className="text-slate-400 block font-bold text-[10px] uppercase tracking-wide">Corporate metadata indices</span>
-                    <div className="flex justify-between border-b border-slate-850 pb-2">
-                      <span>Organization ID:</span>
-                      <span className="text-white font-bold">{activeOrg.id || "org_enterprise_999"}</span>
+                  {/* Metadata and Connectivity Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 font-mono text-xs text-slate-300">
+                      <span className="text-slate-400 block font-bold text-[10px] uppercase tracking-wide">Corporate metadata indices</span>
+                      <div className="flex justify-between border-b border-slate-850 pb-2">
+                        <span>Organization ID:</span>
+                        <span className="text-white font-bold">{activeOrg.id || "org_enterprise_999"}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-850 pb-2">
+                        <span>Integration Blueprint ID:</span>
+                        <span className="text-white font-bold">{activeProject.id || "proj_security_777"}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-850 pb-2">
+                        <span>Active Enforcement mechanism:</span>
+                        <span className="text-emerald-400 font-bold">{activeProject.enforcement_mode}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Cryptographic Whsec Secret:</span>
+                        <span className="text-white font-bold truncate max-w-[200px]">{activeProject.webhook_secret}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between border-b border-slate-850 pb-2">
-                      <span>Integration Blueprint ID:</span>
-                      <span className="text-white font-bold">{activeProject.id || "proj_security_777"}</span>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-850 pb-2">
-                      <span>Active Enforcement mechanism:</span>
-                      <span className="text-emerald-400 font-bold">{activeProject.enforcement_mode}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Cryptographic Whsec Secret:</span>
-                      <span className="text-white font-bold truncate max-w-[200px]">{activeProject.webhook_secret}</span>
+
+                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 font-mono text-xs text-slate-300">
+                      <span className="text-slate-400 block font-bold text-[10px] uppercase tracking-wide">Database Connectivity & Schema Integrity</span>
+                      <div className="flex justify-between border-b border-slate-850 pb-2">
+                        <span>Connection Status:</span>
+                        {partnerConfig?.supabase_connected ? (
+                          <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Active Secure Cloud DB (Postgres)
+                          </span>
+                        ) : (
+                          <span className="text-amber-400 font-bold flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                            Simulated Local Sandbox (In-Memory Fallback)
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans leading-normal">
+                        {partnerConfig?.supabase_connected ? (
+                          "Your cloud database is connected and active. Row level security policies and tables are synchronized in real-time."
+                        ) : (
+                          "The platform is operating in secure local memory fallback. To synchronize data persistently in a remote database, verify your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env variables, and execute the SQL declarations found in supabase_schema.sql in your Supabase SQL Editor."
+                        )}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 max-w-xl font-mono text-xs text-slate-300">
-                    <span className="text-slate-400 block font-bold text-[10px] uppercase tracking-wide">Database Connectivity & Schema Integrity</span>
-                    <div className="flex justify-between border-b border-slate-850 pb-2">
-                      <span>Connection Status:</span>
-                      {partnerConfig?.supabase_connected ? (
-                        <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          Active Secure Cloud DB (Postgres)
-                        </span>
+                  {/* Cryptographic Webhook Broadcast Control Section */}
+                  <div className="border-t border-slate-800 pt-8">
+                    <h3 className="text-md font-bold text-white mb-2">Cryptographic Webhook Broadcasting Gateway</h3>
+                    <p className="text-xs text-[#78819a] mb-6">Configure asynchronous post event receivers with HMAC-SHA256 headers verification.</p>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                      
+                      <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4">
+                        <span className="font-bold text-white text-xs block uppercase tracking-wide font-mono">Configure Broadcast Target</span>
+                        <div>
+                          <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5">Webhook Shared Signature Secret (whsec)</label>
+                          <div className="bg-[#0d0e12] p-3 rounded font-mono text-slate-300 border border-[#1b1e28] text-xs flex justify-between items-center">
+                            <code>{activeProject.webhook_secret}</code>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-mono text-[#78819a] uppercase tracking-wider mb-1.5 flex justify-between">
+                            <span>Target Broadcast Url</span>
+                            <span className="text-emerald-400 text-[9px]">POST JSON PAYLOAD</span>
+                          </label>
+                          <input 
+                            type="url"
+                            required
+                            placeholder="https://api.yourdomain.com/aan-hook"
+                            value={newWebhookUrl}
+                            onChange={(e) => setNewWebhookUrl(e.target.value)}
+                            className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono"
+                          />
+                        </div>
+
+                        <button
+                          onClick={async () => {
+                            if(!newWebhookUrl) return;
+                            handleUpdateConfig(new Event('submit') as any);
+                          }}
+                          className="w-full bg-blue-600 hover:bg-blue-500 font-semibold text-xs py-2 rounded transition-all cursor-pointer"
+                        >
+                          Renew Webhook Broadcast Endpoint
+                        </button>
+                      </div>
+
+                      {/* Interactive Webhook Playground */}
+                      <div className="bg-[#111319] border border-[#1b1e28] p-6 rounded-xl space-y-4">
+                        <span className="font-bold text-white text-xs block uppercase tracking-wide font-mono">Send Webhook Test sandbox</span>
+                        <p className="text-xs text-[#78819a]">Trigger standard mockup verification events to testing payloads integration.</p>
+                        
+                        <div>
+                          <label className="block text-[10px] font-mono text-[#78819a] mb-1.5">Select session resource to simulate</label>
+                          <select
+                            value={activeSimSessionId}
+                            onChange={(e) => setActiveSimSessionId(e.target.value)}
+                            className="w-full bg-[#0d0e12] border border-[#1b1e28] text-xs p-2 rounded text-slate-250 focus:outline-none font-mono"
+                          >
+                            <option value="">-- Choose active session --</option>
+                            {sessions.map(s => (
+                              <option key={s.id} value={s.id}>
+                                {s.id} ({s.external_user_id} - {s.status})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <button
+                          onClick={() => handleSimulateWebhook(activeSimSessionId)}
+                          disabled={!activeSimSessionId || simulatingWebhook}
+                          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-semibold text-xs py-2 rounded flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          {simulatingWebhook ? "Broadcasting..." : "Dispatch Simulated Webhook"}
+                        </button>
+
+                        {simulatedWebhookResult && (
+                          <div className="p-3 bg-emerald-950/20 border border-emerald-900/40 rounded text-[11px] font-mono space-y-1">
+                            <span className="text-emerald-400 font-bold block text-[10px] uppercase">Webhook Delivery Results:</span>
+                            <div className="text-slate-300">Status: <b className="text-emerald-400">Broadcast Success (200 OK)</b></div>
+                            <div className="text-slate-300 truncate">Payload signature hex string: <code className="text-blue-400 font-semibold">{simulatedWebhookResult.delivery?.signature}</code></div>
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Dispatched Logs Table */}
+                  <div className="space-y-4 text-left border-t border-slate-800 pt-8">
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#78819a]">Dispatched Webhooks Gate Log</span>
+                    <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden">
+                      {webhookDeliveries.length === 0 ? (
+                        <div className="p-8 text-center text-[#78819a] text-xs font-mono">
+                          No webhook payloads dispatched.
+                        </div>
                       ) : (
-                        <span className="text-amber-400 font-bold flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                          Simulated Local Sandbox (In-Memory Fallback)
-                        </span>
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-[#0d0e12] text-[#78819a] font-mono uppercase text-[9px] tracking-wider border-b border-[#1b1e28]">
+                            <tr>
+                              <th className="py-3 px-6">Log ID</th>
+                              <th className="py-3 px-4">Dispatched Event Type</th>
+                              <th className="py-3 px-4">Target Payload endpoint</th>
+                              <th className="py-3 px-4 text-center">Signature (x-aan-signature)</th>
+                              <th className="py-3 px-6 text-right">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#1b1e28] text-slate-300 font-mono">
+                            {webhookDeliveries.map(d => (
+                              <tr key={d.id} className="hover:bg-[#0d0e12]/30">
+                                <td className="py-4 px-6 text-blue-400">{d.id}</td>
+                                <td className="py-4 px-4 text-emerald-400 font-bold text-[11px]">{d.event_type}</td>
+                                <td className="py-4 px-4 text-slate-300 truncate max-w-xs">{d.url}</td>
+                                <td className="py-4 px-4 text-center text-indigo-400 text-[10px] tracking-tighter truncate max-w-xs">
+                                  {d.signature}
+                                </td>
+                                <td className="py-4 px-6 text-right">
+                                  <span className="text-[9px] bg-emerald-950/40 text-emerald-400 border border-emerald-900/40 font-bold uppercase px-2 py-0.5 rounded">
+                                    {d.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-400 font-sans leading-normal">
-                      {partnerConfig?.supabase_connected ? (
-                        "Your cloud database is connected and active. Row level security policies and tables are synchronized in real-time."
-                      ) : (
-                        "The platform is operating in secure local memory fallback. To synchronize data persistently in a remote database, verify your SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env variables, and execute the SQL declarations found in supabase_schema.sql in your Supabase SQL Editor."
-                      )}
-                    </p>
                   </div>
+
                 </div>
               )}
 
@@ -2550,25 +2652,9 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
 
               {activeTab === 'organizations' && orgSubTab === 'profiles' && (
                 <div className="space-y-6 animate-fadeIn">
-                  <div className="flex border-b border-slate-800 gap-1.5 mb-6 font-mono text-[11px]">
-                    <button
-                      onClick={() => setOrgSubTab('settings')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'settings' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
-                    >
-                      Project Settings
-                    </button>
-                    <button
-                      onClick={() => setOrgSubTab('policies')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'policies' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
-                    >
-                      MFA Login Policies
-                    </button>
-                    <button
-                      onClick={() => setOrgSubTab('profiles')}
-                      className={`px-4 py-2 border-b-2 transition-all cursor-pointer ${orgSubTab === 'profiles' ? 'border-blue-500 text-white font-bold' : 'border-transparent text-slate-400 hover:text-white'}`}
-                    >
-                      Verification Profiles
-                    </button>
+                  <div className="border-b border-slate-800 pb-4 text-left">
+                    <h2 className="text-lg font-bold text-white">Trust Profiles</h2>
+                    <p className="text-xs text-slate-400">What thresholds and rules determine human uniqueness and liveness?</p>
                   </div>
                   <VerificationProfilesTab 
                     partnerApps={partnerApps}
@@ -2731,6 +2817,14 @@ Verify Success (Mint Proof Certificate)  Force Redirect browser to:
 
         </div>
       </section>
+
+      <DashboardTour
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        setOrgSubTab={setOrgSubTab}
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+      />
 
     </div>
   );

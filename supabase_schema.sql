@@ -83,7 +83,7 @@ create table if not exists public.verification_sessions (
     id uuid primary key default gen_random_uuid(),
     partner_app_id uuid references public.partner_apps(id) on delete cascade not null,
     external_user_id text not null,
-    status text not null check (status in ('started', 'passed', 'failed', 'review')),
+    status text not null check (status in ('started', 'passed', 'failed', 'review', 'created', 'consent_given', 'verification_started', 'verification_passed', 'verification_failed', 'proof_issued', 'expired', 'revoked')),
     risk_score integer not null check (risk_score >= 0 and risk_score <= 100),
     duplicate_candidate boolean default false not null,
     result_reason text,
@@ -431,5 +431,61 @@ create policy "Partners can select or create removal requests of their projects"
             and p.organization_id::text = auth.jwt()->>'organization_id'
         )
     );
+
+
+-- ==========================================================
+-- 13. SECURITY_REPORTS SCHEMA (TESLA-STYLE BUG BOUNTY PROGRAM)
+-- ==========================================================
+
+create table if not exists public.security_reports (
+    id uuid primary key default gen_random_uuid(),
+    title text not null,
+    category text not null check (category in (
+        'authentication_bypass',
+        'partner_api_key_exposure',
+        'cross_organization_data_access',
+        'forged_verification_tokens',
+        'replay_attacks',
+        'webhook_spoofing',
+        'admin_dashboard_access',
+        'rate_limit_bypass',
+        'bot_abuse_at_scale',
+        'unauthorized_partner_actions',
+        'privacy_leaks',
+        'audit_log_tampering',
+        'verification_approval_bypass'
+    )),
+    severity text not null check (severity in ('low', 'medium', 'high', 'critical')),
+    affected_system text not null,
+    reproduction_steps text not null,
+    submitted_evidence text, -- Optional links or markdown text
+    reporter_contact text not null, -- Contact email or identifier
+    status text not null default 'new' check (status in (
+        'new', 'triaged', 'duplicate', 'reproduced', 'patched', 'payout_approved', 'payout_paid', 'closed'
+    )),
+    bounty_amount numeric(10, 2) default 0.00 not null,
+    internal_notes text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    resolved_at timestamp with time zone
+);
+
+create index if not exists idx_security_reports_status on public.security_reports(status);
+create index if not exists idx_security_reports_severity on public.security_reports(severity);
+
+-- RLS FOR SECURITY_REPORTS:
+alter table public.security_reports enable row level security;
+
+-- Policy 1: Anyone can submit a security report (public bug bounty entry point)
+create policy "Anyone can insert security reports"
+    on public.security_reports
+    for insert
+    with check (true);
+
+-- Policy 2: Admins have full access to view, update, or delete reports
+create policy "Admins have full access to security reports"
+    on public.security_reports
+    for all
+    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
+
 
 

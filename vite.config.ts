@@ -7,6 +7,7 @@ export default defineConfig(() => {
   return {
     define: {
       'process.env.ACADEMY_ENABLED': JSON.stringify(process.env.ACADEMY_ENABLED || 'false'),
+      'process.env.BRAND_ENABLED': JSON.stringify(process.env.BRAND_ENABLED || 'false'),
     },
     plugins: [react(), tailwindcss()],
     resolve: {

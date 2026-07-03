@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, UserCheck, Activity, Database, Check, AlertOctagon, Terminal, 
-  Search, RefreshCw, XCircle, ShieldCheck, Heart, Trash2, Shield, Download,
-  Sliders, Clock, BarChart3, HelpCircle, AlertTriangle, Play, Flame, UserPlus,
-  Share2, ChevronRight, Settings, Info, Lock, BookOpen
+  Search, RefreshCw, XCircle, ShieldCheck, Trash2, Shield, Download,
+  Sliders, Clock, BarChart3, AlertTriangle, UserPlus, Info, Lock, BookOpen,
+  Plus, Eye, X, Filter, ChevronRight, CheckCircle2
 } from 'lucide-react';
-import { User, SignatureTemplate, Device, VerificationSession, AuditLog } from '@/src/types';
+import { User, SignatureTemplate, Device, VerificationSession, AuditLog } from '../types';
 import { isAcademyEnabled } from '../academyConfig';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface AdminDashboardProps {
   onNavigate: (page: string, path?: string, lessonId?: string) => void;
@@ -28,7 +29,7 @@ function mapTabToLesson(tab: string): string {
 }
 
 export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
-  // Database states
+  // Core Database states
   const [sessions, setSessions] = useState<VerificationSession[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [devices, setDevices] = useState<Device[]>([]);
@@ -36,14 +37,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [signatureTemplates, setSignatureTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Enterprise specific custom state containers
+  // Enterprise Policies & Chronological timelines
   const [policies, setPolicies] = useState<any[]>([]);
   const [timeline, setTimeline] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("usr_df990a31");
   const [showPolicyModal, setShowPolicyModal] = useState(false);
   const [institutionalConsent, setInstitutionalConsent] = useState(false);
 
-  // Defensive bypass & intrusion detection state
+  // Defensive Bypass & Intrusion states
   const [securityEvents, setSecurityEvents] = useState<any[]>([]);
   const [securityRisk, setSecurityRisk] = useState<{ score: number; level: string; signalsCount: any }>({
     score: 0,
@@ -54,8 +55,27 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [resolutionNotes, setResolutionNotes] = useState("");
   const [severityFilter, setSeverityFilter] = useState<string>("all");
   const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
-  
-  // Custom Policy Builder Form Space
+
+  // Bug Bounty Security Reports States
+  const [securityReports, setSecurityReports] = useState<any[]>([]);
+  const [triagingReportId, setTriagingReportId] = useState<string | null>(null);
+  const [triageActionState, setTriageActionState] = useState({ 
+    action: 'triage', 
+    severity: 'high', 
+    bounty_amount: 1000, 
+    internal_notes: '', 
+    duplicate_of: '' 
+  });
+  const [isTriaging, setIsTriaging] = useState(false);
+  const [bountyFilter, setBountyFilter] = useState<string>("all");
+
+  // Custom inspect drawer state for "Why it exists, What problem it solves, What action to take"
+  const [inspectRecord, setInspectRecord] = useState<{
+    type: 'session' | 'user' | 'device' | 'signature' | 'audit' | 'security-event';
+    data: any;
+  } | null>(null);
+
+  // Policy Builder form space
   const [policyForm, setPolicyForm] = useState({
     name: "",
     conditions: "Device Trust < 35 && Automation Confidence > 90%",
@@ -63,24 +83,32 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     description: ""
   });
 
-  // Active view tab state (within Admin dashboard context)
-  const [activeTab, setActiveTab] = useState<'analytics' | 'overrides' | 'users' | 'policies' | 'timeline' | 'devices' | 'signatures' | 'audits' | 'verification-logs' | 'security-alerts'>('analytics');
+  // Navigation tab state
+  const [activeTab, setActiveTab] = useState<'analytics' | 'overrides' | 'users' | 'policies' | 'timeline' | 'devices' | 'signatures' | 'audits' | 'verification-logs' | 'security-alerts' | 'security-reports'>('analytics');
 
-  // Filter params
+  // Filtering params
   const [auditQuery, setAuditQuery] = useState("");
   const [userQuery, setUserQuery] = useState("");
   const [sessionQuery, setSessionQuery] = useState("");
   const [sessionStatus, setSessionStatus] = useState<string>("all");
   const [downloadingExport, setDownloadingExport] = useState(false);
 
-  // Securely export and download the audit log snapshot from backend
+  // Sync timelines when selected user changes
+  useEffect(() => {
+    if (selectedUserId && activeTab === 'timeline') {
+      fetchUserTimeline(selectedUserId);
+    }
+  }, [selectedUserId, activeTab]);
+
+  useEffect(() => {
+    fetchAdminState();
+  }, []);
+
   const handleDownloadAuditSnapshot = async () => {
     setDownloadingExport(true);
     try {
       const response = await fetch('/api/internal/export-verification-audit');
-      if (!response.ok) {
-        throw new Error('Verification snapshot generation failed');
-      }
+      if (!response.ok) throw new Error('Verification snapshot generation failed');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -90,8 +118,6 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-      
-      // Refresh database states dynamically so the audit rail lists this download event
       fetchAdminState();
     } catch (err) {
       console.error("Failed exporting MVP audit snapshot:", err);
@@ -99,17 +125,6 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       setDownloadingExport(false);
     }
   };
-
-  useEffect(() => {
-    fetchAdminState();
-  }, []);
-
-  // Sync timelines when selected user undergoes change
-  useEffect(() => {
-    if (selectedUserId && activeTab === 'timeline') {
-      fetchUserTimeline(selectedUserId);
-    }
-  }, [selectedUserId, activeTab]);
 
   const fetchUserTimeline = async (userId: string) => {
     try {
@@ -126,7 +141,6 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       const polRes = await fetch('/api/internal/policies');
       const polData = await polRes.json();
       setPolicies(polData);
-      
       if (selectedUserId) {
         fetchUserTimeline(selectedUserId);
       }
@@ -138,7 +152,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const fetchAdminState = async () => {
     setLoading(true);
     try {
-      // 1. Fetch live sessions with fallback
+      // 1. Sessions fetch
       let sessData;
       try {
         const sessRes = await fetch('/api/internal/sessions');
@@ -214,7 +228,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setSessions(sessData);
 
-      // 2. Fetch users with fallback
+      // 2. Users fetch
       let usersData;
       try {
         const usersRes = await fetch('/api/internal/users');
@@ -246,7 +260,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setUsers(usersData);
 
-      // 3. Fetch devices with fallback
+      // 3. Devices fetch
       let devData;
       try {
         const devRes = await fetch('/api/internal/devices');
@@ -258,8 +272,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             user_id: "usr_9a48f2c0",
             device_public_key: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAv0...",
             platform: "macOS Chrome",
-            attestation_status: "passed",
-            risk_score: 10,
+            device_fingerprint_hash: "sha256_df7819bcde23a105f81239aa",
+            trusted: true,
             last_seen_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
             created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
           },
@@ -268,8 +282,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             user_id: "usr_b710ef67",
             device_public_key: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAy1...",
             platform: "iOS Native App",
-            attestation_status: "passed",
-            risk_score: 5,
+            device_fingerprint_hash: "sha256_10cbfa898e88ffcd92994eab",
+            trusted: true,
             last_seen_at: new Date(Date.now() - 23.95 * 3600 * 1000).toISOString(),
             created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString()
           }
@@ -277,7 +291,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setDevices(devData);
 
-      // 4. Fetch audit-logs with fallback
+      // 4. Audit logs fetch
       let auditsData;
       try {
         const auditsRes = await fetch('/api/internal/audit-logs');
@@ -298,7 +312,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setAuditLogs(auditsData);
 
-      // 5. Fetch signatures with fallback
+      // 5. Signatures templates fetch
       let bioData;
       try {
         const bioRes = await fetch('/api/internal/signatures');
@@ -309,6 +323,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             id: "tmpl_101",
             user_id: "usr_b710ef67",
             template_hash: "sig_hash_b710ef67",
+            encrypted_template: "AES_GCM_MOCK_BLOB_89f02cba3912da77fefcc89d0121",
             model_version: "ecc-secp256k1",
             confidence_score: 98.4,
             created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString()
@@ -317,6 +332,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             id: "tmpl_102",
             user_id: "usr_df990a31",
             template_hash: "sig_hash_b710ef67",
+            encrypted_template: "AES_GCM_MOCK_BLOB_de39bca0012bcfeef90a12eefc77",
             model_version: "ecc-secp256k1",
             confidence_score: 92.1,
             created_at: new Date(Date.now() - 11.95 * 3600 * 1000).toISOString()
@@ -325,7 +341,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setSignatureTemplates(bioData);
 
-      // 6. Fetch live security events with fallbacks
+      // 6. Security bypass / intrusion alerts
       let secEvents;
       try {
         const secRes = await fetch('/api/internal/security-events');
@@ -348,7 +364,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               attempted_claims: { organization_id: "org_enterprise_999", human_status: "verified", uniqueness_status: "unique" },
               expected_signature_alg: "HS256"
             },
-            created_at: new Date(Date.now() - 3.5 * 3600 * 1005).toISOString()
+            created_at: new Date(Date.now() - 3.5 * 3600 * 1000).toISOString()
           },
           {
             id: "sec_event_c3d45",
@@ -366,13 +382,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               current_status: "created",
               failed_target_status: "proof_issued"
             },
-            created_at: new Date(Date.now() - 2 * 3600 * 1005).toISOString()
+            created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
           }
         ];
       }
       setSecurityEvents(secEvents);
 
-      // 7. Fetch live security risk report with fallback
+      // 7. Security risk
       let secRisk;
       try {
         const riskRes = await fetch('/api/internal/security-risk');
@@ -386,47 +402,90 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       }
       setSecurityRisk(secRisk);
 
+      // Sync bug bounty vulnerability reports
+      await fetchSecurityReports();
+
       await fetchPoliciesAndTimelines();
     } catch (err) {
-      console.warn("Gracefully unresolved admin sync status: using client verification repository", err);
+      console.warn("Gracefully unresolved admin sync status", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Perform administrator override overrides on pending/review sessions statefully
+  const fetchSecurityReports = async () => {
+    try {
+      const res = await fetch('/api/internal/security-reports');
+      if (res.ok) {
+        const data = await res.json();
+        setSecurityReports(data);
+      }
+    } catch (e) {
+      console.error("Failed to fetch admin security reports:", e);
+    }
+  };
+
+  const handleTriageActionSubmit = async (reportId: string) => {
+    setIsTriaging(true);
+    try {
+      const res = await fetch(`/api/internal/security-reports/${reportId}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(triageActionState)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          fetchSecurityReports();
+          setTriagingReportId(null);
+          setTriageActionState({ action: 'triage', severity: 'high', bounty_amount: 1000, internal_notes: '', duplicate_of: '' });
+        }
+      }
+    } catch (err) {
+      console.error("Failed to execute triage action:", err);
+    } finally {
+      setIsTriaging(false);
+    }
+  };
+
   const triggerSessionAction = async (id: string, action: 'approve' | 'reject') => {
     try {
       const res = await fetch(`/api/internal/sessions/${id}/action`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action })
       });
       const data = await res.json();
       if (data.success) {
-        // Refresh everything statefully
         fetchAdminState();
+        if (inspectRecord?.type === 'session' && inspectRecord.data.id === id) {
+          setInspectRecord({
+            type: 'session',
+            data: { ...inspectRecord.data, status: action === 'approve' ? 'passed' : 'failed' }
+          });
+        }
       }
     } catch (err) {
       console.error("Action override fail", err);
     }
   };
 
-  // Perform administrator user suspension override statefully
   const triggerUserAction = async (id: string, action: 'suspend' | 'verify') => {
     try {
       const res = await fetch(`/api/internal/users/${id}/action`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action })
       });
       const data = await res.json();
       if (data.success) {
         fetchAdminState();
+        if (inspectRecord?.type === 'user' && inspectRecord.data.id === id) {
+          setInspectRecord({
+            type: 'user',
+            data: { ...inspectRecord.data, status: action === 'suspend' ? 'suspended' : 'verified' }
+          });
+        }
       }
     } catch (err) {
       console.error("User override fail", err);
@@ -445,6 +504,15 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         setResolvingEventId(null);
         setResolutionNotes("");
         fetchAdminState();
+        if (inspectRecord?.type === 'security-event' && inspectRecord.data.id === id) {
+          setInspectRecord({
+            type: 'security-event',
+            data: {
+              ...inspectRecord.data,
+              raw_metadata: { ...inspectRecord.data.raw_metadata, resolved: true, resolution_notes: resolutionNotes }
+            }
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to resolve security event:", err);
@@ -456,15 +524,12 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     try {
       const res = await fetch(`/api/internal/security-events/clear`, { method: 'POST' });
       const data = await res.json();
-      if (data.success) {
-        fetchAdminState();
-      }
+      if (data.success) fetchAdminState();
     } catch (err) {
       console.error("Failed to clear security events:", err);
     }
   };
 
-  // Create an Enterprise security policy dynamically
   const handleCreatePolicy = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!policyForm.name || !policyForm.conditions) return;
@@ -491,34 +556,27 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
-  // Toggle active/inactive states of policies
   const handleTogglePolicy = async (policyId: string) => {
     try {
       const res = await fetch(`/api/internal/policies/${policyId}/toggle`, { method: 'POST' });
       const data = await res.json();
-      if (data.success) {
-        await fetchAdminState();
-      }
+      if (data.success) await fetchAdminState();
     } catch (err) {
       console.error("Policy toggle fail", err);
     }
   };
 
-  // Delete policy rule completely
   const handleDeletePolicy = async (policyId: string) => {
     if (!window.confirm("Confirm delete this enterprise policy rule?")) return;
     try {
       const res = await fetch(`/api/internal/policies/${policyId}/delete`, { method: 'POST' });
       const data = await res.json();
-      if (data.success) {
-        await fetchAdminState();
-      }
+      if (data.success) await fetchAdminState();
     } catch (err) {
       console.error("Policy delete fail", err);
     }
   };
 
-  // Trigger custom stateful account challenge or suspension
   const handleAccountAction = async (userId: string, actionType: 'challenge' | 'suspend' | 'disable') => {
     try {
       const res = await fetch(`/api/v1/account/${actionType}`, {
@@ -540,7 +598,6 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
-  // Trigger Policy Enforce statefully on a user profile
   const handleEnforcePolicyOnUser = async (policyId: string, userId: string) => {
     try {
       const res = await fetch(`/api/v1/policy/enforce`, {
@@ -562,7 +619,6 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
-  // Deletes Unwanted / Fraudulent profiles completely upon Institutional approval!
   const handleCompletePurgeProfile = async (userId: string) => {
     if (!institutionalConsent) {
       alert("Institutional Security Consent is strictly required. Please check the clearance checkmark before purging user records.");
@@ -590,10 +646,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       if (data.success) {
         alert(`SUCCEEDED: Profile ${userId} has been completely deleted and purged from all AAN system directories.`);
         setInstitutionalConsent(false);
-        // If the purged user was currently chosen, shift selected user
-        if (selectedUserId === userId) {
-          setSelectedUserId("");
-        }
+        setInspectRecord(null);
+        if (selectedUserId === userId) setSelectedUserId("");
         await fetchAdminState();
       } else {
         alert(`Fail: ${data.error}`);
@@ -603,7 +657,7 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     }
   };
 
-  // Filter lists helper
+  // Filtering Lists helper
   const filteredAudits = auditLogs.filter(log => {
     return log.action.toLowerCase().includes(auditQuery.toLowerCase()) || 
            log.actor_id.toLowerCase().includes(auditQuery.toLowerCase()) ||
@@ -615,1509 +669,1825 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
            user.human_uid.toLowerCase().includes(userQuery.toLowerCase());
   });
 
+  // Highlight Text matches in table rows
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return <span>{text}</span>;
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return (
+      <span>
+        {parts.map((part, i) => 
+          part.toLowerCase() === query.toLowerCase() 
+            ? <mark key={i} className="bg-yellow-500/35 text-white font-semibold rounded px-0.5">{part}</mark>
+            : part
+        )}
+      </span>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-[#0d0e12] font-sans text-[#e3e5eb] selection:bg-[#202533]">
+    <div className="min-h-screen bg-[#07080a] font-sans text-[#8e96a3] selection:bg-[#2563eb]/20 selection:text-white">
       
-      {/* Dashboard Top Header Bar */}
-      <header className="bg-[#111319] border-b border-[#1b1e28] px-6 py-4 flex items-center justify-between">
+      {/* Dynamic Header */}
+      <header className="bg-[#0c0d12] border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-[#171a23] text-emerald-400 p-2 rounded border border-[#232a3b]">
-            <ShieldAlert className="w-5 h-5" />
+          <div className="bg-blue-950/40 text-blue-400 p-2 rounded border border-blue-900/40">
+            <ShieldAlert className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h1 className="font-bold text-sm text-white">Administrative Compliance Console</h1>
-            <p className="text-[10px] text-[#5d6780] font-mono uppercase font-black">Internal Secure System Directory Overview</p>
+            <h1 className="font-bold text-sm text-white leading-none">Administrative Compliance Console</h1>
+            <span className="text-[8px] font-mono uppercase text-[#646e7a] tracking-widest block mt-1.5 font-bold">
+              Stage 4 • Trust Governance & Remediation Center
+            </span>
           </div>
         </div>
 
-        <div className="flex gap-4 items-center select-none">
+        <div className="flex gap-4 items-center font-mono text-xs select-none">
           {isAcademyEnabled() && (
             <>
               <button 
                 onClick={() => onNavigate('academy', undefined, mapTabToLesson(activeTab))} 
-                className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-white transition-all bg-[#171a23] hover:bg-[#1f2431] px-3 py-1.5 rounded border border-[#232a3b] cursor-pointer font-bold font-mono uppercase tracking-wider blink-subtle"
-                title="Open contextual explanation for this feature inside the learning Academy"
+                className="flex items-center gap-1.5 text-[10px] text-blue-400 hover:text-white transition-all bg-blue-950/20 hover:bg-blue-950/40 px-3 py-1.5 rounded border border-blue-900/30 font-bold cursor-pointer uppercase tracking-wider"
               >
-                <BookOpen className="w-3.5 h-3.5 animate-none" />
-                <span>Explain This View</span>
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Explain Tab context</span>
               </button>
-              <span className="text-[#1b1e28] font-mono text-xs">|</span>
+              <span className="text-white/5 font-mono text-xs">|</span>
             </>
           )}
-          <button 
-            onClick={() => onNavigate('landing')} 
-            className="text-xs text-[#78819a] hover:text-white transition-colors cursor-pointer"
-          >
-             Public Portal
+          <button onClick={() => onNavigate('landing')} className="text-[#646e7a] hover:text-white transition-colors cursor-pointer">
+            Landing Portal
           </button>
-          <span className="text-[#1b1e28] font-mono text-xs">|</span>
-          <button 
-            onClick={() => onNavigate('partner')} 
-            className="text-xs text-[#78819a] hover:text-white transition-colors font-mono hover:underline cursor-pointer"
-          >
-            Partner Portal 
+          <span className="text-white/5 font-mono text-xs">|</span>
+          <button onClick={() => onNavigate('partner')} className="text-[#646e7a] hover:text-white transition-colors cursor-pointer font-bold text-blue-400 hover:underline">
+            Partner Portal
           </button>
         </div>
       </header>
 
-      {/* Primary Dashboard Grid with Side-Sub Navigation tab links */}
-      <main className="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-4 gap-5">
+      {/* Primary Console Layout Grid */}
+      <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left mini Sidebar links */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-[#111319] border border-[#1b1e28] rounded-xl overflow-hidden p-4">
-            <span className="font-mono text-[9px] text-[#5d6780] font-extrabold block uppercase tracking-wider mb-3">Auditing Directories</span>
+        {/* Left Interactive Sidebar Section */}
+        <div className="lg:col-span-3 space-y-4">
+          <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden p-4 space-y-6">
             
-            <div className="flex flex-col gap-1.5 font-sans text-xs">
-              <button
-                onClick={() => setActiveTab('analytics')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'analytics' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4 text-sky-400" />
-                Trust Dashboard
-              </button>
-
-              <button
-                onClick={() => setActiveTab('verification-logs')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'verification-logs' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <Shield className="w-4 h-4 text-emerald-400" />
-                Verification Logs
-              </button>
-
-              <button
-                onClick={() => setActiveTab('overrides')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'overrides' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                Identity Overrides
-                {sessions.filter(s => s.status === 'review').length > 0 && (
-                  <span className="ml-auto bg-yellow-500 text-slate-950 font-bold font-mono text-[9px] px-1.5 py-0.5 rounded-full leading-none">
-                    {sessions.filter(s => s.status === 'review').length}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab('users')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'users' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <UserCheck className="w-4 h-4" />
-                User Registries
-              </button>
-
-              <button
-                onClick={() => setActiveTab('policies')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'policies' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <Sliders className="w-4 h-4 text-indigo-400" />
-                Enterprise Policies
-              </button>
-
-              <button
-                onClick={() => setActiveTab('timeline')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'timeline' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <Clock className="w-4 h-4 text-emerald-400" />
-                Account Timelines
-              </button>
-
-              <button
-                onClick={() => setActiveTab('devices')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'devices' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <Database className="w-4 h-4" />
-                Hardware keys & Devices
-              </button>
-
-              <button
-                onClick={() => setActiveTab('signatures')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'signatures' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <Activity className="w-4 h-4" />
-                Signature Verification Indexes
-              </button>
-
-              <button
-                onClick={() => setActiveTab('audits')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer ${
-                  activeTab === 'audits' ? 'bg-[#171a23] text-white border-l-2 border-blue-600 font-bold font-semibold' : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <Terminal className="w-4 h-4" />
-                System Audit Rails
-              </button>
-
-              <button
-                onClick={() => setActiveTab('security-alerts')}
-                className={`w-full text-left px-3 py-2.5 rounded transition-all flex items-center gap-2 cursor-pointer relative ${
-                  activeTab === 'security-alerts'
-                    ? 'bg-rose-950/80 border border-rose-800 text-rose-200 font-semibold'
-                    : 'hover:bg-[#171a23]/40 text-[#78819a] hover:text-[#e3e5eb]'
-                }`}
-              >
-                <ShieldAlert className={`w-4 h-4 ${securityEvents.some((e: any) => !e.raw_metadata?.resolved && e.severity === 'critical') ? 'text-red-500 animate-bounce' : 'text-rose-500'}`} />
-                <span>Intrusion & Bypass Alerts</span>
-                {securityEvents.filter((e: any) => !e.raw_metadata?.resolved).length > 0 && (
-                  <span className="ml-[1px] bg-red-650 bg-red-600 text-white font-bold font-mono text-[9px] px-1.5 py-0.5 rounded-full leading-none shrink-0">
-                    {securityEvents.filter((e: any) => !e.raw_metadata?.resolved).length}
-                  </span>
-                )}
-              </button>
+            <div className="space-y-2">
+              <span className="font-mono text-[9px] text-[#646e7a] font-extrabold block uppercase tracking-widest">COMMAND & TELEMETRY</span>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => { setActiveTab('analytics'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'analytics' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4 text-sky-400" />
+                  <span>Trust Dashboard</span>
+                </button>
+                <button
+                  onClick={() => { setActiveTab('security-alerts'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'security-alerts' ? 'bg-red-950/40 text-red-200 border border-red-900/30 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <ShieldAlert className="w-4 h-4 text-rose-500" />
+                    <span>Intrusion & Bypass Alerts</span>
+                  </div>
+                  {securityEvents.filter((e: any) => !e.raw_metadata?.resolved).length > 0 && (
+                    <span className="bg-rose-500 text-white font-bold font-mono text-[9px] px-1.5 py-0.5 rounded-full shrink-0">
+                      {securityEvents.filter((e: any) => !e.raw_metadata?.resolved).length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => { setActiveTab('security-reports'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'security-reports' ? 'bg-yellow-950/40 text-yellow-200 border border-yellow-900/30 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-yellow-500" />
+                    <span>Security Bug Bounty</span>
+                  </div>
+                  {securityReports.filter((r: any) => r.status === 'new' || r.status === 'triaged').length > 0 && (
+                    <span className="bg-yellow-500 text-slate-950 font-bold font-mono text-[9px] px-1.5 py-0.5 rounded-full shrink-0 animate-pulse">
+                      {securityReports.filter((r: any) => r.status === 'new' || r.status === 'triaged').length}
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[9px] text-[#646e7a] font-extrabold block uppercase tracking-widest">OPERATIONAL DIRECTORY</span>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => { setActiveTab('verification-logs'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'verification-logs' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <Shield className="w-4 h-4 text-emerald-400" />
+                  <span>Verification Logs</span>
+                </button>
+                <button
+                  onClick={() => { setActiveTab('overrides'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                    activeTab === 'overrides' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-yellow-450" />
+                    <span>Identity Overrides</span>
+                  </div>
+                  {sessions.filter(s => s.status === 'review').length > 0 && (
+                    <span className="bg-yellow-500 text-slate-950 font-mono font-extrabold text-[9px] px-1.5 py-0.5 rounded-full shrink-0">
+                      {sessions.filter(s => s.status === 'review').length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => { setActiveTab('users'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'users' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <UserCheck className="w-4 h-4" />
+                  <span>User Registries</span>
+                </button>
+                <button
+                  onClick={() => { setActiveTab('timeline'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'timeline' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  <span>Account Timelines</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[9px] text-[#646e7a] font-extrabold block uppercase tracking-widest">HARDWARE & KEY REPOSITORIES</span>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => { setActiveTab('devices'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'devices' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <Database className="w-4 h-4 text-purple-400" />
+                  <span>Hardware keys & Devices</span>
+                </button>
+                <button
+                  onClick={() => { setActiveTab('signatures'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'signatures' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <Activity className="w-4 h-4 text-sky-400" />
+                  <span>Signature Indexes</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <span className="font-mono text-[9px] text-[#646e7a] font-extrabold block uppercase tracking-widest">SYSTEM GOVERNANCE</span>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => { setActiveTab('policies'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'policies' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <Sliders className="w-4 h-4 text-indigo-400" />
+                  <span>Enterprise Policies</span>
+                </button>
+                <button
+                  onClick={() => { setActiveTab('audits'); setInspectRecord(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2.5 transition-all cursor-pointer ${
+                    activeTab === 'audits' ? 'bg-blue-600/10 text-white border border-blue-500/20 shadow-lg font-bold' : 'hover:bg-white/[0.02] text-[#646e7a]'
+                  }`}
+                >
+                  <Terminal className="w-4 h-4 text-slate-450" />
+                  <span>System Audit Rails</span>
+                </button>
+              </div>
+            </div>
+
           </div>
 
-          <div className="bg-[#111319] border border-[#1b1e28] p-4 rounded-xl text-xs space-y-2">
-            <span className="font-mono text-[9px] text-[#5d6780] font-bold uppercase block">SECURITY STANDARDS MET</span>
-            <div className="flex items-center gap-1.5 text-[#78819a] font-mono text-[10px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              AES-GCM Encryption Enabled
-            </div>
-            <div className="flex items-center gap-1.5 text-[#78819a] font-mono text-[10px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              SHA-256 API Key hashing
-            </div>
-            <div className="flex items-center gap-1.5 text-[#78819a] font-mono text-[10px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              RSA-2048 Device signatures
+          {/* Secure Hardware attestation benchmarks */}
+          <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl space-y-2 text-left">
+            <span className="font-mono text-[9px] text-[#646e7a] font-bold uppercase block">SECURITY STANDARDS DETECTED</span>
+            <div className="space-y-1.5 font-mono text-[10px] text-[#646e7a]">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>AES-256 GCM Encryption</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>HMAC API Key Hashing</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span>Asymmetric RSA-2048 Proofs</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Tab Content Block */}
-        <div className="lg:col-span-3 space-y-8">
+        {/* Right Active View Content panel */}
+        <div className="lg:col-span-9 space-y-6">
           
-          {/* Global MVP Mock Disclaimer */}
-          <div className="bg-[#1a1412] border border-amber-900/30 rounded-lg p-4 text-xs text-[#d2ab6c] leading-relaxed font-sans flex gap-3">
-            <span className="text-[#d2ab6c] font-bold shrink-0 text-xs">⚠️ SANDBOX ADVISORY:</span>
+          {/* Global MVP Advisory Banner */}
+          <div className="bg-amber-950/15 border border-amber-900/30 rounded-xl p-4 text-xs text-amber-200/80 leading-relaxed font-sans flex gap-3 text-left">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0" />
             <div>
-              <p className="font-semibold mb-0.5">MOCK ATTESTATION PREVIEW — Administrative Sandbox Mode</p>
-              <p className="text-[#78819a]">
-                AAN Admin console displays simulated metrics and mock identity records for MVP purposes. Legal compliance, certified security registries, or absolute threat protection are not active or claimed.
+              <p className="font-bold mb-0.5 text-white">MOCK ATTESTATION PREVIEW — Administrative Sandbox Mode</p>
+              <p className="text-[#646e7a]">
+                AAN Admin console displays simulated metrics and mock identity records for compliance preview purposes. Raw biometrics are never permanently retained.
               </p>
             </div>
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-[#78819a] text-xs bg-[#111319] border border-[#1b1e28] rounded-xl">
-              <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-500 mb-2" />
-              Syncing compliance server registry datasets...
+            <div className="p-16 text-center text-[#646e7a] text-xs bg-[#0c0d12] border border-white/5 rounded-2xl">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-500 mb-3" />
+              <span>Attesting database records & synchronizing secure ledger...</span>
             </div>
           ) : (
-            <>
-              {/* Tab: Analytics & Trust Dashboard */}
-              {activeTab === 'analytics' && (
-                <div className="space-y-6">
-                  {/* Top KPIs Row */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                      <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase block">PLATFORM TRUST SCORE</span>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-extrabold text-white font-mono">98.2%</span>
-                        <span className="text-[10px] text-emerald-400 font-mono font-bold">▲ +0.4%</span>
-                      </div>
-                      <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-emerald-500 h-full rounded-full" style={{ width: '98.2%' }}></div>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                      <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase block">DAILY TRUST EVALUATIONS</span>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-extrabold text-white font-mono">1,420</span>
-                        <span className="text-[10px] text-blue-400 font-mono font-bold">▲ +12%</span>
-                      </div>
-                      <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-blue-500 h-full rounded-full" style={{ width: '74%' }}></div>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                      <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase block">DUPLICATES PREVENTED</span>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-extrabold text-white font-mono">412</span>
-                        <span className="text-[10px] text-emerald-400 font-mono font-bold">Verified</span>
-                      </div>
-                      <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-emerald-400 h-full rounded-full" style={{ width: '85%' }}></div>
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
-                      <span className="text-[10px] text-slate-400 font-mono tracking-widest uppercase block">FRAUD ATTEMPTS BLOCKED</span>
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-extrabold text-red-400 font-mono">219</span>
-                        <span className="text-[10px] text-red-400 font-mono font-bold">High Risk</span>
-                      </div>
-                      <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-red-500 h-full rounded-full" style={{ width: '30%' }}></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Policy and Threat Analytics Row */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex items-center justify-between">
-                      <div className="space-y-1">
-                        <span className="text-[9px] text-slate-500 font-mono uppercase block">Automation Attempts Thwarted</span>
-                        <p className="text-2xl font-bold font-mono text-white">725</p>
-                      </div>
-                      <div className="bg-purple-950 p-2.5 rounded-lg border border-purple-900 text-purple-400">
-                        <Flame className="w-5 h-5 animate-pulse" />
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex items-center justify-between">
-                      <div className="space-y-1">
-                        <span className="text-[9px] text-slate-500 font-mono uppercase block">Automated Policy Executions</span>
-                        <p className="text-2xl font-bold font-mono text-white">158</p>
-                      </div>
-                      <div className="bg-indigo-950 p-2.5 rounded-lg border border-indigo-900 text-indigo-400">
-                        <Sliders className="w-5 h-5" />
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex items-center justify-between">
-                      <div className="space-y-1">
-                        <span className="text-[9px] text-slate-500 font-mono uppercase block">Active Account Challenges</span>
-                        <p className="text-2xl font-bold font-mono text-white">88</p>
-                      </div>
-                      <div className="bg-yellow-950/60 p-2.5 rounded-lg border border-yellow-900/60 text-yellow-400">
-                        <Clock className="w-5 h-5 hover:rotate-12 transition-transform" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Primary Visual Analytics Panels */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Session Risk Distribution (Pure CSS Custom Chart) */}
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
-                      <div>
-                        <h4 className="text-sm font-bold text-white text-sans">Session Risk Distribution Assertion</h4>
-                        <p className="text-[10px] text-slate-400">Aggregate telemetry across global authentication gateways.</p>
-                      </div>
-
-                      <div className="space-y-4 pt-2">
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-[11px] font-mono">
-                            <span className="text-emerald-400 font-medium">Low Risk (0 - 15) — Safe Households</span>
-                            <span className="text-slate-300">88.5% (1,257 sessions)</span>
-                          </div>
-                          <div className="w-full bg-slate-950 h-2.5 rounded overflow-hidden">
-                            <div className="bg-emerald-500 h-full rounded" style={{ width: '88.5%' }}></div>
-                          </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -5 }}
+                transition={{ duration: 0.15 }}
+                className="space-y-6"
+              >
+                
+                {/* 1. Analytics Dashboard view */}
+                {activeTab === 'analytics' && (
+                  <div className="space-y-6 text-left">
+                    {/* Bento Statistics Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="bg-[#0c0d12] border border-white/5 p-5 rounded-2xl space-y-2">
+                        <span className="text-[10px] text-[#646e7a] font-mono tracking-widest uppercase block">PLATFORM TRUST</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-extrabold text-white font-mono">98.2%</span>
+                          <span className="text-[9px] text-emerald-400 font-mono font-bold">▲ +0.4%</span>
                         </div>
-
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-[11px] font-mono">
-                            <span className="text-yellow-400 font-medium">Medium Risk (16 - 60) — Challenge Gateways</span>
-                            <span className="text-slate-300">8.4% (119 sessions)</span>
-                          </div>
-                          <div className="w-full bg-slate-950 h-2.5 rounded overflow-hidden">
-                            <div className="bg-yellow-500 h-full rounded" style={{ width: '8.4%' }}></div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex justify-between text-[11px] font-mono">
-                            <span className="text-red-400 font-medium">High Risk (61 - 100) — System Lockout</span>
-                            <span className="text-slate-300">3.1% (44 sessions)</span>
-                          </div>
-                          <div className="w-full bg-slate-950 h-2.5 rounded overflow-hidden">
-                            <div className="bg-red-500 h-full rounded" style={{ width: '3.1%' }}></div>
-                          </div>
+                        <div className="w-full bg-black/40 h-1 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full" style={{ width: '98.2%' }} />
                         </div>
                       </div>
-
-                      <div className="bg-slate-950 border border-slate-850 p-3.5 rounded-lg text-[10px] text-slate-400 font-mono">
-                         <strong className="text-slate-300">Enforcement Strategy:</strong> Dynamic challenges and profile automations reduce friction on 88% of requests while keeping bad actors off our servers entirely.
+                      <div className="bg-[#0c0d12] border border-white/5 p-5 rounded-2xl space-y-2">
+                        <span className="text-[10px] text-[#646e7a] font-mono tracking-widest uppercase block">DAILY EVALUATIONS</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-extrabold text-white font-mono">1,420</span>
+                          <span className="text-[9px] text-blue-400 font-mono font-bold">▲ +12%</span>
+                        </div>
+                        <div className="w-full bg-black/40 h-1 rounded-full overflow-hidden">
+                          <div className="bg-blue-500 h-full" style={{ width: '74%' }} />
+                        </div>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-5 rounded-2xl space-y-2">
+                        <span className="text-[10px] text-[#646e7a] font-mono tracking-widest uppercase block">DUPLICATES BLOCKED</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-extrabold text-white font-mono">412</span>
+                          <span className="text-[9px] text-emerald-400 font-mono font-bold">Verified</span>
+                        </div>
+                        <div className="w-full bg-black/40 h-1 rounded-full overflow-hidden">
+                          <div className="bg-emerald-400 h-full" style={{ width: '85%' }} />
+                        </div>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-5 rounded-2xl space-y-2">
+                        <span className="text-[10px] text-[#646e7a] font-mono tracking-widest uppercase block">THREATS INTERCEPTED</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-2xl font-extrabold text-red-400 font-mono">219</span>
+                          <span className="text-[9px] text-red-400 font-mono font-bold">Critical</span>
+                        </div>
+                        <div className="w-full bg-black/40 h-1 rounded-full overflow-hidden">
+                          <div className="bg-red-500 h-full" style={{ width: '30%' }} />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Device Reputation Trends */}
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4">
-                      <div>
-                        <h4 className="text-sm font-bold text-white text-sans">Device Reputation Index Trends</h4>
-                        <p className="text-[10px] text-slate-400">Chronological telemetry indicating virtual environments & emulation risk patterns.</p>
-                      </div>
-
-                      <div className="grid grid-cols-7 gap-1.5 h-32 items-end pt-3 text-center">
-                        {[
-                          { val: '30%', label: 'Mon' },
-                          { val: '45%', label: 'Tue' },
-                          { val: '15%', label: 'Wed' },
-                          { val: '75%', label: 'Thu' },
-                          { val: '20%', label: 'Fri' },
-                          { val: '10%', label: 'Sat' },
-                          { val: '92%', label: 'Sun' }
-                        ].map((day, dIdx) => (
-                          <div key={dIdx} className="h-full flex flex-col justify-end items-center group relative cursor-pointer">
-                            <div className="text-[8px] font-mono text-slate-500 opacity-0 group-hover:opacity-100 absolute -top-4 transition-all">{day.val}</div>
-                            <div className="w-full bg-slate-950 rounded h-full relative overflow-hidden flex flex-col justify-end">
-                              <div className="bg-sky-500/80 rounded group-hover:bg-sky-400 transition-all pointer-events-none" style={{ height: day.val }}></div>
-                            </div>
-                            <span className="text-[9px] font-mono text-slate-400 block mt-1.5">{day.label}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="border-t border-slate-850 pt-3 flex justify-between items-center text-[10px] text-slate-500 font-mono">
-                        <span>Threat Matrix Index: <strong className="text-amber-400">HEURISTIC ACTIVE</strong></span>
-                        <span>Updated: Real-time via Web Hooks</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Audit Logs Export and Documentation */}
-                  <div className="bg-slate-900 border border-slate-850 p-6 rounded-xl flex flex-wrap items-center justify-between gap-6">
-                    <div className="space-y-1 max-w-xl">
-                      <h4 className="text-sm font-bold text-white">Immutable Administrative Export</h4>
-                      <p className="text-xs text-slate-400">Download cryptographically hashed, signed verification histories and audit ledgers in standard JSON schemas for direct integration alongside enterprise SIEM products (Splunk, Datadog).</p>
-                    </div>
-
-                    <a 
-                      href="/api/internal/export-audit" 
-                      download
-                      className="bg-slate-950 hover:bg-slate-850 text-white border border-slate-800 text-xs px-4 py-2.5 rounded-lg font-mono transition-all flex items-center gap-2 cursor-pointer"
-                    >
-                      <Terminal className="w-4 h-4 text-emerald-400" />
-                      EXPORT_AUDIT_LOG_SCHEMAS.JSON
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab: Enterprise Policy Engine */}
-              {activeTab === 'policies' && (
-                <div className="space-y-6">
-                  {/* Policy Explainer Banner */}
-                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl relative overflow-hidden">
-                    <div className="relative z-10 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-blue-600/10 text-blue-400 border border-blue-900/30 font-mono text-[9px] uppercase px-2 py-0.5 rounded">CONTROLS</span>
-                        <h3 className="font-bold text-white text-base">Administrative Decision Engine</h3>
-                      </div>
-                      <p className="text-xs text-slate-350 max-w-2xl leading-relaxed">
-                        AAN implements a flexible, policy-driven security system. Organizations define custom, no-code logic evaluating continuous metadata signals (device repute, template duplicates, network proxies) to automatically trigger customer-approved suspensions, challenges, or hard profile database purges, maintaining 100% compliance transparency.
-                      </p>
+                    {/* Threat charts and risk analytics */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       
-                      <div className="pt-2">
-                        <button 
-                          onClick={() => setShowPolicyModal(true)}
-                          className="bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs px-4 py-2 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <UserPlus className="w-4 h-4" />
-                          Configure Custom Rule
-                        </button>
+                      {/* Risk Distribution Canvas */}
+                      <div className="bg-[#0c0d12] border border-white/5 p-6 rounded-2xl space-y-4">
+                        <div>
+                          <h4 className="text-sm font-semibold text-white">Verification Risk Profile Distribution</h4>
+                          <p className="text-[10px] text-[#646e7a]">Continuous aggregate statistics on digital attestation sessions.</p>
+                        </div>
+                        <div className="space-y-3 pt-2">
+                          <div>
+                            <div className="flex justify-between text-[11px] font-mono mb-1">
+                              <span className="text-emerald-400">Low Risk (Score 0-15)</span>
+                              <span className="text-white">88.5% (1,257)</span>
+                            </div>
+                            <div className="w-full bg-black/45 h-2 rounded overflow-hidden">
+                              <div className="bg-emerald-500 h-full" style={{ width: '88.5%' }} />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[11px] font-mono mb-1">
+                              <span className="text-yellow-400">Medium Risk (Score 16-60)</span>
+                              <span className="text-white">8.4% (119)</span>
+                            </div>
+                            <div className="w-full bg-black/45 h-2 rounded overflow-hidden">
+                              <div className="bg-yellow-500 h-full" style={{ width: '8.4%' }} />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[11px] font-mono mb-1">
+                              <span className="text-red-400">High Risk (Score 61-100)</span>
+                              <span className="text-white">3.1% (44)</span>
+                            </div>
+                            <div className="w-full bg-black/45 h-2 rounded overflow-hidden">
+                              <div className="bg-red-500 h-full" style={{ width: '3.1%' }} />
+                            </div>
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Bar graph mock */}
+                      <div className="bg-[#0c0d12] border border-white/5 p-6 rounded-2xl space-y-4">
+                        <div>
+                          <h4 className="text-sm font-semibold text-white">Daily Threat Prevention Timeline</h4>
+                          <p className="text-[10px] text-[#646e7a]">Spikes indicate coordinated bot swarm bypass attempts.</p>
+                        </div>
+                        <div className="grid grid-cols-7 gap-2.5 h-28 items-end pt-2 text-center font-mono text-[9px]">
+                          {[
+                            { day: 'Mon', h: '30%', val: 12 },
+                            { day: 'Tue', h: '45%', val: 18 },
+                            { day: 'Wed', h: '15%', val: 6 },
+                            { day: 'Thu', h: '85%', val: 42 },
+                            { day: 'Fri', h: '25%', val: 11 },
+                            { day: 'Sat', h: '10%', val: 4 },
+                            { day: 'Sun', h: '92%', val: 49 }
+                          ].map((dayItem, idx) => (
+                            <div key={idx} className="h-full flex flex-col justify-end items-center group relative cursor-pointer">
+                              <span className="absolute -top-4 opacity-0 group-hover:opacity-100 transition-opacity bg-[#111319] border border-white/5 rounded px-1.5 py-0.5 text-white font-bold z-10">{dayItem.val}</span>
+                              <div className="w-full bg-black/40 rounded-t h-full flex flex-col justify-end overflow-hidden">
+                                <div className="bg-blue-500/80 group-hover:bg-blue-400 transition-colors" style={{ height: dayItem.h }} />
+                              </div>
+                              <span className="text-[#646e7a] block mt-1">{dayItem.day}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Immutable logs snapshot section */}
+                    <div className="bg-[#0c0d12] border border-white/5 p-6 rounded-2xl flex flex-wrap items-center justify-between gap-6">
+                      <div className="space-y-1 max-w-xl">
+                        <h4 className="text-sm font-semibold text-white">Export compliance snapshot history</h4>
+                        <p className="text-xs text-[#646e7a] leading-relaxed">
+                          Download a signed verification snapshot dataset for enterprise reporting, third-party audits, or offline SIEM integration.
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleDownloadAuditSnapshot}
+                        disabled={downloadingExport}
+                        className="bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-2 cursor-pointer active:scale-[0.99] transition-all"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>{downloadingExport ? 'COMPILING SNAPSHOT...' : 'DOWNLOAD LEDGER SCHEMAS'}</span>
+                      </button>
                     </div>
                   </div>
+                )}
 
-                  {/* Policy Dialog/Modal */}
-                  {showPolicyModal && (
-                    <div className="bg-slate-900 border-2 border-blue-600 rounded-xl p-6 space-y-4">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                        <h4 className="font-bold text-white text-sm">Create Control Policy Rule</h4>
-                        <button 
-                          onClick={() => setShowPolicyModal(false)}
-                          className="text-slate-400 hover:text-white font-bold cursor-pointer"
+                {/* 2. Intrusion Bypass alerts list */}
+                {activeTab === 'security-alerts' && (
+                  <div className="space-y-6 text-left">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      <div className="bg-[#0c0d12] border border-white/5 p-5 rounded-2xl space-y-1.5 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[9px] font-mono uppercase text-[#646e7a]">Defensive Index</span>
+                          <h3 className="font-semibold text-white text-sm">System Intrusion Risk</h3>
+                        </div>
+                        <div className="flex items-center gap-3 py-2">
+                          <span className={`text-4xl font-mono font-extrabold ${securityRisk.score > 60 ? 'text-red-500' : 'text-yellow-400'}`}>
+                            {securityRisk.score}
+                          </span>
+                          <div>
+                            <span className="text-xs text-white block uppercase font-bold font-mono tracking-wider">{securityRisk.level}</span>
+                            <span className="text-[10px] text-[#646e7a] block font-mono">Bypass attempt telemetry</span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleResetSecurityEvents}
+                          className="w-full bg-black/40 hover:bg-black/80 border border-white/5 text-[#646e7a] hover:text-white px-3 py-1.5 text-center font-mono text-[9px] font-bold rounded cursor-pointer transition-all"
                         >
-                          
+                          Reset Triggered Alerts
                         </button>
                       </div>
 
-                      <form onSubmit={handleCreatePolicy} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-                        <div className="space-y-2">
-                          <label className="text-[10px] uppercase text-slate-400 block font-bold">Policy Rule Name Description</label>
-                          <input 
-                            type="text" 
-                            placeholder="e.g. Bot Farm Signup Remediation"
-                            value={policyForm.name}
-                            onChange={(e) => setPolicyForm({ ...policyForm, name: e.target.value })}
-                            className="w-full bg-slate-950 border border-slate-800 px-3 py-2.5 rounded focus:outline-none focus:border-blue-600 text-white"
-                            required
-                          />
+                      <div className="bg-[#0c0d12] border border-white/5 p-5 rounded-2xl md:col-span-2 space-y-3">
+                        <div>
+                          <span className="text-[9px] font-mono uppercase text-[#646e7a]">ACTIVE HEURISTICS</span>
+                          <h3 className="font-semibold text-white text-sm">Threat Vector Counts</h3>
                         </div>
+                        <div className="grid grid-cols-3 gap-2.5 font-mono text-xs">
+                          <div className="bg-black/20 p-2.5 rounded border border-white/5">
+                            <span className="text-[#646e7a] text-[9px] block">Failed Tokens</span>
+                            <span className="text-base font-bold text-white mt-0.5 block">{securityRisk.signalsCount?.failedTokens || 0}</span>
+                          </div>
+                          <div className="bg-black/20 p-2.5 rounded border border-white/5">
+                            <span className="text-[#646e7a] text-[9px] block">Bypasses Blocked</span>
+                            <span className="text-base font-bold text-white mt-0.5 block">{securityRisk.signalsCount?.impossibleTransitions || 0}</span>
+                          </div>
+                          <div className="bg-black/20 p-2.5 rounded border border-white/5">
+                            <span className="text-[#646e7a] text-[9px] block">Abusive API Keys</span>
+                            <span className="text-base font-bold text-white mt-0.5 block">{securityRisk.signalsCount?.apiKeyAbuse || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                        <div className="space-y-2">
-                          <label className="text-[10px] uppercase text-slate-400 block font-bold">Policy Remediation Action</label>
-                          <select 
-                            value={policyForm.thenAction}
-                            onChange={(e: any) => setPolicyForm({ ...policyForm, thenAction: e.target.value })}
-                            className="w-full bg-slate-950 border border-slate-800 px-3 py-2.5 rounded focus:outline-none text-slate-300"
+                    {/* Active Mitigation resolution prompt */}
+                    {resolvingEventId && (
+                      <div className="bg-yellow-950/10 border border-yellow-900/30 p-5 rounded-xl space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-yellow-400 font-bold text-xs font-mono">Security Intervention Resolution • Event #{resolvingEventId}</span>
+                          <button onClick={() => setResolvingEventId(null)} className="text-[#646e7a] hover:text-white text-[10px] font-mono hover:underline cursor-pointer">Cancel</button>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <input
+                            type="text"
+                            placeholder="Mitigation notes, firewall overrides applied..."
+                            value={resolutionNotes}
+                            onChange={(e) => setResolutionNotes(e.target.value)}
+                            className="bg-black/40 border border-white/5 rounded px-3 py-2 text-xs text-white flex-1 focus:outline-none focus:border-blue-500"
+                          />
+                          <button
+                            onClick={() => handleResolveEvent(resolvingEventId)}
+                            className="bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-[10px] px-4 py-2 rounded cursor-pointer shrink-0 transition-colors"
                           >
-                            <option value="suspend">Suspend Credentials</option>
-                            <option value="challenge">Force Session Challenge</option>
-                            <option value="flag">Generate Security Flag</option>
-                            <option value="remove_fraud">Purge Fraud Profile COMPLETELY</option>
-                            <option value="merge_duplicates">Auto-Merge Duplicates</option>
+                            Resolve Alert
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Alerts ledger list */}
+                    <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+                      <div className="p-6 border-b border-white/5 flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-white text-sm">Defensive Bypass Intrusion ledger</h3>
+                          <p className="text-[10px] text-[#646e7a]">Deep telemetry logs tracing invalid JWT token structures, tampered claims, and automation triggers.</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={severityFilter}
+                            onChange={(e) => setSeverityFilter(e.target.value)}
+                            className="bg-black/40 border border-white/5 rounded px-2 py-1.5 text-[10px] text-white focus:outline-none"
+                          >
+                            <option value="all">All Severities</option>
+                            <option value="critical">Critical Only</option>
+                            <option value="high">High Only</option>
                           </select>
                         </div>
-
-                        <div className="space-y-2 md:col-span-2">
-                          <label className="text-[10px] uppercase text-slate-400 block font-bold">Active Evaluation Query (No-Code Boolean)</label>
-                          <input 
-                            type="text" 
-                            placeholder="e.g. Device Trust < 30 && Automation Likelihood > 90%"
-                            value={policyForm.conditions}
-                            onChange={(e) => setPolicyForm({ ...policyForm, conditions: e.target.value })}
-                            className="w-full bg-slate-950 border border-slate-800 px-3 py-2.5 rounded focus:outline-none text-blue-400"
-                            required
-                          />
-                        </div>
-
-                        <div className="space-y-2 md:col-span-2">
-                          <label className="text-[10px] uppercase text-slate-400 block font-bold">Security Team Explanatory Summary Note</label>
-                          <textarea 
-                            rows={2}
-                            placeholder="e.g. Automatically clean database profiles which bypass typical browser signatures..."
-                            value={policyForm.description}
-                            onChange={(e) => setPolicyForm({ ...policyForm, description: e.target.value })}
-                            className="w-full bg-slate-950 border border-slate-800 px-3 py-2 rounded focus:outline-none text-slate-300"
-                          />
-                        </div>
-
-                        <div className="md:col-span-2 pt-2 flex justify-end gap-3">
-                          <button 
-                            type="button" 
-                            onClick={() => setShowPolicyModal(false)}
-                            className="bg-slate-950 border border-slate-800 hover:bg-slate-850 px-4 py-2 rounded text-slate-400 transition cursor-pointer"
-                          >
-                            Cancel
-                          </button>
-                          <button 
-                            type="submit"
-                            className="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded text-white font-medium transition cursor-pointer"
-                          >
-                            Deploy Engine Policy
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  )}
-
-                  {/* Policies Config Card Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {policies.map((p) => {
-                      const isRemoveAction = p.thenAction === 'remove_fraud';
-                      return (
-                        <div key={p.id} className="bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between space-y-4">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between gap-4">
-                              <h4 className="font-bold text-white text-sm select-all">{p.name}</h4>
-                              <span className={`inline-block font-mono text-[8px] px-2 py-0.5 rounded border uppercase ${
-                                p.active 
-                                  ? 'bg-emerald-950 text-emerald-400 border-emerald-900' 
-                                  : 'bg-slate-950 text-slate-500 border-slate-800'
-                              }`}>
-                                {p.active ? "ACTIVE POLICY" : "DISABLED"}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-400">{p.description}</p>
-                          </div>
-
-                          <div className="bg-slate-950 border border-slate-850/60 p-3 rounded font-mono text-xs text-sky-400 whitespace-pre-wrap select-all">
-                            <span className="text-slate-500 select-none text-[10px] block uppercase font-bold mb-1">IF CONDITIONS MATCH</span>
-                            {p.conditions}
-                          </div>
-
-                          <div className="flex items-center justify-between border-t border-slate-850 pt-3">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-mono uppercase text-slate-500">ENFORCEMENT:</span>
-                              <span className={`font-mono text-[9px] uppercase px-2 py-0.5 rounded font-bold ${
-                                isRemoveAction 
-                                  ? 'bg-red-950 text-red-400 border border-red-900/40' 
-                                  : 'bg-indigo-950 text-indigo-400 border border-indigo-900'
-                              }`}>
-                                {p.thenAction === 'remove_fraud' ? 'PURGE PROFILE' : p.thenAction.toUpperCase()}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-xs">
-                              <button 
-                                onClick={() => handleTogglePolicy(p.id)}
-                                className="text-[10px] text-slate-400 hover:text-white border border-slate-800 px-2 py-1 rounded hover:bg-slate-950/40 transition cursor-pointer"
-                              >
-                                {p.active ? "Deactivate" : "Activate"}
-                              </button>
-                              <button 
-                                onClick={() => handleDeletePolicy(p.id)}
-                                className="text-[10px] text-red-500 hover:text-red-400 border border-slate-800 hover:border-red-900/40 px-2 py-1 rounded transition cursor-pointer"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Tab: Continuous Account Trust Timeline */}
-              {activeTab === 'timeline' && (
-                <div className="space-y-6">
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
-                    <div className="flex items-center justify-between flex-wrap gap-4 border-b border-slate-850 pb-4">
-                      <div>
-                        <h3 className="font-bold text-white text-base">Account Trust Timelines</h3>
-                        <p className="text-xs text-slate-400 font-sans">Query and browse complete interactive decision trails on any user profile.</p>
                       </div>
 
-                      {/* Dropdown Selector to change active audited account profile */}
-                      <div className="flex items-center gap-3">
-                        <label className="text-[10px] font-mono uppercase text-slate-400 font-bold whitespace-nowrap">Choose Profile ID</label>
-                        <select 
+                      <div className="overflow-x-auto text-[11px] font-mono">
+                        <table className="w-full text-left">
+                          <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-wider text-[#646e7a] border-b border-white/5">
+                            <tr>
+                              <th className="py-3 px-6">Event ID</th>
+                              <th className="py-3 px-4">Severity</th>
+                              <th className="py-3 px-4">Threat Type</th>
+                              <th className="py-3 px-4">IP/User Agent</th>
+                              <th className="py-3 px-4">Status</th>
+                              <th className="py-3 px-6 text-right">Inspect</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/5 text-slate-300">
+                            {securityEvents
+                              .filter(e => severityFilter === 'all' || e.severity === severityFilter)
+                              .map(evt => (
+                                <tr key={evt.id} className="hover:bg-white/[0.01] group transition-colors">
+                                  <td className="py-3.5 px-6 font-bold text-blue-400 select-all">{evt.id}</td>
+                                  <td className="py-3.5 px-4">
+                                    <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${
+                                      evt.severity === 'critical' ? 'bg-red-955 border-red-900 text-red-400 font-extrabold' : 'bg-amber-955 border-amber-900 text-amber-500'
+                                    }`}>
+                                      {evt.severity}
+                                    </span>
+                                  </td>
+                                  <td className="py-3.5 px-4 font-bold text-white text-[10px]">{evt.event_type}</td>
+                                  <td className="py-3.5 px-4 text-[#646e7a] text-[10px] font-sans truncate max-w-[120px]" title={`${evt.ip_address} - ${evt.user_agent}`}>
+                                    {evt.ip_address}
+                                  </td>
+                                  <td className="py-3.5 px-4">
+                                    {evt.raw_metadata?.resolved ? (
+                                      <span className="text-[8px] text-emerald-400 border border-emerald-900 bg-emerald-955 px-1.5 py-0.5 rounded uppercase tracking-wider">RESOLVED</span>
+                                    ) : (
+                                      <button
+                                        onClick={() => { setResolvingEventId(evt.id); setResolutionNotes(""); }}
+                                        className="bg-black/40 hover:bg-black/80 border border-white/5 px-2 py-0.5 rounded text-[9px] text-[#8e96a3] hover:text-white transition-all cursor-pointer"
+                                      >
+                                        Mark Resolved
+                                      </button>
+                                    )}
+                                  </td>
+                                  <td className="py-3.5 px-6 text-right">
+                                    <button
+                                      onClick={() => setInspectRecord({ type: 'security-event', data: evt })}
+                                      className="text-blue-400 hover:text-white transition-colors cursor-pointer text-[10px] flex items-center gap-1 ml-auto group-hover:translate-x-0.5"
+                                    >
+                                      <span>Inspect</span>
+                                      <ChevronRight className="w-3 h-3" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Verification logs directory */}
+                {activeTab === 'verification-logs' && (
+                  <div className="space-y-6 text-left">
+                    {/* Log Stats mini panel */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl">
+                        <span className="text-[9px] font-mono text-[#646e7a] block font-semibold uppercase">Total volume</span>
+                        <span className="text-xl font-bold font-mono text-white block mt-0.5">{sessions.length}</span>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl">
+                        <span className="text-[9px] font-mono text-emerald-400 block font-semibold uppercase">Verified human</span>
+                        <span className="text-xl font-bold font-mono text-emerald-400 block mt-0.5">
+                          {sessions.filter(s => s.status === 'passed').length}
+                        </span>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl">
+                        <span className="text-[9px] font-mono text-yellow-500 block font-semibold uppercase">Anomalies review</span>
+                        <span className="text-xl font-bold font-mono text-yellow-400 block mt-0.5">
+                          {sessions.filter(s => s.status === 'review').length}
+                        </span>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl">
+                        <span className="text-[9px] font-mono text-red-500 block font-semibold uppercase">Failed / Rejected</span>
+                        <span className="text-xl font-bold font-mono text-red-400 block mt-0.5">
+                          {sessions.filter(s => s.status === 'failed').length}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+                      <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-white text-sm">Enterprise verification session index</h3>
+                          <p className="text-[10px] text-[#646e7a]">Immutable auditing ledger of unique trust decisions and cryptographic signed assertions.</p>
+                        </div>
+                      </div>
+
+                      {/* Filter Search controls */}
+                      <div className="bg-black/30 p-4 border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="relative w-full sm:w-72">
+                          <Search className="w-3.5 h-3.5 text-[#646e7a] absolute left-3 top-2.5" />
+                          <input
+                            type="text"
+                            placeholder="Search Session ID or User ID..."
+                            value={sessionQuery}
+                            onChange={(e) => setSessionQuery(e.target.value)}
+                            className="bg-black/40 border border-white/5 rounded pl-9 pr-3 py-1.5 text-xs text-white font-mono w-full focus:outline-none focus:border-blue-500"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono uppercase text-[#646e7a] font-bold">Status:</span>
+                          <select
+                            value={sessionStatus}
+                            onChange={(e) => setSessionStatus(e.target.value)}
+                            className="bg-[#0c0d12] border border-white/5 rounded px-2.5 py-1 text-xs text-[#8e96a3] focus:outline-none"
+                          >
+                            <option value="all">ALL</option>
+                            <option value="passed">PASSED</option>
+                            <option value="failed">FAILED</option>
+                            <option value="review">REVIEW</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto text-[11px] font-mono">
+                        <table className="w-full text-left">
+                          <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-wider text-[#646e7a] border-b border-white/5">
+                            <tr>
+                              <th className="py-3 px-6">Session ID</th>
+                              <th className="py-3 px-4">Partner External User ID</th>
+                              <th className="py-3 px-4">Risk outcome</th>
+                              <th className="py-3 px-4">Proof Claim JWT snippet</th>
+                              <th className="py-3 px-6 text-right">Inspect</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-white/5 text-slate-300">
+                            {sessions
+                              .filter(s => {
+                                const matchSearch = s.id.toLowerCase().includes(sessionQuery.toLowerCase()) || s.external_user_id.toLowerCase().includes(sessionQuery.toLowerCase());
+                                const matchStatus = sessionStatus === 'all' || s.status === sessionStatus;
+                                return matchSearch && matchStatus;
+                              })
+                              .map(session => {
+                                const tokenSnippet = session.proof_token && session.proof_token.length > 15
+                                  ? `${session.proof_token.substring(0, 10)}...${session.proof_token.substring(session.proof_token.length - 10)}`
+                                  : 'unissued';
+
+                                return (
+                                  <tr key={session.id} className="hover:bg-white/[0.01] group transition-colors">
+                                    <td className="py-3.5 px-6 font-bold text-blue-400 select-all">{highlightMatch(session.id, sessionQuery)}</td>
+                                    <td className="py-3.5 px-4 font-sans text-white font-medium">{highlightMatch(session.external_user_id, sessionQuery)}</td>
+                                    <td className="py-3.5 px-4">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${
+                                          session.status === 'passed' ? 'bg-emerald-955 border-emerald-900 text-emerald-400' :
+                                          session.status === 'failed' ? 'bg-red-955 border-red-900 text-red-400' : 'bg-yellow-955 border-yellow-900 text-yellow-500'
+                                        }`}>
+                                          {session.status}
+                                        </span>
+                                        <span className="text-[#646e7a] text-[10px]">({session.risk_score}/100)</span>
+                                      </div>
+                                    </td>
+                                    <td className="py-3.5 px-4 text-[#646e7a] select-all font-mono text-[10px]">
+                                      <code>{tokenSnippet}</code>
+                                    </td>
+                                    <td className="py-3.5 px-6 text-right">
+                                      <button
+                                        onClick={() => setInspectRecord({ type: 'session', data: session })}
+                                        className="text-blue-400 hover:text-white transition-colors cursor-pointer text-[10px] flex items-center gap-1 ml-auto group-hover:translate-x-0.5"
+                                      >
+                                        <span>Inspect</span>
+                                        <ChevronRight className="w-3 h-3" />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            {sessions.filter(s => {
+                              const matchSearch = s.id.toLowerCase().includes(sessionQuery.toLowerCase()) || s.external_user_id.toLowerCase().includes(sessionQuery.toLowerCase());
+                              const matchStatus = sessionStatus === 'all' || s.status === sessionStatus;
+                              return matchSearch && matchStatus;
+                            }).length === 0 && (
+                              <tr>
+                                <td colSpan={5} className="text-center py-12 text-[#646e7a] font-mono text-xs">
+                                  <div className="max-w-md mx-auto space-y-2 p-6">
+                                    <AlertOctagon className="w-8 h-8 text-[#646e7a] mx-auto" />
+                                    <p className="font-semibold text-white">No Verification Records Found</p>
+                                    <p className="text-[11px]">Your query yielded 0 results. Adjust filters or search keywords.</p>
+                                    <button onClick={() => { setSessionQuery(""); setSessionStatus("all"); }} className="bg-white/5 border border-white/5 hover:bg-white/10 px-3 py-1 text-[10px] rounded text-white font-mono cursor-pointer mt-2">
+                                      Clear Filters
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. Identity Overrides Manual Review */}
+                {activeTab === 'overrides' && (
+                  <div className="space-y-6 text-left">
+                    <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden p-6 space-y-4">
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Identity Auditing & Overrides Queue</h3>
+                        <p className="text-[10px] text-[#646e7a]">Override pending or suspicious sessions flagged for manual supervisor validation.</p>
+                      </div>
+
+                      {sessions.filter(s => s.status === 'review' || s.status === 'failed').length === 0 ? (
+                        <div className="p-12 text-center text-[#646e7a] font-mono text-xs bg-black/20 border border-white/5 rounded-xl">
+                          No active manual override candidates found in reviewer queue. Secure attestation pipeline fully automated.
+                        </div>
+                      ) : (
+                        <div className="space-y-3 font-mono">
+                          {sessions.filter(s => s.status === 'review' || s.status === 'failed').map(session => (
+                            <div key={session.id} className="bg-black/30 border border-white/5 p-4 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                              <div className="space-y-1 text-xs">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-blue-400 select-all">{session.id}</span>
+                                  <span className="text-[8px] border border-yellow-900 text-yellow-500 bg-yellow-955 px-1.5 py-0.5 rounded font-extrabold uppercase">
+                                    {session.status}
+                                  </span>
+                                </div>
+                                <div className="text-[11px] text-[#8e96a3] font-sans">
+                                  <strong>External linked User:</strong> {session.external_user_id}
+                                </div>
+                                <div className="text-[10px] text-[#646e7a] max-w-xl font-sans mt-0.5">
+                                  <strong>Anomaly reasons:</strong> {session.result_reason}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => triggerSessionAction(session.id, 'approve')}
+                                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] font-bold px-3 py-1.5 rounded cursor-pointer transition-colors"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => triggerSessionAction(session.id, 'reject')}
+                                  className="bg-red-950 hover:bg-red-900 border border-red-900 text-red-400 font-mono text-[10px] font-bold px-3 py-1.5 rounded cursor-pointer transition-colors"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. User Registries tab */}
+                {activeTab === 'users' && (
+                  <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden text-left shadow-2xl">
+                    <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">AuraProof Cryptographic User Directory</h3>
+                        <p className="text-[10px] text-[#646e7a]">Zero-knowledge human signatures. Raw identity matrices or files are never recorded.</p>
+                      </div>
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 text-[#646e7a] absolute left-2.5 top-2" />
+                        <input
+                          type="text"
+                          placeholder="Search User ID or signature..."
+                          value={userQuery}
+                          onChange={(e) => setUserQuery(e.target.value)}
+                          className="bg-black/40 border border-white/5 rounded pl-8 pr-3 py-1 text-xs text-white focus:outline-none w-52"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto text-[11px] font-mono">
+                      <table className="w-full text-left">
+                        <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-wider text-[#646e7a] border-b border-white/5">
+                          <tr>
+                            <th className="py-3 px-6">User UUID</th>
+                            <th className="py-3 px-4">Anonymized human_uid Commit</th>
+                            <th className="py-3 px-4">Status</th>
+                            <th className="py-3 px-4">Inception Date</th>
+                            <th className="py-3 px-6 text-right">Inspect</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-slate-300">
+                          {filteredUsers.map(user => (
+                            <tr key={user.id} className="hover:bg-white/[0.01] group transition-colors">
+                              <td className="py-3.5 px-6 font-bold text-blue-400 select-all">{highlightMatch(user.id, userQuery)}</td>
+                              <td className="py-3.5 px-4 text-[#8e96a3] select-all max-w-[200px] truncate" title={user.human_uid}>
+                                {highlightMatch(user.human_uid, userQuery)}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${
+                                  user.status === 'verified' ? 'bg-emerald-955 border-emerald-900 text-emerald-400' :
+                                  user.status === 'suspended' ? 'bg-red-955 border-red-900 text-red-400 animate-pulse' : 'bg-slate-900 border-slate-800 text-slate-400'
+                                }`}>
+                                  {user.status}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-[#646e7a]">{new Date(user.created_at).toLocaleString()}</td>
+                              <td className="py-3.5 px-6 text-right">
+                                <button
+                                  onClick={() => setInspectRecord({ type: 'user', data: user })}
+                                  className="text-blue-400 hover:text-white transition-colors cursor-pointer text-[10px] flex items-center gap-1 ml-auto group-hover:translate-x-0.5"
+                                >
+                                  <span>Inspect</span>
+                                  <ChevronRight className="w-3 h-3" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. Account timelines */}
+                {activeTab === 'timeline' && (
+                  <div className="bg-[#0c0d12] border border-white/5 p-6 rounded-2xl text-left space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Account Trust Timelines</h3>
+                        <p className="text-[10px] text-[#646e7a]">Inspect and run audits across individual user decision histories.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-mono uppercase text-[#646e7a] font-bold">Query UUID:</span>
+                        <select
                           value={selectedUserId}
                           onChange={(e) => setSelectedUserId(e.target.value)}
-                          className="bg-slate-950 border border-slate-800 px-3 py-2 rounded text-xs select-all text-blue-400 font-mono focus:outline-none"
+                          className="bg-black/45 border border-white/5 text-xs text-blue-400 rounded px-2.5 py-1 font-mono focus:outline-none"
                         >
-                          <option value="">-- Choose User ID --</option>
+                          <option value="">-- select profile --</option>
                           {users.map(u => (
-                            <option key={u.id} value={u.id}>{`${u.id} (${u.status})`}</option>
+                            <option key={u.id} value={u.id}>{u.id} ({u.status})</option>
                           ))}
                         </select>
                       </div>
                     </div>
 
                     {!selectedUserId ? (
-                      <div className="text-center py-10 text-slate-500 font-mono text-xs">
-                         NO PROFILE ID SELECTED. SELECT AN ACTIVE ACCOUNT FROM THE DROPDOWN LIST ABOVE.
+                      <div className="p-8 text-center text-[#646e7a] font-mono text-xs">
+                        NO ACCOUNT UUID SELECTED. CHOOSE FROM DEPLOYED LIST ABOVE.
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Profile Summary & Enforcement Command Controls */}
-                        <div className="lg:col-span-1 space-y-5 bg-slate-950 border border-slate-850 p-5 rounded-xl flex flex-col justify-between">
-                          <div className="space-y-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 font-mono text-xs">
+                        {/* Summary and remediation controls */}
+                        <div className="lg:col-span-1 bg-black/30 border border-white/5 p-5 rounded-xl space-y-4 flex flex-col justify-between">
+                          <div className="space-y-3.5">
+                            <div>
+                              <span className="text-[8px] text-[#646e7a] block uppercase font-bold">Selected User</span>
+                              <span className="text-white font-bold block truncate">{selectedUserId}</span>
+                            </div>
                             <div className="space-y-1">
-                              <span className="text-[9px] font-mono text-slate-500 uppercase block font-bold">Selected Record Node</span>
-                              <h4 className="font-mono text-xs select-all font-bold text-white">{selectedUserId}</h4>
+                              <span className="text-[8px] text-[#646e7a] block uppercase font-bold">Status Record</span>
+                              <span className={`text-[10px] uppercase font-extrabold font-mono inline-block ${
+                                users.find(u => u.id === selectedUserId)?.status === 'verified' ? 'text-emerald-400' : 'text-red-400'
+                              }`}>
+                                {users.find(u => u.id === selectedUserId)?.status || 'NOT_FOUND'}
+                              </span>
                             </div>
-
-                            <div className="space-y-2">
-                              <span className="text-[9px] font-mono text-slate-500 uppercase block font-bold">Primary Database Directory Attributes</span>
-                              <div className="space-y-1.5 text-[11px] font-mono text-slate-350">
-                                <div className="flex justify-between">
-                                  <span>Node Status:</span>
-                                  <span className={`font-bold ${
-                                    users.find(u => u.id === selectedUserId)?.status === "verified" 
-                                      ? "text-emerald-400" 
-                                      : users.find(u => u.id === selectedUserId)?.status === "suspended" 
-                                        ? "text-yellow-400" 
-                                        : "text-red-400"
-                                  }`}>
-                                    {users.find(u => u.id === selectedUserId)?.status.toUpperCase() || "DELETED / NOT_FOUND"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Human Integrity SHA:</span>
-                                  <span className="text-slate-450 text-[9px] truncate max-w-[120px]" title={users.find(u => u.id === selectedUserId)?.human_uid}>
-                                    {users.find(u => u.id === selectedUserId)?.human_uid || "NONE_LINKED"}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span>Inception (UTC):</span>
-                                  <span className="text-slate-400 text-[10px]">
-                                    {users.find(u => u.id === selectedUserId)?.created_at 
-                                      ? new Date(users.find(u => u.id === selectedUserId)!.created_at).toISOString().substring(11, 19)
-                                      : "N/A"
-                                    }
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="space-y-2 pt-2 border-t border-slate-850">
-                              <span className="text-[9px] font-mono text-slate-500 uppercase block font-bold">MANUAL ENFORCEMENT OVERRIDES</span>
-                              
-                              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                                <button 
-                                  onClick={() => handleAccountAction(selectedUserId, 'challenge')}
-                                  className="bg-slate-900 border border-slate-800 text-slate-300 hover:text-white px-2 py-1.5 rounded text-left transition cursor-pointer"
-                                >
-                                   Challenge Session
-                                </button>
-                                <button 
-                                  onClick={() => handleAccountAction(selectedUserId, 'suspend')}
-                                  className="bg-slate-900 border border-slate-800 text-yellow-500 hover:text-yellow-400 px-2 py-1.5 rounded text-left transition cursor-pointer"
-                                >
-                                   Suspend User
-                                </button>
-                                <button 
-                                  onClick={() => handleAccountAction(selectedUserId, 'disable')}
-                                  className="col-span-2 bg-slate-900 border border-slate-800 text-red-500 hover:text-red-400 px-2 py-1.5 rounded text-left transition cursor-pointer"
-                                >
-                                   Lock/Disable Profile
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* State-Connected Policy Execution Panel */}
-                            <div className="space-y-2 pt-2 border-t border-slate-850">
-                              <span className="text-[9px] font-mono text-slate-500 uppercase block font-bold">RUN ACTIVE SECURITY POLICY</span>
-                              <div className="space-y-1.5">
-                                <select 
-                                  onChange={(e) => {
-                                    if (e.target.value) {
-                                      handleEnforcePolicyOnUser(e.target.value, selectedUserId);
-                                      e.target.value = ""; // reset
-                                    }
-                                  }}
-                                  className="w-full bg-slate-900 border border-slate-800 px-3 py-1.5 rounded text-[10px] font-mono focus:outline-none"
-                                >
-                                  <option value="">-- Apply Policy Action --</option>
-                                  {policies.filter(p => p.active).map(p => (
-                                    <option key={p.id} value={p.id}>{p.name}</option>
-                                  ))}
-                                </select>
-                                <p className="text-[9px] text-slate-550 italic leading-snug">Runs the policy daemon statefully, modifying directory records instantly.</p>
+                            <div className="space-y-2 pt-2 border-t border-white/5">
+                              <span className="text-[8px] text-[#646e7a] block uppercase font-bold">Remediation action</span>
+                              <div className="flex flex-col gap-1 text-[10px]">
+                                <button onClick={() => handleAccountAction(selectedUserId, 'challenge')} className="bg-[#111319] hover:bg-slate-900 border border-white/5 py-1 px-2 rounded text-left text-slate-300">Challenge Session</button>
+                                <button onClick={() => handleAccountAction(selectedUserId, 'suspend')} className="bg-[#111319] hover:bg-slate-900 border border-white/5 py-1 px-2 rounded text-left text-yellow-400">Suspend User</button>
                               </div>
                             </div>
                           </div>
 
-                          {/* HARD PROFILE PURGE/DELETE ACTION ZONE */}
-                          <div className="pt-3 border-t border-red-950/40 space-y-2">
-                            <span className="text-[9px] font-mono text-red-400 uppercase block font-bold">INSTITUTION-APPROVED DELETION</span>
-                            
-                            <div className="bg-red-950/15 border border-red-900/30 p-3 rounded-lg space-y-3">
-                              <label className="flex items-start gap-2 text-[10px] text-slate-350 select-none cursor-pointer">
-                                <input 
-                                  type="checkbox" 
+                          <div className="pt-3 border-t border-white/5 space-y-2">
+                            <span className="text-[8px] text-[#646e7a] block uppercase font-bold">Institutional purging zone</span>
+                            <div className="bg-red-955/15 border border-red-900/30 p-2.5 rounded-lg space-y-2.5">
+                              <label className="flex items-start gap-1.5 text-[9px] text-slate-400 leading-normal select-none cursor-pointer">
+                                <input
+                                  type="checkbox"
                                   checked={institutionalConsent}
                                   onChange={(e) => setInstitutionalConsent(e.target.checked)}
-                                  className="mt-0.5 rounded accent-red-600 bg-slate-950 border-slate-800"
+                                  className="mt-0.5 rounded accent-red-600"
                                 />
-                                <span className="leading-relaxed font-sans">
-                                  <strong>Confirm Institutional Clearance</strong> to completely erase and purge all profile structures permanently.
-                                </span>
+                                <span>I attest security authorization to purge profile permanently.</span>
                               </label>
-
-                              <button 
+                              <button
                                 onClick={() => handleCompletePurgeProfile(selectedUserId)}
                                 disabled={!institutionalConsent}
-                                className={`w-full py-2 rounded text-[10px] font-mono uppercase font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                                  institutionalConsent 
-                                    ? 'bg-red-600 hover:bg-red-500 text-white font-black' 
-                                    : 'bg-slate-900 border border-slate-800 text-slate-550 select-none cursor-not-allowed'
+                                className={`w-full py-1.5 rounded text-[10px] font-bold uppercase transition-all ${
+                                  institutionalConsent ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-black/25 text-[#646e7a] cursor-not-allowed border border-white/5'
                                 }`}
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
-                                PURGE PROFILE FROM DB
+                                Erase profile permanent
                               </button>
                             </div>
                           </div>
                         </div>
 
-                        {/* Middle/Right: Interactive Chronological Timeline Feed */}
+                        {/* Interactive chron ledger timeline */}
                         <div className="lg:col-span-2 space-y-4">
-                          <span className="text-[9px] font-mono text-slate-500 uppercase block font-bold">Chronological Decision Ledger</span>
+                          <span className="text-[8px] text-[#646e7a] uppercase font-bold block">Chronological Trust Actions</span>
                           
                           {timeline.length === 0 ? (
-                            <div className="p-8 text-center text-[11px] font-mono text-slate-550 bg-slate-950 border border-slate-850 rounded-xl">
-                               No history timeline entries registered for user {selectedUserId}. Actions trigger real-time updates.
+                            <div className="p-12 text-center text-[#646e7a] bg-black/20 border border-white/5 rounded-xl">
+                              No history events on user {selectedUserId}. Actions update state in real time.
                             </div>
                           ) : (
-                            <div className="relative border-l-2 border-slate-850 pl-5 ml-2.5 space-y-5 py-2">
-                              {timeline.map((entry) => {
-                                const isFlagEvent = entry.event.toLowerCase().includes('duplicate') || entry.event.toLowerCase().includes('fail') || entry.event.toLowerCase().includes('suspend') || entry.event.toLowerCase().includes('purge');
-                                return (
-                                  <div key={entry.id} className="relative group">
-                                    {/* timeline bullet dot */}
-                                    <div className={`absolute -left-[27px] top-1.5 w-3 h-3 rounded-full border-2 ${
-                                      isFlagEvent 
-                                        ? 'bg-red-500 border-red-950' 
-                                        : 'bg-emerald-500 border-emerald-950'
-                                    }`}></div>
-
-                                    <div className="space-y-1">
-                                      <div className="flex items-center justify-between flex-wrap gap-2">
-                                        <div className="flex items-start gap-2">
-                                          <span className="text-xs font-bold text-white font-sans">{entry.event}</span>
-                                          {entry.session_id && (
-                                            <span className="text-[8px] font-mono text-slate-400 bg-slate-950 border border-slate-850 px-1 rounded block mt-0.5">
-                                              {entry.session_id}
-                                            </span>
-                                          )}
-                                        </div>
-                                        <span className="text-[10px] text-slate-500 font-mono font-medium">{new Date(entry.timestamp).toISOString().substring(0, 19).replace('T', ' ')}</span>
-                                      </div>
-                                      <p className="text-[11px] text-slate-350 leading-relaxed font-sans">{entry.description}</p>
-                                      
-                                      {entry.trustScoreChange && (
-                                        <div className="flex items-center gap-1 font-mono text-[9px] mt-1">
-                                          <span className="text-slate-500 uppercase">Impact Assessment:</span>
-                                          <span className={`font-bold ${
-                                            entry.trustScoreChange.includes('+') 
-                                              ? 'text-emerald-400' 
-                                              : entry.trustScoreChange.includes('-') || entry.trustScoreChange.toLowerCase().includes('purge') || entry.trustScoreChange.toLowerCase().includes('suspend')
-                                                ? 'text-red-400' 
-                                                : 'text-sky-400'
-                                          }`}>
-                                            {entry.trustScoreChange}
-                                          </span>
-                                        </div>
-                                      )}
+                            <div className="relative border-l border-white/5 pl-4 ml-2 space-y-4 py-1.5">
+                              {timeline.map((entry) => (
+                                <div key={entry.id} className="relative group">
+                                  <div className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-blue-500 border border-black" />
+                                  <div className="space-y-0.5">
+                                    <div className="flex justify-between items-center text-[10px] text-white">
+                                      <span className="font-bold">{entry.event}</span>
+                                      <span className="text-[9px] text-[#646e7a]">{new Date(entry.timestamp).toISOString().replace('T', ' ').substring(0, 19)}</span>
                                     </div>
+                                    <p className="text-[11px] text-[#8e96a3] font-sans">{entry.description}</p>
+                                    {entry.trustScoreChange && (
+                                      <span className="text-[8px] bg-white/5 text-emerald-400 rounded px-1.5 py-0.5 inline-block mt-1 uppercase">
+                                        Impact: {entry.trustScoreChange}
+                                      </span>
+                                    )}
                                   </div>
-                                );
-                              })}
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Tab: Real-Time Verification Logs & Audit Exports */}
-              {activeTab === 'verification-logs' && (
-                <div className="space-y-6">
-                  {/* Top Stats Cards within log tab */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in">
-                    <div className="bg-slate-900 border border-slate-850 p-4 rounded-xl">
-                      <span className="text-[9px] font-mono text-slate-500 uppercase font-black block">Total Volume</span>
-                      <span className="text-xl font-bold font-mono text-white mt-1 block">{sessions.length}</span>
-                      <span className="text-[10px] text-slate-400">Total sessions logged</span>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-850 p-4 rounded-xl">
-                      <span className="text-[9px] font-mono text-emerald-500 uppercase font-black block">Verified (Passed)</span>
-                      <span className="text-xl font-bold font-mono text-emerald-400 mt-1 block">
-                        {sessions.filter(s => s.status === 'passed').length}
-                      </span>
-                      <span className="text-[10px] text-slate-400">Low risk / unique human resolved</span>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-850 p-4 rounded-xl">
-                      <span className="text-[9px] font-mono text-yellow-500 uppercase font-black block">Pending Review</span>
-                      <span className="text-xl font-bold font-mono text-yellow-400 mt-1 block">
-                        {sessions.filter(s => s.status === 'review').length}
-                      </span>
-                      <span className="text-[10px] text-slate-400">Flagged anomaly queue</span>
-                    </div>
-                    <div className="bg-slate-900 border border-slate-850 p-4 rounded-xl">
-                      <span className="text-[9px] font-mono text-red-500 uppercase font-black block">Failed (Rejected)</span>
-                      <span className="text-xl font-bold font-mono text-red-400 mt-1 block">
-                        {sessions.filter(s => s.status === 'failed').length}
-                      </span>
-                      <span className="text-[10px] text-slate-400">High-risk threats blocked</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                    <div className="p-6 border-b border-slate-850 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <h3 className="font-bold text-white text-sm">Enterprise Verification Session Ledger</h3>
-                        <p className="text-[10px] text-slate-400 mt-0.5">Secure ledger of unique trust validations, trust score outcomes, and platform claims.</p>
-                      </div>
-
-                      <div className="flex items-center gap-2.5">
-                        <button
-                          onClick={handleDownloadAuditSnapshot}
-                          disabled={downloadingExport}
-                          className="bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:text-slate-450 text-white font-mono text-[11px] font-bold px-4 py-2 rounded flex items-center gap-1.5 cursor-pointer transition-all"
-                        >
-                          <Download className={`w-3.5 h-3.5 ${downloadingExport ? 'animate-bounce' : ''}`} />
-                          {downloadingExport ? 'Redacting & Exporting...' : 'Download Audit Snapshot'}
-                        </button>
-                        <button onClick={fetchAdminState} className="bg-slate-950 p-2 border border-slate-800 rounded text-slate-400 hover:text-white">
-                          <RefreshCw className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                {/* 7. Hardware Keys directory */}
+                {activeTab === 'devices' && (
+                  <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden text-left shadow-2xl">
+                    <div className="p-6 border-b border-white/5">
+                      <h3 className="font-semibold text-white text-sm">Hardware Key Trust Registry</h3>
+                      <p className="text-[10px] text-[#646e7a]">Enforces cryptographic device key anchors to prevent emulator or hypervisor bypass spoofing.</p>
                     </div>
 
-                    {/* Filters Toolbar */}
-                    <div className="bg-slate-950 px-6 py-4 border-b border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div className="relative w-full sm:w-72">
-                        <span className="absolute left-3 top-2.5 text-slate-500">
-                          <Search className="w-3.5 h-3.5" />
-                        </span>
-                        <input
-                          type="text"
-                          placeholder="Search Session ID or User ID..."
-                          value={sessionQuery}
-                          onChange={(e) => setSessionQuery(e.target.value)}
-                          className="bg-slate-900 border border-slate-800 rounded pl-9 pr-3 py-1.5 text-xs text-white font-mono w-full focus:outline-none focus:border-slate-700"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                        <span className="text-[10px] text-slate-500 font-mono">STATUS FILTER:</span>
-                        <select
-                          value={sessionStatus}
-                          onChange={(e) => setSessionStatus(e.target.value)}
-                          className="bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs px-2.5 py-1.5 rounded focus:outline-none"
-                        >
-                          <option value="all">ALL STATUSES</option>
-                          <option value="passed">VERIFIED (PASSED)</option>
-                          <option value="failed">FAILED (REJECTED)</option>
-                          <option value="review">PENDING REVIEW (REVIEW)</option>
-                          <option value="started">INITIATED (STARTED)</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="overflow-x-auto text-[11px]">
+                    <div className="overflow-x-auto text-[11px] font-mono">
                       <table className="w-full text-left">
-                        <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
+                        <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-wider text-[#646e7a] border-b border-white/5">
                           <tr>
-                            <th className="py-3 px-6">Session ID</th>
-                            <th className="py-3 px-4">Partner User ID</th>
-                            <th className="py-3 px-4">Human & Uniqueness Status</th>
-                            <th className="py-3 px-4">Risk Level & Score</th>
-                            <th className="py-3 px-4">Proof Token Hash Digest</th>
-                            <th className="py-3 px-6 text-right">Created At (UTC)</th>
+                            <th className="py-3 px-6">User ID Reference</th>
+                            <th className="py-3 px-4">Terminal Device Platform</th>
+                            <th className="py-3 px-4">Hardware signature Hash</th>
+                            <th className="py-3 px-4">Attestation Key</th>
+                            <th className="py-3 px-6 text-right">Inspect</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-850 text-slate-300">
-                          {sessions
-                            .filter(s => {
-                              const matchSearch = 
-                                s.id.toLowerCase().includes(sessionQuery.toLowerCase()) ||
-                                s.external_user_id.toLowerCase().includes(sessionQuery.toLowerCase());
-                              const matchStatus = sessionStatus === 'all' || s.status === sessionStatus;
-                              return matchSearch && matchStatus;
-                            })
-                            .map((session) => {
-                              // Risk level mapping
-                              let riskColor = 'text-emerald-400 bg-emerald-950/45 border-emerald-900/40';
-                              let riskText = 'Low Risk';
-                              if (session.risk_score >= 85) {
-                                riskColor = 'text-red-500 bg-red-950/45 border-red-950/40 font-bold';
-                                riskText = 'Critical Risk';
-                              } else if (session.risk_score >= 70) {
-                                riskColor = 'text-red-400 bg-red-950/30 border-red-900/40 font-bold';
-                                riskText = 'High Risk';
-                              } else if (session.risk_score >= 35) {
-                                riskColor = 'text-yellow-500 bg-yellow-950/30 border-yellow-905/40';
-                                riskText = 'Medium Risk';
-                              }
-
-                              const tokenSnippet = session.proof_token && session.proof_token.length > 15
-                                ? `${session.proof_token.substring(0, 10)}...${session.proof_token.substring(session.proof_token.length - 10)}`
-                                : 'not_generated';
-
-                              return (
-                                <tr key={session.id} className="hover:bg-slate-950/10 font-mono">
-                                  <td className="py-3.5 px-6 font-bold text-blue-400">{session.id}</td>
-                                  <td className="py-3.5 px-4">
-                                    <span className="text-slate-200">{session.external_user_id}</span>
-                                  </td>
-                                  <td className="py-3.5 px-4">
-                                    <div className="flex items-center gap-2">
-                                      <span className={`text-[9px] uppercase px-1.5 py-0.5 rounded border ${
-                                        session.status === 'passed' 
-                                          ? 'bg-emerald-950/45 text-emerald-400 border-emerald-900/40' 
-                                          : session.status === 'failed' 
-                                            ? 'bg-red-950/45 text-red-500 border-red-900/40' 
-                                            : 'bg-yellow-950/45 text-yellow-500 border-yellow-900/40'
-                                      }`}>
-                                        {session.status}
-                                      </span>
-                                      <span className="text-[10px] text-slate-500">
-                                        {session.status === 'passed' 
-                                          ? (session.duplicate_candidate ? 'duplicate' : 'unique') 
-                                          : 'unchecked'}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="py-3.5 px-4">
-                                    <div className="flex items-center gap-2">
-                                      <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border ${riskColor}`}>
-                                        {riskText}
-                                      </span>
-                                      <span className="text-slate-400 font-bold">{session.risk_score}/100</span>
-                                    </div>
-                                  </td>
-                                  <td className="py-3.5 px-4 text-slate-550 text-[10px] select-all">
-                                    <code className="bg-slate-950 px-1 py-0.5 rounded border border-slate-850">
-                                      {tokenSnippet}
-                                    </code>
-                                  </td>
-                                  <td className="py-3.5 px-6 text-right text-slate-500">{new Date(session.created_at).toISOString().substring(0, 19).replace('T', ' ')}</td>
-                                </tr>
-                              );
-                            })}
-                          {sessions.filter(s => {
-                            const matchSearch = 
-                              s.id.toLowerCase().includes(sessionQuery.toLowerCase()) ||
-                              s.external_user_id.toLowerCase().includes(sessionQuery.toLowerCase());
-                            const matchStatus = sessionStatus === 'all' || s.status === sessionStatus;
-                            return matchSearch && matchStatus;
-                          }).length === 0 && (
-                            <tr>
-                              <td colSpan={6} className="text-center py-8 text-slate-500">
-                                No matching verification logs found for filter combination "{sessionStatus}" and search term.
+                        <tbody className="divide-y divide-white/5 text-slate-300">
+                          {devices.map(dev => (
+                            <tr key={dev.id} className="hover:bg-white/[0.01] group transition-colors">
+                              <td className="py-3.5 px-6 font-bold text-blue-400 select-all">{dev.user_id}</td>
+                              <td className="py-3.5 px-4 font-sans text-white font-medium">{dev.platform}</td>
+                              <td className="py-3.5 px-4 select-all">{dev.device_fingerprint_hash}</td>
+                              <td className="py-3.5 px-4 text-teal-400 select-all max-w-[120px] truncate">
+                                <code>SHA-256_{dev.device_public_key.substring(27, 48)}...</code>
+                              </td>
+                              <td className="py-3.5 px-6 text-right">
+                                <button
+                                  onClick={() => setInspectRecord({ type: 'device', data: dev })}
+                                  className="text-blue-400 hover:text-white transition-colors cursor-pointer text-[10px] flex items-center gap-1 ml-auto group-hover:translate-x-0.5"
+                                >
+                                  <span>Inspect</span>
+                                  <ChevronRight className="w-3 h-3" />
+                                </button>
                               </td>
                             </tr>
-                          )}
+                          ))}
                         </tbody>
                       </table>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Tab 1: Manual Session Overrides for exceptions */}
-              {activeTab === 'overrides' && (
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                  <div className="p-6 border-b border-slate-850 flex items-center justify-between">
-                    <div>
-                      <h3 className="font-bold text-white text-sm">Identity Auditing & Session Overrides</h3>
-                      <p className="text-[10px] text-slate-400">Review high uncertainty anomaly sessions flagged for manual verification overrides.</p>
-                    </div>
-                    <button onClick={fetchAdminState} className="bg-slate-950 p-2 border border-slate-800 rounded text-slate-400 hover:text-white">
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="p-6 space-y-4">
-                    {sessions.filter(s => s.status === 'review' || s.status === 'failed').length === 0 ? (
-                      <div className="text-center p-8 text-xs text-slate-500">
-                        No active anomalies or pending session reviews reported in this interval. All processes verified smooth.
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {sessions.filter(s => s.status === 'review' || s.status === 'failed').map((session) => (
-                          <div key={session.id} className="bg-slate-950 border border-slate-850 p-5 rounded-lg space-y-4 flex flex-col justify-between md:flex-row md:items-center">
-                            <div className="space-y-1 pr-4">
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-xs text-blue-400 font-bold">{session.id}</span>
-                                <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded ${
-                                  session.status === 'review' ? 'bg-yellow-950/45 text-yellow-500 border border-yellow-900/40' : 'bg-red-950/45 text-red-500 border border-red-900/40'
-                                }`}>
-                                  {session.status}
-                                </span>
-                              </div>
-                              <div className="text-[11px] text-slate-305 font-mono">
-                                <b>Linked External User ID:</b> <code>{session.external_user_id}</code>
-                              </div>
-                              <div className="text-[11px] text-slate-400 max-w-lg leading-relaxed">
-                                <b>Anomaly Logs:</b> {session.result_reason}
-                              </div>
-                              <div className="flex flex-wrap gap-1.5 pt-2">
-                                {session.risk_reasons.map((reason, idx) => (
-                                  <span key={idx} className="bg-red-950/40 border border-red-900/40 text-red-400 font-mono text-[9px] font-bold px-1.5 py-0.5 rounded">
-                                    {((reason) || '').toUpperCase()}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="flex gap-2.5 items-center pt-4 md:pt-0">
-                              <div className="text-right pr-2">
-                                <span className="text-[9px] text-slate-500 font-mono block">ANOMALY GRADE</span>
-                                <span className={`text-base font-bold font-mono ${session.risk_score >= 70 ? 'text-red-400' : 'text-yellow-500'}`}>{session.risk_score} / 100</span>
-                              </div>
-                              <button
-                                onClick={() => triggerSessionAction(session.id, 'approve')}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-[10px] font-bold px-3 py-2 rounded flex items-center gap-1 cursor-pointer transition-all"
-                              >
-                                <Check className="w-3 h-3" /> Approve
-                              </button>
-                              <button
-                                onClick={() => triggerSessionAction(session.id, 'reject')}
-                                className="bg-red-950 text-red-400 border border-red-900 hover:bg-red-900 hover:text-white font-mono text-[10px] font-bold px-3 py-2 rounded flex items-center gap-1 cursor-pointer transition-all"
-                              >
-                                <XCircle className="w-3 h-3" /> Reject
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: User lists and suspension toggles */}
-              {activeTab === 'users' && (
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                  <div className="p-6 border-b border-slate-850 flex items-center justify-between flex-wrap gap-4">
-                    <div>
-                      <h3 className="font-bold text-white text-sm">AuraProof Cryptographic User Directory</h3>
-                      <p className="text-[10px] text-slate-400">Review zero-knowledge user hashes and physical status records safely.</p>
+                {/* 8. Signature Verification indexes */}
+                {activeTab === 'signatures' && (
+                  <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden text-left shadow-2xl">
+                    <div className="p-6 border-b border-white/5">
+                      <h3 className="font-semibold text-white text-sm">Signature Verification indexes directory</h3>
+                      <p className="text-[10px] text-[#646e7a]">ZKP attestation templates. Raw credentials or posture metrics are destroyed instantly post-signature generation.</p>
                     </div>
 
-                    <input
-                      type="text"
-                      placeholder="Search User ID or hash..."
-                      value={userQuery}
-                      onChange={(e) => setUserQuery(e.target.value)}
-                      className="bg-slate-950 border border-slate-850 px-3 py-1.5 rounded text-xs font-mono focus:outline-none w-52"
-                    />
-                  </div>
-
-                  <div className="overflow-x-auto text-xs">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
-                        <tr>
-                          <th className="py-3.5 px-6">User UUID</th>
-                          <th className="py-3.5 px-4">Anonymized human_uid Commit</th>
-                          <th className="py-3.5 px-4">Status</th>
-                          <th className="py-3.5 px-4">Created Chronology</th>
-                          <th className="py-3.5 px-6 text-right">Administrative Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-850 text-slate-300">
-                        {filteredUsers.map((user) => (
-                          <tr key={user.id} className="hover:bg-slate-950/30">
-                            <td className="py-4 px-6 font-mono text-blue-400 font-semibold">{user.id}</td>
-                            <td className="py-4 px-4 font-mono select-all text-slate-350">{user.human_uid}</td>
-                            <td className="py-4 px-4">
-                              <span className={`inline-block font-mono text-[9px] font-bold px-2 py-0.5 rounded border ${
-                                user.status === 'verified' ? 'bg-emerald-950/45 border-emerald-900/50 text-emerald-400' :
-                                user.status === 'suspended' ? 'bg-red-955/45 border-red-900/50 text-red-400 animate-pulse' :
-                                'bg-slate-950 border-slate-850 text-slate-400'
-                              }`}>
-                                {((user.status) || '').toUpperCase()}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4 font-mono text-slate-500">{new Date(user.created_at).toLocaleString()}</td>
-                            <td className="py-4 px-6 text-right space-x-2">
-                              {user.status === 'suspended' ? (
+                    <div className="overflow-x-auto text-[11px] font-mono">
+                      <table className="w-full text-left">
+                        <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-wider text-[#646e7a] border-b border-white/5">
+                          <tr>
+                            <th className="py-3 px-6">Signature ID</th>
+                            <th className="py-3 px-4">User Link</th>
+                            <th className="py-3 px-4">Template Hash commit</th>
+                            <th className="py-3 px-4">Model Ver</th>
+                            <th className="py-3 px-4">Match confidence</th>
+                            <th className="py-3 px-6 text-right font-semibold">Inspect</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5 text-slate-300">
+                          {signatureTemplates.map(tmpl => (
+                            <tr key={tmpl.id} className="hover:bg-white/[0.01] group transition-colors">
+                              <td className="py-3.5 px-6 select-all">{tmpl.id}</td>
+                              <td className="py-3.5 px-4 font-bold text-blue-400 select-all">{tmpl.user_id}</td>
+                              <td className="py-3.5 px-4 text-[#8e96a3] select-all font-mono">{tmpl.template_hash}</td>
+                              <td className="py-3.5 px-4 text-[#646e7a]">{tmpl.model_version}</td>
+                              <td className="py-3.5 px-4 text-emerald-400 font-bold">{tmpl.confidence_score}%</td>
+                              <td className="py-3.5 px-6 text-right">
                                 <button
-                                  onClick={() => triggerUserAction(user.id, 'verify')}
-                                  className="text-[10px] bg-emerald-950 border border-emerald-900 text-emerald-400 hover:bg-emerald-800 hover:text-white px-2 py-1 rounded transition-all font-mono font-bold cursor-pointer inline-block"
-                                  title="Reinstate profile"
+                                  onClick={() => setInspectRecord({ type: 'signature', data: tmpl })}
+                                  className="text-blue-400 hover:text-white transition-colors cursor-pointer text-[10px] flex items-center gap-1 ml-auto group-hover:translate-x-0.5"
                                 >
-                                  Reinstate
+                                  <span>Inspect</span>
+                                  <ChevronRight className="w-3 h-3" />
                                 </button>
-                              ) : (
-                                <button
-                                  onClick={() => triggerUserAction(user.id, 'suspend')}
-                                  className="text-[10px] bg-slate-950 border border-slate-800 text-slate-400 hover:bg-red-900 hover:text-white px-2 py-1 rounded transition-all font-mono font-bold cursor-pointer inline-block"
-                                  title="Flag or Suspend user profile"
-                                >
-                                  Flag/Suspend
-                                </button>
-                              )}
-                              <button
-                                onClick={async () => {
-                                  const clearanceConfirmed = window.confirm(
-                                    ` INSTITUTIONAL APPROVAL REQUIRED\n\n` +
-                                    `This action will permanently delete user profile ${user.id}.\n` +
-                                    `Do you have institutional security authorization to purge this record?`
-                                  );
-                                  if (!clearanceConfirmed) return;
-                                  
-                                  try {
-                                    const res = await fetch('/api/v1/account/remove', {
-                                      method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify({
-                                        user_id: user.id,
-                                        approved_by_institution: true
-                                      })
-                                    });
-                                    const data = await res.json();
-                                    if (data.success) {
-                                      alert(`Succeeded: Profile ${user.id} has been completely deleted and purged from all AAN system directories.`);
-                                      await fetchAdminState();
-                                    } else {
-                                      alert(`Purge failed: ${data.error}`);
-                                    }
-                                  } catch (err) {
-                                    console.error("Purge action failed", err);
-                                  }
-                                }}
-                                className="text-[10px] bg-red-955 border border-red-900/50 text-red-400 hover:bg-red-650 hover:text-white px-2 py-1 rounded transition-all font-mono font-bold cursor-pointer inline-block"
-                                title="Delete profile permanently"
-                              >
-                                Delete Profile
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 3: Devices hardware signatures */}
-              {activeTab === 'devices' && (
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                  <div className="p-6 border-b border-slate-850">
-                    <h3 className="font-bold text-white text-sm">Hardware Key Registry</h3>
-                    <p className="text-[10px] text-slate-400">Anchor registers tracking user public signing keys to detect spoofed hypervisors or multi-profile emulators.</p>
-                  </div>
-
-                  <div className="overflow-x-auto text-xs">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
-                        <tr>
-                          <th className="py-3.5 px-6">User ID Reference</th>
-                          <th className="py-3.5 px-4">Terminal Device Platform</th>
-                          <th className="py-3.5 px-4">Hardware Fingerprint Hash</th>
-                          <th className="py-3.5 px-4">PEM Public Key Hash</th>
-                          <th className="py-3.5 px-6">Hardware Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-850 text-slate-300">
-                        {devices.map((device) => (
-                          <tr key={device.id} className="hover:bg-slate-950/20">
-                            <td className="py-4 px-6 font-mono text-blue-400 font-semibold">{device.user_id}</td>
-                            <td className="py-4 px-4 font-sans font-medium text-slate-205">{device.platform}</td>
-                            <td className="py-4 px-4 font-mono text-slate-400 select-all">{device.device_fingerprint_hash}</td>
-                            <td className="py-4 px-4 font-mono text-[10px] text-teal-400 select-all">SHA-256_{device.device_public_key.substring(27, 48)}...</td>
-                            <td className="py-4 px-6">
-                              <span className={`inline-block font-mono text-[9px] uppercase px-2 py-0.5 rounded ${
-                                device.trusted ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-red-900/40 text-red-400 border border-red-900'
-                              }`}>
-                                {device.trusted ? "TRUSTED KEY" : "RISK FLAGGED"}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 4: Cryptographic Signature indexes stats */}
-              {activeTab === 'signatures' && (
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                  <div className="p-6 border-b border-slate-850">
-                    <h3 className="font-bold text-white text-sm">Signature Verification Indexes</h3>
-                    <p className="text-[10px] text-slate-400">Zero-knowledge secure verification signatures. Raw credentials or private keys are never stored on the platform.</p>
-                  </div>
-
-                  <div className="overflow-x-auto text-xs">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
-                        <tr>
-                          <th className="py-3.5 px-6">Signature record ID</th>
-                          <th className="py-3.5 px-4">User ID Link</th>
-                          <th className="py-3.5 px-4">Signature Hash</th>
-                          <th className="py-3.5 px-4">Payload Representation</th>
-                          <th className="py-3.5 px-4">Verification Algorithm</th>
-                          <th className="py-3.5 px-6 text-right">Confidence Score</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-850 text-slate-300">
-                        {signatureTemplates.map((tmpl) => (
-                          <tr key={tmpl.id} className="hover:bg-slate-950/20">
-                            <td className="py-4 px-6 font-mono text-xs">{tmpl.id}</td>
-                            <td className="py-4 px-4 font-mono text-xs text-blue-400 font-semibold">{tmpl.user_id}</td>
-                            <td className="py-4 px-4 font-mono text-xs text-slate-350 select-all">{tmpl.template_hash}</td>
-                            <td className="py-4 px-4 font-mono text-[11px] text-slate-500">
-                              {tmpl.encrypted_template ? tmpl.encrypted_template.slice(0, 32) + "..." : "AES_GCM_ENCRYPTED_SIGNATURE"}
-                            </td>
-                            <td className="py-4 px-4 font-mono text-slate-400">{tmpl.model_version}</td>
-                            <td className="py-4 px-6 text-right font-mono text-emerald-400 font-bold">{tmpl.confidence_score}%</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 5: Immutable system audit logs */}
-              {activeTab === 'audits' && (
-                <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                  <div className="p-6 border-b border-slate-850 flex items-center justify-between flex-wrap gap-4">
-                    <div>
-                      <h3 className="font-bold text-white text-sm">Cryptographic Compliance Audit Trail</h3>
-                      <p className="text-[10px] text-slate-400">Immutable ledger logging system triggers, compliance validations, and administrative parameter updates.</p>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-
-                    <input
-                      type="text"
-                      placeholder="Search audit actions or actors..."
-                      value={auditQuery}
-                      onChange={(e) => setAuditQuery(e.target.value)}
-                      className="bg-slate-950 border border-slate-850 px-3 py-1.5 rounded text-xs font-mono focus:outline-none w-52"
-                    />
                   </div>
+                )}
 
-                  <div className="overflow-x-auto text-[11px]">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
-                        <tr>
-                          <th className="py-3 px-6">Log ID</th>
-                          <th className="py-3 px-4">Actor ID / Scope</th>
-                          <th className="py-3 px-4">Action Event</th>
-                          <th className="py-3 px-4">Audited Target</th>
-                          <th className="py-3 px-4">Event Payload Metadata</th>
-                          <th className="py-3 px-6 text-right">Chronology (UTC)</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-850 text-slate-300">
-                        {filteredAudits.map((log) => (
-                          <tr key={log.id} className="hover:bg-slate-950/20 font-mono">
-                            <td className="py-3 px-6 text-slate-500">{log.id}</td>
-                            <td className="py-3 px-4">
-                              <span className="text-slate-205 font-sans font-bold">{((log.actor_type) || '').toUpperCase()}</span>: 
-                              <code className="text-slate-400 text-[10px] block truncate max-w-[120px]">{log.actor_id}</code>
-                            </td>
-                            <td className="py-3 px-4 text-emerald-400 font-bold">{log.action}</td>
-                            <td className="py-3 px-4 text-xs text-slate-100 uppercase">
-                              {log.target_type}: <span className="text-blue-400 text-[10px] lowercase">{log.target_id}</span>
-                            </td>
-                            <td className="py-3 px-4 max-w-xs truncate text-[10px] text-slate-400 JSON-payload">
-                              {JSON.stringify(log.metadata)}
-                            </td>
-                            <td className="py-3 px-6 text-right text-slate-500">{new Date(log.created_at).toISOString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab: Intrusion & Bypass Alerts Hub */}
-              {activeTab === 'security-alerts' && (
-                <div className="space-y-6">
-                  {/* High level overview grids */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Gauge Panel */}
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl flex flex-col justify-between shadow-xl">
-                      <div>
-                        <span className="font-mono text-[9px] text-slate-450 uppercase tracking-widest block mb-1">AGGREGATED RISK STATE</span>
-                        <h3 className="font-bold text-white text-base">Intrusion Risk Score</h3>
-                      </div>
-                      <div className="py-4 flex items-center gap-4">
-                        <div className="relative flex items-center justify-center">
-                          <span className={`text-4xl font-extrabold font-mono tracking-tight ${
-                            securityRisk.score >= 75 ? 'text-red-500' :
-                            securityRisk.score >= 40 ? 'text-amber-500' : 'text-emerald-400'
-                          }`}>
-                            {securityRisk.score}
-                          </span>
-                          <span className="text-slate-500 text-xs font-mono">/100</span>
-                        </div>
-                        <div className="space-y-1 flex-1">
-                          <div className={`text-[9px] uppercase font-extrabold px-2 py-0.5 rounded font-mono inline-block ${
-                            securityRisk.score >= 75 ? 'bg-red-950 border border-red-800 text-red-200' :
-                            securityRisk.score >= 40 ? 'bg-amber-955 border border-amber-900 text-amber-200' :
-                            'bg-emerald-955 border border-emerald-900 text-emerald-200'
-                          }`}>
-                            {securityRisk.level.toUpperCase()} STATUS
+                {/* 9. Enterprise Rule & Policies */}
+                {activeTab === 'policies' && (
+                  <div className="space-y-6 text-left">
+                    <div className="bg-[#0c0d12] border border-white/5 p-6 rounded-2xl space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="bg-blue-600/10 text-blue-400 border border-blue-900/30 font-mono text-[9px] uppercase px-1.5 py-0.5 rounded">Remediation Engine</span>
+                            <h3 className="font-semibold text-white text-base">Conditional Control Policies</h3>
                           </div>
-                          <p className="text-[10px] text-slate-450">Continuous system security event monitoring index.</p>
+                          <p className="text-xs text-[#646e7a] leading-relaxed max-w-2xl">
+                            Deploy real-time policies that evaluate telemetry conditions (like hardware keys, automation timing thresholds, duplicate templates) to auto-trigger remedies.
+                          </p>
                         </div>
-                      </div>
-                      <button
-                        onClick={handleResetSecurityEvents}
-                        className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-800 rounded text-slate-400 hover:text-white px-3 py-1.5 text-center font-mono text-[10px] font-bold cursor-pointer transition-colors"
-                      >
-                        Reset Triggered Telemetry
-                      </button>
-                    </div>
-
-                    {/* Threat Vectors Aggregates */}
-                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-xl md:col-span-2 shadow-xl flex flex-col justify-between">
-                      <div>
-                        <span className="font-mono text-[9px] text-slate-450 uppercase tracking-widest block mb-1">CYBER RISK VECTORS</span>
-                        <h3 className="font-bold text-white text-base">Active Monitoring Indicators</h3>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 py-4 text-xs font-mono">
-                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
-                          <span className="text-[10px] text-slate-400 truncate">Failed Tokens</span>
-                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.failedTokens || 0)}</span>
-                        </div>
-                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between font-mono">
-                          <span className="text-[10px] text-slate-400 truncate">Blocked Transitions</span>
-                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.impossibleTransitions || 0)}</span>
-                        </div>
-                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
-                          <span className="text-[10px] text-slate-400 truncate">Unauthorized API</span>
-                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.unauthorizedAccess || 0)}</span>
-                        </div>
-                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
-                          <span className="text-[10px] text-slate-400 truncate">Key Re-Verification</span>
-                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.apiKeyAbuse || 0)}</span>
-                        </div>
-                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
-                          <span className="text-[10px] text-slate-400 truncate">Unusual IP Spikes</span>
-                          <span className="text-lg font-bold text-white mt-1">{(securityRisk.signalsCount?.unusualIPActivity || 0)}</span>
-                        </div>
-                        <div className="bg-slate-950 p-2.5 rounded border border-slate-850 flex flex-col justify-between">
-                          <span className="text-[10px] text-slate-400 truncate">Admin Overrides</span>
-                          <span className="text-lg font-bold text-yellow-500 mt-1">{(securityRisk.signalsCount?.adminAnomalies || 0)}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono">
-                        <span className="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping shrink-0" />
-                        <span>Continuous background heuristics validating cryptographic attestation signatures on the device hardware layer.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Main Alerts directory container */}
-                  <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-                    <div className="p-6 border-b border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4">
-                      <div>
-                        <h3 className="font-bold text-white text-sm">Defensive Intrusion Events Ledger</h3>
-                        <p className="text-[10px] text-slate-400">Deep telemetry list tracing attempts to bypass, spoof, or force tokens outside authorized state channels.</p>
-                      </div>
-
-                      <div className="flex gap-2 flex-wrap items-center">
-                        {/* Filters */}
-                        <select
-                          value={severityFilter}
-                          onChange={(e) => setSeverityFilter(e.target.value)}
-                          className="bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-[10px] text-slate-300 focus:outline-none focus:border-slate-700"
+                        <button
+                          onClick={() => setShowPolicyModal(true)}
+                          className="bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold px-4 py-2 rounded-lg cursor-pointer transition-colors shrink-0"
                         >
-                          <option value="all">All Severities</option>
-                          <option value="critical">Critical Only</option>
-                          <option value="high">High Only</option>
-                          <option value="medium">Medium Only</option>
-                          <option value="low">Low Only</option>
-                        </select>
-
-                        <select
-                          value={eventTypeFilter}
-                          onChange={(e) => setEventTypeFilter(e.target.value)}
-                          className="bg-slate-950 border border-slate-850 rounded px-2.5 py-1.5 text-[10px] text-slate-300 focus:outline-none focus:border-slate-700"
-                        >
-                          <option value="all">All Vector Types</option>
-                          <option value="invalid_token_signature">Token Signature Tamper</option>
-                          <option value="impossible_session_state_transition">Impossible Transitions</option>
-                          <option value="replay_attack_attempt">Replay Attacks</option>
-                          <option value="unauthorized_api_key_abuse">API Key Abuse</option>
-                          <option value="admin_override_anomaly">Admin Overrides</option>
-                        </select>
-
-                        <button onClick={fetchAdminState} className="bg-slate-950 p-2.5 border border-slate-850 rounded text-slate-450 hover:text-white cursor-pointer transition-colors">
-                          <RefreshCw className="w-3.5 h-3.5" />
+                          + Configure Custom Rule
                         </button>
                       </div>
                     </div>
 
-                    {/* Active resolve box */}
-                    {resolvingEventId && (
-                      <div className="bg-slate-950 border-b border-slate-850 p-6 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-bold text-white text-xs flex items-center gap-1.5">
-                            <span className="w-2 h-2 bg-yellow-500 rounded-full" />
-                            Security Alert Intervention: Resolve Event {resolvingEventId}
-                          </h4>
-                          <button onClick={() => setResolvingEventId(null)} className="text-slate-400 hover:text-white font-mono text-[11px] hover:underline">Cancel</button>
+                    {/* Policy creator modal block */}
+                    {showPolicyModal && (
+                      <div className="bg-[#0c0d12] border border-blue-600/30 rounded-2xl p-6 space-y-4 animate-fade-in text-xs font-mono">
+                        <div className="flex justify-between items-center border-b border-white/5 pb-2.5">
+                          <span className="font-bold text-white uppercase">Define Engine Rule policy</span>
+                          <button onClick={() => setShowPolicyModal(false)} className="text-[#646e7a] hover:text-white cursor-pointer font-bold font-sans">✕</button>
                         </div>
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <input
-                            type="text"
-                            placeholder="Enter mitigation review, firewall rules applied, or override justification notes..."
-                            value={resolutionNotes}
-                            onChange={(e) => setResolutionNotes(e.target.value)}
-                            className="bg-slate-900 border border-slate-800 rounded px-3 py-2 text-xs text-slate-100 flex-1 focus:outline-none focus:border-slate-750 font-sans"
-                          />
-                          <button
-                            onClick={() => handleResolveEvent(resolvingEventId)}
-                            className="bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-[10px] px-4 py-2 rounded shrink-0 cursor-pointer transition-colors"
-                          >
-                            Execute Resolve Override
-                          </button>
-                        </div>
+                        <form onSubmit={handleCreatePolicy} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase text-[#646e7a] font-bold">Rule Name</label>
+                            <input
+                              type="text"
+                              placeholder="e.g. Bot Farm Signup check"
+                              value={policyForm.name}
+                              onChange={(e) => setPolicyForm({ ...policyForm, name: e.target.value })}
+                              className="w-full bg-black/45 border border-white/5 px-3 py-2 rounded focus:outline-none focus:border-blue-500 text-white"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[9px] uppercase text-[#646e7a] font-bold">Mitigation Target</label>
+                            <select
+                              value={policyForm.thenAction}
+                              onChange={(e: any) => setPolicyForm({ ...policyForm, thenAction: e.target.value })}
+                              className="w-full bg-black/45 border border-white/5 px-3 py-2 rounded focus:outline-none text-slate-350"
+                            >
+                              <option value="suspend">Suspend User</option>
+                              <option value="challenge">Challenge Session</option>
+                              <option value="flag">Flag Risk</option>
+                              <option value="remove_fraud">Erase Fraud profile</option>
+                            </select>
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[9px] uppercase text-[#646e7a] font-bold">IF CONDITIONS MET (No-Code Evaluation query)</label>
+                            <input
+                              type="text"
+                              value={policyForm.conditions}
+                              onChange={(e) => setPolicyForm({ ...policyForm, conditions: e.target.value })}
+                              className="w-full bg-black/45 border border-white/5 px-3 py-2 rounded focus:outline-none text-blue-400"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-1 md:col-span-2">
+                            <label className="text-[9px] uppercase text-[#646e7a] font-bold">Remediation team summary Note</label>
+                            <textarea
+                              rows={2}
+                              value={policyForm.description}
+                              onChange={(e) => setPolicyForm({ ...policyForm, description: e.target.value })}
+                              className="w-full bg-black/45 border border-white/5 px-3 py-2 rounded focus:outline-none text-slate-350"
+                              placeholder="Describe why this policy was created..."
+                            />
+                          </div>
+                          <div className="md:col-span-2 flex justify-end gap-2 pt-2">
+                            <button type="button" onClick={() => setShowPolicyModal(false)} className="bg-black/30 border border-white/5 hover:bg-white/5 px-4 py-1.5 rounded text-[#8e96a3] cursor-pointer">Cancel</button>
+                            <button type="submit" className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-1.5 rounded cursor-pointer">Deploy Policy</button>
+                          </div>
+                        </form>
                       </div>
                     )}
 
-                    <div className="overflow-x-auto text-[11px]">
-                      <table className="w-full text-left font-mono">
-                        <thead className="bg-slate-950 font-mono text-[9px] text-slate-400 uppercase tracking-widest border-b border-slate-850">
+                    {/* Policies listing */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
+                      {policies.map(p => (
+                        <div key={p.id} className="bg-[#0c0d12] border border-white/5 p-5 rounded-2xl flex flex-col justify-between space-y-4">
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center gap-3">
+                              <h4 className="font-bold text-white text-sm truncate">{p.name}</h4>
+                              <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border ${p.active ? 'bg-emerald-955 border-emerald-900 text-emerald-400' : 'bg-black/45 text-slate-500 border-white/5'}`}>
+                                {p.active ? 'ACTIVE' : 'DISABLED'}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-[#646e7a] font-sans line-clamp-2">{p.description}</p>
+                          </div>
+                          <div className="bg-black/40 border border-white/5 p-2.5 rounded text-blue-400 select-all break-all whitespace-pre-wrap leading-normal">
+                            <span className="text-[#646e7a] block text-[8px] uppercase font-bold mb-1 select-none">EVALUATION QUERY</span>
+                            {p.conditions}
+                          </div>
+                          <div className="flex justify-between items-center border-t border-white/5 pt-3">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[8px] text-[#646e7a] uppercase font-bold">REMEDY:</span>
+                              <span className="text-[9px] bg-indigo-955 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-900 uppercase font-extrabold">{p.thenAction}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <button onClick={() => handleTogglePolicy(p.id)} className="bg-black/40 hover:bg-black/85 border border-white/5 rounded px-2 py-0.5 text-[10px] text-[#8e96a3] hover:text-white cursor-pointer transition-all">Toggle</button>
+                              <button onClick={() => handleDeletePolicy(p.id)} className="border border-white/5 rounded px-2 py-0.5 text-[10px] text-red-400 hover:bg-red-955 hover:text-white cursor-pointer transition-all">Delete</button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* 10. System Audit Logs trail */}
+                {activeTab === 'audits' && (
+                  <div className="bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden text-left shadow-2xl">
+                    <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Cryptographic Compliance Audit Trail</h3>
+                        <p className="text-[10px] text-[#646e7a]">Immutable auditing database indexing administrator interventions, policy deploys, and webhook operations.</p>
+                      </div>
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 text-[#646e7a] absolute left-2.5 top-2" />
+                        <input
+                          type="text"
+                          placeholder="Search Audit trail..."
+                          value={auditQuery}
+                          onChange={(e) => setAuditQuery(e.target.value)}
+                          className="bg-black/44 border border-white/5 rounded pl-8 pr-3 py-1 text-xs text-white focus:outline-none w-52 font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="overflow-x-auto text-[10px] font-mono">
+                      <table className="w-full text-left">
+                        <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-wider text-[#646e7a] border-b border-white/5">
                           <tr>
-                            <th className="py-3 px-6">Event ID</th>
-                            <th className="py-3 px-4">Severity</th>
-                            <th className="py-3 px-4">Threat Event Type</th>
-                            <th className="py-3 px-4">Actor ID / host</th>
-                            <th className="py-3 px-4">Reason / payload</th>
-                            <th className="py-3 px-4">Status</th>
-                            <th className="py-3 px-6 text-right">Sequence (UTC)</th>
+                            <th className="py-3 px-6">ID</th>
+                            <th className="py-3 px-4">Actor ID / Type</th>
+                            <th className="py-3 px-4">Event trigger</th>
+                            <th className="py-3 px-4">Target context</th>
+                            <th className="py-3 px-4">Metadata Payload</th>
+                            <th className="py-3 px-6 text-right">Inspect</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-850 text-slate-300">
-                          {securityEvents
-                            .filter((e: any) => severityFilter === "all" || e.severity === severityFilter)
-                            .filter((e: any) => eventTypeFilter === "all" || e.event_type === eventTypeFilter)
-                            .length === 0 ? (
-                              <tr>
-                                <td colSpan={7} className="text-center p-12 text-slate-500 font-mono text-xs">
-                                  No anomalies or bypass intrusion alerts registered matching this query. Defensive shield fully intact.
-                                </td>
-                              </tr>
-                            ) : (
-                              securityEvents
-                                .filter((e: any) => severityFilter === "all" || e.severity === severityFilter)
-                                .filter((e: any) => eventTypeFilter === "all" || e.event_type === eventTypeFilter)
-                                .map((evt: any) => (
-                                  <tr key={evt.id} className="hover:bg-slate-950/20">
-                                    <td className="py-4 px-6 text-slate-500 font-bold">{evt.id}</td>
-                                    <td className="py-4 px-4 text-xs font-mono">
-                                      <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
-                                        evt.severity === 'critical' ? 'bg-red-955 border border-red-900 text-red-400 font-extrabold' :
-                                        evt.severity === 'high' ? 'bg-amber-955 border border-amber-900 text-amber-500 font-bold' :
-                                        evt.severity === 'medium' ? 'bg-yellow-955 border border-yellow-900 text-yellow-500 font-medium' :
-                                        'bg-slate-850 border border-slate-800 text-slate-400'
-                                      }`}>
-                                        {evt.severity.toUpperCase()}
-                                      </span>
-                                    </td>
-                                    <td className="py-4 px-4 font-bold text-white text-[11px] font-mono">{evt.event_type}</td>
-                                    <td className="py-4 px-4 font-sans text-[10px] space-y-0.5 max-w-[140px] truncate">
-                                      <div className="font-extrabold text-slate-300 uppercase leading-none">{evt.actor_type}: <code className="font-mono text-slate-450">{evt.actor_id}</code></div>
-                                      <div className="font-mono text-[9px] text-slate-500 leading-none mt-1">{evt.ip_address}</div>
-                                      <div className="font-mono text-[9px] text-slate-500 truncate" title={evt.user_agent}>{evt.user_agent}</div>
-                                    </td>
-                                    <td className="py-4 px-4 max-w-sm space-y-1.5 font-sans">
-                                      <p className="text-slate-100 text-[10px] font-medium leading-relaxed">{evt.detection_reason}</p>
-                                      <div className="bg-slate-950 p-2 rounded border border-slate-850 font-mono text-[9px] text-slate-400 overflow-x-auto whitespace-pre leading-normal">
-                                        {JSON.stringify(evt.raw_metadata || {}, null, 1)}
-                                      </div>
-                                    </td>
-                                    <td className="py-4 px-4 font-sans">
-                                      {evt.raw_metadata?.resolved ? (
-                                        <div className="space-y-1 text-slate-400 text-[10px]">
-                                          <span className="text-emerald-400 font-bold border border-emerald-900 bg-emerald-955 px-1.5 py-0.5 rounded uppercase font-mono tracking-wider text-[8px]">RESOLVED</span>
-                                          <p className="text-[9px] italic text-slate-500 line-clamp-2 leading-snug" title={evt.raw_metadata.resolution_notes}>"{evt.raw_metadata.resolution_notes}"</p>
-                                        </div>
-                                      ) : (
-                                        <button
-                                          onClick={() => {
-                                            setResolvingEventId(evt.id);
-                                            setResolutionNotes("");
-                                          }}
-                                          className="bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-300 hover:text-white font-mono text-[9px] font-bold px-2 py-1 rounded cursor-pointer transition-all uppercase"
-                                        >
-                                          Mark Resolved
-                                        </button>
-                                      )}
-                                    </td>
-                                    <td className="py-4 px-6 text-right text-slate-500 max-w-[100px] truncate">{new Date(evt.created_at).toISOString()}</td>
-                                  </tr>
-                                ))
-                            )}
+                        <tbody className="divide-y divide-white/5 text-slate-300">
+                          {filteredAudits.map(log => (
+                            <tr key={log.id} className="hover:bg-white/[0.01] group transition-colors">
+                              <td className="py-3 px-6 text-[#646e7a]">{log.id}</td>
+                              <td className="py-3 px-4">
+                                <span className="text-white font-bold">{log.actor_type.toUpperCase()}</span>: 
+                                <code className="text-[#646e7a] text-[9px] block truncate max-w-[100px]" title={log.actor_id}>{log.actor_id}</code>
+                              </td>
+                              <td className="py-3 px-4 text-emerald-400 font-bold">{highlightMatch(log.action, auditQuery)}</td>
+                              <td className="py-3 px-4 font-bold text-white">
+                                {log.target_type.toUpperCase()}: <span className="text-blue-400 font-normal text-[9px] block">{log.target_id}</span>
+                              </td>
+                              <td className="py-3 px-4 text-[#646e7a] max-w-xs truncate font-mono text-[9px]" title={JSON.stringify(log.metadata)}>
+                                {JSON.stringify(log.metadata)}
+                              </td>
+                              <td className="py-3 px-6 text-right">
+                                <button
+                                  onClick={() => setInspectRecord({ type: 'audit', data: log })}
+                                  className="text-blue-400 hover:text-white transition-colors cursor-pointer text-[10px] flex items-center gap-1 ml-auto group-hover:translate-x-0.5"
+                                >
+                                  <span>Inspect</span>
+                                  <ChevronRight className="w-3 h-3" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
                   </div>
-                </div>
-              )}
-            </>
+                )}
+
+                {/* 11. Security Bug Bounty Reports Management */}
+                {activeTab === 'security-reports' && (
+                  <div className="space-y-6">
+                    
+                    {/* Header */}
+                    <div className="bg-[#0c0d12] border border-white/5 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold text-white text-sm">Security Bug Bounty Console</h3>
+                        <p className="text-[10px] text-[#646e7a]">Review incoming whitehat vulnerability reports, assign severity, trigger payouts, and coordinate responsible patches.</p>
+                      </div>
+                      
+                      {/* Filtering */}
+                      <div className="flex gap-2.5">
+                        <select
+                          value={bountyFilter}
+                          onChange={(e) => setBountyFilter(e.target.value)}
+                          className="bg-black/45 border border-white/5 rounded px-3 py-1 text-[11px] text-slate-300 focus:outline-none focus:border-yellow-500 font-mono"
+                        >
+                          <option value="all">All Statuses</option>
+                          <option value="new">Pending Triage</option>
+                          <option value="triaged">Triaged</option>
+                          <option value="patched">Patched</option>
+                          <option value="payout_paid">Paid Tiers</option>
+                          <option value="duplicate">Duplicates</option>
+                          <option value="closed">Closed / Invalid</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Stats widgets */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fadeIn">
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl font-mono text-left">
+                        <span className="text-[#646e7a] text-[9px] uppercase font-bold block">Total Disclosures</span>
+                        <span className="text-xl font-bold text-white mt-1 block">{securityReports.length}</span>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl font-mono text-left border-l-2 border-l-yellow-500">
+                        <span className="text-yellow-500 text-[9px] uppercase font-bold block">Pending Triage</span>
+                        <span className="text-xl font-bold text-yellow-500 mt-1 block">
+                          {securityReports.filter((r: any) => r.status === 'new').length}
+                        </span>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl font-mono text-left border-l-2 border-l-emerald-500">
+                        <span className="text-emerald-400 text-[9px] uppercase font-bold block">Paid Payouts</span>
+                        <span className="text-xl font-bold text-emerald-400 mt-1 block">
+                          {securityReports.filter((r: any) => r.status === 'payout_paid').length}
+                        </span>
+                      </div>
+                      <div className="bg-[#0c0d12] border border-white/5 p-4 rounded-xl font-mono text-left">
+                        <span className="text-slate-400 text-[9px] uppercase font-bold block">Total Paid Rewards</span>
+                        <span className="text-xl font-bold text-white mt-1 block">
+                          ${securityReports.reduce((sum: number, r: any) => sum + (r.bounty_amount || 0), 0).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fadeIn">
+                      
+                      {/* Left: Reports table */}
+                      <div className="lg:col-span-2 bg-[#0c0d12] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+                        <div className="p-4 bg-black/30 border-b border-white/5 font-bold text-white text-xs font-mono uppercase">
+                          Active Vulnerability Reports
+                        </div>
+
+                        <div className="overflow-x-auto text-[11px] font-mono">
+                          <table className="w-full text-left">
+                            <thead className="bg-black/20 text-[#646e7a] text-[9px] uppercase border-b border-white/5">
+                              <tr>
+                                <th className="p-3">ID</th>
+                                <th className="p-3">Vulnerability Title</th>
+                                <th className="p-3">Researcher</th>
+                                <th className="p-3">Severity</th>
+                                <th className="p-3">Status</th>
+                                <th className="p-3 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5 text-slate-350">
+                              {securityReports
+                                .filter((r: any) => bountyFilter === 'all' || r.status === bountyFilter)
+                                .map((rep: any) => (
+                                  <tr key={rep.id} className="hover:bg-white/[0.01] transition">
+                                    <td className="p-3 text-[#646e7a] font-mono text-[10px]">{rep.id}</td>
+                                    <td className="p-3 font-semibold text-white max-w-[150px] truncate" title={rep.title}>{rep.title}</td>
+                                    <td className="p-3 text-slate-400 max-w-[120px] truncate" title={rep.reporter_contact}>{rep.reporter_contact}</td>
+                                    <td className="p-3">
+                                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                        rep.severity === 'critical' ? 'bg-red-955 text-red-400 border border-red-900/40' :
+                                        rep.severity === 'high' ? 'bg-orange-950 text-orange-400 border border-orange-900/40' :
+                                        rep.severity === 'medium' ? 'bg-yellow-950 text-yellow-400 border border-yellow-900/40' :
+                                        'bg-blue-950 text-blue-400 border border-blue-900/40'
+                                      }`}>
+                                        {rep.severity}
+                                      </span>
+                                    </td>
+                                    <td className="p-3">
+                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${
+                                        rep.status === 'payout_paid' || rep.status === 'patched' ? 'bg-emerald-950 text-emerald-400' :
+                                        rep.status === 'duplicate' || rep.status === 'closed' ? 'bg-slate-900 text-slate-500' :
+                                        'bg-yellow-950 text-yellow-500 animate-pulse'
+                                      }`}>
+                                        {rep.status?.replace('_', ' ')}
+                                      </span>
+                                    </td>
+                                    <td className="p-3 text-right">
+                                      <button
+                                        onClick={() => {
+                                          setTriagingReportId(rep.id);
+                                          setTriageActionState({
+                                            action: 'triage',
+                                            severity: rep.severity,
+                                            bounty_amount: rep.bounty_amount || 1000,
+                                            internal_notes: rep.internal_notes || '',
+                                            duplicate_of: rep.duplicate_of || ''
+                                          });
+                                        }}
+                                        className="text-blue-400 hover:text-white underline text-[10px] cursor-pointer"
+                                      >
+                                        Triage &rarr;
+                                      </button>
+                                    </td>
+                                  </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+
+                      {/* Right: Triaging & Action Form */}
+                      <div className="lg:col-span-1 space-y-4">
+                        {triagingReportId ? (
+                          (() => {
+                            const selectedReport = securityReports.find(r => r.id === triagingReportId);
+                            if (!selectedReport) return null;
+
+                            return (
+                              <div className="bg-[#0c0d12] border border-white/5 rounded-2xl p-5 space-y-4 font-mono text-[11px] text-slate-350">
+                                <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                                  <span className="text-white font-bold uppercase text-xs font-mono">TRIAGE RADAR: {selectedReport.id}</span>
+                                  <button onClick={() => setTriagingReportId(null)} className="text-[#646e7a] hover:text-white">&times;</button>
+                                </div>
+
+                                <div className="space-y-3">
+                                  <div>
+                                    <span className="text-slate-500 text-[9px] block">TITLE & CATEGORY</span>
+                                    <span className="text-white font-bold">{selectedReport.title}</span>
+                                    <span className="text-blue-400 text-[9px] block uppercase font-semibold mt-0.5">{selectedReport.category?.replace('_', ' ')}</span>
+                                  </div>
+
+                                  <div>
+                                    <span className="text-slate-500 text-[9px] block font-mono">AFFECTED COMPONENT</span>
+                                    <code className="text-slate-200 bg-slate-950 px-1.5 py-0.5 rounded text-[10px] break-all block mt-0.5">{selectedReport.affected_system}</code>
+                                  </div>
+
+                                  <div className="max-h-36 overflow-y-auto bg-slate-950 p-2.5 rounded border border-white/5 space-y-2">
+                                    <div>
+                                      <span className="text-slate-500 text-[9px] block uppercase font-mono">Reproduction steps</span>
+                                      <p className="text-slate-300 text-xs whitespace-pre-wrap leading-relaxed">{selectedReport.reproduction_steps}</p>
+                                    </div>
+                                    {selectedReport.submitted_evidence && (
+                                      <div className="pt-2 border-t border-white/5">
+                                        <span className="text-slate-500 text-[9px] block uppercase font-mono">Evidence / Payload</span>
+                                        <pre className="text-yellow-400 text-[10.5px] overflow-x-auto whitespace-pre">{selectedReport.submitted_evidence}</pre>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Management form */}
+                                  <form onSubmit={(e) => { e.preventDefault(); handleTriageActionSubmit(selectedReport.id); }} className="space-y-3 border-t border-white/5 pt-3">
+                                    <div className="space-y-1">
+                                      <span className="text-slate-500 text-[9px] block uppercase font-mono">Triage Phase *</span>
+                                      <select
+                                        value={triageActionState.action}
+                                        onChange={(e) => setTriageActionState({ ...triageActionState, action: e.target.value })}
+                                        className="w-full bg-slate-950 border border-white/5 rounded py-1 px-2 focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                                      >
+                                        <option value="triage">Assign Severity & Notes</option>
+                                        <option value="mark_duplicate">Mark as Duplicate</option>
+                                        <option value="apply_patch">Mark Patched / remediated</option>
+                                        <option value="approve_payout">Approve Bounty Payout</option>
+                                        <option value="close">Close / Invalid report</option>
+                                      </select>
+                                    </div>
+
+                                    {triageActionState.action === 'triage' && (
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div className="space-y-1">
+                                          <span className="text-slate-500 text-[9px] block uppercase font-mono">Severity</span>
+                                          <select
+                                            value={triageActionState.severity}
+                                            onChange={(e) => setTriageActionState({ ...triageActionState, severity: e.target.value })}
+                                            className="w-full bg-slate-950 border border-white/5 rounded py-1 px-2 text-white font-mono text-[11px]"
+                                          >
+                                            <option value="low">Low</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="high">High</option>
+                                            <option value="critical">Critical</option>
+                                          </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                          <span className="text-slate-500 text-[9px] block uppercase font-mono">Bounty ($)</span>
+                                          <input
+                                            type="number"
+                                            value={triageActionState.bounty_amount}
+                                            onChange={(e) => setTriageActionState({ ...triageActionState, bounty_amount: parseInt(e.target.value) || 0 })}
+                                            className="w-full bg-slate-950 border border-white/5 rounded py-1 px-2 text-emerald-400 font-bold font-mono text-[11px]"
+                                          />
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {triageActionState.action === 'mark_duplicate' && (
+                                      <div className="space-y-1">
+                                        <span className="text-slate-500 text-[9px] block uppercase font-mono">Original Report ID</span>
+                                        <input
+                                          type="text"
+                                          required
+                                          placeholder="e.g. rep_8ef77b"
+                                          value={triageActionState.duplicate_of}
+                                          onChange={(e) => setTriageActionState({ ...triageActionState, duplicate_of: e.target.value })}
+                                          className="w-full bg-slate-950 border border-white/5 rounded py-1 px-2 text-white font-mono text-[11px]"
+                                        />
+                                      </div>
+                                    )}
+
+                                    <div className="space-y-1">
+                                      <span className="text-slate-500 text-[9px] block uppercase font-mono">Response Notes</span>
+                                      <textarea
+                                        required
+                                        placeholder="Add notes for the whitehat. This will display on their search status page."
+                                        value={triageActionState.internal_notes}
+                                        onChange={(e) => setTriageActionState({ ...triageActionState, internal_notes: e.target.value })}
+                                        className="w-full h-20 bg-slate-950 border border-white/5 rounded py-1 px-2 text-slate-300 font-sans text-xs"
+                                      />
+                                    </div>
+
+                                    <button
+                                      type="submit"
+                                      disabled={isTriaging}
+                                      className="w-full bg-yellow-600 hover:bg-yellow-500 text-slate-950 py-1.5 rounded font-bold font-mono transition text-xs"
+                                    >
+                                      {isTriaging ? "Deploying triage..." : "Save Triage Assessment &rarr;"}
+                                    </button>
+                                  </form>
+                                </div>
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className="bg-[#0c0d12] border border-white/5 rounded-2xl p-6 text-center text-[#646e7a] font-mono text-[11px] h-full flex flex-col justify-center items-center">
+                            <Shield className="h-8 w-8 text-[#646e7a]/40 mb-2" />
+                            SELECT A WHITEHAT DISCLOSURE TO ACTIVATE SECURE TRIAGING CONTROLS
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+
+                  </div>
+                )}
+
+              </motion.div>
+            </AnimatePresence>
           )}
 
         </div>
       </main>
+
+      {/* Interactive Operational Inspection Drawer overlay panel */}
+      <AnimatePresence>
+        {inspectRecord && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setInspectRecord(null)}
+              className="fixed inset-0 bg-black/60 z-40 cursor-pointer"
+            />
+            {/* Drawer Container */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 24, stiffness: 180 }}
+              className="fixed inset-y-0 right-0 w-full sm:w-[500px] bg-[#0c0d12] border-l border-white/5 shadow-2xl z-50 flex flex-col justify-between text-left"
+            >
+              {/* Header */}
+              <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="bg-blue-950/40 text-blue-400 p-2 rounded border border-blue-900/40">
+                    <Info className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white text-sm">Operational Inspector</h3>
+                    <span className="font-mono text-[9px] uppercase tracking-widest text-[#646e7a] block mt-0.5">
+                      Scope: {inspectRecord.type.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setInspectRecord(null)}
+                  className="text-[#646e7a] hover:text-white cursor-pointer hover:rotate-90 transition-transform p-1 rounded hover:bg-white/5"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Scrollable Attributes Body */}
+              <div className="p-6 flex-1 overflow-y-auto space-y-6 text-xs leading-relaxed">
+                
+                {/* Structural boundaries definitions - Why, Problem, action */}
+                <div className="bg-[#111319] border border-white/5 p-4 rounded-xl space-y-1.5">
+                  <span className="font-mono text-[9px] text-blue-400 block font-bold uppercase tracking-wider">Audit Attestation Meta</span>
+                  <div className="space-y-1 text-slate-350">
+                    <p><strong>Why this exists:</strong> Allows administrator validation & remediation checks inside Stage 4.</p>
+                    <p><strong>Problem solved:</strong> Prevents unauthorized bot activity, duplicate templates, and evasive bypass attempts while keeping private identity protected.</p>
+                    <p><strong>Administrator capability:</strong> Statefully modify directories, approve override challenges, or perform compliant account database purges.</p>
+                  </div>
+                </div>
+
+                {/* Main Attributes list depending on record type */}
+                <div className="space-y-4">
+                  <span className="font-mono text-[9px] uppercase text-[#646e7a] tracking-widest block font-bold">DIRECTORY DATASET FIELDS</span>
+                  
+                  {inspectRecord.type === 'session' && (
+                    <div className="space-y-3 font-mono">
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Session ID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Linked User:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.external_user_id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Attestation Risk:</span>
+                        <span className="text-white font-bold">{inspectRecord.data.risk_score} / 100</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Duplicate match:</span>
+                        <span className="text-white font-bold">{inspectRecord.data.duplicate_candidate ? 'DUPLICATE MATCHED' : 'UNIQUE'}</span>
+                      </div>
+                      <div className="space-y-1 pt-1">
+                        <span className="text-[#646e7a] block">Outcome rationale note:</span>
+                        <div className="bg-black/40 p-2.5 rounded text-[11px] text-slate-300 font-sans">{inspectRecord.data.result_reason}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {inspectRecord.type === 'user' && (
+                    <div className="space-y-3 font-mono">
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">User UUID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Status code:</span>
+                        <span className="text-white font-bold uppercase">{inspectRecord.data.status}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">ZKP Human UID Commit:</span>
+                        <span className="text-slate-400 select-all truncate max-w-[200px]" title={inspectRecord.data.human_uid}>{inspectRecord.data.human_uid}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Inception:</span>
+                        <span className="text-white font-bold">{new Date(inspectRecord.data.created_at).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {inspectRecord.type === 'device' && (
+                    <div className="space-y-3 font-mono">
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Device Record ID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">User link ID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.user_id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Fingerprint hash:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.device_fingerprint_hash}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">OS Platform:</span>
+                        <span className="text-white font-bold font-sans">{inspectRecord.data.platform}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[#646e7a] block">RSA PEM Attestation Public Key:</span>
+                        <div className="bg-black/40 p-2.5 rounded font-mono text-[9px] text-[#646e7a] select-all break-all h-20 overflow-y-auto">
+                          {inspectRecord.data.device_public_key}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {inspectRecord.type === 'signature' && (
+                    <div className="space-y-3 font-mono">
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Record ID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Account link:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.user_id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Uniqueness template Hash:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.template_hash}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Confidence:</span>
+                        <span className="text-emerald-400 font-bold">{inspectRecord.data.confidence_score}%</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[#646e7a] block">Encrypted buffer blob snapshot:</span>
+                        <div className="bg-black/40 p-2 rounded text-[10px] select-all break-all">
+                          {inspectRecord.data.encrypted_template}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {inspectRecord.type === 'security-event' && (
+                    <div className="space-y-3 font-mono">
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Threat event ID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Vector type:</span>
+                        <span className="text-white font-bold text-[10px]">{inspectRecord.data.event_type}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">IP Location:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.ip_address}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Detected path:</span>
+                        <span className="text-white font-bold text-[10px]">{inspectRecord.data.request_path || '/'}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[#646e7a] block">Anomaly diagnostic text:</span>
+                        <p className="bg-black/40 p-2 rounded font-sans text-[11px] text-red-400 leading-normal">{inspectRecord.data.detection_reason}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[#646e7a] block">Decrypted headers metadata block:</span>
+                        <pre className="bg-black/50 p-2 rounded text-[9px] text-[#8e96a3] overflow-x-auto select-all">{JSON.stringify(inspectRecord.data.raw_metadata, null, 2)}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {inspectRecord.type === 'audit' && (
+                    <div className="space-y-3 font-mono">
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Audit log ID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Audit actor UUID:</span>
+                        <span className="text-white font-bold select-all">{inspectRecord.data.actor_id}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Triggered action:</span>
+                        <span className="text-emerald-400 font-bold uppercase">{inspectRecord.data.action}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-white/5 pb-1.5">
+                        <span className="text-[#646e7a]">Target Scope:</span>
+                        <span className="text-white font-bold">{inspectRecord.data.target_type} • {inspectRecord.data.target_id}</span>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-[#646e7a] block">Decoded Claims values:</span>
+                        <pre className="bg-black/50 p-2 rounded text-[9px] text-[#8e96a3] overflow-x-auto select-all">{JSON.stringify(inspectRecord.data.metadata, null, 2)}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+
+              </div>
+
+              {/* Quick Administrator Remediations Actions panel */}
+              <div className="p-6 border-t border-white/5 bg-black/40 space-y-4">
+                <span className="font-mono text-[9px] uppercase text-[#646e7a] tracking-widest block font-bold">REMEDIATION QUICK ACTION</span>
+                
+                {inspectRecord.type === 'session' && (
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <button
+                      onClick={() => triggerSessionAction(inspectRecord.data.id, 'approve')}
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white font-mono font-bold text-[10px] py-2 rounded cursor-pointer transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <Check className="w-3.5 h-3.5" /> Approve Override
+                    </button>
+                    <button
+                      onClick={() => triggerSessionAction(inspectRecord.data.id, 'reject')}
+                      className="bg-red-950 hover:bg-red-900 text-red-400 border border-red-900/40 font-mono font-bold text-[10px] py-2 rounded cursor-pointer transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <XCircle className="w-3.5 h-3.5" /> Reject Session
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedUserId(inspectRecord.data.external_user_id || 'usr_df990a31');
+                        setActiveTab('timeline');
+                        setInspectRecord(null);
+                      }}
+                      className="bg-slate-900 hover:bg-slate-800 border border-white/5 text-xs py-2 rounded col-span-2 text-center text-white cursor-pointer"
+                    >
+                      Inspect linked user timeline →
+                    </button>
+                  </div>
+                )}
+
+                {inspectRecord.type === 'user' && (
+                  <div className="space-y-3.5">
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                      {inspectRecord.data.status === 'suspended' ? (
+                        <button
+                          onClick={() => triggerUserAction(inspectRecord.data.id, 'verify')}
+                          className="bg-emerald-950 border border-emerald-900 text-emerald-400 py-1.5 rounded cursor-pointer hover:bg-emerald-800 hover:text-white"
+                        >
+                          Reinstate profile
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => triggerUserAction(inspectRecord.data.id, 'suspend')}
+                          className="bg-yellow-950/20 border border-yellow-900/30 text-yellow-400 py-1.5 rounded cursor-pointer hover:bg-yellow-900 hover:text-slate-950"
+                        >
+                          Suspend Profile
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          setSelectedUserId(inspectRecord.data.id);
+                          setActiveTab('timeline');
+                          setInspectRecord(null);
+                        }}
+                        className="bg-slate-900 border border-white/5 py-1.5 rounded text-white cursor-pointer hover:bg-slate-800"
+                      >
+                        Browse timeline
+                      </button>
+                    </div>
+
+                    <div className="border-t border-white/5 pt-3 space-y-2">
+                      <span className="text-[8px] text-red-400 font-mono font-bold block uppercase tracking-wider">CRITICAL PROFILE PURGING</span>
+                      <div className="bg-red-955/15 border border-red-900/30 p-2.5 rounded-lg space-y-2 text-xs">
+                        <label className="flex items-start gap-1.5 text-[9px] text-slate-400 leading-normal cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={institutionalConsent}
+                            onChange={(e) => setInstitutionalConsent(e.checked || e.target.checked)}
+                            className="mt-0.5 rounded accent-red-600"
+                          />
+                          <span>Confirm authorization to purge this user profile forever.</span>
+                        </label>
+                        <button
+                          onClick={() => handleCompletePurgeProfile(inspectRecord.data.id)}
+                          disabled={!institutionalConsent}
+                          className={`w-full py-1.5 rounded text-[10px] font-mono uppercase font-bold transition-all ${
+                            institutionalConsent ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-black/25 text-[#646e7a] border border-white/5 cursor-not-allowed'
+                          }`}
+                        >
+                          Erase Record permanent
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {inspectRecord.type === 'device' && (
+                  <div className="space-y-2 text-[10px] font-mono">
+                    <p className="text-[#646e7a]">Device hardware public keys are linked to physical hardware signatures. Suspend the parent user or trigger custom security policies to enforce challenges.</p>
+                    <button
+                      onClick={() => {
+                        setSelectedUserId(inspectRecord.data.user_id);
+                        setActiveTab('timeline');
+                        setInspectRecord(null);
+                      }}
+                      className="w-full bg-slate-900 hover:bg-slate-800 border border-white/5 py-2 rounded text-white text-xs cursor-pointer text-center"
+                    >
+                      Open device owner timeline →
+                    </button>
+                  </div>
+                )}
+
+                {inspectRecord.type === 'security-event' && (
+                  <div className="space-y-3 font-mono">
+                    {inspectRecord.data.raw_metadata?.resolved ? (
+                      <div className="bg-emerald-955/10 border border-emerald-900/30 p-3 rounded-lg text-emerald-400 text-[11px] leading-relaxed">
+                        <strong>Resolution Note:</strong> "{inspectRecord.data.raw_metadata.resolution_notes}"
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <span className="text-[#646e7a] text-[9px] block uppercase font-bold">Apply active resolution override</span>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Mitigation notes, firewall overrides..."
+                            value={resolutionNotes}
+                            onChange={(e) => setResolutionNotes(e.target.value)}
+                            className="bg-black/40 border border-white/5 rounded px-2.5 py-1.5 text-xs text-white flex-1 focus:outline-none"
+                          />
+                          <button
+                            onClick={() => handleResolveEvent(inspectRecord.data.id)}
+                            className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded text-xs cursor-pointer"
+                          >
+                            Resolve
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {inspectRecord.type === 'signature' && (
+                  <div className="text-[10px] font-mono text-[#646e7a]">
+                    <span>Post-attestation signature indexes cannot be statefully altered because raw biological timings are shredded from RAM. Remediate or purge the parent user node if suspicious duplicates arise.</span>
+                  </div>
+                )}
+
+                {inspectRecord.type === 'audit' && (
+                  <div className="text-[10px] font-mono text-[#646e7a]">
+                    <span>Cryptographic audit trail ledger records are immutable and cannot be statefully altered. Use direct SIEM APIs for external ledger audits.</span>
+                  </div>
+                )}
+
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

@@ -1,8 +1,16 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import crypto from "crypto";
+import { runPreflightCheck } from "./src/lib/preflight";
 import { supabaseService, isSupabaseConnected } from "./src/lib/supabaseService";
+import { 
+  hashApiKey,
+  hashPartnerUserId,
+  createCheckoutUrl,
+  validateCreateSessionBody
+} from "./src/lib/apiHelpers";
 import { 
   User, 
   SignatureTemplate, 
@@ -14,7 +22,8 @@ import {
   RiskResult,
   Policy,
   TrustTimelineEntry,
-  SecurityEvent
+  SecurityEvent,
+  SecurityReport
 } from "./src/types";
 
 // ============================================================================
@@ -514,6 +523,69 @@ const mockSecurityEvents: SecurityEvent[] = [
   }
 ];
 
+const mockSecurityReports: SecurityReport[] = [
+  {
+    id: "rep_auth_bypass_01",
+    title: "JSON Web Token Validation Bypass in Proof-Token Parser",
+    category: "authentication_bypass",
+    severity: "critical",
+    affected_system: "/api/v1/proofs/verify",
+    reproduction_steps: "1. Construct a forged JWT claims payload with custom verified/unique human claims.\n2. Leave the signature block empty or replace HS256 with standard 'none' algorithm header.\n3. POST verify to proofs validator endpoint.\n4. Server accepts claims without proper signature verification validation under fallback bypass conditions.",
+    submitted_evidence: "```json\n{\n  \"proof_token\": \"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c3JfMDEiLCJodW1hbl92ZXJpZmllZCI6dHJ1ZX0.\"\n}\n```",
+    reporter_contact: "whitehat_alice@secu.net",
+    status: "patched",
+    bounty_amount: 15000.00,
+    internal_notes: "Critical vulnerability fixed. Implemented strict signature algorithm enforcements to throw invalid token signature alerts on any algorithm-mismatch/none-headers.",
+    created_at: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString(),
+    resolved_at: new Date(Date.now() - 6 * 24 * 3600 * 1000).toISOString()
+  },
+  {
+    id: "rep_api_key_02",
+    title: "Unsecured Partner API Key Exposure inside Webhook Outgoing Delivery Payloads",
+    category: "partner_api_key_exposure",
+    severity: "high",
+    affected_system: "Webhook Dispatcher Daemon",
+    reproduction_steps: "1. Register a secure callback target webhook URL on active project configs.\n2. Trigger a normal session verification state completion.\n3. Observe outgoing HTTP POST delivery request headers contain the raw, plain-text partner secret api_key instead of hashed client credentials.",
+    submitted_evidence: "Captured webhook raw packet dump showing:\n```\nPOST /webhooks/poh HTTP/1.1\nHost: api.partner.com\nx-api-key: poh_key_fintech_demo_111\n```",
+    reporter_contact: "bounty_hunter_bob@cyberguard.org",
+    status: "patched",
+    bounty_amount: 5000.00,
+    internal_notes: "Vulnerability resolved in webhook dispatch engine. Filtered all authorization and secret key headers from outbound partner deliveries.",
+    created_at: new Date(Date.now() - 4 * 24 * 3600 * 1000).toISOString(),
+    resolved_at: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString()
+  },
+  {
+    id: "rep_rate_limit_03",
+    title: "API Rate-Limiting Bypass via X-Forwarded-For Spoofing rotation",
+    category: "rate_limit_bypass",
+    severity: "medium",
+    affected_system: "API Gateway Rate-Limiter",
+    reproduction_steps: "1. Issue session creations consecutively.\n2. When 429 Too Many Requests rate block is reached, rotate X-Forwarded-For header values dynamically (e.g. 1.2.3.4, 1.2.3.5).\n3. Gateway treats these as unique IPs, bypassing throttling limits.",
+    submitted_evidence: "Reproduction Python script: rotates IP headers sequentially.",
+    reporter_contact: "infosec_charlie@hackerone.com",
+    status: "reproduced",
+    bounty_amount: 1500.00,
+    internal_notes: "Triaged and reproduced. Designing correct client-ip extraction middleware resolving trusted proxy chains properly.",
+    created_at: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString(),
+    resolved_at: null
+  },
+  {
+    id: "rep_replay_04",
+    title: "Proof Token Replay Vulnerability inside Decentralized Partner Integration Flow",
+    category: "replay_attacks",
+    severity: "high",
+    affected_system: "/api/v1/proofs/verify",
+    reproduction_steps: "1. Capture an authentic proof token generated from a verified session.\n2. Submit the exact same token multiple times consecutively to partner verification validators.\n3. Validators accept token without checking historical uuid reuse patterns or expiry limits.",
+    submitted_evidence: "Captured network traffic: proof token verified multiple times with no stateful replay protection.",
+    reporter_contact: "whitehat_anonymous@gmail.com",
+    status: "triaged",
+    bounty_amount: 0.00,
+    internal_notes: "Currently evaluating. Token replay protection has been implemented inside server.ts with active tracking but needs partner library guidelines enforcement.",
+    created_at: new Date().toISOString(),
+    resolved_at: null
+  }
+];
+
 function appendSecurityEvent(
   severity: 'low' | 'medium' | 'high' | 'critical',
   eventType: string,
@@ -829,6 +901,7 @@ const db = {
   policies: [...mockPolicies],
   trustTimelines: [...mockTrustTimelines],
   securityEvents: [...mockSecurityEvents],
+  securityReports: [...mockSecurityReports],
   verifiedTokens: {
     "vss_session_failed_df9": 2
   } as Record<string, number>,
@@ -1088,6 +1161,9 @@ export function dispatchWebhook(eventType: string, partnerUserId: string, riskLe
 // EXPRESS BOOTSTRAPING
 // ============================================================================
 async function startServer() {
+  // Run deployment and database preflight checks
+  await runPreflightCheck();
+
   const app = express();
   const PORT = 3000;
 
@@ -1121,91 +1197,149 @@ async function startServer() {
 
   // 1. POST /api/v1/verification-sessions
   // Creates a secure external user registration/verification session
-  app.post("/api/v1/verification-sessions", (req, res) => {
-    const { external_user_id, callback_url, verification_level } = req.body;
+  app.post("/api/v1/verification-sessions", async (req, res) => {
+    try {
+      // 1. Validate request body parameters
+      const validation = validateCreateSessionBody(req.body);
+      if (!validation.isValid) {
+        return res.status(400).json({ error: validation.error });
+      }
 
-    if (!external_user_id) {
-      return res.status(400).json({ error: "Missing required parameter: external_user_id" });
-    }
+      const { partner_user_id, redirect_url, metadata } = req.body;
 
-    // Resolve querying Partner using Auth headers in MVP context
-    const apiKey = (req.headers['x-api-key'] || "").toString();
-    let partnerApp = db.partnerApps[0]; // Default fallback for playground if header absent
+      // 2. Read the partner API key from the Authorization header as: Bearer <api_key>
+      const authHeader = (req.headers["authorization"] || "").toString();
+      let apiKey = "";
+      if (authHeader.startsWith("Bearer ")) {
+        apiKey = authHeader.substring(7).trim();
+      }
 
-    if (apiKey) {
-      const hash = crypto.createHash('sha256').update(apiKey).digest('hex');
-      const finder = db.partnerApps.find(app => app.api_key_hash === hash);
-      if (finder) {
-        partnerApp = finder;
-        if (partnerApp.status === 'suspended') {
-          const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
-          const ua = (req.headers['user-agent'] || "Unknown").toString();
-          appendSecurityEvent(
-            'critical',
-            'api_key_abuse',
-            'partner_app',
-            partnerApp.id,
-            ip,
-            ua,
-            `Access Denied: Attempted verification session creation using a suspended API Key [app: ${partnerApp.name}].`,
-            { attempted_key_hash: hash.substring(0, 10) + "..." },
-            undefined,
-            partnerApp.id,
-            req.path
-          );
-          return res.status(403).json({ error: "Access Denied: Partner app is suspended" });
-        }
-      } else {
-        const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
-        const ua = (req.headers['user-agent'] || "Unknown").toString();
+      // Fallback to older 'x-api-key' for developer testing convenience in existing dashboard modules
+      if (!apiKey && req.headers["x-api-key"]) {
+        apiKey = req.headers["x-api-key"].toString();
+      }
+
+      const clientIp = (req.headers["x-forwarded-for"] || req.ip || "127.0.0.1").toString();
+      const userAgent = (req.headers["user-agent"] || "Unknown").toString();
+
+      if (!apiKey) {
         appendSecurityEvent(
-          'high',
-          'api_key_abuse',
-          'unknown',
-          'unknown_actor',
-          ip,
-          ua,
-          `Unauthorized request rejected: Invalid or unregistered API Key signature used.`,
-          { attempted_key_hash: hash.substring(0, 10) + "..." },
+          "high",
+          "api_key_abuse",
+          "unknown",
+          "unknown_actor",
+          clientIp,
+          userAgent,
+          "Unauthorized request rejected: Missing API authorization token in headers.",
+          { attempted_path: req.path },
           undefined,
           undefined,
           req.path
         );
-        return res.status(401).json({ error: "Access Denied: Invalid API Key" });
+        return res.status(401).json({ error: "Access Denied: Missing or malformed authentication credentials" });
       }
+
+      // 3. Hash the incoming API key before comparing it to stored hashes
+      const keyHash = hashApiKey(apiKey);
+
+      // 4. Look up the matching partner application via Supabase or memory fallback
+      const partnerApp = await supabaseService.findPartnerAppByHash(keyHash, db.partnerApps);
+
+      if (!partnerApp) {
+        appendSecurityEvent(
+          "high",
+          "api_key_abuse",
+          "unknown",
+          "unknown_actor",
+          clientIp,
+          userAgent,
+          "Unauthorized request rejected: Invalid or unregistered API key signature used.",
+          { attempted_key_hash: keyHash.substring(0, 10) + "..." },
+          undefined,
+          undefined,
+          req.path
+        );
+        // Secure generic message to prevent timing/database leaks about key existence
+        return res.status(401).json({ error: "Access Denied: Invalid or revoked authentication credentials" });
+      }
+
+      // 5. Check if partner is suspended
+      if (partnerApp.status === "suspended") {
+        appendSecurityEvent(
+          "critical",
+          "api_key_abuse",
+          "partner_app",
+          partnerApp.id,
+          clientIp,
+          userAgent,
+          `Access Denied: Suspended partner app [${partnerApp.name}] attempted to create verification session.`,
+          { attempted_key_hash: keyHash.substring(0, 10) + "..." },
+          undefined,
+          partnerApp.id,
+          req.path
+        );
+        return res.status(403).json({ error: "Access Denied: Partner application is suspended" });
+      }
+
+      // 6. Privacy Preservation: Never store raw partner_user_id. Hash it before saving.
+      const partnerUserHash = partner_user_id 
+        ? hashPartnerUserId(partner_user_id)
+        : crypto.createHash("sha256").update(crypto.randomBytes(16)).digest("hex");
+
+      // 7. Initialize secure session configurations
+      const verificationSessionId = crypto.randomUUID();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 mins expiry
+      const checkoutUrl = createCheckoutUrl(verificationSessionId);
+
+      const newSession: VerificationSession = {
+        id: verificationSessionId,
+        partner_app_id: partnerApp.id,
+        external_user_id: partnerUserHash, // Stored securely as the hashed identifier
+        status: "created", // Set initialized state to 'created' as specified
+        risk_score: 0,
+        duplicate_candidate: false,
+        result_reason: "Session initialized via secure partner API. Pending user verification.",
+        risk_reasons: [],
+        proof_token: "",
+        created_at: new Date().toISOString(),
+        completed_at: null,
+        // Optional integration metadata for response
+        redirect_url: redirect_url || "",
+        metadata: metadata || {},
+        expires_at: expiresAt,
+        checkout_url: checkoutUrl
+      };
+
+      // 8. Save the newly created verification session row
+      await supabaseService.createVerificationSession(newSession, db.verificationSessions);
+
+      // 9. Append a detailed audit log entry with action = 'verification_session_created'
+      appendAuditLog(
+        "partner",
+        partnerApp.id,
+        "verification_session_created",
+        "session",
+        verificationSessionId,
+        {
+          event_type: "verification_session_created",
+          partner_user_hash: partnerUserHash,
+          expires_at: expiresAt,
+          client_ip: clientIp
+        }
+      );
+
+      // 10. Return complete JSON payload response as specified
+      return res.json({
+        session_id: verificationSessionId,
+        status: "created",
+        checkout_url: checkoutUrl,
+        expires_at: expiresAt
+      });
+
+    } catch (error: any) {
+      console.error("[API GATEWAY V1 ERROR] Failed to create verification session:", error);
+      return res.status(500).json({ error: "Internal Server Error: Secure session establishment failed" });
     }
-
-    const verificationSessionId = `vss_session_${crypto.randomBytes(3).toString('hex')}`;
-    const newSession: VerificationSession = {
-      id: verificationSessionId,
-      partner_app_id: partnerApp.id,
-      external_user_id,
-      status: "created", // Set initialized state to 'created' as specified
-      risk_score: 0,
-      duplicate_candidate: false,
-      result_reason: "Session initialized via Partner API route. Pending user verification.",
-      risk_reasons: [],
-      proof_token: "",
-      created_at: new Date().toISOString(),
-      completed_at: null
-    };
-
-    supabaseService.createVerificationSession(newSession, db.verificationSessions);
-
-    appendAuditLog(
-      'partner', 
-      partnerApp.id, 
-      'session.create', 
-      'session', 
-      verificationSessionId, 
-      { external_user_id, callback_url, verification_level, client_ip: req.ip || "127.0.0.1" }
-    );
-
-    res.json({
-      session_id: verificationSessionId,
-      verification_url: `/verify/session/${verificationSessionId}`,
-      expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString() // 15 mins expiry
-    });
   });
 
   // 2. GET /api/v1/verification-sessions/:id
@@ -1933,6 +2067,126 @@ async function startServer() {
   // ============================================================================
   // ENTERPRISE TRUST OPERATIONAL ENDPOINTS (AAN POLICY, TIMELINE, ENFORCEMENT)
   // ============================================================================
+
+  // ============================================================================
+  // BUG BOUNTY & RESPONSIBLE DISCLOSURE ENDPOINTS (TESLA-STYLE)
+  // ============================================================================
+  app.get("/api/internal/security-reports", (req, res) => {
+    res.json(db.securityReports);
+  });
+
+  app.post("/api/internal/security-reports", async (req, res) => {
+    try {
+      const { title, category, severity, affected_system, reproduction_steps, submitted_evidence, reporter_contact } = req.body;
+      
+      if (!title || !category || !severity || !affected_system || !reproduction_steps || !reporter_contact) {
+        return res.status(400).json({ error: "Missing required security report fields." });
+      }
+
+      const reportId = `rep_${crypto.randomBytes(4).toString('hex')}`;
+      const newReport: SecurityReport = {
+        id: reportId,
+        title,
+        category,
+        severity,
+        affected_system,
+        reproduction_steps,
+        submitted_evidence: submitted_evidence || "",
+        reporter_contact,
+        status: "new",
+        bounty_amount: 0.00,
+        internal_notes: "",
+        created_at: new Date().toISOString(),
+        resolved_at: null
+      };
+
+      await supabaseService.createSecurityReport(newReport, db.securityReports);
+
+      appendAuditLog(
+        'user',
+        reporter_contact,
+        'security_report.submitted',
+        'security_report',
+        reportId,
+        { title, category, severity, affected_system }
+      );
+
+      res.json({ success: true, report: newReport });
+    } catch (err: any) {
+      console.error("[BUG BOUNTY] Error submitting security report:", err);
+      res.status(500).json({ error: "Internal server error submitting report" });
+    }
+  });
+
+  app.post("/api/internal/security-reports/:id/action", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { action, severity, status, bounty_amount, internal_notes, duplicate_of } = req.body;
+      
+      const report = db.securityReports.find(r => r.id === id);
+      if (!report) {
+        return res.status(404).json({ error: "Security report not found" });
+      }
+
+      const updates: Partial<SecurityReport> = {};
+      let auditAction = 'security_report.update';
+
+      if (action === 'triage') {
+        updates.status = 'triaged';
+        updates.internal_notes = internal_notes || report.internal_notes;
+        auditAction = 'security_report.triaged';
+      } else if (action === 'assign_severity') {
+        updates.severity = severity;
+        auditAction = 'security_report.severity_assigned';
+      } else if (action === 'mark_duplicate') {
+        updates.status = 'duplicate';
+        updates.internal_notes = `Marked as duplicate of report ${duplicate_of}. ${internal_notes || ""}`.trim();
+        auditAction = 'security_report.marked_duplicate';
+      } else if (action === 'patch') {
+        updates.status = 'patched';
+        updates.internal_notes = internal_notes || report.internal_notes;
+        updates.resolved_at = new Date().toISOString();
+        auditAction = 'security_report.patched';
+      } else if (action === 'approve_bounty') {
+        updates.status = 'payout_approved';
+        updates.bounty_amount = Number(bounty_amount) || 0;
+        updates.internal_notes = internal_notes || report.internal_notes;
+        auditAction = 'security_report.bounty_approved';
+      } else if (action === 'payout') {
+        updates.status = 'payout_paid';
+        updates.internal_notes = internal_notes || report.internal_notes;
+        auditAction = 'security_report.bounty_paid';
+      } else if (action === 'close') {
+        updates.status = 'closed';
+        updates.resolved_at = report.resolved_at || new Date().toISOString();
+        updates.internal_notes = internal_notes || report.internal_notes;
+        auditAction = 'security_report.closed';
+      } else if (action === 'update_notes') {
+        updates.internal_notes = internal_notes;
+        auditAction = 'security_report.notes_updated';
+      } else if (action === 'reproduce') {
+        updates.status = 'reproduced';
+        updates.internal_notes = internal_notes || report.internal_notes;
+        auditAction = 'security_report.reproduced';
+      }
+
+      await supabaseService.updateSecurityReport(id, updates, db.securityReports);
+
+      appendAuditLog(
+        'admin',
+        'admin_super_user_one',
+        auditAction,
+        'security_report',
+        id,
+        { action, updates }
+      );
+
+      res.json({ success: true, report: { ...report, ...updates } });
+    } catch (err: any) {
+      console.error("[BUG BOUNTY] Error taking action on security report:", err);
+      res.status(500).json({ error: "Internal server error executing action" });
+    }
+  });
 
   // 1. Policy Administration
   app.get("/api/internal/policies", (req, res) => {

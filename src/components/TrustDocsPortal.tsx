@@ -72,6 +72,97 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
     setTimeout(() => setTicketSuccess(false), 3000);
   };
 
+  // Bug Bounty / Security Center States
+  const [bountyForm, setBountyForm] = useState({
+    title: '',
+    category: 'authentication_bypass',
+    severity: 'high',
+    affected_system: '',
+    reproduction_steps: '',
+    submitted_evidence: '',
+    reporter_contact: ''
+  });
+  const [bountySubmitted, setBountySubmitted] = useState(false);
+  const [submittedBounty, setSubmittedBounty] = useState<any | null>(null);
+  const [submittingBounty, setSubmittingBounty] = useState(false);
+  const [bountyError, setBountyError] = useState('');
+  
+  const [lookupEmail, setLookupEmail] = useState('');
+  const [lookupResults, setLookupResults] = useState<any[]>([]);
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [bountyReportsList, setBountyReportsList] = useState<any[]>([]);
+  const [disclosureSubTab, setDisclosureSubTab] = useState<'policy' | 'submit' | 'track'>('policy');
+
+  const fetchBountyReports = async () => {
+    try {
+      const res = await fetch('/api/internal/security-reports');
+      if (res.ok) {
+        const data = await res.json();
+        setBountyReportsList(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch security reports:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (currentSection === 'disclosure') {
+      fetchBountyReports();
+    }
+  }, [currentSection]);
+
+  const handleBountySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bountyForm.title || !bountyForm.affected_system || !bountyForm.reproduction_steps || !bountyForm.reporter_contact) {
+      setBountyError('Please fill out all required fields.');
+      return;
+    }
+    setBountyError('');
+    setSubmittingBounty(true);
+    try {
+      const res = await fetch('/api/internal/security-reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bountyForm)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setSubmittedBounty(data.report);
+        setBountySubmitted(true);
+        // Reset form
+        setBountyForm({
+          title: '',
+          category: 'authentication_bypass',
+          severity: 'high',
+          affected_system: '',
+          reproduction_steps: '',
+          submitted_evidence: '',
+          reporter_contact: ''
+        });
+        fetchBountyReports();
+      } else {
+        const errData = await res.json();
+        setBountyError(errData.error || 'Failed to submit security report.');
+      }
+    } catch (err) {
+      setBountyError('Network error submitting security report.');
+    } finally {
+      setSubmittingBounty(false);
+    }
+  };
+
+  const handleLookup = () => {
+    if (!lookupEmail) return;
+    setIsLookingUp(true);
+    setTimeout(() => {
+      const matched = bountyReportsList.filter(
+        r => r.reporter_contact.toLowerCase().trim() === lookupEmail.toLowerCase().trim()
+      );
+      setLookupResults(matched);
+      setIsLookingUp(false);
+    }, 600);
+  };
+
   // Side Navigation Groups
   const categories = [
     {
@@ -106,7 +197,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
     {
       title: "ENTERPRISE",
       items: [
-        { id: "pricing", label: "Pricing Matrix", icon: Sliders },
+        { id: "pricing", label: "Platform Access", icon: Sliders },
         { id: "support", label: "Support Portal", icon: HelpCircle },
         { id: "contact", label: "Contact Sales", icon: Mail },
         { id: "terms", label: "Terms & Conditions", icon: Lock }
@@ -1024,79 +1115,191 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
             </div>
           )}
 
-          {/* ==================== 14. PRICING MATRIX ==================== */}
+          {/* ==================== 14. PLATFORM ACCESS ==================== */}
           {currentSection === 'pricing' && (
-            <div className="space-y-6 max-w-4xl">
+            <div className="space-y-8 max-w-4xl">
               <div>
-                <span className="font-mono text-[10px] text-blue-400 font-bold uppercase tracking-widest block mb-1">PLAN PRESETS</span>
-                <h1 className="text-2xl font-sans font-bold text-white tracking-tight">Enterprise Pricing Matrix</h1>
-                <p className="text-sm text-slate-400 mt-1">Illustrative allocation plans for sandbox integration trials and pilot deployments.</p>
+                <span className="font-mono text-[10px] text-blue-400 font-bold uppercase tracking-widest block mb-1">INTEGRATION MODES</span>
+                <h1 className="text-2xl font-sans font-bold text-white tracking-tight">Platform Access</h1>
+                <p className="text-sm text-slate-400 mt-1">
+                  Choose the integration path that matches your organization’s stage. Every deployment is built around the same mission: establishing trusted digital interactions while preserving user privacy.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div className="p-5 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between">
+                {/* Developer */}
+                <div className="p-6 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-2">
-                      <span className="font-sans font-bold text-white text-xs">Developer Plan</span>
-                      <span className="font-mono text-[10px] text-emerald-400">Free</span>
+                      <span className="font-sans font-bold text-white text-sm">Developer</span>
+                      <span className="font-mono text-[9px] text-emerald-400 uppercase tracking-widest bg-emerald-950/20 px-2 py-0.5 rounded border border-emerald-900/30">Sandbox</span>
                     </div>
-                    <p className="text-xs text-slate-450 leading-relaxed">
-                      Designed to secure experimental projects, test REST integration scripts, and verify system integrity interfaces.
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      For developers evaluating the AAN platform.
                     </p>
-                    <ul className="text-[10.5px] text-slate-400 font-mono space-y-1">
-                      <li>• 100 verifications/month</li>
-                      <li>• Standard client security score</li>
-                      <li>• Sandbox dashboard access</li>
+                    <ul className="text-[11px] text-slate-300 font-sans space-y-1.5 pt-2">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Documentation & SDKs</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Test Environment</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>API Keys</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Integration Examples</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Technical Support</span>
+                      </li>
                     </ul>
                   </div>
+                  <button 
+                    onClick={() => onNavigate('landing')}
+                    className="w-full py-2 bg-slate-900 hover:bg-slate-850 text-white font-mono text-[10px] font-bold tracking-wider rounded transition-all text-center uppercase border border-slate-800"
+                  >
+                    Start Building
+                  </button>
                 </div>
 
-                <div className="p-5 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between">
+                {/* Organization */}
+                <div className="p-6 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-2">
-                      <span className="font-sans font-bold text-white text-xs">Enterprise Plan</span>
-                      <span className="font-mono text-[10px] text-blue-400">Custom Pricing</span>
+                      <span className="font-sans font-bold text-white text-sm">Organization</span>
+                      <span className="font-mono text-[9px] text-blue-400 uppercase tracking-widest bg-blue-950/20 px-2 py-0.5 rounded border border-blue-900/30">Standard</span>
                     </div>
-                    <p className="text-xs text-slate-450 leading-relaxed">
-                      High-throughput deployment for modern scaling platforms requiring zero uptime friction margins.
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      For companies protecting customer accounts and digital communities.
                     </p>
-                    <ul className="text-[10.5px] text-slate-400 font-mono space-y-1">
-                      <li>• Flexible session allowances</li>
-                      <li>• Customizable verification policies</li>
-                      <li>• Dedicated compliance dashboards</li>
+                    <ul className="text-[11px] text-slate-300 font-sans space-y-1.5 pt-2">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Human Verification</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Unique User Assurance</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Returning User Recognition</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Risk Intelligence</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Administrative Dashboard</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Verification Analytics</span>
+                      </li>
                     </ul>
                   </div>
+                  <button 
+                    onClick={() => setCurrentSection('contact')}
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-mono text-[10px] font-bold tracking-wider rounded transition-all text-center uppercase block"
+                  >
+                    Request Access
+                  </button>
                 </div>
 
-                <div className="p-5 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between">
+                {/* Enterprise */}
+                <div className="p-6 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-2">
-                      <span className="font-sans font-bold text-white text-xs">Government Core</span>
-                      <span className="font-mono text-[10px] text-indigo-400">Contact Sales</span>
+                      <span className="font-sans font-bold text-white text-sm">Enterprise</span>
+                      <span className="font-mono text-[9px] text-indigo-400 uppercase tracking-widest bg-indigo-950/20 px-2 py-0.5 rounded border border-indigo-900/30">Custom</span>
                     </div>
-                    <p className="text-xs text-slate-450 leading-relaxed">
-                      Sovereign air-gapped structures meeting strict regulatory identity protection frameworks.
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      For large-scale platforms requiring custom trust policies.
                     </p>
+                    <ul className="text-[11px] text-slate-300 font-sans space-y-1.5 pt-2">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Custom Trust Policies</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Dedicated Infrastructure</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Private Deployment Options</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Enterprise Support</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Service Level Agreements</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Security Reviews</span>
+                      </li>
+                    </ul>
                   </div>
+                  <button 
+                    onClick={() => setCurrentSection('contact')}
+                    className="w-full py-2 bg-slate-900 hover:bg-slate-850 text-white font-mono text-[10px] font-bold tracking-wider rounded transition-all text-center uppercase block border border-slate-800"
+                  >
+                    Contact Enterprise
+                  </button>
                 </div>
 
-                <div className="p-5 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between">
+                {/* Public Sector */}
+                <div className="p-6 bg-slate-950/40 border border-slate-900 rounded-lg flex flex-col justify-between space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between items-center border-b border-slate-850 pb-2 mb-2">
-                      <span className="font-sans font-bold text-slate-400 text-xs">Biomedical Research</span>
-                      <span className="font-mono text-[10px] text-slate-500">Invitation Only</span>
+                      <span className="font-sans font-bold text-white text-sm">Public Sector</span>
+                      <span className="font-mono text-[9px] text-slate-400 uppercase tracking-widest bg-slate-900/40 px-2 py-0.5 rounded border border-slate-800">High Assurance</span>
                     </div>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Controlled node access targeting scholarly cryptography teams evaluating continuous signal heuristics.
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      For government agencies, educational institutions, healthcare organizations, and regulated environments requiring high-assurance trust infrastructure.
                     </p>
+                    <ul className="text-[11px] text-slate-300 font-sans space-y-1.5 pt-2">
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Private Infrastructure</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Custom Compliance Workflows</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Dedicated Support</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>Long-Term Deployment Planning</span>
+                      </li>
+                    </ul>
                   </div>
+                  <button 
+                    onClick={() => setCurrentSection('contact')}
+                    className="w-full py-2 bg-slate-900 hover:bg-slate-850 text-white font-mono text-[10px] font-bold tracking-wider rounded transition-all text-center uppercase block border border-slate-800"
+                  >
+                    Contact AAN
+                  </button>
                 </div>
 
               </div>
 
-              <div className="p-4 bg-slate-900 border border-slate-850 rounded text-center text-xs text-slate-500 font-mono">
-                Illustrative plans compiled for MVP representation only. Actual access credentials require custom pilot clearances.
+              <div className="p-4 bg-slate-900 border border-slate-850 rounded text-center text-xs text-slate-400 leading-relaxed font-sans">
+                Every organization has different trust requirements. Our team works directly with partners to design deployments that fit their operational, privacy, and security needs.
               </div>
             </div>
           )}
@@ -1359,50 +1562,528 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
             </div>
           )}
 
-          {/* ==================== 18. RESPONSIBLE DISCLOSURE ==================== */}
+          {/* ==================== 18. RESPONSIBLE DISCLOSURE & SECURITY CENTER ==================== */}
           {currentSection === 'disclosure' && (
-            <div className="space-y-6 max-w-4xl">
-              <div>
-                <span className="font-mono text-[10px] text-yellow-400 font-bold uppercase tracking-widest block mb-1">BUG BOUNTY PROGRAM</span>
-                <h1 className="text-2xl font-sans font-bold text-white tracking-tight">Responsible Disclosure Policy</h1>
-                <p className="text-sm text-slate-400 mt-1">Submit technical security concerns, review Safe Harbor parameters, and coordinate timelines.</p>
+            <div className="space-y-6 max-w-4xl font-sans text-xs text-slate-350">
+              
+              {/* Header */}
+              <div className="border-b border-slate-800 pb-5">
+                <span className="font-mono text-[10px] text-yellow-500 font-bold uppercase tracking-widest block mb-1">
+                  SECURITY & RESPONSIBLE DISCLOSURE CENTER
+                </span>
+                <h1 className="text-2xl font-sans font-bold text-white tracking-tight">
+                  AAN Bug Bounty Program
+                </h1>
+                <p className="text-sm text-slate-400 mt-1">
+                  Partner with AAN security engineers to isolate trust-boundary vulnerabilities. We commit to a Tesla-style, safe-harbor responsible disclosure framework with direct cash rewards.
+                </p>
               </div>
 
-              <div className="space-y-5 leading-relaxed text-xs text-slate-400 font-sans">
-                
-                <div className="p-4 bg-yellow-950/25 border border-yellow-800/40 text-yellow-400 rounded-lg space-y-1.5 animate-pulse">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-widest block"> REWARD ELIGIBILITY CRITERIA</span>
-                  <p className="text-xs">We value coordinate security research. Gaps or leakage detected on sandbox environments are eligible for symbolic bounty recognition rosters.</p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="font-sans font-bold text-white text-sm">1. Reporting Framework</h3>
-                  <p>
-                    Transmit detailed step-by-step reproduction instructions, sample REST payload triggers, and affected browser environments observed to:
-                  </p>
-                  <p className="font-mono text-[11px] bg-slate-950 border border-slate-850 px-3 py-1 text-blue-400 rounded max-w-xs">
-                    security@aan.trust
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="font-sans font-bold text-white text-sm">2. Safe Harbor Safeguards</h3>
-                  <p>
-                    AAN pledges never to initiate legal claims or request law enforcement audits targeting researchers who locate and report structural vulnerabilities under our coordination policies.
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="font-sans font-bold text-white text-sm">3. Standard Disclosure Timeline</h3>
-                  <p>
-                    To insulate our integrated active pilot institutional partners, researchers agree to grant a rolling 90-day silent window for our security engineers to apply fixes before publishing details publically.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-slate-900 border border-slate-850 text-[10.5px] text-slate-450 font-mono">
-                  Future PGP Key Signature: [ -----BEGIN PGP PUBLIC KEY BLOCK----- ... ]
-                </div>
+              {/* Sub-Navigation Tabs */}
+              <div className="flex border-b border-slate-850 gap-2">
+                <button
+                  onClick={() => setDisclosureSubTab('policy')}
+                  className={`px-4 py-2 text-xs font-mono border-b-2 transition ${
+                    disclosureSubTab === 'policy'
+                      ? 'border-yellow-500 text-white font-bold bg-slate-900/40'
+                      : 'border-transparent text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Policy & Tiers
+                </button>
+                <button
+                  onClick={() => setDisclosureSubTab('submit')}
+                  className={`px-4 py-2 text-xs font-mono border-b-2 transition ${
+                    disclosureSubTab === 'submit'
+                      ? 'border-yellow-500 text-white font-bold bg-slate-900/40'
+                      : 'border-transparent text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Submit Report
+                </button>
+                <button
+                  onClick={() => setDisclosureSubTab('track')}
+                  className={`px-4 py-2 text-xs font-mono border-b-2 transition ${
+                    disclosureSubTab === 'track'
+                      ? 'border-yellow-500 text-white font-bold bg-slate-900/40'
+                      : 'border-transparent text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Track & Search
+                </button>
               </div>
+
+              {/* TAB 1: POLICY & TIERS */}
+              {disclosureSubTab === 'policy' && (
+                <div className="space-y-6 animate-fadeIn">
+                  
+                  {/* Safe Harbor Alert */}
+                  <div className="p-4 bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 rounded space-y-1.5 leading-normal">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                      <span className="font-mono text-[11px] font-bold uppercase tracking-wider animate-pulse">
+                        CERTIFIED SAFE HARBOR CONTRACT
+                      </span>
+                    </div>
+                    <p className="text-slate-300">
+                      AAN guarantees that any honest security researcher operating within these guidelines will receive <strong>complete immunity from legal actions</strong>, civil claims, or security-audit referrals. We value cooperative whitehat intelligence.
+                    </p>
+                  </div>
+
+                  {/* Bounty Tiers Cards */}
+                  <div>
+                    <h3 className="text-white font-bold text-sm mb-3">Responsible Disclosure Bounty Tiers</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      
+                      <div className="bg-slate-900/60 border border-slate-800 p-3.5 rounded">
+                        <span className="text-slate-500 font-mono text-[9px] uppercase tracking-wider block">Tier 4</span>
+                        <div className="text-lg font-bold text-slate-200 mt-1">$100 – $500</div>
+                        <span className="text-blue-400 font-mono text-[9px] uppercase tracking-wider block mt-1">LOW</span>
+                        <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
+                          Minor UI defects, documentation leakage, simple validation errors.
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-900/60 border border-slate-800 p-3.5 rounded">
+                        <span className="text-slate-500 font-mono text-[9px] uppercase tracking-wider block">Tier 3</span>
+                        <div className="text-lg font-bold text-slate-200 mt-1">$500 – $2,500</div>
+                        <span className="text-yellow-400 font-mono text-[9px] uppercase tracking-wider block mt-1">MEDIUM</span>
+                        <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
+                          Rate limit bypasses, webhook signature mismatch flaws, localized spoofing.
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-900/60 border border-slate-800 p-3.5 rounded border-l-2 border-l-orange-500">
+                        <span className="text-slate-500 font-mono text-[9px] uppercase tracking-wider block">Tier 2</span>
+                        <div className="text-lg font-bold text-white mt-1">$2,500 – $10,000</div>
+                        <span className="text-orange-400 font-mono text-[9px] uppercase tracking-wider block mt-1">HIGH</span>
+                        <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
+                          Partner API key exposures, forged verification tokens, cross-org data access.
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-900/60 border border-red-900/80 p-3.5 rounded bg-red-950/10 border-l-2 border-l-red-500">
+                        <span className="text-red-400/60 font-mono text-[9px] uppercase tracking-wider block">Tier 1</span>
+                        <div className="text-lg font-bold text-red-400 mt-1">$10,000 – $25,000+</div>
+                        <span className="text-red-500 font-mono text-[9px] uppercase tracking-wider block mt-1 font-bold">CRITICAL</span>
+                        <p className="text-[11px] text-slate-400 mt-1.5 leading-snug">
+                          Full authentication bypasses, global encryption breaches, admin console access.
+                        </p>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Bounty Scope Matrix */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-white font-bold text-sm">Targeted Scope & Reward Categories</h3>
+                      <span className="text-[10px] font-mono text-slate-500 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                        Focus: Trust Boundaries
+                      </span>
+                    </div>
+
+                    <div className="border border-slate-850 rounded overflow-hidden">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-900 text-slate-400 font-mono text-[10px] uppercase tracking-wider border-b border-slate-850">
+                            <th className="p-3">Category ID & Name</th>
+                            <th className="p-3">Target Objective / Core Risk</th>
+                            <th className="p-3 text-right">Standard Severity</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-850 text-[11px]">
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">authentication_bypass</td>
+                            <td className="p-3 text-slate-400">Total bypass of the AAN core cryptographic verification sequence or API authentication filters.</td>
+                            <td className="p-3 text-right text-red-500 font-bold font-mono">CRITICAL</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">partner_api_key_exposure</td>
+                            <td className="p-3 text-slate-400">Exposing secret partner credentials, unhashed API keys, or JWT private keys through client-side state.</td>
+                            <td className="p-3 text-right text-orange-400 font-bold font-mono">HIGH</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">cross_organization_data_access</td>
+                            <td className="p-3 text-slate-400">Inspecting verification histories, audit trails, or settings belonging to another partner space.</td>
+                            <td className="p-3 text-right text-orange-400 font-bold font-mono">HIGH</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">forged_verification_tokens</td>
+                            <td className="p-3 text-slate-400">Generating structurally valid proof-of-human claims tokens without passing authorized verification.</td>
+                            <td className="p-3 text-right text-red-500 font-bold font-mono">CRITICAL</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">replay_attacks</td>
+                            <td className="p-3 text-slate-400">Re-submitting old or expired proof tokens to successfully simulate dynamic human verification.</td>
+                            <td className="p-3 text-right text-orange-400 font-bold font-mono">HIGH</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">webhook_spoofing</td>
+                            <td className="p-3 text-slate-400">Forging verified webhook deliveries to partner servers due to poor signature security controls.</td>
+                            <td className="p-3 text-right text-yellow-500 font-bold font-mono">MEDIUM</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">admin_dashboard_access</td>
+                            <td className="p-3 text-slate-400">Accessing the Internal Compliance Console or Admin inspection drawers without authentication.</td>
+                            <td className="p-3 text-right text-red-500 font-bold font-mono">CRITICAL</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">rate_limit_bypass</td>
+                            <td className="p-3 text-slate-400">Evading standard verification window throttling or client limits to conduct brute-force attacks.</td>
+                            <td className="p-3 text-right text-yellow-500 font-bold font-mono">MEDIUM</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">bot_abuse_at_scale</td>
+                            <td className="p-3 text-slate-400">Automating signature captures, biometric template injections, or device loops at massive volume.</td>
+                            <td className="p-3 text-right text-orange-400 font-bold font-mono">HIGH</td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 font-mono font-semibold text-slate-200">privacy_leaks</td>
+                            <td className="p-3 text-slate-400">Leaking raw biometric templates, unhashed hardware signals, or persistent user identifiers in logs.</td>
+                            <td className="p-3 text-right text-orange-400 font-bold font-mono">HIGH</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Standard Rules */}
+                  <div className="space-y-2 border-t border-slate-850 pt-4">
+                    <h3 className="font-sans font-bold text-white text-sm">Program Guidelines & Conduct</h3>
+                    <p className="text-xs text-slate-400">
+                      Researchers agree to give AAN a <strong>90-day silent remediation window</strong> before public disclosure. Do not perform Denial of Service (DoS) tests, physical security checks, or target third-party partner applications outside our official sandbox environments.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: SUBMIT REPORT */}
+              {disclosureSubTab === 'submit' && (
+                <div className="space-y-6 animate-fadeIn">
+                  
+                  {bountySubmitted ? (
+                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg text-center space-y-4 max-w-xl mx-auto">
+                      <div className="h-12 w-12 bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
+                        ✓
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-white font-sans font-bold text-base">Vulnerability Report Received</h3>
+                        <p className="text-xs text-slate-400 leading-normal">
+                          Thank you for your submission. Your report has been successfully logged directly into our Compliance database and mapped to our secure triaging pipeline.
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-950 border border-slate-850 p-4 rounded text-left font-mono space-y-2 text-[11px]">
+                        <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                          <span className="text-slate-500">REPORT ID:</span>
+                          <span className="text-white font-bold">{submittedBounty?.id}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                          <span className="text-slate-500">TITLE:</span>
+                          <span className="text-slate-200 truncate max-w-[250px]">{submittedBounty?.title}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                          <span className="text-slate-500">CATEGORY:</span>
+                          <span className="text-blue-400">{submittedBounty?.category}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-900 pb-1.5">
+                          <span className="text-slate-500">SEVERITY:</span>
+                          <span className={`font-bold ${
+                            submittedBounty?.severity === 'critical' ? 'text-red-500' :
+                            submittedBounty?.severity === 'high' ? 'text-orange-400' :
+                            submittedBounty?.severity === 'medium' ? 'text-yellow-400' : 'text-blue-400'
+                          }`}>{submittedBounty?.severity?.toUpperCase()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">INITIAL BOUNTY STATUS:</span>
+                          <span className="text-yellow-400 font-bold uppercase tracking-wider">NEW / PENDING TRIAGE</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          onClick={() => {
+                            setBountySubmitted(false);
+                            setSubmittedBounty(null);
+                          }}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-mono rounded text-[11px] transition"
+                        >
+                          Submit Another Vulnerability
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleBountySubmit} className="space-y-4 max-w-2xl bg-slate-900/40 p-5 border border-slate-850 rounded-lg">
+                      <div className="border-b border-slate-850 pb-2">
+                        <h3 className="text-white font-sans font-bold text-sm">Disclose Security Gaps Securely</h3>
+                        <p className="text-[11px] text-slate-500 mt-0.5">Please provide reproducible technical details to support triage efficiency.</p>
+                      </div>
+
+                      {bountyError && (
+                        <div className="p-3 bg-red-950/20 border border-red-900/40 text-red-400 rounded text-xs">
+                          {bountyError}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-mono text-[10px]">Report Title *</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. JWT Signature None-Algorithm validation bypass"
+                            className="w-full bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                            value={bountyForm.title}
+                            onChange={(e) => setBountyForm({ ...bountyForm, title: e.target.value })}
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-mono text-[10px]">Reporter Contact Email *</label>
+                          <input
+                            type="email"
+                            required
+                            placeholder="whitehat@securityresearch.org"
+                            className="w-full bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                            value={bountyForm.reporter_contact}
+                            onChange={(e) => setBountyForm({ ...bountyForm, reporter_contact: e.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-mono text-[10px]">Vulnerability Category *</label>
+                          <select
+                            className="w-full bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                            value={bountyForm.category}
+                            onChange={(e) => setBountyForm({ ...bountyForm, category: e.target.value })}
+                          >
+                            <option value="authentication_bypass">Authentication bypass</option>
+                            <option value="partner_api_key_exposure">Partner API key exposure</option>
+                            <option value="cross_organization_data_access">Cross-organization data access</option>
+                            <option value="forged_verification_tokens">Forged verification tokens</option>
+                            <option value="replay_attacks">Replay attacks using old proof tokens</option>
+                            <option value="webhook_spoofing">Webhook spoofing</option>
+                            <option value="admin_dashboard_access">Admin dashboard access bugs</option>
+                            <option value="rate_limit_bypass">Rate-limit bypass</option>
+                            <option value="bot_abuse_at_scale">Bot abuse at scale</option>
+                            <option value="unauthorized_partner_actions">Unauthorized partner actions</option>
+                            <option value="privacy_leaks">Privacy leaks</option>
+                            <option value="audit_log_tampering">Audit log tampering</option>
+                            <option value="verification_approval_bypass">Verification approval bypass</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-slate-400 font-mono text-[10px]">Estimated Severity *</label>
+                          <select
+                            className="w-full bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                            value={bountyForm.severity}
+                            onChange={(e) => setBountyForm({ ...bountyForm, severity: e.target.value as any })}
+                          >
+                            <option value="low">Low Severity ($100 - $500)</option>
+                            <option value="medium">Medium Severity ($500 - $2,500)</option>
+                            <option value="high">High Severity ($2,500 - $10,000)</option>
+                            <option value="critical">Critical Severity ($10,000 - $25,000+)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-mono text-[10px]">Affected API System / Module *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. /api/v1/proofs/verify or Webhook dispatch headers"
+                          className="w-full bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                          value={bountyForm.affected_system}
+                          onChange={(e) => setBountyForm({ ...bountyForm, affected_system: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-mono text-[10px]">Reproduction Steps *</label>
+                        <textarea
+                          required
+                          placeholder="Provide clear steps to reproduce the vulnerability. Be specific."
+                          className="w-full h-28 bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-sans text-xs"
+                          value={bountyForm.reproduction_steps}
+                          onChange={(e) => setBountyForm({ ...bountyForm, reproduction_steps: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-slate-400 font-mono text-[10px]">Supporting Proof of Concept Payload / Code Snippet (Optional)</label>
+                        <textarea
+                          placeholder="Provide payload bodies, script snippets, or request headers confirming the leak."
+                          className="w-full h-24 bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                          value={bountyForm.submitted_evidence}
+                          onChange={(e) => setBountyForm({ ...bountyForm, submitted_evidence: e.target.value })}
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={submittingBounty}
+                        className="w-full bg-yellow-600 hover:bg-yellow-500 text-slate-950 font-mono text-xs font-bold py-2 px-4 rounded transition flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {submittingBounty ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Transmitting secure telemetry...
+                          </>
+                        ) : (
+                          <>
+                            Submit Bug Bounty Report &rarr;
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 3: TRACK REPORT STATUS */}
+              {disclosureSubTab === 'track' && (
+                <div className="space-y-6 animate-fadeIn">
+                  
+                  {/* Lookup Interface */}
+                  <div className="bg-slate-900/40 p-5 border border-slate-850 rounded-lg space-y-4 max-w-xl">
+                    <div>
+                      <h3 className="text-white font-sans font-bold text-sm">Vulnerability Report Lookup Engine</h3>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Enter your researcher email below to retrieve status updates, triage notes, and bounty payouts.</p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        placeholder="whitehat@securityresearch.org"
+                        className="flex-1 bg-slate-950 border border-slate-800 py-2 px-3 rounded focus:outline-none focus:border-yellow-500 text-white font-mono text-[11px]"
+                        value={lookupEmail}
+                        onChange={(e) => setLookupEmail(e.target.value)}
+                      />
+                      <button
+                        onClick={handleLookup}
+                        disabled={isLookingUp || !lookupEmail}
+                        className="px-4 py-2 bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-slate-950 font-mono font-bold text-xs rounded transition flex items-center gap-1.5"
+                      >
+                        {isLookingUp ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : "Search"}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Results list */}
+                  {lookupEmail && (
+                    <div className="space-y-3">
+                      <h4 className="text-white font-mono text-[10px] uppercase tracking-wider text-slate-400">
+                        Search Results for "{lookupEmail}" ({lookupResults.length} matches)
+                      </h4>
+
+                      {lookupResults.length === 0 ? (
+                        <div className="p-4 bg-slate-900/30 border border-slate-850 text-slate-500 text-center rounded text-xs font-mono">
+                          No matching active security reports found for this researcher contact.
+                        </div>
+                      ) : (
+                        <div className="space-y-3.5">
+                          {lookupResults.map((report) => (
+                            <div key={report.id} className="bg-slate-900/70 border border-slate-800 rounded-lg p-4 space-y-3">
+                              
+                              {/* Header */}
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                                <div>
+                                  <span className="font-mono text-[10px] text-slate-500 uppercase font-bold mr-2">[{report.id}]</span>
+                                  <span className="text-white font-sans font-semibold text-xs">{report.title}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-2 py-0.5 text-[9px] font-mono rounded font-bold uppercase ${
+                                    report.severity === 'critical' ? 'bg-red-955 text-red-400 border border-red-900/50' :
+                                    report.severity === 'high' ? 'bg-orange-950 text-orange-400 border border-orange-900/50' :
+                                    report.severity === 'medium' ? 'bg-yellow-950 text-yellow-400 border border-yellow-900/50' :
+                                    'bg-blue-950 text-blue-400 border border-blue-900/50'
+                                  }`}>
+                                    {report.severity}
+                                  </span>
+
+                                  <span className={`px-2 py-0.5 text-[9px] font-mono rounded font-bold uppercase ${
+                                    report.status === 'patched' || report.status === 'payout_paid' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/50' :
+                                    report.status === 'duplicate' || report.status === 'closed' ? 'bg-slate-800 text-slate-400 border border-slate-750' :
+                                    'bg-yellow-950/40 text-yellow-500 border border-yellow-900/30 animate-pulse'
+                                  }`}>
+                                    {report.status?.replace('_', ' ')}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Details */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px] text-slate-400 font-mono">
+                                <div>
+                                  <span className="text-slate-500 block text-[9px] uppercase tracking-wider">Category</span>
+                                  <span className="text-slate-200">{report.category?.replace('_', ' ')}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-500 block text-[9px] uppercase tracking-wider">Affected Component</span>
+                                  <span className="text-slate-200 truncate block">{report.affected_system}</span>
+                                </div>
+                                <div>
+                                  <span className="text-slate-500 block text-[9px] uppercase tracking-wider">Approved Bounty</span>
+                                  <span className="text-emerald-400 font-bold">${report.bounty_amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                </div>
+                              </div>
+
+                              {/* Internal Engineer Notes */}
+                              {report.internal_notes && (
+                                <div className="p-2.5 bg-slate-950 border border-slate-850 rounded">
+                                  <span className="text-slate-500 block text-[9px] uppercase tracking-wider font-mono">AAN Security Engineer Response:</span>
+                                  <p className="text-slate-300 text-[11px] leading-relaxed mt-1">{report.internal_notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Program Global Transparency Board */}
+                  <div className="space-y-3 border-t border-slate-850 pt-5">
+                    <h4 className="text-white font-sans font-bold text-xs">AAN Platform Global Vulnerability Disclosures</h4>
+                    <p className="text-xs text-slate-400">
+                      To drive absolute transparency in decentralized trust infrastructure design, we publish the status and bounty history of all reports anonymously:
+                    </p>
+
+                    <div className="space-y-2">
+                      {bountyReportsList.map((rep) => {
+                        // anonymize reporter contact
+                        const parts = rep.reporter_contact.split('@');
+                        const anonEmail = parts[0].substring(0, 2) + '***@' + (parts[1] || 'domain.com');
+                        
+                        return (
+                          <div key={rep.id} className="flex items-center justify-between p-2.5 bg-slate-900/30 border border-slate-850/50 rounded font-mono text-[10.5px]">
+                            <div className="flex items-center gap-3">
+                              <span className="text-slate-500">[{rep.id}]</span>
+                              <span className="text-slate-200 truncate max-w-[200px] md:max-w-md">{rep.title}</span>
+                              <span className="text-slate-500">by {anonEmail}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-emerald-400">${rep.bounty_amount?.toLocaleString()}</span>
+                              <span className={`px-1.5 py-0.5 rounded text-[8.5px] uppercase font-bold ${
+                                rep.status === 'patched' || rep.status === 'payout_paid' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900/30' :
+                                'bg-yellow-950/30 text-yellow-500'
+                              }`}>{rep.status}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
             </div>
           )}
 

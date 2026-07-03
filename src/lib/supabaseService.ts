@@ -3,7 +3,8 @@ import {
   VerificationSession, 
   AuditLog, 
   SecurityEvent, 
-  PartnerApp 
+  PartnerApp,
+  SecurityReport
 } from "../types";
 
 // ============================================================================
@@ -251,6 +252,108 @@ export const supabaseService = {
         localStore.unshift(partnerApp);
       }
       return partnerApp;
+    }
+  },
+
+  /**
+   * 6. FIND PARTNER APP BY KEY HASH
+   */
+  async findPartnerAppByHash(
+    hash: string,
+    localStore: PartnerApp[]
+  ): Promise<PartnerApp | null> {
+    if (isConfigured && supabase) {
+      const { data, error } = await supabase
+        .from("partner_apps")
+        .select("*")
+        .eq("api_key_hash", hash)
+        .maybeSingle();
+
+      if (error) {
+        handleDbError(error, "findPartnerAppByHash");
+        return localStore.find(x => x.api_key_hash === hash) || null;
+      }
+      return data as PartnerApp | null;
+    } else {
+      return localStore.find(x => x.api_key_hash === hash) || null;
+    }
+  },
+
+  /**
+   * 7. CREATE SECURITY REPORT (BUG BOUNTY RESPONSIBLE DISCLOSURE)
+   */
+  async createSecurityReport(
+    report: SecurityReport,
+    localStore: SecurityReport[]
+  ): Promise<SecurityReport> {
+    if (isConfigured && supabase) {
+      console.log(`[AAN DB] INSERT security_report ${report.id} to Supabase`);
+      const { data, error } = await supabase
+        .from("security_reports")
+        .insert({
+          id: report.id,
+          title: report.title,
+          category: report.category,
+          severity: report.severity,
+          affected_system: report.affected_system,
+          reproduction_steps: report.reproduction_steps,
+          submitted_evidence: report.submitted_evidence,
+          reporter_contact: report.reporter_contact,
+          status: report.status,
+          bounty_amount: report.bounty_amount,
+          internal_notes: report.internal_notes,
+          created_at: report.created_at,
+          resolved_at: report.resolved_at
+        })
+        .select()
+        .single();
+
+      if (error) {
+        handleDbError(error, "createSecurityReport");
+        localStore.unshift(report);
+        return report;
+      }
+      return data as SecurityReport;
+    } else {
+      localStore.unshift(report);
+      return report;
+    }
+  },
+
+  /**
+   * 8. UPDATE SECURITY REPORT (TRIAGE / PATCH / PAYOUT / NOTES)
+   */
+  async updateSecurityReport(
+    reportId: string,
+    updates: Partial<SecurityReport>,
+    localStore: SecurityReport[]
+  ): Promise<SecurityReport | null> {
+    if (isConfigured && supabase) {
+      console.log(`[AAN DB] UPDATE security_report ${reportId} in Supabase`);
+      const { data, error } = await supabase
+        .from("security_reports")
+        .update(updates)
+        .eq("id", reportId)
+        .select()
+        .single();
+
+      if (error) {
+        handleDbError(error, "updateSecurityReport");
+        const idx = localStore.findIndex(r => r.id === reportId);
+        if (idx >= 0) {
+          localStore[idx] = { ...localStore[idx], ...updates };
+          return localStore[idx];
+        }
+        return null;
+      }
+      return data as SecurityReport;
+    } else {
+      const idx = localStore.findIndex(r => r.id === reportId);
+      if (idx >= 0) {
+        localStore[idx] = { ...localStore[idx], ...updates };
+        return localStore[idx];
+      }
+      return null;
     }
   }
 };

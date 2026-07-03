@@ -78,6 +78,10 @@ export interface VerificationSession {
   proof_token: string;
   created_at: string;
   completed_at: string | null;
+  redirect_url?: string;
+  metadata?: Record<string, any>;
+  expires_at?: string;
+  checkout_url?: string;
 }
 
 export interface AuditLog {
@@ -211,4 +215,34 @@ export interface ProfileHistoryEntry {
   timestamp: string;
   reason: string;
 }
+
+export interface SecurityReport {
+  id: string;
+  title: string;
+  category: 
+    | 'authentication_bypass'
+    | 'partner_api_key_exposure'
+    | 'cross_organization_data_access'
+    | 'forged_verification_tokens'
+    | 'replay_attacks'
+    | 'webhook_spoofing'
+    | 'admin_dashboard_access'
+    | 'rate_limit_bypass'
+    | 'bot_abuse_at_scale'
+    | 'unauthorized_partner_actions'
+    | 'privacy_leaks'
+    | 'audit_log_tampering'
+    | 'verification_approval_bypass';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  affected_system: string;
+  reproduction_steps: string;
+  submitted_evidence?: string;
+  reporter_contact: string;
+  status: 'new' | 'triaged' | 'duplicate' | 'reproduced' | 'patched' | 'payout_approved' | 'payout_paid' | 'closed';
+  bounty_amount: number;
+  internal_notes?: string;
+  created_at: string;
+  resolved_at?: string | null;
+}
+
 
