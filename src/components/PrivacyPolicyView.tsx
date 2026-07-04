@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-interface TermsOfServiceViewProps {
+interface PrivacyPolicyViewProps {
   onNavigate: (page: string, customPath?: string) => void;
 }
 
@@ -20,7 +20,7 @@ interface Section {
   content: string[];
 }
 
-export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewProps) {
+export default function PrivacyPolicyView({ onNavigate }: PrivacyPolicyViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [activeSection, setActiveSection] = useState<string>('section-1');
@@ -36,78 +36,78 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
     {
       id: 'section-1',
       num: 1,
-      title: 'Eligibility & Legal Capability',
-      icon: Scale,
-      shortDesc: 'Age constraints, authority representations, and digital consent compliance.',
+      title: 'Data Minimization Mandate',
+      icon: Shield,
+      shortDesc: 'AAN operates on a strict zero-knowledge, local-first data processing mandate.',
       content: [
-        'You must be at least 13 years old (or the minimum age of digital consent in your region) to participate in AAN verification flows. If we isolate evidence of underage usage, we will suspend all active credentials.',
-        'If you are integrating these APIs on behalf of an enterprise, corporate body, or public entity, you warrant that you hold the legal authority to bind that entity. In such cases, the terms "you" and "your" refer strictly to that organization.'
+        'AAN is engineered on a fundamental principle of data minimization. We do not store biometric data, physical government documents, or unhashed personal identifiable information (PII) on central servers.',
+        'Our verification loops process security and integrity parameters in volatile, short-lived memory (RAM) and generate one-way cryptographic proof vectors. Once the verification session is confirmed, the temporary raw inputs are permanently purged from RAM, leaving only a state-level mathematical assertion.'
       ]
     },
     {
       id: 'section-2',
       num: 2,
-      title: 'Developer Accounts & Credentials',
-      icon: UserCheck,
-      shortDesc: 'Your responsibilities regarding API key safeguarding and project access.',
+      title: 'Telemetry Processed',
+      icon: Terminal,
+      shortDesc: 'The non-custodial metadata, device signatures, and network attributes we analyze.',
       content: [
-        'Access to the Partner Portal and developer API endpoints requires complete credentials and registration. You must provide truthful, current, and accurate operational parameters for your organization.',
-        'You are exclusively responsible for securing your API keys, private credentials, and cryptographic tokens. Any transaction or request occurring under your credential set is deemed authorized by your organization. You must report any suspected key compromise immediately.'
+        'To detect multi-accounting, emulators, and coordinated automated botnets, AAN processes device-level security metadata. This includes public hardware signature keys, non-personal device configuration indices, and localized browser environmental variables.',
+        'We do not employ cross-site marketing trackers, third-party advertising cookies, or behavioral surveillance engines. All network telemetry analyzed is processed under a strict defensive context to enforce security rules and verify unique humanness.'
       ]
     },
     {
       id: 'section-3',
       num: 3,
-      title: 'Consent-First Verification Rules',
+      title: 'Zero-Biometrics Guarantee',
       icon: Fingerprint,
-      shortDesc: 'Strict enforcement of explicit, user-initiated verification loops.',
+      shortDesc: 'How signature templates and validation checks bypass central biological databases.',
       content: [
-        'AAN is a non-custodial middleware designed to verify humanness. All verification flows must be initiated strictly with explicit, user-initiated actions. Hidden, passive, or non-consensual biometric profiling is strictly prohibited.',
-        'Integrating clients must publish a transparent notice to their end-users explaining that AAN is utilized as a secure verification processor. You represent that your data practices fully comply with applicable privacy standards, including GDPR, CCPA, and regional laws.'
+        'AAN completely replaces legacy biometric databases with modern cryptographic signature Net templates. When a user completes a verification gesture, we calculate a multi-dimensional, localized vector hash that describes the uniqueness of the action without recording physical facial features or voice signatures.',
+        'Because the resulting templates are irreversible one-way cryptographic hashes, they cannot be reconstructed back into physical representations. This guarantees that even in the event of an external network compromise, user physical identities remain totally secure and uncompromised.'
       ]
     },
     {
       id: 'section-4',
       num: 4,
-      title: 'Intellectual Property & API Restrictions',
-      icon: Terminal,
-      shortDesc: 'AAN proprietary software protections, trademark guidelines, and code boundaries.',
+      title: 'Data Retention & Purges',
+      icon: Clock,
+      shortDesc: 'Our automated memory purge timelines and persistent logs constraints.',
       content: [
-        'AAN grants you a limited, non-exclusive, revocable, non-transferable license to access our RESTful endpoints, SDKs, and dashboard interfaces solely to verify your platform users.',
-        'You are strictly forbidden from attempting to reverse-engineer, decompile, or disassemble our proprietary telemetry algorithms. Any scraping, load testing, or adversarial manipulation of AAN production APIs will trigger an automatic security lock.'
+        'All active gesture-capture inputs exist exclusively in transient server memory for the duration of the verification flow, with a hard timeout of ten (10) minutes.',
+        'The resulting signed verification assertion (proof token) remains valid for thirty (30) days to prevent repetitive verification fatigue. System logs containing high-level security event counters, blocked bypass attempts, and anonymized audit indexes are retained in secure, encrypted archives for compliance tracing before automated deletion.'
       ]
     },
     {
       id: 'section-5',
       num: 5,
-      title: 'Service Availability & Disclaimers',
-      icon: ShieldAlert,
-      shortDesc: 'As-Is operational model and our probabilistic risk assessment standards.',
+      title: 'Third-Party Data Sale Restrictions',
+      icon: EyeOff,
+      shortDesc: 'Absolute prohibition on sharing, marketing, or commercializing client metadata.',
       content: [
-        'AAN SERVICES AND APIS ARE PROVIDED TO ALL INTEGRATING PARTNERS ON AN "AS IS" AND "AS AVAILABLE" BASIS. WE EXPLICITLY DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.',
-        'WE DO NOT WARRANT THAT THE ADAPTIVE TRUST LAYERS WILL SUPPRESS 100% OF MULTI-ACCOUNTING OR AUTOMATED FRAUD. ADVISORIES ARE PROBABILISTIC SECURITY RECOMMENDATIONS DERIVED IN REAL-TIME AND UTILIZED AT YOUR OWN RISK.'
+        'We do not sell, rent, lease, or commercialize any verified user hashes or security telemetry. The cryptographic proofs issued by AAN are shared exclusively with the registered partner application that initiated the verification hand-shake.',
+        'Our service model is entirely funded through enterprise licensing and consumption fees, ensuring that our core incentives are aligned with protecting user privacy rather than monetizing user data.'
       ]
     },
     {
       id: 'section-6',
       num: 6,
-      title: 'Account Revocation & Termination',
-      icon: Power,
-      shortDesc: 'Automatic triggers for API credential revocation and integration blocks.',
+      title: 'GDPR & CCPA Rights',
+      icon: Globe,
+      shortDesc: 'Providing clear right-to-be-forgotten and user-initiated deletion mechanisms.',
       content: [
-        'We reserve the absolute right to suspend or terminate your developer access, active API keys, and database synchronization immediately and without warning in the event of a security emergency.',
-        'Grounds for immediate revocation include: (a) violating the Consent-First policy; (b) deliberate bypass of rate limit protections; (c) sending raw, unhashed personal datasets to verification loops; or (d) causing performance stability hazards.'
+        'AAN provides comprehensive support for CCPA and GDPR compliance. Any individual verified through AAN possesses the absolute right to query, lock, or request the immediate purge of their cryptographic signature links.',
+        'Integrators and partner organizations can initiate automated compliance deletion loops directly via the Partner Portal or by calling our RESTful erasure endpoints. Upon receipt, all historical hashes linked to the specified external ID are permanently scrubbed from the platform ledger.'
       ]
     },
     {
       id: 'section-7',
       num: 7,
-      title: 'Governing Law & Jurisdiction',
-      icon: Globe,
-      shortDesc: 'California state legislation boundaries and San Francisco court assignments.',
+      title: 'Contact & Compliance Auditing',
+      icon: Mail,
+      shortDesc: 'Our physical address, compliance channel, and independent audit schedules.',
       content: [
-        'These Terms of Service and any contractual disputes arising from your use of AAN shall be governed by, analyzed, and construed under the laws of the State of California, disregarding conflicts of law principles.',
-        'Any legal suit, action, or proceeding originating from these Terms must be filed exclusively in the federal or state courts located in the City and County of San Francisco, California. Both parties consent to personal jurisdiction in these courts.'
+        'To ensure our zero-knowledge models remain robust, AAN undergoes recurring independent security, SOC2 Type II, and privacy-compliance audits by certified external agencies.',
+        'If you have specific regulatory compliance questions, require a formal Data Processing Agreement (DPA), or want to contact our Data Protection Officer (DPO), please reach out to us at: privacy@aan.org, or write to: AAN Trust Infrastructure, Attn: Privacy Operations, 548 Market St, San Francisco, CA 94104.'
       ]
     }
   ];
@@ -280,10 +280,10 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
             <span>Return to Home</span>
           </button>
           <div className="flex items-center gap-3 text-xs font-mono text-slate-500">
-            <span>DECENTRALIZED ASSURANCE CONTRACT</span>
+            <span>ZERO-KNOWLEDGE PRIVACY POLICY</span>
             <span className="text-white/[0.04]">|</span>
             <span className="bg-emerald-950/40 border border-emerald-900/30 px-2 py-0.5 rounded text-emerald-400 text-[10px] font-bold">
-              v2.4.0-ENTERPRISE
+              v2.4.0-COMPLIANT
             </span>
           </div>
         </div>
@@ -294,13 +294,13 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-emerald-500/[0.01] rounded-full blur-[160px] pointer-events-none" />
         <div className="max-w-[800px] mx-auto text-left relative z-10">
           <span className="font-mono text-xs text-emerald-400 font-bold uppercase tracking-widest block mb-4 print:hidden">
-            LEGAL USAGE AGREEMENT
+            DECENTRALIZED PRIVACY CHARTER
           </span>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-sans font-light text-white tracking-tight leading-none mb-6">
-            Terms of Service
+            Privacy Policy
           </h1>
           <p className="text-lg sm:text-xl text-[#646e7a] font-sans font-light leading-relaxed mb-10 max-w-[700px] print:text-black">
-            The legal guidelines governing your platform integration with the AAN Trust Infrastructure, APIs, Portal, and user-verification protocols.
+            Our unwavering commitment to extreme data minimization, zero biometric warehousing, and local-first cryptographic validation.
           </p>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-8 border-t border-white/[0.03] print:border-slate-300">
@@ -313,8 +313,8 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
               <span className="text-sm font-sans font-medium text-slate-300 mt-1 block print:text-black">July 4, 2026</span>
             </div>
             <div className="col-span-2 sm:col-span-1">
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Version History</span>
-              <span className="text-sm font-mono text-emerald-400 mt-1 block font-bold print:text-black">v2.4.0-Enterprise</span>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest block font-bold">Audit Status</span>
+              <span className="text-sm font-mono text-emerald-400 mt-1 block font-bold print:text-black">SOC-2 TYPE II</span>
             </div>
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
         <aside className="hidden lg:block lg:col-span-3 print:hidden">
           <div className="sticky top-24 space-y-6 select-none">
             <div className="pb-3 border-b border-white/[0.03]">
-              <span className="font-sans font-semibold text-xs text-white uppercase tracking-widest block">AGREEMENT CLAUSES</span>
+              <span className="font-sans font-semibold text-xs text-white uppercase tracking-widest block">POLICY SECTIONS</span>
               <p className="text-[10px] text-slate-500 mt-1 font-mono">Index & Navigation</p>
             </div>
 
@@ -360,7 +360,7 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
                 className="w-full flex items-center justify-center gap-2 text-xs font-mono font-semibold bg-white/[0.02] hover:bg-white/[0.04] text-slate-300 py-2 px-3 rounded border border-white/[0.06] transition-all cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5 text-slate-400" />
-                <span>PRINT DOCUMENT</span>
+                <span>PRINT CHARTER</span>
               </button>
             </div>
           </div>
@@ -375,7 +375,7 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input 
                 type="text"
-                placeholder="Search legal elements (e.g., eligibility, accounts, California)..."
+                placeholder="Search privacy elements (e.g., zero-knowledge, biometrics, logs)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-[#050507] border border-white/[0.06] focus:border-emerald-500/50 outline-none text-xs text-slate-200 pl-9 pr-4 py-2.5 rounded-lg font-sans placeholder-slate-600 transition-colors"
@@ -491,7 +491,7 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
 
       <footer className="border-t border-white/[0.03] py-16 px-6 mt-32 print:hidden text-center text-xs text-slate-500">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
-          <span>© 2026 AAN Trust Infrastructure. All rights reserved.</span>
+          <span>© 2026 AAN Trust Infrastructure. All claims cryptographic and non-custodial.</span>
           <button 
             onClick={() => onNavigate('landing')}
             className="text-emerald-400 hover:underline font-mono"

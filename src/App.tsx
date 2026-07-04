@@ -3,9 +3,10 @@ import LandingPage from './components/LandingPage';
 import VerifySessionFlow from './components/VerifySessionFlow';
 import PartnerDashboard from './components/PartnerDashboard';
 import AdminDashboard from './components/AdminDashboard';
-import BrandBook from './components/BrandBook';
 import TrustDocsPortal from './components/TrustDocsPortal';
 import AANAcademy from './components/AANAcademy';
+import TermsOfServiceView from './components/TermsOfServiceView';
+import PrivacyPolicyView from './components/PrivacyPolicyView';
 import { Shield, Hammer, Users, HeartHandshake, FileText, Settings, Code, BookOpen, ChevronDown, ChevronUp, GraduationCap } from 'lucide-react';
 import { isAcademyEnabled } from './academyConfig';
 import { isBrandEnabled } from './brandConfig';
@@ -37,16 +38,18 @@ export default function App() {
         setCurrentPage('partner');
       } else if (path === '/admin' || path.startsWith('/admin/')) {
         setCurrentPage('admin');
-      } else if (path === '/brand' || path.startsWith('/brand/')) {
-        if (isBrandEnabled()) {
-          setCurrentPage('brand');
-        } else {
-          setCurrentPage('landing');
-        }
+      } else if (path === '/brand' || path.startsWith('/brand/') || path === '/docs' || path.startsWith('/docs/')) {
+        const sub = path.replace('/', '').split('/')[0] || 'docs';
+        setDocsSubSection(sub);
+        setCurrentPage('trustdocs');
       } else if (path === '/academy' || path.startsWith('/academy/')) {
         const lessonId = path.replace('/academy/', '') || "intro";
         setAcademySelectedId(lessonId);
         setCurrentPage('academy');
+      } else if (path === '/terms' || path === '/terms/') {
+        setCurrentPage('terms');
+      } else if (path === '/privacy' || path === '/privacy/') {
+        setCurrentPage('privacy');
       } else if (validSubSections.includes(cleanPath)) {
         setDocsSubSection(cleanPath);
         setCurrentPage('trustdocs');
@@ -73,7 +76,9 @@ export default function App() {
         admin: '/admin',
         brand: '/brand',
         academy: '/academy/' + (preferredLessonId || academySelectedId || 'intro'),
-        verify: '/verify/session/' + (sessionIdParam || "vss_session_unconfirmed_9a4")
+        verify: '/verify/session/' + (sessionIdParam || "vss_session_unconfirmed_9a4"),
+        terms: '/terms',
+        privacy: '/privacy'
       };
       targetPath = routes[page] || '/';
     }
@@ -97,18 +102,18 @@ export default function App() {
       path: '/'
     },
     {
-      id: 'partner',
-      name: '2. Partner Portal (/dashboard)',
-      description: 'Enterprise developer space to configure keys, query secure logs, and manage webhooks.',
-      icon: Code,
-      path: '/dashboard'
-    },
-    {
       id: 'verify',
-      name: '3. User Scan Onboarding',
+      name: '2. User Scan Onboarding',
       description: 'Unique humanness validation environment employing multi-modal non-custodial telemetry.',
       icon: Users,
       path: '/verify/session/' + (sessionIdParam || 'vss_session_unconfirmed_9a4')
+    },
+    {
+      id: 'partner',
+      name: '3. Partner Portal (/dashboard)',
+      description: 'Enterprise developer space to configure keys, query secure logs, and manage webhooks.',
+      icon: Code,
+      path: '/dashboard'
     },
     {
       id: 'admin',
@@ -118,11 +123,11 @@ export default function App() {
       path: '/admin'
     },
     {
-      id: 'brand',
-      name: '5. Brand Core (/brand)',
-      description: 'Core corporate tokens, visual scales, layout pairs, color palettes, and typographic patterns.',
-      icon: BookOpen,
-      path: '/brand'
+      id: 'trustdocs',
+      name: '5. Resource Directory (/docs)',
+      description: 'Technical platform documentation, API references, security standards, and trust matrix.',
+      icon: FileText,
+      path: '/docs'
     },
     {
       id: 'academy',
@@ -136,27 +141,26 @@ export default function App() {
   const activeItem = menuItems.find(item => item.id === currentPage) || menuItems[0];
 
   return (
-    <div className="relative min-h-screen bg-slate-950 flex flex-col text-slate-200">
+    <div className="relative min-h-screen bg-[#050507] flex flex-col text-slate-300">
       
-      {/*  AI STUDIO WORKSPACE INTERFACE SWITCHER HEADER */}
-      {/* Explains roles and lets user jump straight to any part of the MVP */}
-      <div className="relative z-50 bg-slate-900 border-b border-blue-900/40 text-slate-300 py-3 px-4 text-xs select-none">
+      {/* AI STUDIO WORKSPACE INTERFACE SWITCHER HEADER */}
+      <div className="relative z-50 bg-[#08090c] border-b border-white/[0.04] text-slate-400 py-3 px-6 text-xs select-none">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 font-mono text-[11px]">
-            <span className="bg-blue-950 text-blue-400 border border-blue-900/40 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">AAN Sandbox Engine</span>
-            <span className="text-slate-400 hidden md:inline font-sans font-medium text-[11px]">Toggle MVP stages seamlessly to test the entire security loop.</span>
+          <div className="flex items-center gap-2.5 font-mono text-[10px] tracking-wide">
+            <span className="bg-white/[0.03] text-white border border-white/[0.06] font-semibold px-2 py-0.5 rounded uppercase tracking-wider">AAN Sandbox Engine</span>
+            <span className="text-slate-500 hidden md:inline font-sans font-medium text-[10px]">Jump straight to any part of the Trust loop.</span>
           </div>
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-full sm:w-auto px-4 py-2 rounded text-[10px] font-mono font-bold uppercase cursor-pointer flex items-center justify-between sm:justify-start gap-2.5 border bg-slate-950 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 active:scale-[0.98] transition-all"
+            className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg text-[10px] font-mono font-medium uppercase cursor-pointer flex items-center justify-between sm:justify-start gap-2 border bg-black/40 border-white/[0.06] text-slate-300 hover:text-white hover:border-white/[0.12] active:scale-[0.98] transition-all"
             aria-expanded={isMenuOpen}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Current Stage: <span className="text-blue-400 font-extrabold">{activeItem.name}</span></span>
+              <span>STAGE: <span className="text-white font-semibold">{activeItem.name}</span></span>
             </div>
-            {isMenuOpen ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
+            {isMenuOpen ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
           </button>
         </div>
       </div>
@@ -169,18 +173,16 @@ export default function App() {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="relative z-40 max-h-[60vh] sm:max-h-[75vh] md:max-h-none overflow-y-auto bg-slate-950/95 border-b border-blue-900/40 backdrop-blur-md shadow-[inset_0_16px_20px_-12px_rgba(0,0,0,0.95),inset_0_-16px_20px_-12px_rgba(0,0,0,0.95),inset_0_8px_16px_-8px_rgba(30,58,138,0.35),inset_0_-8px_16px_-8px_rgba(30,58,138,0.35)]"
+            transition={{ duration: 0.15, ease: "easeInOut" }}
+            className="relative z-40 max-h-[60vh] sm:max-h-[75vh] md:max-h-none overflow-y-auto bg-[#08090c]/95 border-b border-white/[0.04] backdrop-blur-md"
           >
             <div className={`max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-${
               menuItems.filter(item => 
-                (item.id !== 'academy' || isAcademyEnabled()) && 
-                (item.id !== 'brand' || isBrandEnabled())
+                (item.id !== 'academy' || isAcademyEnabled())
               ).length
-            } gap-4 animate-fadeIn`}>
+            } gap-4`}>
               {menuItems.filter(item => 
-                (item.id !== 'academy' || isAcademyEnabled()) && 
-                (item.id !== 'brand' || isBrandEnabled())
+                (item.id !== 'academy' || isAcademyEnabled())
               ).map((item) => {
                 const Icon = item.icon;
                 const isActive = currentPage === item.id;
@@ -193,21 +195,21 @@ export default function App() {
                     }}
                     className={`text-left p-4 rounded-xl border transition-all duration-150 cursor-pointer flex flex-col justify-between h-full group ${
                       isActive 
-                        ? 'bg-blue-600/95 border-blue-500 text-white shadow-lg' 
-                        : 'bg-slate-900/40 hover:bg-slate-900 border-slate-850/70 text-slate-300 hover:text-white hover:border-slate-700'
+                        ? 'bg-white text-black border-white shadow-lg' 
+                        : 'bg-black/20 hover:bg-black/40 border-white/[0.04] text-slate-400 hover:text-white hover:border-white/[0.12]'
                     }`}
                   >
                     <div className="flex items-start justify-between w-full mb-3">
-                      <div className={`p-2 rounded-lg ${isActive ? 'bg-blue-700 text-white' : 'bg-slate-950 text-slate-400 group-hover:text-blue-400 group-hover:bg-slate-900 transition-all'}`}>
+                      <div className={`p-2 rounded-lg ${isActive ? 'bg-slate-100 text-black' : 'bg-[#050507] text-slate-500 group-hover:text-white group-hover:bg-black transition-all'}`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       {isActive && (
-                        <span className="bg-white/20 text-white text-[8px] font-mono uppercase font-black px-1.5 py-0.5 rounded tracking-wide">Active</span>
+                        <span className="bg-black/10 text-black text-[8px] font-mono uppercase font-black px-1.5 py-0.5 rounded tracking-wide">Active</span>
                       )}
                     </div>
                     <div>
-                      <h4 className="font-bold text-xs font-mono tracking-tight mb-1">{item.name}</h4>
-                      <p className={`text-[10px] leading-relaxed font-sans ${isActive ? 'text-blue-105/90' : 'text-slate-400 line-clamp-2'}`}>
+                      <h4 className={`font-semibold text-xs font-mono tracking-tight mb-1 ${isActive ? 'text-black' : 'text-slate-300'}`}>{item.name}</h4>
+                      <p className={`text-[10px] leading-relaxed font-sans ${isActive ? 'text-slate-800' : 'text-slate-500 line-clamp-2'}`}>
                         {item.description}
                       </p>
                     </div>
@@ -249,10 +251,6 @@ export default function App() {
           />
         )}
 
-        {currentPage === 'brand' && (
-          <BrandBook />
-        )}
-
         {currentPage === 'academy' && (
           <AANAcademy 
             initialLessonId={academySelectedId || "intro"} 
@@ -263,6 +261,18 @@ export default function App() {
         {currentPage === 'trustdocs' && (
           <TrustDocsPortal 
             activeSubSection={docsSubSection}
+            onNavigate={(page, customPath) => navigateTo(page, customPath)}
+          />
+        )}
+
+        {currentPage === 'terms' && (
+          <TermsOfServiceView 
+            onNavigate={(page, customPath) => navigateTo(page, customPath)}
+          />
+        )}
+
+        {currentPage === 'privacy' && (
+          <PrivacyPolicyView 
             onNavigate={(page, customPath) => navigateTo(page, customPath)}
           />
         )}

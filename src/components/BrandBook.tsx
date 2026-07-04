@@ -13,7 +13,12 @@ import {
   Info,
   ChevronRight,
   TrendingUp,
-  Share2
+  Share2,
+  Download,
+  Grid,
+  Eye,
+  RefreshCw,
+  Palette
 } from 'lucide-react';
 
 // Definitions for the AAN Brand Identity System
@@ -29,18 +34,107 @@ export default function BrandBook() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
+  // Logo Sandbox States
+  const [logoTheme, setLogoTheme] = useState<'emerald' | 'white' | 'black'>('emerald');
+  const [logoBg, setLogoBg] = useState<'dark' | 'light' | 'transparent'>('dark');
+  const [logoType, setLogoType] = useState<'parallel' | 'symmetric'>('parallel');
+  const [strokeThickness, setStrokeThickness] = useState<number>(12);
+  const [copiedSvg, setCopiedSvg] = useState<boolean>(false);
+  const [subTab, setSubTab] = useState<'master' | 'spacing' | 'lockups' | 'favicon'>('master');
+
   const sections: BrandSection[] = [
     { id: 'foundation', title: '1. Brand Foundation', subtitle: 'Mission, Promise & Core Positionings', icon: Target },
     { id: 'audience', title: '2. Target Audience', subtitle: 'Deep Customer Personas per Segment', icon: Users },
     { id: 'architecture', title: '3. Product Architecture', subtitle: 'Ecosystem & SDK Definitions', icon: Layers },
     { id: 'story', title: '4. Company Story', subtitle: 'Origin Narrative & Foundational Urgency', icon: Clock },
     { id: 'future', title: '5. 10-Year Roadmap', subtitle: 'The Future of Sovereign Digital Trust', icon: TrendingUp },
+    { id: 'assets', title: '6. Logo & Brand Assets', subtitle: 'SVG Master, Lockups & Spacing Guide', icon: FileCode },
   ];
 
   const handleCopyToken = (token: string, value: string) => {
     navigator.clipboard.writeText(value);
     setCopiedToken(token);
     setTimeout(() => setCopiedToken(null), 2000);
+  };
+
+  const getSvgString = (type: 'parallel' | 'symmetric', theme: 'emerald' | 'white' | 'black', thickness: number) => {
+    const strokeColor = theme === 'emerald' ? '#00E676' : theme === 'white' ? '#FFFFFF' : '#000000';
+    const isParallel = type === 'parallel';
+    
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <!-- AAN Master Logo Symbol - Geometric Monogram -->
+  <g fill="none" stroke="${strokeColor}" stroke-width="${thickness}" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left Shape (Abstract Capital A) -->
+    <path d="M 28 96 L 52 36 L 76 96" />
+    
+    <!-- Right Shape (The N) -->
+    <!-- Main rising diagonal -->
+    <path d="M 76 96 L 92 56" />
+    ${isParallel 
+      ? `<!-- Detached parallel rising segment -->
+    <path d="M 96 46 L 104 26" />`
+      : `<!-- Detached symmetrical descending segment -->
+    <path d="M 94 32 L 100 47" />`
+    }
+  </g>
+</svg>`;
+  };
+
+  const handleCopySvg = (type: 'parallel' | 'symmetric') => {
+    const svgStr = getSvgString(type, logoTheme, strokeThickness);
+    navigator.clipboard.writeText(svgStr);
+    setCopiedSvg(true);
+    setTimeout(() => setCopiedSvg(false), 2000);
+  };
+
+  const handleDownloadSVG = (type: 'parallel' | 'symmetric') => {
+    const svgStr = getSvgString(type, logoTheme, strokeThickness);
+    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `aan_logo_${type}_${logoTheme}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadPNG = (type: 'parallel' | 'symmetric') => {
+    const svgStr = getSvgString(type, logoTheme, strokeThickness);
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Draw background if not transparent
+    if (logoBg === 'dark') {
+      ctx.fillStyle = '#0D1117';
+      ctx.fillRect(0, 0, 512, 512);
+    } else if (logoBg === 'light') {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 512, 512);
+    }
+
+    const img = new Image();
+    const encodedSvg = btoa(unescape(encodeURIComponent(svgStr)));
+    img.src = 'data:image/svg+xml;base64,' + encodedSvg;
+
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, 512, 512);
+      try {
+        const pngUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = `aan_logo_${type}_${logoTheme}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error('PNG conversion failed:', err);
+      }
+    };
   };
 
   // Filter sections by search query
@@ -486,6 +580,550 @@ export default function BrandBook() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* CHAPTER 6: LOGO & BRAND ASSETS */}
+          {activeTab === 'assets' && (
+            <div className="space-y-8 animate-fade-in text-slate-300">
+              <div className="border-b border-slate-800 pb-5">
+                <span className="font-mono text-xs text-emerald-400 font-semibold tracking-wide block">CHAPTER 06</span>
+                <h2 className="text-2xl font-bold font-sans text-white mt-1">Logo & Brand Assets Recreation</h2>
+                <p className="text-slate-400 text-sm mt-1">Interactive vector recreation studio. Zero reinterpretations, 100% geometric compliance.</p>
+              </div>
+
+              {/* Sub-navigation */}
+              <div className="flex flex-wrap gap-2 border-b border-slate-900 pb-3">
+                {[
+                  { id: 'master', label: 'SVG Master Sandbox', icon: Palette },
+                  { id: 'spacing', label: 'Geometry & Spacing Guide', icon: Grid },
+                  { id: 'lockups', label: 'Typography & Lockups', icon: Target },
+                  { id: 'favicon', label: 'Favicon & App Icon Formats', icon: Eye }
+                ].map((st) => {
+                  const Icon = st.icon;
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => setSubTab(st.id as any)}
+                      className={`flex items-center gap-2 py-2 px-3.5 rounded-lg border text-xs font-medium font-mono transition-all duration-200 ${
+                        subTab === st.id
+                          ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-400 shadow-lg shadow-emerald-950/20'
+                          : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {st.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* SECTION A: MASTER SANDBOX */}
+              {subTab === 'master' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Visualizer Panel */}
+                    <div className="lg:col-span-7 flex flex-col items-center justify-center p-8 bg-slate-950/60 border border-slate-850 rounded-2xl relative group overflow-hidden">
+                      {/* Grid background when transparent */}
+                      <div 
+                        className={`absolute inset-0 transition-colors duration-300 ${
+                          logoBg === 'dark' ? 'bg-[#0D1117]' : logoBg === 'light' ? 'bg-white' : 'bg-transparent'
+                        }`}
+                        style={logoBg === 'transparent' ? {
+                          backgroundImage: 'linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%), linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%)',
+                          backgroundSize: '16px 16px',
+                          backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
+                          backgroundColor: '#090d14'
+                        } : {}}
+                      />
+                      
+                      <div className="relative z-10 p-6 flex items-center justify-center min-h-[220px]">
+                        <svg 
+                          viewBox="0 0 128 128" 
+                          className="w-48 h-48 drop-shadow-[0_8px_24px_rgba(0,0,0,0.3)] transition-all duration-300"
+                        >
+                          <g 
+                            fill="none" 
+                            stroke={logoTheme === 'emerald' ? '#00E676' : logoTheme === 'white' ? '#FFFFFF' : '#000000'} 
+                            strokeWidth={strokeThickness} 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          >
+                            <path d="M 28 96 L 52 36 L 76 96" />
+                            <path d="M 76 96 L 92 56" />
+                            {logoType === 'parallel' ? (
+                              <path d="M 96 46 L 104 26" />
+                            ) : (
+                              <path d="M 94 32 L 100 47" />
+                            )}
+                          </g>
+                        </svg>
+                      </div>
+
+                      <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-[10px] font-mono text-slate-500 z-10 bg-slate-950/80 backdrop-blur-sm py-1.5 px-3 rounded-md border border-slate-900">
+                        <span>CANVAS: 128 x 128 PX</span>
+                        <span>STROKE: {strokeThickness}PX</span>
+                        <span className="uppercase">{logoType}</span>
+                      </div>
+                    </div>
+
+                    {/* Controls Panel */}
+                    <div className="lg:col-span-5 space-y-6">
+                      <div className="p-6 bg-slate-900/20 border border-slate-850 rounded-2xl space-y-5">
+                        <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2 pb-2 border-b border-slate-850">
+                          <Palette className="w-3.5 h-3.5 text-emerald-400" />
+                          Vector Parameters
+                        </h3>
+
+                        {/* Logo Variant Toggle */}
+                        <div className="space-y-2">
+                          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">Geometry Slant Type</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => setLogoType('parallel')}
+                              className={`py-2 px-3 text-left rounded-lg border font-mono text-xs font-semibold transition-all ${
+                                logoType === 'parallel'
+                                  ? 'bg-slate-900 border-emerald-500/40 text-emerald-400'
+                                  : 'border-slate-850 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'
+                              }`}
+                            >
+                              <div className="font-sans font-bold">Parallel Ascent</div>
+                              <div className="text-[9px] text-slate-500 font-normal mt-0.5 font-mono">Split Slash (Modern)</div>
+                            </button>
+                            <button
+                              onClick={() => setLogoType('symmetric')}
+                              className={`py-2 px-3 text-left rounded-lg border font-mono text-xs font-semibold transition-all ${
+                                logoType === 'symmetric'
+                                  ? 'bg-slate-900 border-emerald-500/40 text-emerald-400'
+                                  : 'border-slate-850 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'
+                              }`}
+                            >
+                              <div className="font-sans font-bold">Symmetric Cadence</div>
+                              <div className="text-[9px] text-slate-500 font-normal mt-0.5 font-mono">True N-Leg (Classic)</div>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Stroke Color Theme */}
+                        <div className="space-y-2">
+                          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">Symbol Accent (Stroke)</span>
+                          <div className="flex gap-2">
+                            {[
+                              { id: 'emerald', label: 'Emerald (#00E676)', colorBg: 'bg-[#00E676]' },
+                              { id: 'white', label: 'Pure White', colorBg: 'bg-white' },
+                              { id: 'black', label: 'Pure Black', colorBg: 'bg-black border border-slate-700' }
+                            ].map((thm) => (
+                              <button
+                                key={thm.id}
+                                onClick={() => setLogoTheme(thm.id as any)}
+                                className={`flex items-center gap-1.5 py-1.5 px-3 rounded-md border text-xs font-mono transition-all ${
+                                  logoTheme === thm.id
+                                    ? 'bg-slate-900 border-slate-700 text-slate-100 font-semibold'
+                                    : 'border-transparent text-slate-400 hover:text-slate-300 hover:bg-slate-900/20'
+                                }`}
+                              >
+                                <span className={`w-2.5 h-2.5 rounded-full ${thm.colorBg}`} />
+                                {thm.id === 'emerald' ? 'Emerald' : thm.id === 'white' ? 'White' : 'Black'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Canvas Background Style */}
+                        <div className="space-y-2">
+                          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">Preview Canvas BG</span>
+                          <div className="flex gap-2">
+                            {[
+                              { id: 'dark', label: 'Dark Matte' },
+                              { id: 'light', label: 'Light Matte' },
+                              { id: 'transparent', label: 'Transparent' }
+                            ].map((bg) => (
+                              <button
+                                key={bg.id}
+                                onClick={() => setLogoBg(bg.id as any)}
+                                className={`py-1.5 px-3 rounded-md border text-xs font-mono transition-all ${
+                                  logoBg === bg.id
+                                    ? 'bg-slate-900 border-slate-700 text-slate-100 font-semibold'
+                                    : 'border-transparent text-slate-400 hover:text-slate-300 hover:bg-slate-900/20'
+                                }`}
+                              >
+                                {bg.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Stroke Thickness Control */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-[11px] font-mono">
+                            <span className="text-slate-400 uppercase tracking-wider">Uniform Stroke Width</span>
+                            <span className="text-emerald-400 font-bold">{strokeThickness} px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="8"
+                            max="18"
+                            value={strokeThickness}
+                            onChange={(e) => setStrokeThickness(parseInt(e.target.value))}
+                            className="w-full accent-emerald-400 bg-slate-950 h-1.5 rounded-lg appearance-none cursor-pointer border border-slate-900"
+                          />
+                          <div className="flex justify-between text-[9px] font-mono text-slate-500">
+                            <span>8px (Fine)</span>
+                            <span>12px (Default)</span>
+                            <span>18px (Bold)</span>
+                          </div>
+                        </div>
+
+                        {/* Export Actions */}
+                        <div className="space-y-2 pt-2 border-t border-slate-850">
+                          <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">Production Asset Export</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              onClick={() => handleDownloadSVG(logoType)}
+                              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-200 hover:text-white transition-all text-xs font-mono font-bold uppercase"
+                            >
+                              <Download className="w-3.5 h-3.5 text-blue-400" />
+                              Export SVG
+                            </button>
+                            <button
+                              onClick={() => handleDownloadPNG(logoType)}
+                              className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-200 hover:text-white transition-all text-xs font-mono font-bold uppercase"
+                            >
+                              <Download className="w-3.5 h-3.5 text-emerald-400" />
+                              Export PNG
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Copyable SVG Block */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs text-slate-400 uppercase tracking-wider">SVG Master Code XML</span>
+                      <button
+                        onClick={() => handleCopySvg(logoType)}
+                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-emerald-400 font-mono py-1 px-2.5 rounded hover:bg-slate-900 transition-colors"
+                      >
+                        {copiedSvg ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-400" />
+                            Copied Code!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            Copy XML Code
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-850 overflow-x-auto text-[11px] font-mono text-slate-300 leading-normal max-h-48 whitespace-pre scrollbar-thin">
+                      {getSvgString(logoType, logoTheme, strokeThickness)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION B: GEOMETRY & SPACING GUIDE */}
+              {subTab === 'spacing' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  {/* Blueprint Panel */}
+                  <div className="lg:col-span-6 p-6 bg-slate-950/80 border border-slate-850 rounded-2xl flex flex-col items-center relative overflow-hidden">
+                    {/* Architectural Blueprint grid lines */}
+                    <div className="absolute inset-0 opacity-10 pointer-events-none" style={{
+                      backgroundImage: 'linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)',
+                      backgroundSize: '16px 16px'
+                    }} />
+                    
+                    <h3 className="font-mono text-[10px] text-blue-400 font-bold tracking-widest uppercase mb-4 self-start border-l-2 border-blue-500 pl-2">
+                      SPECIFICATION BLUEPRINT • GEOMETRY CONSTRAINTS
+                    </h3>
+
+                    {/* SVG Blueprint Draw */}
+                    <div className="w-64 h-64 relative flex items-center justify-center p-4 bg-slate-900/30 rounded-xl border border-slate-850/60 z-10">
+                      <svg viewBox="0 0 128 128" className="w-full h-full">
+                        {/* Blueprint construction grid */}
+                        <g stroke="#3b82f6" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.4">
+                          {/* Baselines */}
+                          <line x1="10" y1="96" x2="118" y2="96" />
+                          <line x1="10" y1="36" x2="118" y2="36" />
+                          <line x1="10" y1="26" x2="118" y2="26" />
+                          
+                          {/* Verticals for spacing */}
+                          <line x1="28" y1="10" x2="28" y2="118" />
+                          <line x1="52" y1="10" x2="52" y2="118" />
+                          <line x1="76" y1="10" x2="76" y2="118" />
+                          <line x1="92" y1="10" x2="92" y2="118" />
+                          <line x1="104" y1="10" x2="104" y2="118" />
+                        </g>
+
+                        {/* Real Symbol in Blueprint Style */}
+                        <g fill="none" stroke="#60a5fa" strokeWidth={strokeThickness} strokeLinecap="round" strokeLinejoin="round" opacity="0.8">
+                          <path d="M 28 96 L 52 36 L 76 96" />
+                          <path d="M 76 96 L 92 56" />
+                          {logoType === 'parallel' ? (
+                            <path d="M 96 46 L 104 26" />
+                          ) : (
+                            <path d="M 94 32 L 100 47" />
+                          )}
+                        </g>
+
+                        {/* Blue annotation lines & text */}
+                        <g stroke="#f43f5e" strokeWidth="0.8">
+                          {/* Angle indicator arc at Left base */}
+                          <path d="M 38 96 A 10 10 0 0 0 35 88" fill="none" />
+                          {/* Apex coordinate markers */}
+                          <circle cx="52" cy="36" r="2" fill="#f43f5e" />
+                          <circle cx="76" cy="96" r="2" fill="#f43f5e" />
+                          <circle cx="28" cy="96" r="2" fill="#f43f5e" />
+                          <circle cx="92" cy="56" r="2" fill="#f43f5e" />
+                        </g>
+
+                        {/* Labels (Small Text) */}
+                        <g fill="#93c5fd" fontSize="5" fontFamily="monospace">
+                          <text x="36" y="92">60°</text>
+                          <text x="56" y="34">Apex (52,36)</text>
+                          <text x="78" y="100">Center (76,96)</text>
+                          <text x="12" y="100">Base (28,96)</text>
+                          <text x="96" y="60">Gap (10.7px)</text>
+                          <text x="96" y="22">Detached</text>
+                          
+                          {/* Baseline labels */}
+                          <text x="2" y="97" fill="#f43f5e" fontSize="4">Y=96</text>
+                          <text x="2" y="37" fill="#f43f5e" fontSize="4">Y=36</text>
+                          <text x="2" y="27" fill="#f43f5e" fontSize="4">Y=26</text>
+                        </g>
+                      </svg>
+                    </div>
+
+                    <span className="text-[10px] font-mono text-slate-500 mt-4 uppercase">
+                      Interactive Engineering Blueprint Overlay (Y-Asymmetrical Offset)
+                    </span>
+                  </div>
+
+                  {/* Spacing Explanations */}
+                  <div className="lg:col-span-6 space-y-4">
+                    <div className="p-6 bg-slate-900/30 border border-slate-850 rounded-2xl space-y-4">
+                      <h4 className="font-sans font-bold text-sm text-white border-b border-slate-850 pb-2 uppercase tracking-wide">
+                        Geometric System Rules
+                      </h4>
+                      
+                      <div className="space-y-3">
+                        <div className="flex gap-3">
+                          <span className="font-mono text-xs text-emerald-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-900 h-fit">01</span>
+                          <div>
+                            <h5 className="font-sans font-bold text-xs text-slate-200">The 60° Angle Axis</h5>
+                            <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
+                              All diagonal bars align strictly to a 60-degree slant (slope value of exactly ±2.5dy). This creates a perfect vertical balance and allows the letterforms A and N to nestle together seamlessly.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <span className="font-mono text-xs text-emerald-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-900 h-fit">02</span>
+                          <div>
+                            <h5 className="font-sans font-bold text-xs text-slate-200">9.375% Stroke Ratio</h5>
+                            <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
+                              The stroke thickness of 12px relative to the 128px bounding box represents a precise 9.375% ratio. Altering this value breaks the delicate balance of negative space inside the capital "A".
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <span className="font-mono text-xs text-emerald-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-900 h-fit">03</span>
+                          <div>
+                            <h5 className="font-sans font-bold text-xs text-slate-200">Visual Tension Gap</h5>
+                            <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
+                              The detached segment's start at (96, 46) leaves an exact 10.7px gap from the top of the main diagonal bar at (92, 56). This gap is designed to reflect the visual width of the stroke itself, maintaining consistent optical density.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <span className="font-mono text-xs text-emerald-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-900 h-fit">04</span>
+                          <div>
+                            <h5 className="font-sans font-bold text-xs text-slate-200">Astructural Minimalism</h5>
+                            <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">
+                              The horizontal crossbar is completely omitted from the "A", and the left-most stem is omitted from the "N". These omissions make the monogram feel lightweight, sleek, and invisible.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION C: TYPOGRAPHY & LOCKUPS */}
+              {subTab === 'lockups' && (
+                <div className="space-y-6">
+                  {/* Typographic rules summary */}
+                  <div className="p-5 bg-slate-900/30 border border-slate-850 rounded-2xl grid grid-cols-1 md:grid-cols-2 gap-6 items-center text-xs">
+                    <div>
+                      <h4 className="font-sans font-bold text-sm text-slate-100 uppercase tracking-wide">Brand Typography Lockup</h4>
+                      <p className="text-slate-400 mt-1 leading-relaxed">
+                        When combining the symbol with the AAN brand name, always preserve the exact geometric lockup structures. The symbol stands as a monolith of trust, accompanied by clean modern sans-serif typography.
+                      </p>
+                    </div>
+                    <div className="space-y-2 font-mono text-slate-400 text-[11px] bg-slate-950/80 p-3.5 rounded-lg border border-slate-900">
+                      <div><b className="text-slate-200">PRIMARY FONT:</b> Space Grotesk / Inter (Bold)</div>
+                      <div><b className="text-slate-200">SUBTITLE FONT:</b> JetBrains Mono (Light, Uppercase)</div>
+                      <div><b className="text-slate-200">TRACKING:</b> Title: tracking-wide, Sub: tracking-[0.25em]</div>
+                    </div>
+                  </div>
+
+                  {/* Interactive Lockup Previews */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Vertical Lockup */}
+                    <div className="p-8 bg-slate-950/60 border border-slate-850 rounded-2xl flex flex-col items-center justify-center text-center space-y-4">
+                      <span className="font-mono text-[9px] text-slate-500 uppercase tracking-widest block self-start">Vertical Lockup (Default)</span>
+                      
+                      <div className="py-6 flex flex-col items-center">
+                        <svg viewBox="0 0 128 128" className="w-24 h-24 drop-shadow-md">
+                          <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M 28 96 L 52 36 L 76 96" />
+                            <path d="M 76 96 L 92 56" />
+                            {logoType === 'parallel' ? (
+                              <path d="M 96 46 L 104 26" />
+                            ) : (
+                              <path d="M 94 32 L 100 47" />
+                            )}
+                          </g>
+                        </svg>
+                        
+                        <h3 className="text-3xl font-extrabold font-sans text-white tracking-wide mt-3">AAN</h3>
+                        <p className="text-[10px] font-mono text-slate-400 uppercase tracking-[0.25em] mt-1 font-light">TRUST INFRASTRUCTURE</p>
+                      </div>
+                    </div>
+
+                    {/* Horizontal Lockup */}
+                    <div className="p-8 bg-slate-950/60 border border-slate-850 rounded-2xl flex flex-col items-center justify-center space-y-4">
+                      <span className="font-mono text-[9px] text-slate-500 uppercase tracking-widest block self-start">Horizontal Lockup (Navbars)</span>
+                      
+                      <div className="py-10 flex items-center gap-4">
+                        <svg viewBox="0 0 128 128" className="w-16 h-16 drop-shadow-md">
+                          <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M 28 96 L 52 36 L 76 96" />
+                            <path d="M 76 96 L 92 56" />
+                            {logoType === 'parallel' ? (
+                              <path d="M 96 46 L 104 26" />
+                            ) : (
+                              <path d="M 94 32 L 100 47" />
+                            )}
+                          </g>
+                        </svg>
+                        
+                        <div>
+                          <h3 className="text-2xl font-extrabold font-sans text-white tracking-wide leading-none">AAN</h3>
+                          <p className="text-[9px] font-mono text-slate-400 uppercase tracking-[0.25em] mt-1.5 font-light">TRUST INFRASTRUCTURE</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION D: FAVICON & APP ICON */}
+              {subTab === 'favicon' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                  {/* App icon templates */}
+                  <div className="lg:col-span-7 p-6 bg-slate-950/60 border border-slate-850 rounded-2xl space-y-6 text-xs">
+                    <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-200 pb-2 border-b border-slate-850">
+                      System Launcher Icons
+                    </h4>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      {/* iOS Squircle */}
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-20 h-20 bg-[#0D1117] border border-slate-800 rounded-[22.5%] flex items-center justify-center shadow-lg shadow-black/40">
+                          <svg viewBox="0 0 128 128" className="w-12 h-12">
+                            <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M 28 96 L 52 36 L 76 96" />
+                              <path d="M 76 96 L 92 56" />
+                              {logoType === 'parallel' ? (
+                                <path d="M 96 46 L 104 26" />
+                              ) : (
+                                <path d="M 94 32 L 100 47" />
+                              )}
+                            </g>
+                          </svg>
+                        </div>
+                        <span className="font-mono text-[10px] text-slate-400 block">iOS Squircle</span>
+                      </div>
+
+                      {/* Android Adaptive Circle */}
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-20 h-20 bg-[#0D1117] border border-slate-800 rounded-full flex items-center justify-center shadow-lg shadow-black/40">
+                          <svg viewBox="0 0 128 128" className="w-12 h-12">
+                            <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M 28 96 L 52 36 L 76 96" />
+                              <path d="M 76 96 L 92 56" />
+                              {logoType === 'parallel' ? (
+                                <path d="M 96 46 L 104 26" />
+                              ) : (
+                                <path d="M 94 32 L 100 47" />
+                              )}
+                            </g>
+                          </svg>
+                        </div>
+                        <span className="font-mono text-[10px] text-slate-400 block">Android Circle</span>
+                      </div>
+
+                      {/* macOS Rounded Rect */}
+                      <div className="space-y-3 flex flex-col items-center">
+                        <div className="w-20 h-20 bg-[#0D1117] border border-slate-850 rounded-2xl flex items-center justify-center shadow-lg shadow-black/40 relative">
+                          <div className="absolute inset-1.5 border border-white/[0.04] rounded-xl" />
+                          <svg viewBox="0 0 128 128" className="w-10 h-10 z-10">
+                            <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M 28 96 L 52 36 L 76 96" />
+                              <path d="M 76 96 L 92 56" />
+                              {logoType === 'parallel' ? (
+                                <path d="M 96 46 L 104 26" />
+                              ) : (
+                                <path d="M 94 32 L 100 47" />
+                              )}
+                            </g>
+                          </svg>
+                        </div>
+                        <span className="font-mono text-[10px] text-slate-400 block">macOS App Icon</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Favicon scales */}
+                  <div className="lg:col-span-5 p-6 bg-slate-950/60 border border-slate-850 rounded-2xl space-y-6">
+                    <h4 className="font-mono text-xs font-bold uppercase tracking-wider text-slate-200 pb-2 border-b border-slate-850">
+                      Favicon Resolution Clarity
+                    </h4>
+
+                    <div className="flex flex-col gap-4">
+                      {[16, 32, 48].map((size) => (
+                        <div key={size} className="flex items-center gap-4 bg-slate-900/40 p-3 rounded-lg border border-slate-850 text-xs">
+                          <span className="font-mono text-[10px] text-slate-400 w-12">{size}x{size} px</span>
+                          <div className="bg-[#0D1117] p-2 rounded border border-slate-800 flex items-center justify-center shadow-sm">
+                            <svg viewBox="0 0 128 128" style={{ width: `${size}px`, height: `${size}px` }}>
+                              <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M 28 96 L 52 36 L 76 96" />
+                                <path d="M 76 96 L 92 56" />
+                                {logoType === 'parallel' ? (
+                                  <path d="M 96 46 L 104 26" />
+                                ) : (
+                                  <path d="M 94 32 L 100 47" />
+                                )}
+                              </g>
+                            </svg>
+                          </div>
+                          <span className="text-slate-500 font-sans text-[11px] leading-normal">
+                            {size === 16 ? 'Browser address bar clarity.' : size === 32 ? 'Standard browser tab size.' : 'High-density desktop shortcut.'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

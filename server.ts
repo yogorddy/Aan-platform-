@@ -25,6 +25,7 @@ import {
   SecurityEvent,
   SecurityReport
 } from "./src/types";
+import { AIEngine, setActiveProvider, activeProvider, AIProvider } from "./src/lib/aiEngine";
 
 // ============================================================================
 // MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before production use.
@@ -2061,6 +2062,123 @@ async function startServer() {
         proof_token: session.proof_token
       }
     });
+  });
+
+  // ============================================================================
+  // DECOUPLED AI ENGINE & ROUTING ENDPOINTS (LAYER 2 & LAYER 3 CO-PILOT)
+  // ============================================================================
+  
+  app.get("/api/internal/ai/config", (req, res) => {
+    res.json({
+      activeProvider,
+      providers: AIEngine.getProviderSchema()
+    });
+  });
+
+  app.post("/api/internal/ai/config", (req, res) => {
+    const { provider } = req.body;
+    const allowed: AIProvider[] = ['gemini', 'openai', 'anthropic', 'local_llm'];
+    
+    if (!provider || !allowed.includes(provider)) {
+      return res.status(400).json({ error: "Invalid provider specified. Must be one of: gemini, openai, anthropic, local_llm" });
+    }
+
+    setActiveProvider(provider as AIProvider);
+    appendAuditLog('admin', 'admin_super_user_one', 'ai.provider_changed', 'ai_engine', 'active_routing', {
+      new_provider: provider,
+      context: "Enterprise Provider Independence Strategy"
+    });
+
+    res.json({ success: true, activeProvider: provider });
+  });
+
+  app.post("/api/internal/ai/explain-risk", async (req, res) => {
+    try {
+      const { type, targetId } = req.body;
+      if (!type || !targetId) {
+        return res.status(400).json({ error: "Missing required parameters: type, targetId" });
+      }
+
+      let prompt = "";
+      let systemInstruction = "You are AAN's decoupled AI Risk Analyzer. Summarize the raw data, highlight any anomalies, and explain the threat landscape. Keep the analysis factual and clear.";
+
+      if (type === 'user') {
+        const user = db.users.find(u => u.id === targetId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+        
+        // Find linked sessions, devices, templates
+        const sessions = db.verificationSessions.filter(s => s.external_user_id === user.id || s.id.includes(targetId.substring(4)));
+        const devices = db.devices.filter(d => d.user_id === user.id);
+        const templates = db.signatureTemplates.filter(t => t.user_id === user.id);
+
+        prompt = `Analyze this user record:
+User ID: ${user.id}
+Status: ${user.status}
+Created At: ${user.created_at}
+
+Associated Sessions: ${JSON.stringify(sessions, null, 2)}
+Associated Devices: ${JSON.stringify(devices, null, 2)}
+Associated Signature Templates: ${JSON.stringify(templates, null, 2)}
+
+Provide a security risk assessment, highlighting any Sybil patterns or device collisions. Recommend compliance actions (e.g., maintain suspension, require reverification).`;
+      } else if (type === 'session') {
+        const session = db.verificationSessions.find(s => s.id === targetId);
+        if (!session) return res.status(404).json({ error: "Session not found" });
+
+        prompt = `Analyze this verification session:
+Session ID: ${session.id}
+Partner App ID: ${session.partner_app_id}
+External User ID: ${session.external_user_id}
+Status: ${session.status}
+Risk Score: ${session.risk_score}
+Duplicate Candidate: ${session.duplicate_candidate}
+Result Reason: ${session.result_reason}
+Risk Reasons: ${JSON.stringify(session.risk_reasons)}
+Created At: ${session.created_at}
+
+Provide a forensic breakdown explaining exactly why this risk score was generated, what signal caused the flag, and how the partner application should react.`;
+      } else if (type === 'security-event') {
+        const event = db.securityEvents.find(e => e.id === targetId);
+        if (!event) return res.status(404).json({ error: "Security event not found" });
+
+        prompt = `Analyze this security intrusion alert:
+Event ID: ${event.id}
+Severity: ${event.severity}
+Event Type: ${event.event_type}
+Actor: ${event.actor_type} (ID: ${event.actor_id})
+IP Address: ${event.ip_address}
+User Agent: ${event.user_agent}
+Request Path: ${event.request_path}
+Detection Reason: ${event.detection_reason}
+Metadata: ${JSON.stringify(event.raw_metadata, null, 2)}
+
+Explain the nature of this attack vector (e.g. JWT signature bypass, impossible state transition), its potential business impact, and how AAN's deterministic core defended against it.`;
+      } else {
+        return res.status(400).json({ error: "Invalid type specified. Must be 'user', 'session', or 'security-event'" });
+      }
+
+      const aiResponse = await AIEngine.generateText(prompt, systemInstruction);
+      res.json(aiResponse);
+    } catch (err: any) {
+      console.error("[AI ENGINE] Error generating risk explanation:", err);
+      res.status(500).json({ error: "Failed to generate AI explanation" });
+    }
+  });
+
+  app.post("/api/internal/ai/chat", async (req, res) => {
+    try {
+      const { prompt } = req.body;
+      if (!prompt) {
+        return res.status(400).json({ error: "Prompt is required." });
+      }
+
+      const systemInstruction = "You are AAN's Independent AI Security Investigator. Assist the compliance officer by searching and describing anomalies in logs. Emphasize that you are a cognitive copilot and do not make final trust decisions.";
+      const aiResponse = await AIEngine.generateText(prompt, systemInstruction);
+      res.json(aiResponse);
+    } catch (err: any) {
+      console.error("[AI ENGINE] Error in AI Copilot Chat:", err);
+      res.status(500).json({ error: "Failed to query AI Copilot" });
+    }
   });
 
 
