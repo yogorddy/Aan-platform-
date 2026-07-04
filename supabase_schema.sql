@@ -1,491 +1,164 @@
--- ==========================================================
--- PRIVACY-PRESERVING PROOF-OF-HUMAN IDENTITY API
--- Supabase Postgres Database Migration / Schema Definition
--- ==========================================================
+-- ============================================================================
+-- AAN INFRASTRUCTURE PLATFORM — SECURE DATABASE MIGRATION SCHEMA
+-- ============================================================================
+-- Target Database: PostgreSQL (Supabase Cloud Database instance)
+-- Schema Version: 2.4.0-Enterprise
+-- Date Created: July 4, 2026
+--
+-- HOW TO DEPLOY TO SUPABASE:
+-- 1. Open your Supabase Dashboard: https://supabase.com/dashboard
+-- 2. Select your AAN project.
+-- 3. In the left navigation, click "SQL Editor" (the icon looks like a terminal prompt '>_').
+-- 4. Click "New Query" to open a fresh slate.
+-- 5. Copy the entire contents of this file, paste it into the editor, and click "Run" (CMD + Enter).
+-- 6. All tables, indices, constraints, and Row Level Security structures will populate instantly.
+-- ============================================================================
 
--- Enable UUID extension
-create extension if not exists "uuid-ossp";
+-- Enable UUID extension if not already active
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. USERS TABLE
--- Tracks the high-level identity validation status.
--- Do not store SSNs, names, email or raw identity assets here.
-create table if not exists public.users (
-    id uuid primary key default gen_random_uuid(),
-    status text not null check (status in ('pending', 'verified', 'rejected', 'suspended')),
-    human_uid text unique not null, -- Anonymized one-way cryptographic commitment representing a unique person's signature
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+
+-- ==========================================
+-- 1. TABLE: PARTNER_APPS
+-- ==========================================
+-- Stores registered integrating clients, metadata, and active API key hashes.
+CREATE TABLE IF NOT EXISTS partner_apps (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    api_key_hash VARCHAR(255) NOT NULL UNIQUE,
+    webhook_url TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
--- Index for human_uid lookup during duplicate check
-create index if not exists idx_users_human_uid on public.users(human_uid);
+-- Optimize API lookup routing
+CREATE INDEX IF NOT EXISTS idx_partner_apps_hash ON partner_apps (api_key_hash);
 
--- 2. SIGNATURE_TEMPLATES TABLE
--- Stores highly processed, encrypted signature hashes/templates only.
--- NEVER store raw identifying secrets.
-create table if not exists public.signature_templates (
-    id uuid primary key default gen_random_uuid(),
-    user_id uuid references public.users(id) on delete cascade not null,
-    template_hash text not null unique, -- Cryptographic hash of the signature template for O(1) duplicate checks
-    encrypted_template text not null, -- Encrypted signature template (AES-256 or similar, managed at application level)
-    model_version text not null, -- E.g., 'signature-v3', 'integrity-deepface-v1'
-    confidence_score numeric(5, 2) not null, -- Match or quality confidence score during enrollment
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+
+-- ==========================================
+-- 2. TABLE: USERS
+-- ==========================================
+-- Stores digital identities assessed by the Decentralized Assurance core.
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(255) PRIMARY KEY,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'verified', 'rejected', 'suspended')),
+    human_uid VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-create index if not exists idx_signature_templates_hash on public.signature_templates(template_hash);
 
--- 3. DEVICES TABLE
--- Tracks registered client hardware public keys. Used in multi-account blocklists.
-create table if not exists public.devices (
-    id uuid primary key default gen_random_uuid(),
-    user_id uuid references public.users(id) on delete cascade not null,
-    device_public_key text not null, -- RSA-2048 or Ed25519 PEM string 
-    device_fingerprint_hash text not null, -- Hash of Canvas, OS, and client parameters
-    platform text not null, -- e.g., 'iOS', 'Android', 'macOS-Chrome'
-    trusted boolean default true not null,
-    last_seen_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+-- ==========================================
+-- 3. TABLE: VERIFICATION_SESSIONS
+-- ==========================================
+-- Manages session state, humanness risk score assessments, and cryptographic proofs.
+CREATE TABLE IF NOT EXISTS verification_sessions (
+    id VARCHAR(255) PRIMARY KEY,
+    partner_app_id VARCHAR(255) REFERENCES partner_apps(id) ON DELETE CASCADE,
+    external_user_id VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    risk_score INT NOT NULL DEFAULT 0 CHECK (risk_score >= 0 AND risk_score <= 100),
+    duplicate_candidate BOOLEAN NOT NULL DEFAULT FALSE,
+    result_reason TEXT NOT NULL,
+    risk_reasons TEXT[] DEFAULT '{}'::TEXT[] NOT NULL,
+    proof_token TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    completed_at TIMESTAMPTZ
 );
 
-create index if not exists idx_devices_fingerprint on public.devices(device_fingerprint_hash);
-create index if not exists idx_devices_pubkey on public.devices(device_public_key);
+-- Multi-column indexing for fast verification checks and metrics
+CREATE INDEX IF NOT EXISTS idx_verification_sessions_partner ON verification_sessions (partner_app_id);
+CREATE INDEX IF NOT EXISTS idx_verification_sessions_external ON verification_sessions (external_user_id);
+CREATE INDEX IF NOT EXISTS idx_verification_sessions_status ON verification_sessions (status);
 
--- 4. PARTNER_APPS TABLE
--- Platforms querying the proof-of-human API.
-create table if not exists public.partner_apps (
-    id uuid primary key default gen_random_uuid(),
-    name text not null,
-    api_key_hash text not null unique, -- SHA-256 hash of API key
-    webhook_url text, -- Webhook target to push verification state updates
-    status text not null check (status in ('active', 'suspended')),
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+
+-- ==========================================
+-- 4. TABLE: AUDIT_LOGS
+-- ==========================================
+-- Tracks developer changes, API calls, and compliance logs securely.
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id VARCHAR(255) PRIMARY KEY,
+    actor_type VARCHAR(50) NOT NULL CHECK (actor_type IN ('system', 'partner', 'admin', 'user')),
+    actor_id VARCHAR(255) NOT NULL,
+    action TEXT NOT NULL,
+    target_type VARCHAR(255) NOT NULL,
+    target_id VARCHAR(255) NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-create index if not exists idx_partner_apps_key_hash on public.partner_apps(api_key_hash);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_actor ON audit_logs (actor_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON audit_logs (action);
 
--- 5. PARTNER_USER_LINKS TABLE
--- Map to partner accounts. Ensures pseudonymity (partner does not see raw user_id unless permitted)
-create table if not exists public.partner_user_links (
-    id uuid primary key default gen_random_uuid(),
-    partner_app_id uuid references public.partner_apps(id) on delete cascade not null,
-    user_id uuid references public.users(id) on delete cascade not null,
-    external_user_id text not null, -- User identifier on partner platform (e.g. 'app_user_123')
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    unique(partner_app_id, external_user_id)
+
+-- ==========================================
+-- 5. TABLE: SECURITY_EVENTS
+-- ==========================================
+-- Logs intrusion attempts, key exposure signals, and botnet telemetry.
+CREATE TABLE IF NOT EXISTS security_events (
+    id VARCHAR(255) PRIMARY KEY,
+    severity VARCHAR(50) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    event_type VARCHAR(255) NOT NULL,
+    actor_type VARCHAR(50) NOT NULL CHECK (actor_type IN ('user', 'partner_app', 'admin', 'system', 'unknown')),
+    actor_id VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(100) NOT NULL,
+    user_agent TEXT NOT NULL,
+    session_id VARCHAR(255),
+    partner_app_id VARCHAR(255) REFERENCES partner_apps(id) ON DELETE SET NULL,
+    request_path VARCHAR(255),
+    detection_reason TEXT NOT NULL,
+    raw_metadata JSONB DEFAULT '{}'::jsonb NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
-create index if not exists idx_partner_user_links_lookup on public.partner_user_links(partner_app_id, external_user_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_severity ON security_events (severity);
+CREATE INDEX IF NOT EXISTS idx_security_events_partner ON security_events (partner_app_id);
 
--- 6. VERIFICATION_SESSIONS TABLE
--- Individual verification session lifecycles.
-create table if not exists public.verification_sessions (
-    id uuid primary key default gen_random_uuid(),
-    partner_app_id uuid references public.partner_apps(id) on delete cascade not null,
-    external_user_id text not null,
-    status text not null check (status in ('started', 'passed', 'failed', 'review', 'created', 'consent_given', 'verification_started', 'verification_passed', 'verification_failed', 'proof_issued', 'expired', 'revoked')),
-    risk_score integer not null check (risk_score >= 0 and risk_score <= 100),
-    duplicate_candidate boolean default false not null,
-    result_reason text,
-    risk_reasons jsonb default '[]'::jsonb not null,
-    proof_token text, -- Signed cryptographic token (JWT-like or custom payload)
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    completed_at timestamp with time zone
+
+-- ==========================================
+-- 6. TABLE: SECURITY_REPORTS
+-- ==========================================
+-- Active repository for Bug Bounty and Responsible Vulnerability Disclosures.
+CREATE TABLE IF NOT EXISTS security_reports (
+    id VARCHAR(255) PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    severity VARCHAR(50) NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+    affected_system VARCHAR(255) NOT NULL,
+    reproduction_steps TEXT NOT NULL,
+    submitted_evidence TEXT,
+    reporter_contact VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL CHECK (status IN ('new', 'triaged', 'duplicate', 'reproduced', 'patched', 'payout_approved', 'payout_paid', 'closed')),
+    bounty_amount DECIMAL(12, 2) DEFAULT 0.00 NOT NULL,
+    internal_notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    resolved_at TIMESTAMPTZ
 );
 
-create index if not exists idx_sessions_partner_app on public.verification_sessions(partner_app_id);
-
--- 7. AUDIT_LOGS TABLE
--- Cryptographically linked or static strict operational logs.
-create table if not exists public.audit_logs (
-    id uuid primary key default gen_random_uuid(),
-    actor_type text not null check (actor_type in ('system', 'partner', 'admin', 'user')),
-    actor_id text not null, -- E.g. API key ID, admin email, partner id
-    action text not null, -- E.g. 'api_key.create', 'verification.verify', 'user.suspend'
-    target_type text not null, -- E.g. 'user', 'session', 'api_key'
-    target_id text not null,
-    metadata jsonb default '{}'::jsonb not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
-create index if not exists idx_audit_logs_action on public.audit_logs(action);
-create index if not exists idx_audit_logs_target on public.audit_logs(target_type, target_id);
-
--- Trigger to auto-update users.updated_at
-create or replace function public.handle_update_timestamp()
-returns trigger as $$
-begin
-    new.updated_at = now();
-    return new;
-end;
-$$ language plpgsql;
-
-create trigger tr_users_update_timestamp
-    before update on public.users
-    for each row
-    execute procedure public.handle_update_timestamp();
-
--- ==========================================================
--- REALISTIC ROW LEVEL SECURITY (RLS) POLICIES
--- ==========================================================
-
--- Enable Row Level Security on all core tables
-alter table public.users enable row level security;
-alter table public.signature_templates enable row level security;
-alter table public.devices enable row level security;
-alter table public.partner_apps enable row level security;
-alter table public.partner_user_links enable row level security;
-alter table public.verification_sessions enable row level security;
-alter table public.audit_logs enable row level security;
-
--- 1. Users Table Security Policies
--- Users are privacy-centric and can only be queried by authorized admin roles or authenticated partners.
-create policy "Admins have full access to users"
-    on public.users
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partner apps can select linked users"
-    on public.users
-    for select
-    using (
-        exists (
-            select 1 from public.partner_user_links l
-            where l.user_id = public.users.id
-        )
-    );
-
--- 2. Signature Templates Security Policies
--- Extremely sensitive. Never expose raw signature hashes or embeddings.
--- Strictly restricted to service-role background verification workers. No client/partner selects.
-create policy "Strict service-role only access to signature templates"
-    on public.signature_templates
-    for all
-    using (auth.jwt()->>'role' = 'service_role')
-    with check (auth.jwt()->>'role' = 'service_role');
-
--- 3. Devices Security Policies
--- Tracks fingerprints and hardware keys. Accessible only by service-role or linked partner apps.
-create policy "Admins have full access to devices"
-    on public.devices
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partner apps can select devices of their users"
-    on public.devices
-    for select
-    using (
-        exists (
-            select 1 from public.partner_user_links l
-            where l.user_id = public.devices.user_id
-        )
-    );
-
--- 4. Partner Apps Security Policies
--- Partners can only select their own app settings.
-create policy "Admins have full access to partner apps"
-    on public.partner_apps
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can select their own partner app configuration"
-    on public.partner_apps
-    for select
-    using (
-        -- In Supabase, can compare with claims or partner app ID
-        id::text = auth.jwt()->>'partner_app_id'
-    );
-
--- 5. Partner User Links Security Policies
--- Scoped to the partner application ID matching their credentials.
-create policy "Admins have full access to partner user links"
-    on public.partner_user_links
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can select their own user links"
-    on public.partner_user_links
-    for select
-    using (partner_app_id::text = auth.jwt()->>'partner_app_id');
-
--- 6. Verification Sessions Security Policies
--- Scoped strictly so partners can only view their own verification sessions.
-create policy "Admins have full access to verification sessions"
-    on public.verification_sessions
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can select their own sessions"
-    on public.verification_sessions
-    for select
-    using (partner_app_id::text = auth.jwt()->>'partner_app_id');
-
-create policy "Partners can create sessions under their ID"
-    on public.verification_sessions
-    for insert
-    with check (partner_app_id::text = auth.jwt()->>'partner_app_id');
-
--- 7. Audit Logs Security Policies
--- Append-only constraint: Only system processes or authorized roles can append logs.
--- Update and Delete actions are strictly prohibited on audit tables to prevent cover-up of malicious activities.
-create policy "Admins can read audit logs"
-    on public.audit_logs
-    for select
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can read their own target audit logs"
-    on public.audit_logs
-    for select
-    using (actor_id = auth.jwt()->>'partner_app_id');
-
-create policy "System and Admins can insert audit logs"
-    on public.audit_logs
-    for insert
-    with check (true); -- Append-only trigger
-
--- No update/delete policies are declared, which safely disables update/delete for all roles!
+CREATE INDEX IF NOT EXISTS idx_security_reports_status ON security_reports (status);
+CREATE INDEX IF NOT EXISTS idx_security_reports_severity ON security_reports (severity);
 
 
--- ==========================================================
--- 8. ORGANIZATIONS & PROJECTS SCHEMAS (MODULE 1)
--- ==========================================================
+-- ==========================================
+-- ROW-LEVEL SECURITY (RLS) POLICIES
+-- ==========================================
+-- By default, Supabase secures tables. AAN backend APIs consume this database
+-- using the private service-role client, bypassing policies and enabling secure
+-- server-side access, keeping API keys protected. Public accesses are blocked.
 
-create table if not exists public.organizations (
-    id uuid primary key default gen_random_uuid(),
-    name text not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+ALTER TABLE partner_apps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE verification_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE security_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE security_reports ENABLE ROW LEVEL SECURITY;
 
-create table if not exists public.projects (
-    id uuid primary key default gen_random_uuid(),
-    organization_id uuid references public.organizations(id) on delete cascade not null,
-    name text not null,
-    allowed_domains text[] default '{}'::text[] not null,
-    login_policy text not null,
-    enforcement_mode text not null check (enforcement_mode in ('monitor_only', 'flag_suspicious', 'require_reverification', 'block_untrusted', 'partner_removal')),
-    webhook_secret text not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
+-- Service Role Key Bypasses RLS by default. To allow read-only query of public disclosure
+-- report statuses, we add a public read policy to security_reports table:
+CREATE POLICY "Allow public read access to security reports" 
+ON security_reports 
+FOR SELECT 
+USING (status IN ('patched', 'payout_paid'));
 
--- ==========================================================
--- 9. WEBHOOK_DELIVERIES SCHEMA (MODULE 5)
--- ==========================================================
-
-create table if not exists public.webhook_deliveries (
-    id uuid primary key default gen_random_uuid(),
-    project_id uuid references public.projects(id) on delete cascade not null,
-    event_type text not null,
-    url text not null,
-    payload jsonb not null,
-    signature text not null,
-    status text not null check (status in ('success', 'failed')),
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- ==========================================================
--- 10. DUPLICATE_SIGNALS SCHEMA (MODULE 6)
--- ==========================================================
-
-create table if not exists public.duplicate_signals (
-    id uuid primary key default gen_random_uuid(),
-    project_id uuid references public.projects(id) on delete cascade not null,
-    session_id uuid references public.verification_sessions(id) on delete cascade not null,
-    external_user_id text not null,
-    duplicate_external_user_id text not null,
-    confidence numeric(5,2) not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- ==========================================================
--- 11. REMOVAL_REQUESTS SCHEMA (MODULE 9)
--- ==========================================================
-
-create table if not exists public.removal_requests (
-    id uuid primary key default gen_random_uuid(),
-    project_id uuid references public.projects(id) on delete cascade not null,
-    external_user_id text not null,
-    status text not null check (status in ('pending', 'approved', 'rejected')),
-    reason text not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    approved_at timestamp with time zone
-);
-
--- ==========================================================
--- 12. SECURITY_EVENTS SCHEMA (BYPASS & INTRUSION DETECTION LAYER)
--- ==========================================================
-
-create table if not exists public.security_events (
-    id uuid primary key default gen_random_uuid(),
-    severity text not null check (severity in ('low', 'medium', 'high', 'critical')),
-    event_type text not null, -- e.g., 'invalid_token_signature', 'expired_token_reuse', 'token_replay_attempt', 'impossible_session_state_transition', etc.
-    actor_type text not null check (actor_type in ('user', 'partner_app', 'admin', 'system', 'unknown')),
-    actor_id text not null,
-    ip_address text not null,
-    user_agent text not null,
-    session_id text,
-    partner_app_id text,
-    request_path text,
-    detection_reason text not null,
-    raw_metadata jsonb default '{}'::jsonb not null,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
-create index if not exists idx_security_events_severity on public.security_events(severity);
-create index if not exists idx_security_events_type on public.security_events(event_type);
-
--- RLS FOR SECURITY_EVENTS: Ensure strict administrative boundary
-alter table public.security_events enable row level security;
-
--- Admin-only policy: Only authorized administrative roles may read system intrusion logs. Guest/Partner users are denied.
-create policy "Admins select access to security events"
-    on public.security_events
-    for select
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-
--- ==========================================================
--- RLS FOR MODULE SPECIFIC TABLES
--- ==========================================================
-
--- Enable Row Level Security
-alter table public.organizations enable row level security;
-alter table public.projects enable row level security;
-alter table public.webhook_deliveries enable row level security;
-alter table public.duplicate_signals enable row level security;
-alter table public.removal_requests enable row level security;
-
--- 8. Organizations RLS Policies
-create policy "Admins have full access to organizations"
-    on public.organizations
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Users can select their linked organization"
-    on public.organizations
-    for select
-    using (
-        -- Assumes partner app is mapped or matching claim in JWT
-        id::text = auth.jwt()->>'organization_id'
-    );
-
--- 9. Projects RLS Policies
-create policy "Admins have full access to projects"
-    on public.projects
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can select projects within their organization"
-    on public.projects
-    for select
-    using (
-        organization_id::text = auth.jwt()->>'organization_id'
-    );
-
--- 10. Webhook Deliveries RLS Policies
-create policy "Admins have full access to webhook deliveries"
-    on public.webhook_deliveries
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can select webhook deliveries of their projects"
-    on public.webhook_deliveries
-    for select
-    using (
-        exists (
-            select 1 from public.projects p
-            where p.id = public.webhook_deliveries.project_id
-            and p.organization_id::text = auth.jwt()->>'organization_id'
-        )
-    );
-
--- 11. Duplicate Signals RLS Policies
-create policy "Admins have full access to duplicate signals"
-    on public.duplicate_signals
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can select duplicate signals of their projects"
-    on public.duplicate_signals
-    for select
-    using (
-        exists (
-            select 1 from public.projects p
-            where p.id = public.duplicate_signals.project_id
-            and p.organization_id::text = auth.jwt()->>'organization_id'
-        )
-    );
-
--- 12. Removal Requests RLS Policies
-create policy "Admins have full access to removal requests"
-    on public.removal_requests
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-create policy "Partners can select or create removal requests of their projects"
-    on public.removal_requests
-    for all
-    using (
-        exists (
-            select 1 from public.projects p
-            where p.id = public.removal_requests.project_id
-            and p.organization_id::text = auth.jwt()->>'organization_id'
-        )
-    );
-
-
--- ==========================================================
--- 13. SECURITY_REPORTS SCHEMA (TESLA-STYLE BUG BOUNTY PROGRAM)
--- ==========================================================
-
-create table if not exists public.security_reports (
-    id uuid primary key default gen_random_uuid(),
-    title text not null,
-    category text not null check (category in (
-        'authentication_bypass',
-        'partner_api_key_exposure',
-        'cross_organization_data_access',
-        'forged_verification_tokens',
-        'replay_attacks',
-        'webhook_spoofing',
-        'admin_dashboard_access',
-        'rate_limit_bypass',
-        'bot_abuse_at_scale',
-        'unauthorized_partner_actions',
-        'privacy_leaks',
-        'audit_log_tampering',
-        'verification_approval_bypass'
-    )),
-    severity text not null check (severity in ('low', 'medium', 'high', 'critical')),
-    affected_system text not null,
-    reproduction_steps text not null,
-    submitted_evidence text, -- Optional links or markdown text
-    reporter_contact text not null, -- Contact email or identifier
-    status text not null default 'new' check (status in (
-        'new', 'triaged', 'duplicate', 'reproduced', 'patched', 'payout_approved', 'payout_paid', 'closed'
-    )),
-    bounty_amount numeric(10, 2) default 0.00 not null,
-    internal_notes text,
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-    resolved_at timestamp with time zone
-);
-
-create index if not exists idx_security_reports_status on public.security_reports(status);
-create index if not exists idx_security_reports_severity on public.security_reports(severity);
-
--- RLS FOR SECURITY_REPORTS:
-alter table public.security_reports enable row level security;
-
--- Policy 1: Anyone can submit a security report (public bug bounty entry point)
-create policy "Anyone can insert security reports"
-    on public.security_reports
-    for insert
-    with check (true);
-
--- Policy 2: Admins have full access to view, update, or delete reports
-create policy "Admins have full access to security reports"
-    on public.security_reports
-    for all
-    using (auth.jwt()->>'role' = 'service_role' or auth.jwt()->>'role' = 'admin_super_user');
-
-
-
+-- Return operational success log in database console
+SELECT 'MIGRATION COMPLETED SUCCESSFULLY' AS status;

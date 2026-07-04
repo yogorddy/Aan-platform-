@@ -42,6 +42,10 @@ export function isSupabaseConnected(): boolean {
   return isConfigured;
 }
 
+export function disableRemoteDatabase(): void {
+  isConfigured = false;
+}
+
 /**
  * Centralized DB Error and Table Missing handler to guarantee graceful fallback
  */

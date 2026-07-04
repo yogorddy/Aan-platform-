@@ -8,6 +8,7 @@ import {
   Trash2, Send, Info
 } from 'lucide-react';
 import { isBrandEnabled } from '../brandConfig';
+import TermsOfServiceView from './TermsOfServiceView';
 
 interface TrustDocsPortalProps {
   activeSubSection?: string;
@@ -197,13 +198,28 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
     {
       title: "ENTERPRISE",
       items: [
-        { id: "pricing", label: "Platform Access", icon: Sliders },
+        { id: "pricing", label: "Platform Access", icon: HelpCircle }, // wait, maintain existing pricing / support icon if any
         { id: "support", label: "Support Portal", icon: HelpCircle },
         { id: "contact", label: "Contact Sales", icon: Mail },
         { id: "terms", label: "Terms & Conditions", icon: Lock }
       ]
     }
   ];
+
+  if (currentSection === 'terms') {
+    return (
+      <TermsOfServiceView 
+        onNavigate={(page, path) => {
+          if (page === 'trustdocs' && path) {
+            const section = path.startsWith('/') ? path.substring(1) : path;
+            setCurrentSection(section);
+          } else {
+            onNavigate(page, path);
+          }
+        }} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600Selection">
