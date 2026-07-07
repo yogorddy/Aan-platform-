@@ -4,14 +4,16 @@ import {
   AuditLog, 
   SecurityEvent, 
   PartnerApp,
-  SecurityReport
+  SecurityReport,
+  IntegrationRequest,
+  IntegrationRequestStatusHistory
 } from "../types";
 
 // ============================================================================
 // AAN PLATFORM — PRIVACY-PRESERVING IDENTITY DB REPOSITORY LAYER
 // ============================================================================
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
 let supabase: SupabaseClient | null = null;
@@ -357,6 +359,272 @@ export const supabaseService = {
         localStore[idx] = { ...localStore[idx], ...updates };
         return localStore[idx];
       }
+      return null;
+    }
+  },
+
+  /**
+   * 9. CREATE INTEGRATION REQUEST
+   */
+  async createIntegrationRequest(
+    request: IntegrationRequest,
+    localStore: IntegrationRequest[]
+  ): Promise<IntegrationRequest> {
+    if (isConfigured && supabase) {
+      const { data, error } = await supabase
+        .from("integration_requests")
+        .insert(request)
+        .select()
+        .single();
+
+      if (error) {
+        handleDbError(error, "createIntegrationRequest");
+        localStore.unshift(request);
+        return request;
+      }
+      return data as IntegrationRequest;
+    } else {
+      localStore.unshift(request);
+      return request;
+    }
+  },
+
+  /**
+   * 10. GET INTEGRATION REQUESTS
+   */
+  async getIntegrationRequests(
+    localStore: IntegrationRequest[]
+  ): Promise<IntegrationRequest[]> {
+    if (isConfigured && supabase) {
+      const { data, error } = await supabase
+        .from("integration_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        handleDbError(error, "getIntegrationRequests");
+        return localStore;
+      }
+      return data as IntegrationRequest[];
+    } else {
+      return localStore;
+    }
+  },
+
+  /**
+   * 11. UPDATE INTEGRATION REQUEST
+   */
+  async updateIntegrationRequest(
+    requestId: string,
+    updates: Partial<IntegrationRequest>,
+    localStore: IntegrationRequest[]
+  ): Promise<IntegrationRequest | null> {
+    if (isConfigured && supabase) {
+      const { data, error } = await supabase
+        .from("integration_requests")
+        .update(updates)
+        .eq("id", requestId)
+        .select()
+        .single();
+
+      if (error) {
+        handleDbError(error, "updateIntegrationRequest");
+        const idx = localStore.findIndex(r => r.id === requestId);
+        if (idx >= 0) {
+          localStore[idx] = { ...localStore[idx], ...updates, updated_at: new Date().toISOString() };
+          return localStore[idx];
+        }
+        return null;
+      }
+      return data as IntegrationRequest;
+    } else {
+      const idx = localStore.findIndex(r => r.id === requestId);
+      if (idx >= 0) {
+        localStore[idx] = { ...localStore[idx], ...updates, updated_at: new Date().toISOString() };
+        return localStore[idx];
+      }
+      return null;
+    }
+  },
+
+  /**
+   * 12. CREATE STATUS HISTORY ENTRY
+   */
+  async createIntegrationRequestStatusHistory(
+    history: IntegrationRequestStatusHistory,
+    localStore: IntegrationRequestStatusHistory[]
+  ): Promise<IntegrationRequestStatusHistory> {
+    if (isConfigured && supabase) {
+      const { data, error } = await supabase
+        .from("integration_request_status_history")
+        .insert(history)
+        .select()
+        .single();
+
+      if (error) {
+        handleDbError(error, "createIntegrationRequestStatusHistory");
+        localStore.unshift(history);
+        return history;
+      }
+      return data as IntegrationRequestStatusHistory;
+    } else {
+      localStore.unshift(history);
+      return history;
+    }
+  },
+
+  /**
+   * 13. GET STATUS HISTORY FOR REQUEST
+   */
+  async getIntegrationRequestStatusHistory(
+    requestId: string,
+    localStore: IntegrationRequestStatusHistory[]
+  ): Promise<IntegrationRequestStatusHistory[]> {
+    if (isConfigured && supabase) {
+      const { data, error } = await supabase
+        .from("integration_request_status_history")
+        .select("*")
+        .eq("integration_request_id", requestId)
+        .order("changed_at", { ascending: true });
+
+      if (error) {
+        handleDbError(error, "getIntegrationRequestStatusHistory");
+        return localStore.filter(h => h.integration_request_id === requestId);
+      }
+      return data as IntegrationRequestStatusHistory[];
+    } else {
+      return localStore.filter(h => h.integration_request_id === requestId);
+    }
+  },
+
+  /**
+   * 14. TRUST INTELLIGENCE API: GET METRICS
+   */
+  async getTrustMetrics(): Promise<any> {
+    try {
+      const res = await fetch("/api/trust/metrics");
+      if (!res.ok) throw new Error("HTTP error: " + res.status);
+      return await res.json();
+    } catch (err: any) {
+      console.warn("getTrustMetrics API failed:", err);
+      return null;
+    }
+  },
+
+  /**
+   * 15. TRUST INTELLIGENCE API: GET CLUSTERS
+   */
+  async getTrustClusters(): Promise<any[]> {
+    try {
+      const res = await fetch("/api/trust/clusters");
+      if (!res.ok) throw new Error("HTTP error: " + res.status);
+      return await res.json();
+    } catch (err) {
+      console.warn("getTrustClusters API failed:", err);
+      return [];
+    }
+  },
+
+  /**
+   * 16. TRUST INTELLIGENCE API: GET VERIFIED HUMANS
+   */
+  async getVerifiedHumans(): Promise<any[]> {
+    try {
+      const res = await fetch("/api/trust/humans");
+      if (!res.ok) throw new Error("HTTP error: " + res.status);
+      return await res.json();
+    } catch (err) {
+      console.warn("getVerifiedHumans API failed:", err);
+      return [];
+    }
+  },
+
+  /**
+   * 17. TRUST INTELLIGENCE API: GET TIMELINE
+   */
+  async getTrustTimelineData(): Promise<any[]> {
+    try {
+      const res = await fetch("/api/trust/timeline");
+      if (!res.ok) throw new Error("HTTP error: " + res.status);
+      return await res.json();
+    } catch (err) {
+      console.warn("getTrustTimelineData API failed:", err);
+      return [];
+    }
+  },
+
+  /**
+   * 18. TRUST INTELLIGENCE API: GET ALERTS
+   */
+  async getPartnerAlerts(): Promise<any[]> {
+    try {
+      const res = await fetch("/api/trust/alerts");
+      if (!res.ok) throw new Error("HTTP error: " + res.status);
+      return await res.json();
+    } catch (err) {
+      console.warn("getPartnerAlerts API failed:", err);
+      return [];
+    }
+  },
+
+  /**
+   * 19. TRUST INTELLIGENCE API: DISMISS ALERT
+   */
+  async dismissAlert(id: string): Promise<any> {
+    try {
+      const res = await fetch("/api/trust/alerts/dismiss", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id })
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn("dismissAlert API failed:", err);
+      return null;
+    }
+  },
+
+  /**
+   * 20. TEST LAB API: GET RUNS
+   */
+  async getTestLabRuns(): Promise<any[]> {
+    try {
+      const res = await fetch("/api/trust/test-lab/runs");
+      if (!res.ok) throw new Error("HTTP error: " + res.status);
+      return await res.json();
+    } catch (err) {
+      console.warn("getTestLabRuns API failed:", err);
+      return [];
+    }
+  },
+
+  /**
+   * 21. TEST LAB API: TRIGGER RUN
+   */
+  async runSimulationScenario(scenario_type: string): Promise<any> {
+    try {
+      const res = await fetch("/api/trust/test-lab/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario_type })
+      });
+      return await res.json();
+    } catch (err) {
+      console.warn("runSimulationScenario API failed:", err);
+      return null;
+    }
+  },
+
+  /**
+   * 22. TRUST INTELLIGENCE API: GET UNIFIED GRAPH DATA
+   */
+  async getTrustGraphData(): Promise<any> {
+    try {
+      const res = await fetch("/api/trust/graph-data");
+      if (!res.ok) throw new Error("HTTP error: " + res.status);
+      return await res.json();
+    } catch (err) {
+      console.warn("getTrustGraphData API failed:", err);
       return null;
     }
   }

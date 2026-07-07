@@ -37,7 +37,7 @@ export default function BrandBook() {
   // Logo Sandbox States
   const [logoTheme, setLogoTheme] = useState<'emerald' | 'white' | 'black'>('emerald');
   const [logoBg, setLogoBg] = useState<'dark' | 'light' | 'transparent'>('dark');
-  const [logoType, setLogoType] = useState<'parallel' | 'symmetric'>('parallel');
+  const logoType = 'parallel';
   const [strokeThickness, setStrokeThickness] = useState<number>(12);
   const [copiedSvg, setCopiedSvg] = useState<boolean>(false);
   const [subTab, setSubTab] = useState<'master' | 'spacing' | 'lockups' | 'favicon'>('master');
@@ -59,23 +59,12 @@ export default function BrandBook() {
 
   const getSvgString = (type: 'parallel' | 'symmetric', theme: 'emerald' | 'white' | 'black', thickness: number) => {
     const strokeColor = theme === 'emerald' ? '#00E676' : theme === 'white' ? '#FFFFFF' : '#000000';
-    const isParallel = type === 'parallel';
     
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
   <!-- AAN Master Logo Symbol - Geometric Monogram -->
   <g fill="none" stroke="${strokeColor}" stroke-width="${thickness}" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Left Shape (Abstract Capital A) -->
-    <path d="M 28 96 L 52 36 L 76 96" />
-    
-    <!-- Right Shape (The N) -->
-    <!-- Main rising diagonal -->
-    <path d="M 76 96 L 92 56" />
-    ${isParallel 
-      ? `<!-- Detached parallel rising segment -->
-    <path d="M 96 46 L 104 26" />`
-      : `<!-- Detached symmetrical descending segment -->
-    <path d="M 94 32 L 100 47" />`
-    }
+    <path d="M 28 96 L 52 36 L 68 76" />
+    <path d="M 68 80 L 92 20 L 108 60" />
   </g>
 </svg>`;
   };
@@ -252,21 +241,21 @@ export default function BrandBook() {
               <div className="border-b border-slate-800 pb-5">
                 <span className="font-mono text-xs text-blue-400">CHAPTER 01</span>
                 <h2 className="text-2xl font-bold font-sans text-white mt-1">Brand Foundation</h2>
-                <p className="text-slate-400 text-sm mt-1">Defining the purpose, vision, and core alignment of AAN technology.</p>
+                <p className="text-slate-400 text-sm mt-1">Defining the purpose, vision, and core alignment of AAN.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-5 bg-slate-900/50 border border-slate-850 rounded-xl hover:border-slate-800 transition-all">
                   <h4 className="font-mono text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">Myopic Focus: The Mission</h4>
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    To build highly resilient, privacy-preserving infrastructure that enables digital platforms to assert user uniqueness and trust, eliminating malicious botnets and fake entities without exposing raw identity details.
+                    To enable digital interactions to begin with confidence, establishing a sovereign framework where authenticity is verified without compromising participant privacy or collecting personal data.
                   </p>
                 </div>
 
                 <div className="p-5 bg-slate-900/50 border border-slate-850 rounded-xl hover:border-slate-800 transition-all">
                   <h4 className="font-mono text-[11px] uppercase tracking-wider text-slate-400 font-semibold mb-2">The Long View: The Vision</h4>
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    A world where trust online is earned dynamically through verifiable digital evidence rather than continuous corporate surveillance or centralized government registries.
+                    An ecosystem where trust is earned dynamically through verifiable authenticity, serving as a global standard that remains neutral to specific industries and markets.
                   </p>
                 </div>
               </div>
@@ -278,47 +267,47 @@ export default function BrandBook() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">Brand Purpose</span>
                     <span className="col-span-2 leading-relaxed text-slate-300">
-                      To establish the definitive trust consensus layer of the internet, allowing software developers to operate global platforms with safe, anonymous uniqueness safeguards.
+                      To establish a neutral trust layer for the digital ecosystem, enabling communities, systems, and platforms to interact with absolute confidence.
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">Brand Promise</span>
                     <span className="col-span-2 leading-relaxed text-slate-300">
-                      We secure authentic human interactions at scale, guaranteeing that partner platforms receive zero user tracking vectors or stored private templates.
+                      We verify digital authenticity continuously and non-custodially, ensuring interactions are authentic and private by default.
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">Brand Positioning</span>
                     <span className="col-span-2 leading-relaxed text-slate-300 font-mono">
-                      "Stripe is for secure payments. Cloudflare is for network integrity. AAN is for privacy-preserving digital trust."
+                      "Stripe is for secure payments. Cloudflare is for network routing. AAN is for verifiable digital trust."
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">One-Sentence Pitch</span>
                     <span className="col-span-2 leading-relaxed text-slate-300 font-bold text-white">
-                      AAN builds privacy-preserving digital trust infrastructure that enables platforms to verify real, unique, and returning humans while protecting user privacy.
+                      AAN represents the sovereign standard for digital trust, allowing platforms to establish the authenticity and uniqueness of their interactions neutrally.
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 py-2 border-b border-slate-900">
                     <span className="font-semibold text-slate-200">Elevator Pitch</span>
                     <span className="col-span-2 leading-relaxed text-slate-300">
-                      Traditional identity companies scan driver’s licenses, hoard SSNs, and record high-res facial scans, creating permanent security and privacy hazards. AAN changes the game. We provide a decentralized backend infrastructure that lets apps verify real, unique users through secure, locally-hashed cryptographic postures. Recipient portals get only cryptographic approvals—never raw user data.
+                      Traditional systems demand intrusive verification, trading private details for temporary access. AAN changes the model. We provide an independent, non-custodial trust standard that verifies real, unique interactions through locally-compiled cryptographic proof. Receipient nodes get absolute confidence—never raw or sensitive profiles.
                     </span>
                   </div>
                 </div>
               </div>
 
               <div className="p-6 bg-slate-900/20 border border-slate-850 rounded-xl space-y-3">
-                <span className="font-mono text-[10px] text-emerald-400 font-bold uppercase">Executive Summary for Seed Investors & Architects</span>
+                <span className="font-mono text-[10px] text-emerald-400 font-bold uppercase">Executive Summary</span>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  In a digital landscape overrun by multi-agent AI scripts, neural fake accounts, bot syndicates, and digital identity fraud, platforms encounter a fatal structural paradox: how to guarantee a user is an actual, unique, and trusted human without establishing a full surveillance panopticon. 
+                  In a digital landscape overrun by synthetic interactions and automated scripts, platforms face a fatal structural challenge: how to guarantee authenticity without resorting to intrusive surveillance. 
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                  <b>AAN provides the escape velocity.</b> By treating identity verification as a stateless utility and returning verifiable cryptographic assertions, AAN decouples trust from surveillance. AAN does not compete with national legal documentation. We operate precisely at the API layer, giving developers tools to safeguard digital ecosystems at SOC-2, CCPA, and GDPR specifications.
+                  <b>AAN provides the category-defining standard.</b> By decoupling trust from surveillance, AAN serves as a timeless companion to the world's most trusted technologies. Rather than catering to a single industry vertical, AAN operates neutrally across all digital interactions to guarantee privacy, authenticity, and confidence.
                 </p>
               </div>
             </div>
@@ -332,80 +321,80 @@ export default function BrandBook() {
               <div className="border-b border-slate-800 pb-5">
                 <span className="font-mono text-xs text-blue-400">CHAPTER 02</span>
                 <h2 className="text-2xl font-bold font-sans text-white mt-1">Target Audience & Personas</h2>
-                <p className="text-slate-400 text-sm mt-1">Ten highly specific client profiles targeting AAN infrastructure.</p>
+                <p className="text-slate-400 text-sm mt-1">Ten highly specific client profiles aligning with AAN digital trust.</p>
               </div>
 
               <div className="space-y-4">
                 {[
                   {
-                    segment: '1. SaaS Companies',
-                    problem: 'Explosion of automated trial abuse, pipeline carding, and fake multi-tenant profiles.',
-                    goal: 'Protect developer compute resources and database scalability without causing onboarding friction.',
-                    painPoint: 'CAPTCHAs kill user signup metrics; legacy passport uploads are too heavy and expensive.',
-                    motivation: 'To lock trial signups to verified unique people cleanly.'
+                    segment: '1. Cloud Platforms',
+                    problem: 'Explosion of automated trial abuse and fake multi-tenant profiles.',
+                    goal: 'Protect compute resources and database scalability without causing onboarding friction.',
+                    painPoint: 'Intrusive friction points kill signup metrics; legacy approaches are too heavy and expensive.',
+                    motivation: 'To align trial signups to real unique participants cleanly.'
                   },
                   {
-                    segment: '2. Fintech Platforms',
-                    problem: 'Rapid synthetic identity creation and coordinated automated signups.',
-                    goal: 'Perform quick integrity and attestation handshakes before proceeding to standard manual review steps.',
-                    painPoint: 'High rates of automated spoofing rendering standard CAPTCHAs obsolete.',
-                    motivation: 'Sovereign hardware-bound client credential verification.'
+                    segment: '2. Financial Systems',
+                    problem: 'Rapid synthetic profile creation and coordinated automated signups.',
+                    goal: 'Perform quick integrity and validation matches before proceeding.',
+                    painPoint: 'High rates of automated spoofing rendering legacy defense systems obsolete.',
+                    motivation: 'Sovereign hardware-bound client attestation.'
                   },
                   {
-                    segment: '3. Online Marketplaces',
-                    problem: 'Malicious listings, seller multi-account review rigging, scam farm operations.',
-                    goal: 'Validate each vendor account leads back to a unique person index.',
+                    segment: '3. Digital Marketplaces',
+                    problem: 'Malicious listings, vendor multi-account review rigging, scam farm operations.',
+                    goal: 'Validate each vendor account leads back to a unique active participant.',
                     painPoint: 'Forcing micro-merchants to provide complete official identification causes significant churn.',
-                    motivation: 'Clean proof of unique human status.'
+                    motivation: 'Clean proof of unique participant status.'
                   },
                   {
-                    segment: '4. Gaming Platforms',
-                    problem: 'Smurfing, cheat scripts, botnets farming virtual materials, complete lobby compromise.',
-                    goal: 'Ensure each player is a distinct, verifiable biological operator.',
+                    segment: '4. Interactive Worlds',
+                    problem: 'Cheat scripts, botnets farming virtual materials, complete lobby compromise.',
+                    goal: 'Ensure each player is a distinct, genuine operator.',
                     painPoint: 'Hard blocks on IP or device parameters affect dormitories and households incorrectly.',
-                    motivation: 'Low friction hardware-bound attestation.'
+                    motivation: 'Low friction hardware-bound confirmation.'
                   },
                   {
-                    segment: '5. Enterprise Software',
-                    problem: 'Credential stuffing, social engineering attacks, and fake user approvals.',
-                    goal: 'Add an ironclad, frictionless privacy-centric hardware-bound layer to MFA.',
-                    painPoint: 'Employees resent sharing corporate credentials or central telemetry.',
-                    motivation: 'Stateless, zero-knowledge human validation.'
+                    segment: '5. Collaborative Environments',
+                    problem: 'Credential stuffing, social engineering attacks, and fake approvals.',
+                    goal: 'Add an ironclad, frictionless privacy-centric layer to access.',
+                    painPoint: 'Employees resent sharing credentials or central telemetry.',
+                    motivation: 'Stateless, zero-knowledge validation.'
                   },
                   {
-                    segment: '6. Social Platforms',
-                    problem: 'AI fake accounts spreading massive coordinated spam, bot manipulation of viral timelines.',
-                    goal: 'Enable a "Verified Unique Human" filter tier for account operations.',
-                    painPoint: 'Users reject sharing real passports/IDs with volatile social corporations.',
-                    motivation: 'Pseudonymous anti-bot attestation token flows.'
+                    segment: '6. Shared Spaces',
+                    problem: 'Coordinated spam campaigns, automated manipulation of viral timelines.',
+                    goal: 'Enable a "Verified Unique" filter tier for operations.',
+                    painPoint: 'Users reject sharing real passports/IDs with volatile corporations.',
+                    motivation: 'Pseudonymous attestation token flows.'
                   },
                   {
-                    segment: '7. Healthcare Tech',
-                    problem: 'Spam telehealth appointment reservations and duplicate record files.',
-                    goal: 'Secure unique returning human continuity without leaking clinical files.',
-                    painPoint: 'HIPAA requires perfect decoupling of personal indicators from clinical tables.',
-                    motivation: 'ZKP credential isolation.'
+                    segment: '7. Health Systems',
+                    problem: 'Spam appointment reservations and duplicate record files.',
+                    goal: 'Secure unique returning continuity without leaking personal profiles.',
+                    painPoint: 'Regulatory guidelines require perfect decoupling of personal indicators.',
+                    motivation: 'Credential isolation.'
                   },
                   {
-                    segment: '8. EdTech Tools',
-                    problem: 'AI bots taking courses, duplicate submissions, and online examination fraud.',
-                    goal: 'Lock student sessions to verified physical human students.',
+                    segment: '8. Academic Platforms',
+                    problem: 'AI bots taking courses, duplicate submissions, and evaluation fraud.',
+                    goal: 'Confirm student sessions correspond to verified physical students.',
                     painPoint: 'Aggressive surveillance causes anxiety and prompts major regulatory pushbacks.',
                     motivation: 'Local, secure client attestation.'
                   },
                   {
-                    segment: '9. Gov Contractors',
-                    problem: 'Protecting secure portal entry without exposing physical identity databases to hackers.',
-                    goal: 'Strict multi-signal risk metrics combining device profiles with localized cryptographic signatures.',
-                    painPoint: 'Traditional databases are constant massive targets for sovereign state hackers.',
-                    motivation: 'Military-grade cryptographic proof signatures.'
+                    segment: '9. Public Institutions',
+                    problem: 'Protecting secure portal entry without exposing physical databases to hackers.',
+                    goal: 'Strict multi-signal risk metrics combining device profiles with localized signatures.',
+                    painPoint: 'Traditional databases are constant massive targets for sovereign state threats.',
+                    motivation: 'Cryptographic proof signatures.'
                   },
                   {
-                    segment: '10. General Software Developers',
+                    segment: '10. Digital Creators',
                     problem: 'Complex, brittle setup processes required by old legacy identity suites.',
-                    goal: 'Obtain simple JSON Web Tokens containing unambiguous proof values in 3 lines of code.',
-                    painPoint: 'Integrating old identity SDKs takes weeks, is poorly of documentation, and requires sales calls.',
-                    motivation: 'Pristine self-serve documentation and transparent CLI endpoints.'
+                    goal: 'Obtain simple JSON tokens containing unambiguous proof values in 3 lines of code.',
+                    painPoint: 'Integrating old SDKs takes weeks, is poorly documented, and requires sales calls.',
+                    motivation: 'Pristine self-serve documentation and transparent endpoints.'
                   }
                 ].map((per, idx) => (
                   <div key={idx} className="p-5 bg-slate-900/30 border border-slate-850 hover:border-blue-900/30 rounded-xl space-y-3 transition-all relative overflow-hidden">
@@ -427,7 +416,7 @@ export default function BrandBook() {
                         <p className="text-slate-400 mt-0.5">{per.painPoint}</p>
                       </div>
                       <div>
-                        <span className="text-slate-500 font-mono text-[10px] block uppercase">Buying Motivation:</span>
+                        <span className="text-slate-500 font-mono text-[10px] block uppercase">Motivation:</span>
                         <p className="text-slate-300 mt-0.5 font-medium">{per.motivation}</p>
                       </div>
                     </div>
@@ -450,16 +439,16 @@ export default function BrandBook() {
 
               <div className="space-y-4">
                 {[
-                  { name: 'AAN Verify', use: 'The high-velocity verification session flow containing device attestation signals and dynamic challenge generators.' },
-                  { name: 'AAN Trust', use: 'Risk analysis, template hashes indexation matching, and multi-device correlation algorithms.' },
-                  { name: 'AAN Sentinel', use: 'Anomalous bot vector trackers, spoof mitigation, and real-time attempt velocity restrictions.' },
-                  { name: 'AAN Console', use: 'Secure partner portal interface displaying session histories, audit logs, and status controls.' },
-                  { name: 'AAN SDK', use: 'Multi-framework client developer libraries enabling fast, low-friction hardware-bound configurations.' },
-                  { name: 'AAN Connect', use: 'Pre-built standard single sign-on widgets, bridging OAuth attestation frameworks.' },
-                  { name: 'AAN Protect', use: 'Military-grade hardware-locked key pairs generated within browser-bound sandboxes.' },
-                  { name: 'AAN Proof', use: 'The cryptographic output generation mechanism producing signed, secure attestation tokens.' },
-                  { name: 'AAN Gateway', use: 'The secure REST developer endpoint translating hashed keys into state validations.' },
-                  { name: 'AAN Identity Graph', use: 'Anonymized, isolated relation chains linking devices and hashes safely per partner app.' }
+                  { name: 'AAN Verify', use: 'The session standard validating authenticity and user uniqueness gracefully.' },
+                  { name: 'AAN Trust', use: 'A non-custodial coordination framework that establishes returning status with zero personal data leakage.' },
+                  { name: 'AAN Sentinel', use: 'Protective patterns that shield digital ecosystems from coordinated synthetic interaction storms.' },
+                  { name: 'AAN Console', use: 'The neutral interface displaying session summaries, system configurations, and trust statuses.' },
+                  { name: 'AAN SDK', use: 'Universal client libraries enabling seamless and rapid integration of the AAN trust standard.' },
+                  { name: 'AAN Connect', use: 'Pre-built widgets that offer secure entry options across decentralized spaces.' },
+                  { name: 'AAN Protect', use: 'Hardware-secured cryptographic postures generated locally to safeguard user privacy.' },
+                  { name: 'AAN Proof', use: 'The signature generation mechanism delivering reliable, verifiable trust tokens.' },
+                  { name: 'AAN Gateway', use: 'The secure endpoint translating compiled credentials into standard confidence values.' },
+                  { name: 'AAN Identity Graph', use: 'Anonymized relationship hashes mapping trust nodes cleanly without tracking users.' }
                 ].map((prod, i) => (
                   <div key={i} className="p-4 bg-slate-900/30 border border-slate-850 rounded-xl flex items-start gap-4">
                     <div className="h-8 w-8 bg-blue-950/60 rounded-lg flex items-center justify-center text-blue-400 font-mono text-[10px] font-bold flex-shrink-0">
@@ -649,13 +638,8 @@ export default function BrandBook() {
                             strokeLinecap="round" 
                             strokeLinejoin="round"
                           >
-                            <path d="M 28 96 L 52 36 L 76 96" />
-                            <path d="M 76 96 L 92 56" />
-                            {logoType === 'parallel' ? (
-                              <path d="M 96 46 L 104 26" />
-                            ) : (
-                              <path d="M 94 32 L 100 47" />
-                            )}
+                            <path d="M 28 96 L 52 36 L 68 76" />
+                            <path d="M 68 80 L 92 20 L 108 60" />
                           </g>
                         </svg>
                       </div>
@@ -675,32 +659,15 @@ export default function BrandBook() {
                           Vector Parameters
                         </h3>
 
-                        {/* Logo Variant Toggle */}
+                        {/* Logo Variant Toggle (Hardlocked to Parallel Ascent) */}
                         <div className="space-y-2">
                           <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider block">Geometry Slant Type</span>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              onClick={() => setLogoType('parallel')}
-                              className={`py-2 px-3 text-left rounded-lg border font-mono text-xs font-semibold transition-all ${
-                                logoType === 'parallel'
-                                  ? 'bg-slate-900 border-emerald-500/40 text-emerald-400'
-                                  : 'border-slate-850 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'
-                              }`}
-                            >
-                              <div className="font-sans font-bold">Parallel Ascent</div>
-                              <div className="text-[9px] text-slate-500 font-normal mt-0.5 font-mono">Split Slash (Modern)</div>
-                            </button>
-                            <button
-                              onClick={() => setLogoType('symmetric')}
-                              className={`py-2 px-3 text-left rounded-lg border font-mono text-xs font-semibold transition-all ${
-                                logoType === 'symmetric'
-                                  ? 'bg-slate-900 border-emerald-500/40 text-emerald-400'
-                                  : 'border-slate-850 hover:bg-slate-900/30 text-slate-400 hover:text-slate-300'
-                              }`}
-                            >
-                              <div className="font-sans font-bold">Symmetric Cadence</div>
-                              <div className="text-[9px] text-slate-500 font-normal mt-0.5 font-mono">True N-Leg (Classic)</div>
-                            </button>
+                          <div className="p-3.5 bg-slate-950/60 rounded-xl border border-emerald-500/10 flex items-center justify-between">
+                            <div>
+                              <div className="font-sans font-bold text-sm text-[#00E676]">Parallel Ascent</div>
+                              <div className="text-[10px] text-slate-400 mt-0.5 font-mono">Official Unified Monogram</div>
+                            </div>
+                            <span className="px-2 py-0.5 bg-emerald-500/10 text-[#00E676] rounded text-[9px] font-mono font-semibold uppercase border border-emerald-500/20">Active Brand</span>
                           </div>
                         </div>
 
@@ -848,26 +815,24 @@ export default function BrandBook() {
                         <g stroke="#3b82f6" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.4">
                           {/* Baselines */}
                           <line x1="10" y1="96" x2="118" y2="96" />
+                          <line x1="10" y1="80" x2="118" y2="80" />
+                          <line x1="10" y1="76" x2="118" y2="76" />
+                          <line x1="10" y1="60" x2="118" y2="60" />
                           <line x1="10" y1="36" x2="118" y2="36" />
-                          <line x1="10" y1="26" x2="118" y2="26" />
+                          <line x1="10" y1="20" x2="118" y2="20" />
                           
                           {/* Verticals for spacing */}
                           <line x1="28" y1="10" x2="28" y2="118" />
                           <line x1="52" y1="10" x2="52" y2="118" />
-                          <line x1="76" y1="10" x2="76" y2="118" />
+                          <line x1="68" y1="10" x2="68" y2="118" />
                           <line x1="92" y1="10" x2="92" y2="118" />
-                          <line x1="104" y1="10" x2="104" y2="118" />
+                          <line x1="108" y1="10" x2="108" y2="118" />
                         </g>
 
                         {/* Real Symbol in Blueprint Style */}
                         <g fill="none" stroke="#60a5fa" strokeWidth={strokeThickness} strokeLinecap="round" strokeLinejoin="round" opacity="0.8">
-                          <path d="M 28 96 L 52 36 L 76 96" />
-                          <path d="M 76 96 L 92 56" />
-                          {logoType === 'parallel' ? (
-                            <path d="M 96 46 L 104 26" />
-                          ) : (
-                            <path d="M 94 32 L 100 47" />
-                          )}
+                          <path d="M 28 96 L 52 36 L 68 76" />
+                          <path d="M 68 80 L 92 20 L 108 60" />
                         </g>
 
                         {/* Blue annotation lines & text */}
@@ -876,24 +841,26 @@ export default function BrandBook() {
                           <path d="M 38 96 A 10 10 0 0 0 35 88" fill="none" />
                           {/* Apex coordinate markers */}
                           <circle cx="52" cy="36" r="2" fill="#f43f5e" />
-                          <circle cx="76" cy="96" r="2" fill="#f43f5e" />
+                          <circle cx="92" cy="20" r="2" fill="#f43f5e" />
                           <circle cx="28" cy="96" r="2" fill="#f43f5e" />
-                          <circle cx="92" cy="56" r="2" fill="#f43f5e" />
+                          <circle cx="68" cy="80" r="2" fill="#f43f5e" />
+                          <circle cx="68" cy="76" r="2" fill="#f43f5e" />
+                          <circle cx="108" cy="60" r="2" fill="#f43f5e" />
                         </g>
 
                         {/* Labels (Small Text) */}
                         <g fill="#93c5fd" fontSize="5" fontFamily="monospace">
                           <text x="36" y="92">60°</text>
-                          <text x="56" y="34">Apex (52,36)</text>
-                          <text x="78" y="100">Center (76,96)</text>
-                          <text x="12" y="100">Base (28,96)</text>
-                          <text x="96" y="60">Gap (10.7px)</text>
-                          <text x="96" y="22">Detached</text>
+                          <text x="56" y="34">Apex 1 (52,36)</text>
+                          <text x="80" y="16">Apex 2 (92,20)</text>
+                          <text x="12" y="102">Base 1 (28,96)</text>
+                          <text x="44" y="86">Base 2 (68,80)</text>
+                          <text x="96" y="66">End 2 (108,60)</text>
                           
                           {/* Baseline labels */}
                           <text x="2" y="97" fill="#f43f5e" fontSize="4">Y=96</text>
                           <text x="2" y="37" fill="#f43f5e" fontSize="4">Y=36</text>
-                          <text x="2" y="27" fill="#f43f5e" fontSize="4">Y=26</text>
+                          <text x="2" y="21" fill="#f43f5e" fontSize="4">Y=20</text>
                         </g>
                       </svg>
                     </div>
@@ -983,13 +950,8 @@ export default function BrandBook() {
                       <div className="py-6 flex flex-col items-center">
                         <svg viewBox="0 0 128 128" className="w-24 h-24 drop-shadow-md">
                           <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M 28 96 L 52 36 L 76 96" />
-                            <path d="M 76 96 L 92 56" />
-                            {logoType === 'parallel' ? (
-                              <path d="M 96 46 L 104 26" />
-                            ) : (
-                              <path d="M 94 32 L 100 47" />
-                            )}
+                            <path d="M 28 96 L 52 36 L 68 76" />
+                            <path d="M 68 80 L 92 20 L 108 60" />
                           </g>
                         </svg>
                         
@@ -1005,13 +967,8 @@ export default function BrandBook() {
                       <div className="py-10 flex items-center gap-4">
                         <svg viewBox="0 0 128 128" className="w-16 h-16 drop-shadow-md">
                           <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M 28 96 L 52 36 L 76 96" />
-                            <path d="M 76 96 L 92 56" />
-                            {logoType === 'parallel' ? (
-                              <path d="M 96 46 L 104 26" />
-                            ) : (
-                              <path d="M 94 32 L 100 47" />
-                            )}
+                            <path d="M 28 96 L 52 36 L 68 76" />
+                            <path d="M 68 80 L 92 20 L 108 60" />
                           </g>
                         </svg>
                         
@@ -1040,13 +997,8 @@ export default function BrandBook() {
                         <div className="w-20 h-20 bg-[#0D1117] border border-slate-800 rounded-[22.5%] flex items-center justify-center shadow-lg shadow-black/40">
                           <svg viewBox="0 0 128 128" className="w-12 h-12">
                             <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M 28 96 L 52 36 L 76 96" />
-                              <path d="M 76 96 L 92 56" />
-                              {logoType === 'parallel' ? (
-                                <path d="M 96 46 L 104 26" />
-                              ) : (
-                                <path d="M 94 32 L 100 47" />
-                              )}
+                              <path d="M 28 96 L 52 36 L 68 76" />
+                              <path d="M 68 80 L 92 20 L 108 60" />
                             </g>
                           </svg>
                         </div>
@@ -1058,13 +1010,8 @@ export default function BrandBook() {
                         <div className="w-20 h-20 bg-[#0D1117] border border-slate-800 rounded-full flex items-center justify-center shadow-lg shadow-black/40">
                           <svg viewBox="0 0 128 128" className="w-12 h-12">
                             <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M 28 96 L 52 36 L 76 96" />
-                              <path d="M 76 96 L 92 56" />
-                              {logoType === 'parallel' ? (
-                                <path d="M 96 46 L 104 26" />
-                              ) : (
-                                <path d="M 94 32 L 100 47" />
-                              )}
+                              <path d="M 28 96 L 52 36 L 68 76" />
+                              <path d="M 68 80 L 92 20 L 108 60" />
                             </g>
                           </svg>
                         </div>
@@ -1077,13 +1024,8 @@ export default function BrandBook() {
                           <div className="absolute inset-1.5 border border-white/[0.04] rounded-xl" />
                           <svg viewBox="0 0 128 128" className="w-10 h-10 z-10">
                             <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M 28 96 L 52 36 L 76 96" />
-                              <path d="M 76 96 L 92 56" />
-                              {logoType === 'parallel' ? (
-                                <path d="M 96 46 L 104 26" />
-                              ) : (
-                                <path d="M 94 32 L 100 47" />
-                              )}
+                              <path d="M 28 96 L 52 36 L 68 76" />
+                              <path d="M 68 80 L 92 20 L 108 60" />
                             </g>
                           </svg>
                         </div>
@@ -1105,13 +1047,8 @@ export default function BrandBook() {
                           <div className="bg-[#0D1117] p-2 rounded border border-slate-800 flex items-center justify-center shadow-sm">
                             <svg viewBox="0 0 128 128" style={{ width: `${size}px`, height: `${size}px` }}>
                               <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M 28 96 L 52 36 L 76 96" />
-                                <path d="M 76 96 L 92 56" />
-                                {logoType === 'parallel' ? (
-                                  <path d="M 96 46 L 104 26" />
-                                ) : (
-                                  <path d="M 94 32 L 100 47" />
-                                )}
+                                <path d="M 28 96 L 52 36 L 68 76" />
+                                <path d="M 68 80 L 92 20 L 108 60" />
                               </g>
                             </svg>
                           </div>

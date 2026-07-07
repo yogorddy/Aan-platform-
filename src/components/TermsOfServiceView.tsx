@@ -102,12 +102,12 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
     {
       id: 'section-7',
       num: 7,
-      title: 'Governing Law & Jurisdiction',
-      icon: Globe,
-      shortDesc: 'California state legislation boundaries and San Francisco court assignments.',
+      title: 'Security, Privacy & Evolution',
+      icon: Shield,
+      shortDesc: 'Continuous practices review, compliance audits, and direct support channels.',
       content: [
-        'These Terms of Service and any contractual disputes arising from your use of AAN shall be governed by, analyzed, and construed under the laws of the State of California, disregarding conflicts of law principles.',
-        'Any legal suit, action, or proceeding originating from these Terms must be filed exclusively in the federal or state courts located in the City and County of San Francisco, California. Both parties consent to personal jurisdiction in these courts.'
+        'We continuously review and improve our security and privacy practices as AAN evolves. Independent security assessments, compliance certifications, and third-party audits will be introduced as the platform matures.',
+        'For questions about privacy, data handling, or enterprise agreements, contact us at privacy@aan.org.'
       ]
     }
   ];

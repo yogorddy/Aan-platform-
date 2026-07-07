@@ -80,16 +80,70 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
   }, [step]);
 
   const platform = {
-    name: "Fintech Trust Layer",
-    domain: "fintechsecure.com",
-    logoLetter: "F"
+    name: "Sovereign Digital Platform",
+    domain: "sovereigndigital.com",
+    logoLetter: "S"
   };
+
+  const steps = [
+    { id: 'auth', label: 'Consent', desc: 'Secure Handshake' },
+    { id: 'camera_check', label: 'Attestation', desc: 'Humanness Proof' },
+    { id: 'processing', label: 'Computation', desc: 'Generating Proof' },
+    { id: 'success', label: 'Completed', desc: 'Proof Signed' }
+  ];
+
+  const currentStepIndex = steps.findIndex(s => s.id === step);
+  const progressPercent = ((currentStepIndex + 1) / steps.length) * 100;
 
   return (
     <div className="min-h-screen bg-[#050507] text-[#8c919d] font-sans selection:bg-emerald-500/10 selection:text-white flex flex-col justify-between py-12 px-6 relative overflow-hidden">
       
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.015)_0%,transparent_70%)] pointer-events-none" />
+
+      {/* Top Header & Animated Progress Indicator */}
+      <div className="max-w-sm mx-auto w-full relative z-20 mb-6 mt-1 px-1">
+        <div className="flex justify-between items-center mb-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00E676] animate-pulse" />
+            <span className="text-[8px] font-mono tracking-widest text-[#00E676] uppercase font-bold">
+              AAN SECURE HANDSHAKE
+            </span>
+          </div>
+          <span className="text-[9px] font-mono text-slate-400 font-semibold bg-white/[0.02] border border-white/[0.05] px-2 py-0.5 rounded-md">
+            {Math.round(progressPercent)}% COMPLETE
+          </span>
+        </div>
+
+        {/* Outer track bar */}
+        <div className="relative h-1 bg-white/[0.03] rounded-full overflow-hidden border border-white/[0.01]">
+          {/* Glowing background bar */}
+          <motion.div 
+            className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ type: "spring", stiffness: 70, damping: 15 }}
+          />
+        </div>
+
+        {/* Step Labels */}
+        <div className="grid grid-cols-4 gap-1 mt-2.5">
+          {steps.map((s, idx) => {
+            const isActive = s.id === step;
+            const isCompleted = currentStepIndex > idx;
+            return (
+              <div key={s.id} className="text-center space-y-0.5">
+                <span className={`block text-[9px] font-mono font-bold tracking-wider transition-colors duration-300 ${isActive ? 'text-[#00E676]' : isCompleted ? 'text-emerald-400/70' : 'text-slate-600'}`}>
+                  {s.label}
+                </span>
+                <span className={`hidden sm:block text-[8px] font-sans font-medium transition-colors duration-300 leading-none ${isActive ? 'text-white' : 'text-slate-600'}`}>
+                  {s.desc}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col items-center justify-center max-w-sm mx-auto w-full relative z-10 my-auto py-4">

@@ -35,6 +35,6 @@ export function isAcademyEnabled(): boolean {
     return processEnv === "true" || processEnv === "1";
   }
 
-  // 3. Default to disabled (hidden) when no flag is provided to focus on MVPs
-  return false;
+  // 3. Default to enabled to provide full UX experience
+  return true;
 }

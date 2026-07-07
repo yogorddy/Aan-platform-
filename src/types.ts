@@ -245,4 +245,40 @@ export interface SecurityReport {
   resolved_at?: string | null;
 }
 
+export interface IntegrationRequest {
+  id: string; // uuid
+  organization_name: string;
+  contact_name: string;
+  email: string;
+  website?: string | null;
+  use_case?: string | null;
+  message: string;
+  phone?: string | null;
+  company_size?: string | null;
+  urgency?: 'low' | 'normal' | 'high' | string;
+  status: 'pending' | 'reviewed' | 'contacted' | 'approved' | 'rejected' | 'archived';
+  source: string;
+  request_code: string;
+  metadata?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+  status_changed_at?: string;
+  ip_hash?: string | null;
+  user_agent_hash?: string | null;
+  submission_source?: string;
+  environment?: string;
+  admin_notes?: string | null;
+}
+
+export interface IntegrationRequestStatusHistory {
+  id: string; // uuid
+  integration_request_id: string; // uuid references integration_requests.id
+  previous_status?: 'pending' | 'reviewed' | 'contacted' | 'approved' | 'rejected' | 'archived' | string | null;
+  new_status: 'pending' | 'reviewed' | 'contacted' | 'approved' | 'rejected' | 'archived' | string;
+  changed_by?: string | null;
+  changed_at: string;
+  change_reason?: string | null;
+  metadata?: Record<string, any>;
+}
+
 

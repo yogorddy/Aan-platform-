@@ -30,6 +30,6 @@ export function isBrandEnabled(): boolean {
     return processEnv === "true" || processEnv === "1";
   }
 
-  // Default to disabled (hidden) just like academy
-  return false;
+  // Default to enabled to provide full brand book experience
+  return true;
 }

@@ -8,6 +8,7 @@ import {
   Trash2, Send, Info, Download, Palette, Grid, Target, Copy
 } from 'lucide-react';
 import TermsOfServiceView from './TermsOfServiceView';
+import { isBrandEnabled } from '../brandConfig';
 
 interface TrustDocsPortalProps {
   activeSubSection?: string;
@@ -19,8 +20,9 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
   const mapSubSectionToCategory = (sub: string): string => {
     if (['docs', 'api-ref', 'sdks', 'changelog', 'github'].includes(sub)) return 'docs';
     if (['security', 'privacy', 'trust', 'disclosure', 'status'].includes(sub)) return 'security';
-    if (['brand', 'mission', 'research', 'roadmap'].includes(sub)) return 'brand';
-    if (['pricing', 'support', 'contact'].includes(sub)) return 'enterprise';
+    if (['brand', 'geometry', 'favicon'].includes(sub)) return isBrandEnabled() ? 'brand' : 'docs';
+    if (['pricing', 'support'].includes(sub)) return 'enterprise';
+    if (['contact'].includes(sub)) return 'contact';
     if (['terms'].includes(sub)) return 'terms';
     return 'docs';
   };
@@ -35,8 +37,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
       // If parent is same as activeSubSection, map to default inner tabs
       if (activeSubSection === 'docs') setInnerSubTab('overview');
       else if (activeSubSection === 'security') setInnerSubTab('standards');
-      else if (activeSubSection === 'brand') setInnerSubTab('sandbox');
       else if (activeSubSection === 'enterprise') setInnerSubTab('pricing');
+      else if (activeSubSection === 'contact') setInnerSubTab('contact');
       else setInnerSubTab(activeSubSection);
     }
   }, [activeSubSection]);
@@ -46,8 +48,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
     // Set default inner sub tab for clean state
     if (cat === 'docs') setInnerSubTab('overview');
     else if (cat === 'security') setInnerSubTab('standards');
-    else if (cat === 'brand') setInnerSubTab('sandbox');
     else if (cat === 'enterprise') setInnerSubTab('pricing');
+    else if (cat === 'contact') setInnerSubTab('contact');
     else setInnerSubTab('terms');
     
     onNavigate('trustdocs', `/${cat}`);
@@ -88,9 +90,52 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
   // Brand Master Asset States
   const [logoTheme, setLogoTheme] = useState<'emerald' | 'white' | 'black'>('emerald');
   const [logoBg, setLogoBg] = useState<'dark' | 'light' | 'transparent'>('dark');
-  const [logoType, setLogoType] = useState<'parallel' | 'symmetric'>('parallel');
+  const logoType = 'parallel';
   const [strokeThickness, setStrokeThickness] = useState<number>(12);
   const [copiedSvg, setCopiedSvg] = useState<boolean>(false);
+
+  // Fallback security disclosures
+  const FALLBACK_REPORTS = [
+    {
+      id: "rep_auth_bypass_01",
+      title: "JSON Web Token Validation Bypass in Proof-Token Parser",
+      category: "authentication_bypass",
+      severity: "critical",
+      affected_system: "/api/v1/proofs/verify",
+      reproduction_steps: "Construct a forged JWT claims payload with custom verified/unique human claims.",
+      submitted_evidence: "",
+      reporter_contact: "whitehat_alice@secu.net",
+      status: "patched",
+      bounty_amount: 15000.00,
+      created_at: new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString()
+    },
+    {
+      id: "rep_api_key_02",
+      title: "Unsecured Partner API Key Exposure inside Webhook Outgoing Delivery Payloads",
+      category: "partner_api_key_exposure",
+      severity: "high",
+      affected_system: "Webhook Dispatcher Daemon",
+      reproduction_steps: "Register a secure callback target webhook URL.",
+      submitted_evidence: "",
+      reporter_contact: "bounty_hunter_bob@cyberguard.org",
+      status: "patched",
+      bounty_amount: 5000.00,
+      created_at: new Date(Date.now() - 4 * 24 * 3600 * 1000).toISOString()
+    },
+    {
+      id: "rep_rate_limit_03",
+      title: "API Rate-Limiting Bypass via X-Forwarded-For Spoofing rotation",
+      category: "rate_limit_bypass",
+      severity: "medium",
+      affected_system: "API Gateway Rate-Limiter",
+      reproduction_steps: "Issue session creations consecutively.",
+      submitted_evidence: "",
+      reporter_contact: "infosec_charlie@hackerone.com",
+      status: "reproduced",
+      bounty_amount: 1500.00,
+      created_at: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString()
+    }
+  ];
 
   // Fetch security disclosures
   const fetchBountyReports = async () => {
@@ -99,9 +144,13 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
       if (res.ok) {
         const data = await res.json();
         setBountyReportsList(data);
+      } else {
+        console.warn("Failed to fetch security reports (HTTP error), using local fallback.");
+        setBountyReportsList(FALLBACK_REPORTS);
       }
     } catch (err) {
-      console.error("Failed to fetch security reports:", err);
+      console.warn("Failed to fetch security reports (Network error), using local fallback:", err);
+      setBountyReportsList(FALLBACK_REPORTS);
     }
   };
 
@@ -190,23 +239,12 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
   // Brand Asset Helper Functions
   const getSvgString = (type: 'parallel' | 'symmetric', theme: 'emerald' | 'white' | 'black', thickness: number) => {
     const strokeColor = theme === 'emerald' ? '#00E676' : theme === 'white' ? '#FFFFFF' : '#000000';
-    const isParallel = type === 'parallel';
     
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
   <!-- AAN Master Logo Symbol - Geometric Monogram -->
   <g fill="none" stroke="${strokeColor}" stroke-width="${thickness}" stroke-linecap="round" stroke-linejoin="round">
-    <!-- Left Shape (Abstract Capital A) -->
-    <path d="M 28 96 L 52 36 L 76 96" />
-    
-    <!-- Right Shape (The N) -->
-    <!-- Main rising diagonal -->
-    <path d="M 76 96 L 92 56" />
-    ${isParallel 
-      ? `<!-- Detached parallel rising segment -->
-    <path d="M 96 46 L 104 26" />`
-      : `<!-- Detached symmetrical descending segment -->
-    <path d="M 94 32 L 100 47" />`
-    }
+    <path d="M 28 96 L 52 36 L 68 76" />
+    <path d="M 68 80 L 92 20 L 108 60" />
   </g>
 </svg>`;
   };
@@ -271,7 +309,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
   const categories = [
     { id: "docs", label: "Core Platform & APIs", icon: BookOpen, desc: "Developer docs, REST specifications, and SDK references." },
     { id: "security", label: "Trust & Security Hub", icon: ShieldCheck, desc: "Sovereign data principles and vulnerability disclosure board." },
-    { id: "brand", label: "Brand Manual & Assets", icon: Palette, desc: "Geometric systems, lockups, and interactive vector builders." },
+    ...(isBrandEnabled() ? [{ id: "brand", label: "Logo & Brand Book", icon: Palette, desc: "Official AAN monogram vector geometry and assets." }] : []),
     { id: "enterprise", label: "Enterprise Support", icon: HeartHandshake, desc: "Licensing tiers, sales pipeline, and live ticketing desks." },
     { id: "terms", label: "Terms & Privacy", icon: Lock, desc: "System service conditions and strict minimization policies." }
   ];
@@ -820,7 +858,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
           )}
 
           {/* ==================== 3. BRAND MANUAL & ASSETS ==================== */}
-          {activeTab === 'brand' && (
+          {(activeTab === 'brand' || activeTab === 'brand_disabled') && (
             <div className="space-y-6 animate-fade-in">
               <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
                 <div>
@@ -874,13 +912,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                             strokeLinecap="round" 
                             strokeLinejoin="round"
                           >
-                            <path d="M 28 96 L 52 36 L 76 96" />
-                            <path d="M 76 96 L 92 56" />
-                            {logoType === 'parallel' ? (
-                              <path d="M 96 46 L 104 26" />
-                            ) : (
-                              <path d="M 94 32 L 100 47" />
-                            )}
+                            <path d="M 28 96 L 52 36 L 68 76" />
+                            <path d="M 68 80 L 92 20 L 108 60" />
                           </g>
                         </svg>
                       </div>
@@ -897,27 +930,12 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <div className="p-4 bg-[#08090c] border border-white/[0.04] rounded-xl space-y-4 text-xs">
                         <div className="space-y-1.5">
                           <span className="text-[10px] font-mono text-[#646e7a] uppercase tracking-wider block">Geometric Slant</span>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              onClick={() => setLogoType('parallel')}
-                              className={`py-1.5 px-2.5 text-center rounded-lg border font-mono text-[10px] font-semibold transition-all cursor-pointer ${
-                                logoType === 'parallel'
-                                  ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                                  : 'border-white/[0.06] text-[#646e7a] hover:text-slate-300'
-                              }`}
-                            >
-                              Parallel Ascent
-                            </button>
-                            <button
-                              onClick={() => setLogoType('symmetric')}
-                              className={`py-1.5 px-2.5 text-center rounded-lg border font-mono text-[10px] font-semibold transition-all cursor-pointer ${
-                                logoType === 'symmetric'
-                                  ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                                  : 'border-white/[0.06] text-[#646e7a] hover:text-slate-300'
-                              }`}
-                            >
-                              Symmetric Cadence
-                            </button>
+                          <div className="p-3 bg-white/[0.02] rounded-xl border border-emerald-500/10 flex items-center justify-between text-xs">
+                            <div>
+                              <div className="font-sans font-bold text-emerald-400">Parallel Ascent</div>
+                              <div className="text-[9px] text-[#646e7a] mt-0.5 font-mono">Official Brand Monogram</div>
+                            </div>
+                            <span className="px-1.5 py-0.5 bg-emerald-500/10 text-[#00E676] rounded text-[8px] font-mono font-semibold uppercase border border-emerald-500/20">Active</span>
                           </div>
                         </div>
 
@@ -1046,32 +1064,37 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <svg viewBox="0 0 128 128" className="w-full h-full">
                         <g stroke="#00E676" strokeWidth="0.5" strokeDasharray="2,2" opacity="0.3">
                           <line x1="10" y1="96" x2="118" y2="96" />
+                          <line x1="10" y1="80" x2="118" y2="80" />
+                          <line x1="10" y1="76" x2="118" y2="76" />
+                          <line x1="10" y1="60" x2="118" y2="60" />
                           <line x1="10" y1="36" x2="118" y2="36" />
+                          <line x1="10" y1="20" x2="118" y2="20" />
+                          
                           <line x1="28" y1="10" x2="28" y2="118" />
                           <line x1="52" y1="10" x2="52" y2="118" />
-                          <line x1="76" y1="10" x2="76" y2="118" />
+                          <line x1="68" y1="10" x2="68" y2="118" />
+                          <line x1="92" y1="10" x2="92" y2="118" />
+                          <line x1="108" y1="10" x2="108" y2="118" />
                         </g>
 
                         <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" opacity="0.8">
-                          <path d="M 28 96 L 52 36 L 76 96" />
-                          <path d="M 76 96 L 92 56" />
-                          {logoType === 'parallel' ? (
-                            <path d="M 96 46 L 104 26" />
-                          ) : (
-                            <path d="M 94 32 L 100 47" />
-                          )}
+                          <path d="M 28 96 L 52 36 L 68 76" />
+                          <path d="M 68 80 L 92 20 L 108 60" />
                         </g>
 
                         <g stroke="#ff5252" strokeWidth="1">
                           <circle cx="52" cy="36" r="2" fill="#ff5252" />
-                          <circle cx="76" cy="96" r="2" fill="#ff5252" />
+                          <circle cx="92" cy="20" r="2" fill="#ff5252" />
                           <circle cx="28" cy="96" r="2" fill="#ff5252" />
+                          <circle cx="68" cy="80" r="2" fill="#ff5252" />
+                          <circle cx="68" cy="76" r="2" fill="#ff5252" />
+                          <circle cx="108" cy="60" r="2" fill="#ff5252" />
                         </g>
 
                         <g fill="#00E676" fontSize="5.5" fontFamily="monospace" opacity="0.9">
                           <text x="35" y="92">60°</text>
-                          <text x="56" y="34">Apex (52,36)</text>
-                          <text x="78" y="100">Base (76,96)</text>
+                          <text x="56" y="34">Apex 1 (52,36)</text>
+                          <text x="80" y="18">Apex 2 (92,20)</text>
                           <text x="8" y="100">Y=96</text>
                         </g>
                       </svg>
@@ -1102,9 +1125,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <div className="w-16 h-16 bg-[#050507] border border-white/[0.06] rounded-[22.5%] flex items-center justify-center shadow-lg">
                         <svg viewBox="0 0 128 128" className="w-10 h-10">
                           <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M 28 96 L 52 36 L 76 96" />
-                            <path d="M 76 96 L 92 56" />
-                            <path d="M 96 46 L 104 26" />
+                            <path d="M 28 96 L 52 36 L 68 76" />
+                            <path d="M 68 80 L 92 20 L 108 60" />
                           </g>
                         </svg>
                       </div>
@@ -1115,9 +1137,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <div className="w-16 h-16 bg-[#050507] border border-white/[0.06] rounded-full flex items-center justify-center shadow-lg">
                         <svg viewBox="0 0 128 128" className="w-10 h-10">
                           <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M 28 96 L 52 36 L 76 96" />
-                            <path d="M 76 96 L 92 56" />
-                            <path d="M 96 46 L 104 26" />
+                            <path d="M 28 96 L 52 36 L 68 76" />
+                            <path d="M 68 80 L 92 20 L 108 60" />
                           </g>
                         </svg>
                       </div>
@@ -1128,9 +1149,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <div className="w-16 h-16 bg-[#050507] border border-white/[0.06] rounded-lg flex items-center justify-center shadow-lg">
                         <svg viewBox="0 0 128 128" className="w-8 h-8">
                           <g fill="none" stroke="#00E676" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M 28 96 L 52 36 L 76 96" />
-                            <path d="M 76 96 L 92 56" />
-                            <path d="M 96 46 L 104 26" />
+                            <path d="M 28 96 L 52 36 L 68 76" />
+                            <path d="M 68 80 L 92 20 L 108 60" />
                           </g>
                         </svg>
                       </div>
@@ -1154,8 +1174,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                 <div className="flex gap-1.5 bg-black/40 p-1 rounded-lg border border-white/[0.04] text-[10px] font-mono">
                   {[
                     { id: 'pricing', label: 'Access Tiers' },
-                    { id: 'support', label: 'Ticketing Desk' },
-                    { id: 'contact', label: 'Contact Sales' }
+                    { id: 'support', label: 'Ticketing Desk' }
                   ].map((sub) => (
                     <button
                       key={sub.id}
@@ -1283,79 +1302,90 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                   )}
                 </div>
               )}
+            </div>
+          )}
 
-              {innerSubTab === 'contact' && (
-                <form onSubmit={handleContactSubmit} className="space-y-3">
-                  {contactSubmitted ? (
-                    <div className="p-6 bg-emerald-500/[0.03] border border-emerald-500/[0.12] rounded-xl text-center space-y-2">
-                      <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto" />
-                      <h4 className="text-white font-medium">Sales Pipeline Connected</h4>
-                      <p className="text-xs text-[#646e7a]">Thank you. An AAN accounts representative will email you shortly.</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Your Name *</label>
-                          <input 
-                            type="text" 
-                            required
-                            value={contactForm.name}
-                            onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                            placeholder="Alex Mercer"
-                            className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
-                          />
-                        </div>
+          {/* ==================== 5. CONTACT SALES DESK ==================== */}
+          {activeTab === 'contact' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
+                <div>
+                  <span className="font-mono text-[9px] text-emerald-400 tracking-wider font-bold uppercase block">Chapter 05</span>
+                  <h1 className="text-xl font-semibold text-white tracking-tight">Contact Sales Desk</h1>
+                  <p className="text-xs text-[#646e7a] mt-1">Direct pipeline to AAN Enterprise architects and sovereign deployment teams.</p>
+                </div>
+              </div>
 
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Work Email *</label>
-                          <input 
-                            type="email" 
-                            required
-                            value={contactForm.email}
-                            onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                            placeholder="alex@organization.com"
-                            className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
-                          />
-                        </div>
+              <form onSubmit={handleContactSubmit} className="space-y-4 bg-black/30 border border-white/[0.04] p-6 rounded-2xl">
+                {contactSubmitted ? (
+                  <div className="p-6 bg-emerald-500/[0.03] border border-emerald-500/[0.12] rounded-xl text-center space-y-2 animate-fade-in">
+                    <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto animate-bounce" />
+                    <h4 className="text-white font-medium">Sales Pipeline Connected</h4>
+                    <p className="text-xs text-[#646e7a]">Thank you. An AAN accounts representative will email you shortly.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Your Name *</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                          placeholder="Alex Mercer"
+                          className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
+                        />
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Organization *</label>
-                          <input 
-                            type="text" 
-                            required
-                            value={contactForm.organization}
-                            onChange={(e) => setContactForm({ ...contactForm, organization: e.target.value })}
-                            placeholder="Mercer Industries"
-                            className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Message *</label>
-                          <input 
-                            type="text" 
-                            required
-                            value={contactForm.message}
-                            onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                            placeholder="We need to verify 10,000 users/day with custom WebAuthn logic."
-                            className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
-                          />
-                        </div>
-
-                        <button 
-                          type="submit"
-                          className="w-full bg-white text-slate-950 hover:bg-slate-200 transition-all font-bold text-xs py-2 rounded-lg cursor-pointer"
-                        >
-                          Request API Token Access
-                        </button>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Work Email *</label>
+                        <input 
+                          type="email" 
+                          required
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                          placeholder="alex@organization.com"
+                          className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
+                        />
                       </div>
                     </div>
-                  )}
-                </form>
-              )}
+
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Organization *</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={contactForm.organization}
+                          onChange={(e) => setContactForm({ ...contactForm, organization: e.target.value })}
+                          placeholder="Mercer Industries"
+                          className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-mono uppercase tracking-wider text-[#646e7a]">Message *</label>
+                        <input 
+                          type="text" 
+                          required
+                          value={contactForm.message}
+                          onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                          placeholder="We need to verify 10,000 users/day with custom WebAuthn logic."
+                          className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
+                        />
+                      </div>
+
+                      <button 
+                        type="submit"
+                        className="w-full bg-white text-slate-950 hover:bg-slate-200 transition-all font-bold text-xs py-2 rounded-lg cursor-pointer shadow-md"
+                      >
+                        Request API Token Access
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
             </div>
           )}
 

@@ -16,12 +16,12 @@ export default function IntegrationWizardTab({ onNavigateToAcademy, onRefreshDas
   const [copiedKey, setCopiedKey] = useState(false);
 
   // Form states
-  const [orgName, setOrgName] = useState("FinTech Safehouse Ltd");
-  const [projectName, setProjectName] = useState("Alpha Secure Signups");
+  const [orgName, setOrgName] = useState("Sovereign Digital Ltd");
+  const [projectName, setProjectName] = useState("Core Trust Directory");
   const [apiKey, setApiKey] = useState("");
-  const [domains, setDomains] = useState("api.fintechsafehouse.com, localhost:3000");
+  const [domains, setDomains] = useState("api.sovereigndigital.com, localhost:3000");
   const [loginPolicy, setLoginPolicy] = useState("high_risk_mfa");
-  const [webhookUrl, setWebhookUrl] = useState("https://api.fintechsafehouse.com/v1/auth/aan-status");
+  const [webhookUrl, setWebhookUrl] = useState("https://api.sovereigndigital.com/v1/auth/aan-status");
   const [testSessionId, setTestSessionId] = useState("vss_sb_test_55a2c");
   const [testProofToken, setTestProofToken] = useState("");
   const [isVerifyingProof, setIsVerifyingProof] = useState(false);
@@ -62,7 +62,7 @@ export default function IntegrationWizardTab({ onNavigateToAcademy, onRefreshDas
 
   const handleTestSessionRequest = () => {
     const demoProof = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + btoa(JSON.stringify({
-      org_id: "org_fintech_wizard",
+      org_id: "org_sovereign_wizard",
       project_id: "proj_wizard_alpha",
       partner_user_id: "external_usr_beta_0",
       human_status: "verified",
@@ -81,7 +81,7 @@ export default function IntegrationWizardTab({ onNavigateToAcademy, onRefreshDas
       setVerificationResult({
         valid: true,
         claims: {
-          organization_id: "org_fintech_wizard",
+          organization_id: "org_sovereign_wizard",
           project_id: "proj_wizard_alpha",
           partner_user_id: "external_usr_beta_0",
           human_status: "verified",
@@ -219,7 +219,7 @@ export default function IntegrationWizardTab({ onNavigateToAcademy, onRefreshDas
                     value={orgName}
                     onChange={(e) => setOrgName(e.target.value)}
                     className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
-                    placeholder="e.g. Acme fintech Corp"
+                    placeholder="e.g. Acme Corporation"
                   />
                 </div>
                 <div className="bg-[#0d0e12] border border-[#1b1e28] p-3.5 rounded-lg flex items-start gap-2.5">

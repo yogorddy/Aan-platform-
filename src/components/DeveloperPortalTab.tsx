@@ -15,7 +15,8 @@ export default function DeveloperPortalTab({ onNavigateToAcademy }: DeveloperPor
   const [portalSection, setPortalSection] = useState<"quickstart" | "explorer" | "sdks" | "webhooks" | "changelog">("quickstart");
 
   // API Explorer dynamic request testing state
-  const [explorerEndpoint, setExplorerEndpoint] = useState<"verify-session" | "verify-proof-token" | "device-risk">("verify-session");
+  const [explorerEndpoint, setExplorerEndpoint] = useState<"verify-session" | "verify-proof-token" | "device-risk" | "trust-evaluate">("verify-session");
+  const [evalPreset, setEvalPreset] = useState<"ALLOW" | "STEP_UP" | "DENY">("ALLOW");
   const [explorerApiKey, setExplorerApiKey] = useState("poh_key_sandbox_secret_99");
   const [explorerUserId, setExplorerUserId] = useState("user_example_99");
   const [explorerEmailHash, setExplorerEmailHash] = useState("a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2");
@@ -263,6 +264,41 @@ aan = AanTrustSdk::Client.new(
             issued_at: new Date().toISOString()
           }
         };
+      } else if (explorerEndpoint === "trust-evaluate") {
+        if (evalPreset === "ALLOW") {
+          resData = {
+            decision: "ALLOW",
+            trust_score: 98,
+            risk_score: 2,
+            reason: [
+              "Verified returning human",
+              "Known trusted device",
+              "Normal behavioral pattern"
+            ]
+          };
+        } else if (evalPreset === "STEP_UP") {
+          resData = {
+            decision: "STEP_UP",
+            trust_score: 41,
+            risk_score: 76,
+            reason: [
+              "Unknown device",
+              "Behavioral anomaly",
+              "Credential stuffing pattern detected"
+            ]
+          };
+        } else {
+          resData = {
+            decision: "DENY",
+            trust_score: 3,
+            risk_score: 99,
+            reason: [
+              "High-confidence automated behavior",
+              "Known malicious infrastructure",
+              "Multiple linked abuse attempts"
+            ]
+          };
+        }
       } else {
         resData = {
           device_trusted: true,
@@ -488,6 +524,7 @@ Content-Type: application/json`}
               >
                 <option value="verify-session">POST /api/v1/verify-session</option>
                 <option value="verify-proof-token">POST /api/v1/verify-proof-token</option>
+                <option value="trust-evaluate">POST /api/v1/trust/evaluate</option>
                 <option value="device-risk">GET /api/v1/device-risk-score</option>
               </select>
             </div>
@@ -540,6 +577,32 @@ Content-Type: application/json`}
               </div>
             )}
 
+            {explorerEndpoint === "trust-evaluate" && (
+              <div className="space-y-3">
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-mono text-[#78819a] uppercase font-black">Partner User Identifier</label>
+                  <input
+                    type="text"
+                    value={explorerUserId}
+                    onChange={(e) => setExplorerUserId(e.target.value)}
+                    className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1 text-left">
+                  <label className="text-[9px] font-mono text-[#78819a] uppercase font-black">Simulate Decision Scenario</label>
+                  <select
+                    value={evalPreset}
+                    onChange={(e) => setEvalPreset(e.target.value as any)}
+                    className="w-full bg-[#0d0e12] border border-[#1b1e28] rounded px-2.5 py-1.5 font-mono text-xs text-slate-300 focus:outline-none"
+                  >
+                    <option value="ALLOW">ALLOW Preset (Sovereign Human)</option>
+                    <option value="STEP_UP">STEP_UP Preset (Credential Stuffing/Travel Velocity)</option>
+                    <option value="DENY">DENY Preset (Automated Script/Botnet Farm)</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
             {explorerEndpoint === "device-risk" && (
               <div className="p-3 bg-[#0d0e12] border border-[#1b1e28] rounded-lg text-xs leading-normal font-sans">
                 <span className="text-[9px] font-mono text-blue-400 font-extrabold uppercase">AUTO EVAL</span>
@@ -565,7 +628,7 @@ Content-Type: application/json`}
               <div className="bg-[#0d0e12] px-4 py-2 border-b border-[#1b1e28]/60 flex justify-between items-center font-mono text-[9px] text-[#78819a] font-bold">
                 <span>COMPILED CURL SHELL SCHEME</span>
                 <button
-                  onClick={() => copyToClipboard(`curl -X POST https://sandbox-api.aan.trust/v1/${explorerEndpoint === "verify-session" ? "verify-session" : explorerEndpoint === "verify-proof-token" ? "verify-proof-token" : "device-risk-score"}`, "curl")}
+                  onClick={() => copyToClipboard(`curl -X POST https://sandbox-api.aan.trust/v1/${explorerEndpoint === "verify-session" ? "verify-session" : explorerEndpoint === "verify-proof-token" ? "verify-proof-token" : explorerEndpoint === "trust-evaluate" ? "trust/evaluate" : "device-risk-score"}`, "curl")}
                   className="hover:text-white flex items-center gap-0.5 cursor-pointer font-bold"
                 >
                   {copiedCode === "curl" ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
@@ -574,7 +637,7 @@ Content-Type: application/json`}
               </div>
               
               <pre className="p-4 font-mono text-[10px] text-slate-350 overflow-x-auto whitespace-pre">
-{`curl -X POST https://sandbox-api.aan.trust/v1/${explorerEndpoint === "verify-session" ? "verify-session" : explorerEndpoint === "verify-proof-token" ? "verify-proof-token" : "device-risk-score"} \\
+{`curl -X POST https://sandbox-api.aan.trust/v1/${explorerEndpoint === "verify-session" ? "verify-session" : explorerEndpoint === "verify-proof-token" ? "verify-proof-token" : explorerEndpoint === "trust-evaluate" ? "trust/evaluate" : "device-risk-score"} \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: ${explorerApiKey || "YOUR_KEY"}" \\
 ${explorerEndpoint === "verify-session" ? `  -d '{
@@ -582,6 +645,9 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
     "email_hash": "${explorerEmailHash.slice(0, 20)}..."
   }'` : explorerEndpoint === "verify-proof-token" ? `  -d '{
     "proof_token": "${explorerToken.slice(0, 25)}..."
+  }'` : explorerEndpoint === "trust-evaluate" ? `  -d '{
+    "partner_user_id": "${explorerUserId}",
+    "simulate_preset": "${evalPreset}"
   }'` : `  -d '{
     "device_fingerprint": "sandbox_fp_abc"
   }'`}`}

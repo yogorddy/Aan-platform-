@@ -3,6 +3,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import crypto from "crypto";
+import { z } from "zod";
 import { runPreflightCheck } from "./src/lib/preflight";
 import { supabaseService, isSupabaseConnected } from "./src/lib/supabaseService";
 import { 
@@ -23,7 +24,9 @@ import {
   Policy,
   TrustTimelineEntry,
   SecurityEvent,
-  SecurityReport
+  SecurityReport,
+  IntegrationRequest,
+  IntegrationRequestStatusHistory
 } from "./src/types";
 import { AIEngine, setActiveProvider, activeProvider, AIProvider } from "./src/lib/aiEngine";
 
@@ -35,10 +38,10 @@ import { AIEngine, setActiveProvider, activeProvider, AIProvider } from "./src/l
 // Seeds
 const mockPartnerApps: PartnerApp[] = [
   {
-    id: "partner_apps_fintech_123",
-    name: "Fintech Trust Layer",
-    api_key_hash: crypto.createHash('sha256').update("poh_key_fintech_demo_111").digest('hex'),
-    webhook_url: "https://api.fintechsecure.com/webhooks/poh",
+    id: "partner_apps_main_123",
+    name: "Core Trust Standard",
+    api_key_hash: crypto.createHash('sha256').update("poh_key_sovereign_demo_111").digest('hex'),
+    webhook_url: "https://api.sovereigndigital.com/webhooks/poh",
     status: "active",
     created_at: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
   },
@@ -176,9 +179,9 @@ const mockDevices: Device[] = [
 const mockPartnerUserLinks: PartnerUserLink[] = [
   {
     id: "link_1",
-    partner_app_id: "partner_apps_fintech_123",
+    partner_app_id: "partner_apps_main_123",
     user_id: "usr_9a48f2c0",
-    external_user_id: "fintech_external_alice_77",
+    external_user_id: "sovereign_external_alice_77",
     created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
   },
   {
@@ -190,9 +193,9 @@ const mockPartnerUserLinks: PartnerUserLink[] = [
   },
   {
     id: "link_3",
-    partner_app_id: "partner_apps_fintech_123",
+    partner_app_id: "partner_apps_main_123",
     user_id: "usr_df990a31",
-    external_user_id: "fintech_external_charlie_12",
+    external_user_id: "sovereign_external_charlie_12",
     created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString()
   },
   {
@@ -204,9 +207,9 @@ const mockPartnerUserLinks: PartnerUserLink[] = [
   },
   {
     id: "link_5",
-    partner_app_id: "partner_apps_fintech_123",
+    partner_app_id: "partner_apps_main_123",
     user_id: "usr_bc4477ee",
-    external_user_id: "fintech_external_emma_88",
+    external_user_id: "sovereign_external_emma_88",
     created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString()
   }
 ];
@@ -214,8 +217,8 @@ const mockPartnerUserLinks: PartnerUserLink[] = [
 const mockVerificationSessions: VerificationSession[] = [
   {
     id: "vss_session_unconfirmed_9a4",
-    partner_app_id: "partner_apps_fintech_123",
-    external_user_id: "fintech_external_alice_77",
+    partner_app_id: "partner_apps_main_123",
+    external_user_id: "sovereign_external_alice_77",
     status: "started",
     risk_score: 15,
     duplicate_candidate: false,
@@ -240,8 +243,8 @@ const mockVerificationSessions: VerificationSession[] = [
   },
   {
     id: "vss_session_failed_df9",
-    partner_app_id: "partner_apps_fintech_123",
-    external_user_id: "fintech_external_charlie_12",
+    partner_app_id: "partner_apps_main_123",
+    external_user_id: "sovereign_external_charlie_12",
     status: "failed",
     risk_score: 95,
     duplicate_candidate: true,
@@ -266,8 +269,8 @@ const mockVerificationSessions: VerificationSession[] = [
   },
   {
     id: "vss_session_verified_bc4",
-    partner_app_id: "partner_apps_fintech_123",
-    external_user_id: "fintech_external_emma_88",
+    partner_app_id: "partner_apps_main_123",
+    external_user_id: "sovereign_external_emma_88",
     status: "passed",
     risk_score: 4,
     duplicate_candidate: false,
@@ -283,11 +286,11 @@ const mockAuditLogs: AuditLog[] = [
   {
     id: "log_1",
     actor_type: "partner",
-    actor_id: "partner_apps_fintech_123",
+    actor_id: "partner_apps_main_123",
     action: "session.create",
     target_type: "session",
     target_id: "vss_session_unconfirmed_9a4",
-    metadata: { ext_usr: "fintech_external_alice_77", client_ip: "198.51.100.41", level: "human_unique" },
+    metadata: { ext_usr: "sovereign_external_alice_77", client_ip: "198.51.100.41", level: "human_unique" },
     created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
   },
   {
@@ -479,7 +482,7 @@ const mockSecurityEvents: SecurityEvent[] = [
     ip_address: "198.51.100.12",
     user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/121.0.0.0",
     session_id: "vss_session_failed_df9",
-    partner_app_id: "partner_apps_fintech_123",
+    partner_app_id: "partner_apps_main_123",
     request_path: "/api/v1/verification-sessions/vss_session_failed_df9/signature",
     detection_reason: "Defensive Transition Enforcer Blocked: Direct state jump request attempted from created to proof_issued bypassing active consent & integrity verification.",
     raw_metadata: {
@@ -493,11 +496,11 @@ const mockSecurityEvents: SecurityEvent[] = [
     severity: "medium",
     event_type: "token_replay_attempt",
     actor_type: "partner_app",
-    actor_id: "partner_apps_fintech_123",
+    actor_id: "partner_apps_main_123",
     ip_address: "203.0.113.88",
     user_agent: "PostmanRuntime/7.36.1",
     session_id: "vss_session_failed_df9",
-    partner_app_id: "partner_apps_fintech_123",
+    partner_app_id: "partner_apps_main_123",
     request_path: "/api/v1/proofs/verify",
     detection_reason: "Repetitive proof token submission flagged. Potential replay attempt in quick succession.",
     raw_metadata: {
@@ -547,7 +550,7 @@ const mockSecurityReports: SecurityReport[] = [
     severity: "high",
     affected_system: "Webhook Dispatcher Daemon",
     reproduction_steps: "1. Register a secure callback target webhook URL on active project configs.\n2. Trigger a normal session verification state completion.\n3. Observe outgoing HTTP POST delivery request headers contain the raw, plain-text partner secret api_key instead of hashed client credentials.",
-    submitted_evidence: "Captured webhook raw packet dump showing:\n```\nPOST /webhooks/poh HTTP/1.1\nHost: api.partner.com\nx-api-key: poh_key_fintech_demo_111\n```",
+    submitted_evidence: "Captured webhook raw packet dump showing:\n```\nPOST /webhooks/poh HTTP/1.1\nHost: api.partner.com\nx-api-key: poh_key_sovereign_demo_111\n```",
     reporter_contact: "bounty_hunter_bob@cyberguard.org",
     status: "patched",
     bounty_amount: 5000.00,
@@ -890,6 +893,373 @@ function verifyHardwareProofToken(proofToken: string, req: any): { valid: boolea
   return { valid: true, claims };
 }
 
+const mockIntegrationRequests: IntegrationRequest[] = [
+  {
+    id: "req_f682bb6d-f421-419b-b2b9-e93b1b11b7a2",
+    organization_name: "Aether Grid",
+    contact_name: "Evelyn Vance",
+    email: "evelyn@aethergrid.io",
+    website: "https://aethergrid.io",
+    use_case: "Sovereign liveness verification for decentralized high-density node validators.",
+    message: "We want to verify our grid operators' uniqueness without holding any of their facial metadata or biometric signatures. AAN is the only platform we found that supports zero-knowledge signature templates.",
+    phone: "+1 (555) 382-9901",
+    company_size: "11-50",
+    urgency: "high",
+    status: "pending",
+    source: "contact_form",
+    request_code: "AAN-REQ-000481",
+    created_at: new Date(Date.now() - 3.5 * 3600 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 3.5 * 3600 * 1000).toISOString()
+  },
+  {
+    id: "req_c83d6a92-7f31-41fa-8a67-b50f75f7881c",
+    organization_name: "Vertex Protocol",
+    contact_name: "Liam O'Connor",
+    email: "l.oconnor@vertex.network",
+    website: "https://vertex.network",
+    use_case: "Sybil protection for a distributed governance community.",
+    message: "We are preparing for our season 3 governance vote and need to ensure each member represents a distinct human. Integrations with existing tools took too long; we'd like to run AAN directly.",
+    phone: "",
+    company_size: "1-10",
+    urgency: "normal",
+    status: "reviewed",
+    source: "contact_form",
+    request_code: "AAN-REQ-000480",
+    created_at: new Date(Date.now() - 18 * 3600 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString()
+  }
+];
+
+const mockIntegrationRequestStatusHistory: IntegrationRequestStatusHistory[] = [
+  {
+    id: "hist_c83d6a92-1",
+    integration_request_id: "req_c83d6a92-7f31-41fa-8a67-b50f75f7881c",
+    previous_status: "pending",
+    new_status: "reviewed",
+    changed_by: "admin_super_user_one",
+    changed_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+    change_reason: "Initial qualification and compliance audit.",
+    metadata: { audit_completed: true }
+  }
+];
+
+// ============================================================================
+// TRUST INTELLIGENCE SEED DATA & MODELS
+// ============================================================================
+
+const seededTrustClusters = [
+  {
+    id: "cluster_98a1",
+    name: "Secure Developer Enclave (Cluster #104)",
+    risk_score: 6,
+    confidence_score: 98,
+    status: "high_confidence",
+    algorithm: "louvain",
+    verified_humans_count: 1,
+    partner_accounts_count: 3,
+    trust_devices_count: 2,
+    events_count: 12,
+    decisions_count: 12,
+    last_activity: "2026-07-05T23:10:00Z",
+    created_at: "2026-07-01T00:00:00Z"
+  },
+  {
+    id: "cluster_12b4",
+    name: "Coordinated Crawler Fleet (Cluster #211)",
+    risk_score: 89,
+    confidence_score: 92,
+    status: "suspicious",
+    algorithm: "louvain",
+    verified_humans_count: 1,
+    partner_accounts_count: 12,
+    trust_devices_count: 5,
+    events_count: 45,
+    decisions_count: 42,
+    last_activity: "2026-07-05T22:45:00Z",
+    created_at: "2026-07-01T00:00:00Z"
+  },
+  {
+    id: "cluster_44f8",
+    name: "Dormant Ban Evasion Ring (Cluster #319)",
+    risk_score: 68,
+    confidence_score: 94,
+    status: "mixed_signals",
+    algorithm: "louvain",
+    verified_humans_count: 1,
+    partner_accounts_count: 2,
+    trust_devices_count: 3,
+    events_count: 15,
+    decisions_count: 14,
+    last_activity: "2026-07-05T23:22:00Z",
+    created_at: "2026-07-01T00:00:00Z"
+  }
+];
+
+const seededVerifiedHumans = [
+  {
+    id: "vh_92a83b10",
+    name: "Verified Human A (Alice Vance)",
+    status: "within_policy",
+    last_seen: "2026-07-05T23:10:00Z",
+    avg_trust_score: 94,
+    highest_risk_score: 8,
+    relationship_confidence: 98,
+    total_accounts: 3,
+    known_devices_count: 2,
+    primary_cluster_id: "cluster_98a1",
+    created_at: "2026-01-15T09:21:00Z"
+  },
+  {
+    id: "vh_03b8e912",
+    name: "Verified Human B (Unknown Proxy Operator)",
+    status: "needs_review",
+    last_seen: "2026-07-05T22:45:00Z",
+    avg_trust_score: 32,
+    highest_risk_score: 89,
+    relationship_confidence: 92,
+    total_accounts: 12,
+    known_devices_count: 5,
+    primary_cluster_id: "cluster_12b4",
+    created_at: "2026-07-05T22:00:00Z"
+  },
+  {
+    id: "vh_7f2d5e3c",
+    name: "Verified Human C (Evasion Pattern detected)",
+    status: "exceeds_policy",
+    last_seen: "2026-07-05T23:22:00Z",
+    avg_trust_score: 45,
+    highest_risk_score: 94,
+    relationship_confidence: 94,
+    total_accounts: 2,
+    known_devices_count: 3,
+    primary_cluster_id: "cluster_44f8",
+    created_at: "2024-11-12T10:00:00Z"
+  }
+];
+
+const seededPartnerAccounts = [
+  { id: "acc_usr_alice_personal", human_id: "vh_92a83b10", email: "alice.vance@gmail.com", account_type: "Personal", created_at: "2026-01-15T00:00:00Z", last_login: "15 minutes ago" },
+  { id: "acc_usr_alice_business", human_id: "vh_92a83b10", email: "alice@vance-consulting.co", account_type: "Business", created_at: "2026-03-22T00:00:00Z", last_login: "3 hours ago" },
+  { id: "acc_usr_alice_sandbox", human_id: "vh_92a83b10", email: "alice-dev-sandbox@vance.io", account_type: "Developer Sandbox", created_at: "2026-06-10T00:00:00Z", last_login: "1 day ago" },
+
+  { id: "acc_usr_bulk_01", human_id: "vh_03b8e912", email: "crawler_node_99@dispostable.com", account_type: "Personal", created_at: "2026-07-05T00:00:00Z", last_login: "Just now" },
+  { id: "acc_usr_bulk_02", human_id: "vh_03b8e912", email: "crawler_node_100@dispostable.com", account_type: "Personal", created_at: "2026-07-05T00:00:00Z", last_login: "1 minute ago" },
+  { id: "acc_usr_bulk_03", human_id: "vh_03b8e912", email: "crawler_node_101@dispostable.com", account_type: "Personal", created_at: "2026-07-05T00:00:00Z", last_login: "2 minutes ago" },
+  { id: "acc_usr_bulk_04", human_id: "vh_03b8e912", email: "temp_usr_882@outlook.com", account_type: "Guest", created_at: "2026-07-05T00:00:00Z", last_login: "5 minutes ago" },
+  { id: "acc_usr_bulk_05", human_id: "vh_03b8e912", email: "temp_usr_883@outlook.com", account_type: "Guest", created_at: "2026-07-05T00:00:00Z", last_login: "10 minutes ago" },
+  { id: "acc_usr_bulk_06", human_id: "vh_03b8e912", email: "test_shopp_77a@yahoo.com", account_type: "Personal", created_at: "2026-07-05T00:00:00Z", last_login: "12 minutes ago" },
+
+  { id: "acc_usr_evader_new", human_id: "vh_7f2d5e3c", email: "johnny.vaughn+signup@gmail.com", account_type: "Personal", created_at: "2026-07-05T00:00:00Z", last_login: "Just now" },
+  { id: "acc_usr_evader_old_banned", human_id: "vh_7f2d5e3c", email: "johnny_banned_fraud@gmail.com", account_type: "Personal", created_at: "2024-11-12T00:00:00Z", last_login: "Banned 48h ago" }
+];
+
+const seededTrustDevices = [
+  { id: "dev_iphone_15", human_id: "vh_92a83b10", name: "Trusted iPhone 15 Pro", type: "Mobile (iOS)", status: "trusted", last_used_ip: "67.185.244.102", fingerprint_score: 99, created_at: "2026-01-15T09:25:00Z" },
+  { id: "dev_macbook_pro", human_id: "vh_92a83b10", name: "Work Macbook Pro 16", type: "Desktop (macOS)", status: "trusted", last_used_ip: "12.89.44.10", fingerprint_score: 96, created_at: "2026-03-22T14:15:00Z" },
+
+  { id: "dev_headless_node_1", human_id: "vh_03b8e912", name: "Unknown Chrome Linux Node", type: "Cloud VM", status: "unknown", last_used_ip: "185.190.141.2", fingerprint_score: 12, created_at: "2026-07-05T22:05:00Z" },
+  { id: "dev_headless_node_2", human_id: "vh_03b8e912", name: "Unknown Chrome Windows Server", type: "Cloud VM", status: "unknown", last_used_ip: "185.190.141.5", fingerprint_score: 14, created_at: "2026-07-05T22:15:00Z" },
+  { id: "dev_headless_node_3", human_id: "vh_03b8e912", name: "Slightly Altered Headless UserAgent", type: "Cloud VM", status: "unknown", last_used_ip: "185.220.101.44", fingerprint_score: 8, created_at: "2026-07-05T22:30:00Z" },
+
+  { id: "dev_banned_android", human_id: "vh_7f2d5e3c", name: "Banned OnePlus 11 Phone", type: "Mobile (Android)", status: "blocked", last_used_ip: "74.120.14.88", fingerprint_score: 95, created_at: "2024-11-12T10:05:00Z" },
+  { id: "dev_compromised_chrome", human_id: "vh_7f2d5e3c", name: "Suspect Chrome 125 Windows", type: "Desktop (Windows)", status: "unknown", last_used_ip: "74.120.14.88", fingerprint_score: 42, created_at: "2026-07-05T23:22:00Z" }
+];
+
+const seededTrustEvents = [
+  {
+    id: "evt_aan_9c4f8d21",
+    event_type: "legit_user",
+    external_user_id: "usr_verified_alice",
+    email: "alice.vance@gmail.com",
+    risk_score: 12,
+    reason_codes: ["HUMAN_TELEMETRY_PASSED", "IP_CLEAN", "DEVICE_MATCH"],
+    metadata: {
+      ip: "67.185.244.102",
+      location: "Seattle, US",
+      device: "iOS Safari (iPhone 14)",
+      network: "T-Mobile LTE",
+      anomaly_details: "Perfect behavioral biometrics and clean residential IP."
+    },
+    timestamp: "2026-07-05T23:10:00Z",
+    cluster_id: "cluster_98a1"
+  },
+  {
+    id: "evt_aan_3b8a1c9e",
+    event_type: "signup_bot",
+    external_user_id: "usr_phantom_botnet",
+    email: "crawler_node_99@dispostable.com",
+    risk_score: 94,
+    reason_codes: ["DEVICE_SPOOF_DETECTED", "COORDINATED_REPLAY", "HIGH_RISK_IP"],
+    metadata: {
+      ip: "185.190.141.2",
+      location: "Frankfurt, DE",
+      device: "Headless Chrome (Linux)",
+      network: "DigitalOcean AS14061",
+      anomaly_details: "WebGL and canvas fingerprinting mismatches indicate fully headless emulation."
+    },
+    timestamp: "2026-07-05T22:45:00Z",
+    cluster_id: "cluster_12b4"
+  }
+];
+
+const seededTrustDecisions = [
+  {
+    id: "dec_92a83b10",
+    human_id: "vh_92a83b10",
+    event_id: "evt_aan_9c4f8d21",
+    recommendation: "ALLOW",
+    policy_matched: "Maximum associated accounts limit",
+    confidence: 99,
+    explanation: "The verified human Alice Vance has 3 active accounts, which is well below the organization's maximum policy limit of 10. Signals remain stable.",
+    evidence: ["3 active linked developer/personal accounts", "2 trusted domestic devices"],
+    created_at: "2026-07-05T23:10:00Z"
+  },
+  {
+    id: "dec_03b8e912",
+    human_id: "vh_03b8e912",
+    event_id: "evt_aan_3b8a1c9e",
+    recommendation: "REVIEW",
+    policy_matched: "Flag rapid account creation & bot patterns",
+    confidence: 92,
+    explanation: "This pattern strongly exceeds the organization policy limit of 10 maximum accounts per human. The coordinated headless activity warrants immediate administrative review.",
+    evidence: ["12 accounts registered under 4 minutes", "5 unknown automated server devices matched", "Zero real user biometrics recorded"],
+    created_at: "2026-07-05T22:45:00Z"
+  },
+  {
+    id: "dec_7f2d5e3c",
+    human_id: "vh_7f2d5e3c",
+    event_id: "evt_aan_9c4f8d21",
+    recommendation: "STEP_UP",
+    policy_matched: "Flag possible ban evasion",
+    confidence: 94,
+    explanation: "The user session shares an unmistakable relationship with a previously banned account. We recommend a high-friction step-up proof before proceeding.",
+    evidence: ["WebGL signature match to account banned 48h ago for fraud", "New registration from matching IP address subnet"],
+    created_at: "2026-07-05T23:22:00Z"
+  }
+];
+
+const seededTrustRelationships = [
+  {
+    id: "rel_1",
+    human_id: "vh_92a83b10",
+    type: "Associated Account",
+    source: "acc_usr_alice_personal",
+    target: "acc_usr_alice_business",
+    confidence: 99,
+    evidence: ["Same verified human cryptographic anchor", "Sharing domestic trusted hardware profile", "Identical residential IP subnets"],
+    status: "active_trusted",
+    recommendation: "Accept accounts within standard corporate onboarding policy.",
+    cluster_id: "cluster_98a1",
+    created_at: "2026-01-15T09:21:00Z"
+  },
+  {
+    id: "rel_2",
+    human_id: "vh_92a83b10",
+    type: "Shared Hardware Profile",
+    source: "dev_iphone_15",
+    target: "acc_usr_alice_sandbox",
+    confidence: 98,
+    evidence: ["Identical WebGL GPU and canvas hash match", "Secure local keychain proof validity"],
+    status: "active_trusted",
+    recommendation: "Allow seamless login; standard sandbox developer usage patterns matched.",
+    cluster_id: "cluster_98a1",
+    created_at: "2026-03-22T14:15:00Z"
+  },
+  {
+    id: "rel_b1",
+    human_id: "vh_03b8e912",
+    type: "Associated Account",
+    source: "acc_usr_bulk_01",
+    target: "acc_usr_bulk_02",
+    confidence: 92,
+    evidence: ["Coordinated rapid signup times (within seconds)", "Identical headless Selenium user-agent fingerprint", "Same cloud server IP address range"],
+    status: "flagged",
+    recommendation: "Route accounts to review queue. Flagged for suspicious coordinated signup velocity.",
+    cluster_id: "cluster_12b4",
+    created_at: "2026-07-05T22:05:00Z"
+  },
+  {
+    id: "rel_b2",
+    human_id: "vh_03b8e912",
+    type: "Network Proxy Match",
+    source: "dev_headless_node_1",
+    target: "dev_headless_node_3",
+    confidence: 95,
+    evidence: ["Rotating nodes within the same Tor exit node sub-classification", "No physical user hardware biometrics detected"],
+    status: "review_recommended",
+    recommendation: "Enforce a Step-Up multi-factor check or puzzle proof on these endpoints.",
+    cluster_id: "cluster_12b4",
+    created_at: "2026-07-05T22:30:00Z"
+  },
+  {
+    id: "rel_c1",
+    human_id: "vh_7f2d5e3c",
+    type: "Associated Account",
+    source: "acc_usr_evader_new",
+    target: "acc_usr_evader_old_banned",
+    confidence: 94,
+    evidence: ["Same hardware device WebGL signature matched", "Identical residential location and local carrier profile", "Close email name lexicographical similarity"],
+    status: "flagged",
+    recommendation: "Review according to your organization policy. This profile matches a previously banned account.",
+    cluster_id: "cluster_44f8",
+    created_at: "2026-07-05T23:22:00Z"
+  }
+];
+
+const seededTrustTimeline = [
+  { id: "tl_1", human_id: "vh_92a83b10", event_id: "evt_aan_9c4f8d21", event: "Account Created", timestamp: "2026-01-15T09:21:00Z", description: "Personal Account registered (alice.vance@gmail.com)", trust_score_change: "+50" },
+  { id: "tl_2", human_id: "vh_92a83b10", event_id: "evt_aan_9c4f8d21", event: "Human Verified", timestamp: "2026-01-15T09:24:00Z", description: "Successfully established cryptographic anchor", trust_score_change: "+30" },
+  { id: "tl_3", human_id: "vh_92a83b10", event_id: "evt_aan_9c4f8d21", event: "New Device Added", timestamp: "2026-01-15T09:25:00Z", description: "Device registered as trusted hardware identifier", trust_score_change: "+14" },
+  { id: "tl_4", human_id: "vh_92a83b10", event_id: "evt_aan_9c4f8d21", event: "Account Associated", timestamp: "2026-03-22T14:10:00Z", description: "Business Account linked to existing verified human", trust_score_change: "0" },
+  { id: "tl_5", human_id: "vh_92a83b10", event_id: "evt_aan_9c4f8d21", event: "Login Allowed", timestamp: "2026-07-05T23:10:00Z", description: "Successful login using trusted iPhone device", trust_score_change: "0" },
+
+  { id: "tl_b1", human_id: "vh_03b8e912", event_id: "evt_aan_3b8a1c9e", event: "Account Created", timestamp: "2026-07-05T22:00:00Z", description: "Account crawler_node_99 created", trust_score_change: "+20" },
+  { id: "tl_b2", human_id: "vh_03b8e912", event_id: "evt_aan_3b8a1c9e", event: "Human Verified", timestamp: "2026-07-05T22:01:00Z", description: "Partial low-confidence validation", trust_score_change: "+12" },
+  { id: "tl_b3", human_id: "vh_03b8e912", event_id: "evt_aan_3b8a1c9e", event: "Suspicious Login Detected", timestamp: "2026-07-05T22:05:00Z", description: "Automated browser signs in from DigitalOcean VM", trust_score_change: "-35" },
+  { id: "tl_b4", human_id: "vh_03b8e912", event_id: "evt_aan_3b8a1c9e", event: "Account Associated", timestamp: "2026-07-05T22:15:00Z", description: "New account crawler_node_100 associated with same verified human signature", trust_score_change: "-10" },
+  { id: "tl_b5", human_id: "vh_03b8e912", event_id: "evt_aan_3b8a1c9e", event: "Policy Exceeded", timestamp: "2026-07-05T22:45:00Z", description: "Maximum associated accounts limit (10) reached for single human signature", trust_score_change: "-20" },
+
+  { id: "tl_c1", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "Account Created", timestamp: "2024-11-12T10:00:00Z", description: "Old account johnny_banned_fraud@gmail.com created", trust_score_change: "+30" },
+  { id: "tl_c2", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "Suspicious Activity Detected", timestamp: "2026-07-03T18:00:00Z", description: "Payment fraud triggers full account ban", trust_score_change: "-80" },
+  { id: "tl_c3", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "New Account Attempt", timestamp: "2026-07-05T23:20:00Z", description: "Attempted registration with fresh email alias (johnny.vaughn+signup@gmail.com)", trust_score_change: "-5" },
+  { id: "tl_c4", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "Review Recommended", timestamp: "2026-07-05T23:22:00Z", description: "AAN flag triggered due to blacklisted hardware profile match", trust_score_change: "-10" }
+];
+
+const seededPartnerAlerts = [
+  {
+    id: "alt_1",
+    severity: "high",
+    title: "Coordinated Crawler Fleet (Cluster #211)",
+    description: "Anomalous multi-account creation velocity: 12 accounts registered under 4 minutes with matching headless hardware signatures.",
+    human_id: "vh_03b8e912",
+    event_id: "evt_aan_3b8a1c9e",
+    status: "active",
+    created_at: "2026-07-05T22:45:00Z"
+  },
+  {
+    id: "alt_2",
+    severity: "high",
+    title: "Dormant Ban Evasion Ring (Cluster #319)",
+    description: "WebGL hardware template matches an account banned 48h ago for payment fraud (johnny_banned_fraud@gmail.com).",
+    human_id: "vh_7f2d5e3c",
+    event_id: "evt_aan_9c4f8d21",
+    status: "active",
+    created_at: "2026-07-05T23:22:00Z"
+  }
+];
+
+const seededTestLabRuns = [
+  {
+    id: "run_1",
+    scenario_type: "benchmark",
+    name: "Enterprise Stress Test Loop",
+    status: "completed",
+    events_count: 45,
+    avg_risk_score: 52,
+    created_at: "2026-07-05T21:00:00Z"
+  }
+];
+
 // Active State Storage Object (acts as our local relational storage system for MVP state)
 const db = {
   partnerApps: [...mockPartnerApps],
@@ -903,9 +1273,23 @@ const db = {
   trustTimelines: [...mockTrustTimelines],
   securityEvents: [...mockSecurityEvents],
   securityReports: [...mockSecurityReports],
+  integrationRequests: [...mockIntegrationRequests],
+  integrationRequestStatusHistory: [...mockIntegrationRequestStatusHistory],
   verifiedTokens: {
     "vss_session_failed_df9": 2
   } as Record<string, number>,
+
+  // Trust Intelligence Extensions
+  verifiedHumans: [...seededVerifiedHumans],
+  partnerAccounts: [...seededPartnerAccounts],
+  trustDevices: [...seededTrustDevices],
+  trustEvents: [...seededTrustEvents],
+  trustDecisions: [...seededTrustDecisions],
+  trustRelationships: [...seededTrustRelationships],
+  trustTimeline: [...seededTrustTimeline],
+  trustClusters: [...seededTrustClusters],
+  partnerAlerts: [...seededPartnerAlerts],
+  testLabRuns: [...seededTestLabRuns],
 
   organizations: [
     {
@@ -931,7 +1315,7 @@ const db = {
       id: "wh_del_1",
       project_id: "proj_security_777",
       event_type: "aan.verification.completed",
-      url: "https://api.fintechsecure.com/webhooks/poh",
+      url: "https://api.sovereigndigital.com/webhooks/poh",
       payload: {
         event_id: "evt_101",
         event_type: "aan.verification.completed",
@@ -952,7 +1336,7 @@ const db = {
       id: "dup_1",
       project_id: "proj_security_777",
       session_id: "vss_session_failed_df9",
-      external_user_id: "fintech_external_charlie_12",
+      external_user_id: "sovereign_external_charlie_12",
       duplicate_external_user_id: "dao_external_bob_99",
       confidence: 99.1,
       created_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString()
@@ -962,7 +1346,7 @@ const db = {
     {
       id: "rem_1",
       project_id: "proj_security_777",
-      external_user_id: "fintech_external_charlie_12",
+      external_user_id: "sovereign_external_charlie_12",
       status: "pending",
       reason: "High-risk duplicate signature scan flagged under security policy standard review.",
       created_at: new Date(Date.now() - 11 * 3600 * 1000).toISOString(),
@@ -1140,7 +1524,7 @@ export function dispatchWebhook(eventType: string, partnerUserId: string, riskLe
     id: `wh_del_${crypto.randomBytes(4).toString('hex')}`,
     project_id: project.id,
     event_type: eventType,
-    url: db.partnerApps[0]?.webhook_url || "https://api.fintechsecure.com/webhooks/poh",
+    url: db.partnerApps[0]?.webhook_url || "https://api.sovereigndigital.com/webhooks/poh",
     payload,
     signature,
     status: "success",
@@ -1805,6 +2189,268 @@ async function startServer() {
       valid: true,
       claims: verificationResult.claims
     });
+  });
+
+
+  // ============================================================================
+  // INTEGRATION REQUESTS & CONTACT FLOW ENDPOINTS
+  // ============================================================================
+
+  const integrationRequestSchema = z.object({
+    organization_name: z.string().min(1, "Organization name is required"),
+    contact_name: z.string().min(1, "Contact name is required"),
+    email: z.string().email("Invalid email address"),
+    website: z.string().optional().nullable().or(z.literal('')),
+    use_case: z.string().optional().nullable().or(z.literal('')),
+    message: z.string().min(1, "Message is required"),
+    phone: z.string().optional().nullable().or(z.literal('')),
+    company_size: z.string().optional().nullable().or(z.literal('')),
+    urgency: z.string().optional().nullable().or(z.literal(''))
+  });
+
+  function sendAdminEmailNotification(request: IntegrationRequest) {
+    const adminEmail = process.env.AAN_ADMIN_EMAIL || "admin@aan.network";
+    console.log(`\n================================================================================`);
+    console.log(`[SIMULATED EMAIL NOTIFICATION DISPATCH]`);
+    console.log(`To: ${adminEmail}`);
+    console.log(`Subject: New Integration Request Submitted: ${request.request_code}`);
+    console.log(`Body:`);
+    console.log(`  Dear Admin,`);
+    console.log(`  A new integration request has been submitted on the AAN Platform.`);
+    console.log(`  `);
+    console.log(`  Request Code:      ${request.request_code}`);
+    console.log(`  Organization:      ${request.organization_name}`);
+    console.log(`  Contact Person:    ${request.contact_name} (${request.email})`);
+    console.log(`  Website:           ${request.website || "N/A"}`);
+    console.log(`  Phone:             ${request.phone || "N/A"}`);
+    console.log(`  Company Size:      ${request.company_size || "N/A"}`);
+    console.log(`  Urgency Level:     ${request.urgency || "normal"}`);
+    console.log(`  `);
+    console.log(`  Use Case Summary:`);
+    console.log(`  ${request.use_case || "N/A"}`);
+    console.log(`  `);
+    console.log(`  Message Detail:`);
+    console.log(`  "${request.message}"`);
+    console.log(`  `);
+    console.log(`  Please review this request in the AAN Admin Portal:`);
+    console.log(`  http://localhost:3000/admin`);
+    console.log(`================================================================================\n`);
+  }
+
+  // POST /api/integration-request
+  // Handles the frontend contact and integration request submissions
+  app.post("/api/integration-request", express.json(), async (req, res) => {
+    try {
+      const parsed = integrationRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: parsed.error.flatten().fieldErrors 
+        });
+      }
+
+      const body = parsed.data;
+      const uuid = req.body.id || crypto.randomUUID();
+      
+      // Generate standard uppercase alphanumeric tracking code: AAN-REQ-XXXXXX
+      let requestCode = req.body.request_code;
+      if (!requestCode) {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        requestCode = 'AAN-REQ-';
+        for (let i = 0; i < 6; i++) {
+          requestCode += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+      }
+
+      // Hash raw IP and User Agent to preserve privacy
+      const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || "127.0.0.1").toString();
+      const ip_hash = crypto.createHash('sha256').update(ip).digest('hex');
+
+      const ua = (req.headers['user-agent'] || "Unknown").toString();
+      const user_agent_hash = crypto.createHash('sha256').update(ua).digest('hex');
+
+      const submission_source = req.body.submission_source || "api_proxy";
+      const environment = process.env.NODE_ENV || "development";
+      const nowStr = new Date().toISOString();
+
+      const newRequest: IntegrationRequest = {
+        id: uuid,
+        organization_name: body.organization_name,
+        contact_name: body.contact_name,
+        email: body.email,
+        website: body.website || null,
+        use_case: body.use_case || null,
+        message: body.message,
+        phone: body.phone || null,
+        company_size: body.company_size || null,
+        urgency: body.urgency || "normal",
+        status: "pending",
+        source: "contact_form",
+        request_code: requestCode,
+        metadata: {},
+        created_at: nowStr,
+        updated_at: nowStr,
+        status_changed_at: nowStr,
+        ip_hash,
+        user_agent_hash,
+        submission_source,
+        environment,
+        admin_notes: null
+      };
+
+      // Create integration request (persist in Supabase or fallback in-memory)
+      const savedRequest = await supabaseService.createIntegrationRequest(newRequest, db.integrationRequests);
+
+      // Trigger mocked/logged admin notification email
+      sendAdminEmailNotification(savedRequest);
+
+      // Create an audit log of this submission
+      appendAuditLog(
+        'user',
+        body.email,
+        'integration_request.submitted',
+        'integration_request',
+        savedRequest.id,
+        { organization: body.organization_name, request_code: savedRequest.request_code }
+      );
+
+      res.status(201).json({
+        success: true,
+        message: "Integration request received and catalogued successfully.",
+        request_code: savedRequest.request_code
+      });
+    } catch (err: any) {
+      console.error("[API ERROR] Error creating integration request:", err);
+      res.status(500).json({ error: "Failed to process integration request. Internal Server Error." });
+    }
+  });
+
+  // GET /api/internal/integration-requests
+  // For the Admin Dashboard to retrieve all requests
+  app.get("/api/internal/integration-requests", async (req, res) => {
+    try {
+      const requests = await supabaseService.getIntegrationRequests(db.integrationRequests);
+      res.json(requests);
+    } catch (err: any) {
+      console.error("[API ERROR] Error fetching integration requests:", err);
+      res.status(500).json({ error: "Internal server error fetching integration requests." });
+    }
+  });
+
+  // GET /api/internal/integration-requests/:id/status-history
+  // For the Admin Dashboard to retrieve status transition history
+  app.get("/api/internal/integration-requests/:id/status-history", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const history = await supabaseService.getIntegrationRequestStatusHistory(id, db.integrationRequestStatusHistory);
+      res.json(history);
+    } catch (err: any) {
+      console.error("[API ERROR] Error fetching status history:", err);
+      res.status(500).json({ error: "Internal server error fetching status history." });
+    }
+  });
+
+  // POST /api/internal/integration-requests/:id/status
+  // For the Admin Dashboard to update a request's status and insert status history logs
+  app.post("/api/internal/integration-requests/:id/status", express.json(), async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status, change_reason, metadata, admin_notes } = req.body;
+
+      const allowedStatuses = ['pending', 'reviewed', 'contacted', 'approved', 'rejected', 'archived'];
+      if (!status || !allowedStatuses.includes(status)) {
+        return res.status(400).json({ error: "Missing or invalid status value" });
+      }
+
+      // Fetch current/previous status of the request first to log transition accurately
+      let previous_status: any = null;
+      const existingReq = db.integrationRequests.find(r => r.id === id);
+      if (existingReq) {
+        previous_status = existingReq.status;
+      }
+      const isSupabase = isSupabaseConnected() && (supabaseService as any).supabase;
+      if (isSupabase) {
+        try {
+          const { data } = await (supabaseService as any).supabase
+            .from("integration_requests")
+            .select("status")
+            .eq("id", id)
+            .single();
+          if (data) {
+            previous_status = data.status;
+          }
+        } catch (e) {
+          console.warn("[DB WARNING] Failed to fetch previous status from live Supabase, fallback to in-memory status", e);
+        }
+      }
+
+      const nowStr = new Date().toISOString();
+      let updated: IntegrationRequest | null = null;
+      let historyEntry: any = null;
+
+      if (isSupabase) {
+        // Update ONLY status (and admin_notes if provided) in Supabase.
+        // Let the Supabase trigger automatically update status_changed_at and write status history.
+        const updates: any = { status };
+        if (admin_notes !== undefined) {
+          updates.admin_notes = admin_notes;
+        }
+        updated = await supabaseService.updateIntegrationRequest(id, updates, db.integrationRequests);
+      } else {
+        // Fallback local memory state updates
+        const updates: Partial<IntegrationRequest> = { 
+          status,
+          status_changed_at: nowStr,
+          updated_at: nowStr
+        };
+        if (admin_notes !== undefined) {
+          updates.admin_notes = admin_notes;
+        }
+        updated = await supabaseService.updateIntegrationRequest(id, updates, db.integrationRequests);
+
+        // Manually write mock status history for local storage fallback
+        historyEntry = {
+          id: crypto.randomUUID(),
+          integration_request_id: id,
+          previous_status: previous_status || null,
+          new_status: status,
+          changed_by: "admin_super_user_one",
+          changed_at: nowStr,
+          change_reason: change_reason || admin_notes || "Administrative status transition.",
+          metadata: metadata || {}
+        };
+        await supabaseService.createIntegrationRequestStatusHistory(historyEntry, db.integrationRequestStatusHistory);
+      }
+
+      if (!updated) {
+        return res.status(404).json({ error: "Integration request not found" });
+      }
+
+      // Write immutable audit log
+      appendAuditLog(
+        'admin',
+        'admin_super_user_one',
+        'integration_request.status_updated',
+        'integration_request',
+        id,
+        { 
+          previous_status, 
+          new_status: status, 
+          change_reason: change_reason || admin_notes || "Administrative status transition.",
+          request_code: updated.request_code 
+        }
+      );
+
+      res.json({
+        success: true,
+        message: `Request status successfully updated to ${status}.`,
+        request: updated,
+        history: historyEntry
+      });
+    } catch (err: any) {
+      console.error("[API ERROR] Error updating integration request status:", err);
+      res.status(500).json({ error: "Internal server error updating request status." });
+    }
   });
 
 
@@ -2896,6 +3542,561 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
     res.json({ success: true, request });
   });
 
+  // ============================================================================
+  // TRUST INTELLIGENCE & TEST LAB API ENDPOINTS
+  // ============================================================================
+
+  /**
+   * GET /api/trust/metrics
+   * Aggregated live metrics for the Trust Center Dashboard
+   */
+  app.get("/api/trust/metrics", (req, res) => {
+    const totalVerifiedHumans = db.verifiedHumans.length;
+    const totalAccounts = db.partnerAccounts.length;
+    const totalDevices = db.trustDevices.length;
+    
+    const activeAlerts = db.partnerAlerts.filter(a => a.status === "active");
+    const totalActiveAlerts = activeAlerts.length;
+
+    // Calculate average trust score
+    const totalScore = db.verifiedHumans.reduce((acc, h) => acc + h.avg_trust_score, 0);
+    const averageTrustScore = totalVerifiedHumans > 0 ? Math.round(totalScore / totalVerifiedHumans) : 85;
+
+    // Calculate status distribution
+    const statusDistribution = {
+      within_policy: db.verifiedHumans.filter(h => h.status === "within_policy").length,
+      needs_review: db.verifiedHumans.filter(h => h.status === "needs_review").length,
+      exceeds_policy: db.verifiedHumans.filter(h => h.status === "exceeds_policy").length
+    };
+
+    res.json({
+      totalVerifiedHumans,
+      totalAccounts,
+      totalDevices,
+      averageTrustScore,
+      totalActiveAlerts,
+      statusDistribution,
+      activeAlerts
+    });
+  });
+
+  /**
+   * GET /api/trust/graph-data
+   * Fetches unified, stateful datasets representing the entire Trust Graph
+   */
+  app.get("/api/trust/graph-data", (req, res) => {
+    res.json({
+      humans: db.verifiedHumans,
+      clusters: db.trustClusters,
+      accounts: db.partnerAccounts,
+      devices: db.trustDevices,
+      timeline: db.trustTimeline,
+      relationships: db.trustRelationships,
+      decisions: db.trustDecisions
+    });
+  });
+
+  /**
+   * GET /api/trust/clusters
+   * Retrieve all community modular partitions (trust clusters)
+   */
+  app.get("/api/trust/clusters", (req, res) => {
+    res.json(db.trustClusters);
+  });
+
+  /**
+   * GET /api/trust/humans
+   * Retrieve all verified humans in the trust graph
+   */
+  app.get("/api/trust/humans", (req, res) => {
+    res.json(db.verifiedHumans);
+  });
+
+  /**
+   * GET /api/trust/alerts
+   * Retrieve active alerts
+   */
+  app.get("/api/trust/alerts", (req, res) => {
+    res.json(db.partnerAlerts);
+  });
+
+  /**
+   * POST /api/trust/alerts/dismiss
+   * Dismiss an active partner alert
+   */
+  app.post("/api/trust/alerts/dismiss", (req, res) => {
+    const { id } = req.body;
+    const alertIndex = db.partnerAlerts.findIndex(a => a.id === id);
+    if (alertIndex !== -1) {
+      db.partnerAlerts[alertIndex].status = "dismissed";
+      return res.json({ success: true, alert: db.partnerAlerts[alertIndex] });
+    }
+    res.status(404).json({ error: "Alert not found" });
+  });
+
+  /**
+   * GET /api/trust/timeline
+   * Retrieve entire chronological timeline events
+   */
+  app.get("/api/trust/timeline", (req, res) => {
+    res.json(db.trustTimeline);
+  });
+
+  /**
+   * GET /api/trust/test-lab/runs
+   * Retrieve test lab runs
+   */
+  app.get("/api/trust/test-lab/runs", (req, res) => {
+    res.json(db.testLabRuns);
+  });
+
+  /**
+   * POST /api/trust/test-lab/run
+   * Dynamically triggers a simulation run and writes updates statefully
+   */
+  app.post("/api/trust/test-lab/run", (req, res) => {
+    const { scenario_type } = req.body;
+    const runId = `run_${Math.random().toString(36).substr(2, 9)}`;
+    const timestamp = new Date().toISOString();
+
+    let runName = "Scenario Simulation";
+    let status = "completed";
+    let events_count = 1;
+    let avg_risk_score = 10;
+
+    let newCluster: any = null;
+    let newHuman: any = null;
+    let newAccounts: any[] = [];
+    let newDevices: any[] = [];
+    let newEvents: any[] = [];
+    let newDecisions: any[] = [];
+    let newTimelineItems: any[] = [];
+    let newRelationships: any[] = [];
+    let newAlert: any = null;
+
+    if (scenario_type === "signup_bot") {
+      runName = "Bot Signup Attempt Stress Test";
+      events_count = 12;
+      avg_risk_score = 88;
+
+      newCluster = {
+        id: `cluster_${Math.random().toString(36).substr(2, 4)}`,
+        name: "Automated Signup Herd (Cluster #212)",
+        risk_score: 88,
+        confidence_score: 91,
+        status: "suspicious",
+        algorithm: "louvain",
+        verified_humans_count: 1,
+        partner_accounts_count: 8,
+        trust_devices_count: 3,
+        events_count: 12,
+        decisions_count: 12,
+        last_activity: timestamp,
+        created_at: timestamp
+      };
+
+      newHuman = {
+        id: `vh_${Math.random().toString(36).substr(2, 8)}`,
+        name: `Verified Human ${Math.random().toString(36).substr(2, 4).toUpperCase()} (Bot Herd)`,
+        status: "needs_review",
+        last_seen: timestamp,
+        avg_trust_score: 14,
+        highest_risk_score: 88,
+        relationship_confidence: 91,
+        total_accounts: 8,
+        known_devices_count: 3,
+        primary_cluster_id: newCluster.id,
+        created_at: timestamp
+      };
+
+      // Create accounts
+      for (let i = 1; i <= 8; i++) {
+        newAccounts.push({
+          id: `acc_usr_bot_${Math.random().toString(36).substr(2, 6)}`,
+          human_id: newHuman.id,
+          email: `crawler_node_b${i}_${Math.random().toString(36).substr(2, 3)}@dispostable.com`,
+          account_type: "Personal",
+          created_at: timestamp,
+          last_login: "Just now"
+        });
+      }
+
+      // Create devices
+      newDevices = [
+        { id: `dev_vm_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "Headless Chrome (AWS node)", type: "Cloud VM", status: "unknown", last_used_ip: "54.210.12.8", fingerprint_score: 10, created_at: timestamp },
+        { id: `dev_vm_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "Headless Firefox (DigitalOcean node)", type: "Cloud VM", status: "unknown", last_used_ip: "185.190.141.2", fingerprint_score: 12, created_at: timestamp },
+        { id: `dev_vm_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "Selenium Node (Linode VM)", type: "Cloud VM", status: "unknown", last_used_ip: "104.23.4.11", fingerprint_score: 8, created_at: timestamp }
+      ];
+
+      // Event & Decision
+      const eventId = `evt_aan_${Math.random().toString(36).substr(2, 8)}`;
+      newEvents.push({
+        id: eventId,
+        event_type: "signup_bot",
+        external_user_id: "usr_phantom_botnet",
+        email: newAccounts[0].email,
+        risk_score: 88,
+        reason_codes: ["DEVICE_SPOOF_DETECTED", "COORDINATED_REPLAY", "HIGH_RISK_IP"],
+        metadata: {
+          ip: "185.190.141.2",
+          location: "Frankfurt, DE",
+          device: "Headless Chrome (Linux)",
+          network: "DigitalOcean AS14061",
+          anomaly_details: "WebGL and canvas fingerprinting mismatches indicate fully headless emulation."
+        },
+        timestamp,
+        cluster_id: newCluster.id
+      });
+
+      newDecisions.push({
+        id: `dec_${Math.random().toString(36).substr(2, 8)}`,
+        human_id: newHuman.id,
+        event_id: eventId,
+        recommendation: "REVIEW",
+        policy_matched: "Flag rapid account creation & bot patterns",
+        confidence: 91,
+        explanation: "Coordinated headless activity with high-velocity signups detected. Exceeds standard project limit of 10 maximum accounts per human anchor.",
+        evidence: ["8 accounts registered under 2 minutes", "3 automated VM devices matched", "Zero real user biometrics recorded"],
+        created_at: timestamp
+      });
+
+      // Timeline & relationships
+      newTimelineItems = [
+        { id: `tl_bot_1`, human_id: newHuman.id, event_id: eventId, event: "Account Created", timestamp, description: "Coordinated signup spike initiated", trust_score_change: "-30" },
+        { id: `tl_bot_2`, human_id: newHuman.id, event_id: eventId, event: "Policy Exceeded", timestamp, description: "Velocity threshold matched (8 accounts in 2 mins)", trust_score_change: "-40" }
+      ];
+
+      newRelationships = [
+        { id: `rel_bot_1`, human_id: newHuman.id, type: "Coordinated Replay Link", source: newAccounts[0].id, target: newAccounts[1].id, confidence: 91, evidence: ["Same browser fingerprint", "Rotating cloud IPs"], status: "flagged", recommendation: "REVIEW", cluster_id: newCluster.id, created_at: timestamp }
+      ];
+
+      // High severity alert
+      newAlert = {
+        id: `alt_${Math.random().toString(36).substr(2, 6)}`,
+        severity: "high",
+        title: "Coordinated Crawler Fleet (Cluster #212)",
+        description: "Anomalous creation of 8 accounts using cloud-hosted headless VM environments within 2 minutes.",
+        human_id: newHuman.id,
+        event_id: eventId,
+        status: "active",
+        created_at: timestamp
+      };
+
+    } else if (scenario_type === "ban_evasion") {
+      runName = "Ban Evasion Defense Test";
+      events_count = 3;
+      avg_risk_score = 75;
+
+      newCluster = {
+        id: `cluster_${Math.random().toString(36).substr(2, 4)}`,
+        name: "Evasion Ring Match (Cluster #320)",
+        risk_score: 75,
+        confidence_score: 95,
+        status: "suspicious",
+        algorithm: "louvain",
+        verified_humans_count: 1,
+        partner_accounts_count: 2,
+        trust_devices_count: 2,
+        events_count: 3,
+        decisions_count: 3,
+        last_activity: timestamp,
+        created_at: timestamp
+      };
+
+      newHuman = {
+        id: `vh_${Math.random().toString(36).substr(2, 8)}`,
+        name: `Verified Human ${Math.random().toString(36).substr(2, 4).toUpperCase()} (Evasion Check)`,
+        status: "exceeds_policy",
+        last_seen: timestamp,
+        avg_trust_score: 38,
+        highest_risk_score: 75,
+        relationship_confidence: 95,
+        total_accounts: 2,
+        known_devices_count: 2,
+        primary_cluster_id: newCluster.id,
+        created_at: timestamp
+      };
+
+      newAccounts = [
+        { id: `acc_usr_${Math.random().toString(36).substr(2, 6)}`, human_id: newHuman.id, email: `evader_signup_${Math.random().toString(36).substr(2, 3)}@gmail.com`, account_type: "Personal", created_at: timestamp, last_login: "Just now" },
+        { id: `acc_usr_${Math.random().toString(36).substr(2, 6)}`, human_id: newHuman.id, email: `johnny_banned_fraud@gmail.com`, account_type: "Personal", created_at: "2024-11-12T00:00:00Z", last_login: "Banned 48h ago" }
+      ];
+
+      newDevices = [
+        { id: `dev_sus_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "Banned OnePlus 11 Phone", type: "Mobile (Android)", status: "blocked", last_used_ip: "74.120.14.88", fingerprint_score: 95, created_at: timestamp },
+        { id: `dev_sus_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "Suspect Windows Chrome Node", type: "Desktop (Windows)", status: "unknown", last_used_ip: "74.120.14.88", fingerprint_score: 42, created_at: timestamp }
+      ];
+
+      const eventId = `evt_aan_${Math.random().toString(36).substr(2, 8)}`;
+      newEvents.push({
+        id: eventId,
+        event_type: "ban_evasion",
+        external_user_id: "usr_suspect_evader",
+        email: newAccounts[0].email,
+        risk_score: 75,
+        reason_codes: ["HARDWARE_PROFILE_BLACK_LISTED", "IP_CLEAN"],
+        metadata: {
+          ip: "74.120.14.88",
+          location: "Dallas, US",
+          device: "OnePlus 11 (Android)",
+          network: "Comcast Cable",
+          anomaly_details: "Hardware and canvas fingerprints match a profile banned yesterday for premium credit card fraud."
+        },
+        timestamp,
+        cluster_id: newCluster.id
+      });
+
+      newDecisions.push({
+        id: `dec_${Math.random().toString(36).substr(2, 8)}`,
+        human_id: newHuman.id,
+        event_id: eventId,
+        recommendation: "STEP_UP",
+        policy_matched: "Flag possible ban evasion",
+        confidence: 95,
+        explanation: "Hardware template matches a banned account (johnny_banned_fraud@gmail.com). We recommend a high-friction biometric challenge before proceeding.",
+        evidence: ["WebGL signature match to account banned 48h ago for fraud", "New registration from matching IP address subnet"],
+        created_at: timestamp
+      });
+
+      newTimelineItems = [
+        { id: `tl_ev_1`, human_id: newHuman.id, event_id: eventId, event: "Account Created", timestamp, description: "Registration attempt from blacklisted device", trust_score_change: "-50" },
+        { id: `tl_ev_2`, human_id: newHuman.id, event_id: eventId, event: "Review Recommended", timestamp, description: "Flagged possible ban evasion ring", trust_score_change: "-10" }
+      ];
+
+      newRelationships = [
+        { id: `rel_ev_1`, human_id: newHuman.id, type: "Shared Hardware Profile", source: newDevices[0].id, target: newAccounts[0].id, confidence: 95, evidence: ["Identical physical GPU template"], status: "flagged", recommendation: "STEP_UP", cluster_id: newCluster.id, created_at: timestamp }
+      ];
+
+      newAlert = {
+        id: `alt_${Math.random().toString(36).substr(2, 6)}`,
+        severity: "medium",
+        title: "Dormant Ban Evasion Ring (Cluster #320)",
+        description: "Hardware signature from a banned fraud account matches a brand-new registration attempt.",
+        human_id: newHuman.id,
+        event_id: eventId,
+        status: "active",
+        created_at: timestamp
+      };
+
+    } else if (scenario_type === "account_takeover") {
+      runName = "Credential Stuffing & ATO Simulation";
+      events_count = 5;
+      avg_risk_score = 92;
+
+      newCluster = {
+        id: `cluster_${Math.random().toString(36).substr(2, 4)}`,
+        name: "Credential Stuffing Attempt (Cluster #401)",
+        risk_score: 92,
+        confidence_score: 96,
+        status: "suspicious",
+        algorithm: "louvain",
+        verified_humans_count: 1,
+        partner_accounts_count: 2,
+        trust_devices_count: 2,
+        events_count: 5,
+        decisions_count: 5,
+        last_activity: timestamp,
+        created_at: timestamp
+      };
+
+      newHuman = {
+        id: `vh_${Math.random().toString(36).substr(2, 8)}`,
+        name: `Verified Human ${Math.random().toString(36).substr(2, 4).toUpperCase()} (ATO Defense)`,
+        status: "exceeds_policy",
+        last_seen: timestamp,
+        avg_trust_score: 28,
+        highest_risk_score: 92,
+        relationship_confidence: 96,
+        total_accounts: 2,
+        known_devices_count: 2,
+        primary_cluster_id: newCluster.id,
+        created_at: timestamp
+      };
+
+      newAccounts = [
+        { id: `acc_usr_${Math.random().toString(36).substr(2, 6)}`, human_id: newHuman.id, email: `victim_acc_${Math.random().toString(36).substr(2, 3)}@gmail.com`, account_type: "Personal", created_at: "2025-02-14T00:00:00Z", last_login: "Just now" }
+      ];
+
+      newDevices = [
+        { id: `dev_sus_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "ATO Hacker Tor Proxy Node", type: "Cloud VM", status: "blocked", last_used_ip: "109.12.82.4", fingerprint_score: 12, created_at: timestamp },
+        { id: `dev_sus_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "Victim Trusted Chrome macOS", type: "Desktop (macOS)", status: "trusted", last_used_ip: "67.185.244.102", fingerprint_score: 97, created_at: "2025-02-14T10:00:00Z" }
+      ];
+
+      const eventId = `evt_aan_${Math.random().toString(36).substr(2, 8)}`;
+      newEvents.push({
+        id: eventId,
+        event_type: "account_takeover",
+        external_user_id: "usr_ato_attacker",
+        email: newAccounts[0].email,
+        risk_score: 92,
+        reason_codes: ["IMPOSSIBLE_TRAVEL", "DEVICE_FINGERPRINT_MISMATCH", "TOR_PROXY_DETECTED"],
+        metadata: {
+          ip: "109.12.82.4",
+          location: "Moscow, RU",
+          device: "Tor Browser (Linux)",
+          network: "M247 Ltd Tor Proxy",
+          anomaly_details: "Sudden login from untrusted proxy location just 10 minutes after user activity in Seattle."
+        },
+        timestamp,
+        cluster_id: newCluster.id
+      });
+
+      newDecisions.push({
+        id: `dec_${Math.random().toString(36).substr(2, 8)}`,
+        human_id: newHuman.id,
+        event_id: eventId,
+        recommendation: "DENY",
+        policy_matched: "Flag anomalous proxy entry",
+        confidence: 96,
+        explanation: "Critical risk login from an active Tor exit node subnet mismatched to the standard resident location and hardware profile of this verified human.",
+        evidence: ["Impossible travel distance logged (Seattle to Moscow in 10 mins)", "Mismatched WebGL fingerprint signature", "Known Tor server proxy IP"],
+        created_at: timestamp
+      });
+
+      newTimelineItems = [
+        { id: `tl_ato_1`, human_id: newHuman.id, event_id: eventId, event: "Anomalous Login Blocked", timestamp, description: "ATO block issued from untrusted proxy", trust_score_change: "-75" },
+        { id: `tl_ato_2`, human_id: newHuman.id, event_id: eventId, event: "Security Challenge Initiated", timestamp, description: "Compromised credential locking trigger active", trust_score_change: "-10" }
+      ];
+
+      newRelationships = [
+        { id: `rel_ato_1`, human_id: newHuman.id, type: "Relational Conflict", source: newDevices[0].id, target: newAccounts[0].id, confidence: 96, evidence: ["Mismatched residential carrier vs cloud VM"], status: "flagged", recommendation: "DENY", cluster_id: newCluster.id, created_at: timestamp }
+      ];
+
+      newAlert = {
+        id: `alt_${Math.random().toString(36).substr(2, 6)}`,
+        severity: "high",
+        title: "Account Takeover Attempt Blocked",
+        description: "Anomalous login on victim_acc from Moscow Tor network was successfully blocked. Compromise lock active.",
+        human_id: newHuman.id,
+        event_id: eventId,
+        status: "active",
+        created_at: timestamp
+      };
+
+    } else {
+      // Legit user
+      runName = "Legitimate Onboarding Flow";
+      events_count = 2;
+      avg_risk_score = 5;
+
+      newCluster = {
+        id: `cluster_${Math.random().toString(36).substr(2, 4)}`,
+        name: "Residential Office Cluster (Cluster #105)",
+        risk_score: 5,
+        confidence_score: 99,
+        status: "high_confidence",
+        algorithm: "louvain",
+        verified_humans_count: 1,
+        partner_accounts_count: 2,
+        trust_devices_count: 2,
+        events_count: 2,
+        decisions_count: 2,
+        last_activity: timestamp,
+        created_at: timestamp
+      };
+
+      newHuman = {
+        id: `vh_${Math.random().toString(36).substr(2, 8)}`,
+        name: `Verified Human ${Math.random().toString(36).substr(2, 4).toUpperCase()} (Onboarding)`,
+        status: "within_policy",
+        last_seen: timestamp,
+        avg_trust_score: 97,
+        highest_risk_score: 5,
+        relationship_confidence: 99,
+        total_accounts: 2,
+        known_devices_count: 2,
+        primary_cluster_id: newCluster.id,
+        created_at: timestamp
+      };
+
+      newAccounts = [
+        { id: `acc_usr_${Math.random().toString(36).substr(2, 6)}`, human_id: newHuman.id, email: `developer_legit_${Math.random().toString(36).substr(2, 3)}@gmail.com`, account_type: "Personal", created_at: timestamp, last_login: "Just now" }
+      ];
+
+      newDevices = [
+        { id: `dev_ok_${Math.random().toString(36).substr(2, 5)}`, human_id: newHuman.id, name: "Trusted MacBook Pro 16", type: "Desktop (macOS)", status: "trusted", last_used_ip: "64.233.160.10", fingerprint_score: 99, created_at: timestamp }
+      ];
+
+      const eventId = `evt_aan_${Math.random().toString(36).substr(2, 8)}`;
+      newEvents.push({
+        id: eventId,
+        event_type: "legit_user",
+        external_user_id: "usr_legit_dev",
+        email: newAccounts[0].email,
+        risk_score: 5,
+        reason_codes: ["HUMAN_TELEMETRY_PASSED", "IP_CLEAN", "DEVICE_MATCH"],
+        metadata: {
+          ip: "64.233.160.10",
+          location: "San Jose, US",
+          device: "macOS Chrome 126",
+          network: "Google Fiber AS16591",
+          anomaly_details: "Stable behavioral pattern with residential Google Fiber routing."
+        },
+        timestamp,
+        cluster_id: newCluster.id
+      });
+
+      newDecisions.push({
+        id: `dec_${Math.random().toString(36).substr(2, 8)}`,
+        human_id: newHuman.id,
+        event_id: eventId,
+        recommendation: "ALLOW",
+        policy_matched: "Maximum associated accounts limit",
+        confidence: 99,
+        explanation: "No anomalies detected. Biometrics and location match user profile criteria.",
+        evidence: ["Residential Google Fiber connection", "1 registered macOS developer workstation"],
+        created_at: timestamp
+      });
+
+      newTimelineItems = [
+        { id: `tl_ok_1`, human_id: newHuman.id, event_id: eventId, event: "Account Created", timestamp, description: "Personal account registered", trust_score_change: "+50" },
+        { id: `tl_ok_2`, human_id: newHuman.id, event_id: eventId, event: "Human Verified", timestamp, description: "Cryptographic human biometrics validated", trust_score_change: "+30" },
+        { id: `tl_ok_3`, human_id: newHuman.id, event_id: eventId, event: "Login Allowed", timestamp, description: "Seamless verification event completed", trust_score_change: "+17" }
+      ];
+
+      newRelationships = [
+        { id: `rel_ok_1`, human_id: newHuman.id, type: "Authorized Workstation", source: newDevices[0].id, target: newAccounts[0].id, confidence: 99, evidence: ["Validated secure local secure-enclave hardware key"], status: "active_trusted", recommendation: "ALLOW", cluster_id: newCluster.id, created_at: timestamp }
+      ];
+    }
+
+    // Write statefully to in-memory tables
+    if (newCluster) db.trustClusters.unshift(newCluster);
+    if (newHuman) db.verifiedHumans.unshift(newHuman);
+    if (newAccounts.length > 0) db.partnerAccounts.unshift(...newAccounts);
+    if (newDevices.length > 0) db.trustDevices.unshift(...newDevices);
+    if (newEvents.length > 0) db.trustEvents.unshift(...newEvents);
+    if (newDecisions.length > 0) db.trustDecisions.unshift(...newDecisions);
+    if (newTimelineItems.length > 0) db.trustTimeline.unshift(...newTimelineItems);
+    if (newRelationships.length > 0) db.trustRelationships.unshift(...newRelationships);
+    if (newAlert) db.partnerAlerts.unshift(newAlert);
+
+    const newRun = {
+      id: runId,
+      scenario_type,
+      name: runName,
+      status,
+      events_count,
+      avg_risk_score,
+      created_at: timestamp
+    };
+    db.testLabRuns.unshift(newRun);
+
+    res.json({
+      success: true,
+      run: newRun,
+      updates: {
+        cluster: newCluster,
+        human: newHuman,
+        accountsCount: newAccounts.length,
+        devicesCount: newDevices.length,
+        events: newEvents,
+        decisions: newDecisions,
+        timeline: newTimelineItems,
+        relationships: newRelationships,
+        alert: newAlert
+      }
+    });
+  });
 
   // ============================================================================
   // VITE RENDER ENVIRONMENT SETUPS (Dev vs Production)
