@@ -627,6 +627,120 @@ export const supabaseService = {
       console.warn("getTrustGraphData API failed:", err);
       return null;
     }
+  },
+
+  /**
+   * 23. HANDSHAKE: CREATE TRUST EVENT IN SUPABASE (aan_trust_events)
+   */
+  async createTrustEvent(
+    event: {
+      session_id: string;
+      project_id?: string;
+      external_user_id: string;
+      decision: string;
+      risk_score: number;
+      reason_codes: string[];
+      signal_payload: Record<string, any>;
+      proof_token?: string;
+      created_at: string;
+      completed_at?: string | null;
+    },
+    localStore: any[]
+  ): Promise<any> {
+    if (isConfigured && supabase) {
+      console.log(`[AAN DB] INSERT aan_trust_event for session ${event.session_id} to Supabase`);
+      try {
+        const { data, error } = await supabase
+          .from("aan_trust_events")
+          .insert({
+            session_id: event.session_id,
+            project_id: event.project_id || null,
+            external_user_id: event.external_user_id,
+            decision: event.decision,
+            risk_score: event.risk_score,
+            reason_codes: event.reason_codes,
+            signal_payload: event.signal_payload,
+            proof_token: event.proof_token || null,
+            created_at: event.created_at,
+            completed_at: event.completed_at || null
+          })
+          .select()
+          .single();
+
+        if (error) {
+          handleDbError(error, "createTrustEvent");
+          localStore.unshift(event);
+          return event;
+        }
+        return data;
+      } catch (err) {
+        console.warn("[AAN DB GRACEFUL FALLBACK] createTrustEvent exception:", err);
+        localStore.unshift(event);
+        return event;
+      }
+    } else {
+      localStore.unshift(event);
+      return event;
+    }
+  },
+
+  /**
+   * 24. HANDSHAKE: UPDATE TRUST EVENT IN SUPABASE (aan_trust_events)
+   */
+  async updateTrustEvent(
+    sessionId: string,
+    updates: {
+      decision: string;
+      risk_score: number;
+      reason_codes: string[];
+      proof_token: string;
+      completed_at: string;
+    },
+    localStore: any[]
+  ): Promise<any> {
+    if (isConfigured && supabase) {
+      console.log(`[AAN DB] UPDATE aan_trust_events for session ${sessionId} in Supabase`);
+      try {
+        const { data, error } = await supabase
+          .from("aan_trust_events")
+          .update({
+            decision: updates.decision,
+            risk_score: updates.risk_score,
+            reason_codes: updates.reason_codes,
+            proof_token: updates.proof_token,
+            completed_at: updates.completed_at
+          })
+          .eq("session_id", sessionId)
+          .select()
+          .single();
+
+        if (error) {
+          handleDbError(error, "updateTrustEvent");
+          const idx = localStore.findIndex(e => e.session_id === sessionId);
+          if (idx >= 0) {
+            localStore[idx] = { ...localStore[idx], ...updates };
+            return localStore[idx];
+          }
+          return null;
+        }
+        return data;
+      } catch (err) {
+        console.warn("[AAN DB GRACEFUL FALLBACK] updateTrustEvent exception:", err);
+        const idx = localStore.findIndex(e => e.session_id === sessionId);
+        if (idx >= 0) {
+          localStore[idx] = { ...localStore[idx], ...updates };
+          return localStore[idx];
+        }
+        return null;
+      }
+    } else {
+      const idx = localStore.findIndex(e => e.session_id === sessionId);
+      if (idx >= 0) {
+        localStore[idx] = { ...localStore[idx], ...updates };
+        return localStore[idx];
+      }
+      return null;
+    }
   }
 };
 

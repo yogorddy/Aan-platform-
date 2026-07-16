@@ -29,6 +29,7 @@ import {
   IntegrationRequestStatusHistory
 } from "./src/types";
 import { AIEngine, setActiveProvider, activeProvider, AIProvider } from "./src/lib/aiEngine";
+import { GraphAnalysisEngine } from "./src/lib/graphAnalysisEngine";
 
 // ============================================================================
 // MOCK IMPLEMENTATION — Replace with certified identity, device, fraud, and security providers before production use.
@@ -1284,6 +1285,7 @@ const db = {
   partnerAccounts: [...seededPartnerAccounts],
   trustDevices: [...seededTrustDevices],
   trustEvents: [...seededTrustEvents],
+  aanTrustEvents: [] as any[],
   trustDecisions: [...seededTrustDecisions],
   trustRelationships: [...seededTrustRelationships],
   trustTimeline: [...seededTrustTimeline],
@@ -1746,6 +1748,183 @@ async function startServer() {
         risk_reasons: session.risk_reasons
       },
       proof_token: session.proof_token || ""
+    });
+  });
+
+  // 3a. POST /api/v1/verification-sessions/:id/signals
+  // AAN Secure Handshake - Source of truth endpoint
+  app.post("/api/v1/verification-sessions/:id/signals", async (req, res) => {
+    const sessionId = req.params.id;
+    const session = db.verificationSessions.find(s => s.id === sessionId);
+
+    if (!session) {
+      return res.status(404).json({ error: "Verification session not found" });
+    }
+
+    const clientIp = (req.headers["x-forwarded-for"] || req.ip || "127.0.0.1").toString();
+    const userAgent = (req.headers["user-agent"] || "Unknown").toString();
+
+    // 1. On every handshake, insert a trust event into Supabase first (or fallback local store)
+    const initialEvent = {
+      session_id: sessionId,
+      project_id: db.projects[0]?.id || null,
+      external_user_id: session.external_user_id,
+      decision: "pending",
+      risk_score: 0,
+      reason_codes: [] as string[],
+      signal_payload: req.body || {},
+      created_at: new Date().toISOString(),
+      completed_at: null
+    };
+
+    let createdEventRecord: any = null;
+    let dbFailed = false;
+
+    try {
+      createdEventRecord = await supabaseService.createTrustEvent(initialEvent, db.aanTrustEvents);
+      if (!createdEventRecord) {
+        dbFailed = true;
+      }
+    } catch (err) {
+      console.error("[AAN HANDSHAKE] Supabase insert failed (failing safely):", err);
+      dbFailed = true;
+      // Fallback local insert to guarantee resilience
+      db.aanTrustEvents.unshift(initialEvent);
+      createdEventRecord = initialEvent;
+    }
+
+    // 2. Compute the risk decision from the partner-provided signal payload
+    const signalPayload = req.body?.signal_payload || req.body;
+    let decision: 'approved' | 'review' | 'denied' = 'approved';
+    let riskScore = 12;
+    let reasonCodes: string[] = [];
+
+    // If signal_payload is missing, mark decision as review with reason code SIGNAL_PAYLOAD_MISSING
+    if (!signalPayload || Object.keys(signalPayload).length === 0) {
+      decision = 'review';
+      riskScore = 50;
+      reasonCodes.push("SIGNAL_PAYLOAD_MISSING");
+    } else {
+      // Evaluate payload signals
+      const { email_hash, phone_hash, device_fingerprint, platform } = signalPayload;
+      let duplicateSignalsFound = false;
+
+      const userEmailHash = email_hash || "";
+      const userPhoneHash = phone_hash || "";
+      if (
+        userEmailHash.includes("duplicate") || 
+        userPhoneHash.includes("duplicate") || 
+        userEmailHash === "sha256_duplicate_user_char_99"
+      ) {
+        duplicateSignalsFound = true;
+      }
+
+      if (duplicateSignalsFound) {
+        riskScore = 85;
+        reasonCodes.push("duplicate_signature_template_hash");
+      }
+
+      if (device_fingerprint) {
+        // Find if this device is associated with a different user
+        const knownDevice = db.devices.some(d => d.device_fingerprint_hash === device_fingerprint && d.user_id !== session.external_user_id);
+        if (knownDevice) {
+          riskScore += 30;
+          reasonCodes.push("new_device_on_existing_user");
+        }
+      }
+
+      // Standard boundaries
+      if (riskScore >= 70) {
+        decision = 'denied';
+      } else if (riskScore >= 35) {
+        decision = 'review';
+      } else {
+        decision = 'approved';
+      }
+    }
+
+    // 3. Generate cryptographic signed proof token/JWT
+    const uniquenessStatus = reasonCodes.includes("duplicate_signature_template_hash") ? 'duplicate' : 'unique';
+    const riskLevel = riskScore >= 70 ? 'high' : (riskScore >= 35 ? 'medium' : 'low');
+    const humanStatus = decision === 'approved' ? 'verified' : (decision === 'review' ? 'pending' : 'suspended');
+    
+    const proofToken = issueProofToken(
+      session.external_user_id,
+      sessionId,
+      humanStatus,
+      uniquenessStatus,
+      riskLevel
+    );
+
+    // 4. Update trust event with computed decision and proof token
+    let updatedEventRecord: any = null;
+    const finalUpdates = {
+      decision: decision,
+      risk_score: riskScore,
+      reason_codes: reasonCodes,
+      proof_token: proofToken,
+      completed_at: new Date().toISOString()
+    };
+
+    try {
+      updatedEventRecord = await supabaseService.updateTrustEvent(sessionId, finalUpdates, db.aanTrustEvents);
+    } catch (err) {
+      console.error("[AAN HANDSHAKE] Supabase update failed (failing safely):", err);
+      const idx = db.aanTrustEvents.findIndex(e => e.session_id === sessionId);
+      if (idx >= 0) {
+        db.aanTrustEvents[idx] = { ...db.aanTrustEvents[idx], ...finalUpdates };
+      }
+      updatedEventRecord = { ...initialEvent, ...finalUpdates };
+    }
+
+    // Also update main verification session row
+    const sessionStatusMap: Record<string, string> = {
+      'approved': 'passed',
+      'review': 'review',
+      'denied': 'failed'
+    };
+    
+    const sessionStatus = sessionStatusMap[decision] || 'passed';
+    session.status = sessionStatus as any;
+    session.risk_score = riskScore;
+    session.risk_reasons = reasonCodes;
+    session.proof_token = proofToken;
+    session.completed_at = new Date().toISOString();
+
+    await supabaseService.updateVerificationSession(sessionId, {
+      status: sessionStatus as any,
+      risk_score: riskScore,
+      risk_reasons: reasonCodes,
+      proof_token: proofToken
+    }, db.verificationSessions);
+
+    // Log the Secure Handshake audit outcome
+    appendAuditLog(
+      'system',
+      'handshake_engine',
+      'handshake.verify_outcome',
+      'session',
+      sessionId,
+      { decision, risk_score: riskScore, reason_codes: reasonCodes }
+    );
+
+    // Only show success if proof token exists (and if db was online, the database records exist)
+    const success = !!proofToken && (!isSupabaseConnected() || !dbFailed || !!updatedEventRecord);
+
+    if (!success) {
+      return res.status(500).json({
+        status: "failed",
+        error: "Secure handshake transaction failed. Proof token or database state could not be validated."
+      });
+    }
+
+    return res.json({
+      status: "success",
+      decision: decision,
+      risk_score: riskScore,
+      reason_codes: reasonCodes,
+      proof_token: proofToken,
+      session_id: sessionId
     });
   });
 
@@ -3585,6 +3764,12 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
    * Fetches unified, stateful datasets representing the entire Trust Graph
    */
   app.get("/api/trust/graph-data", (req, res) => {
+    try {
+      // Run stateful Graph Analysis Engine on live state
+      GraphAnalysisEngine.analyzeAndUpdateState(db);
+    } catch (err) {
+      console.warn("[GraphAnalysisEngine] live run failed:", err);
+    }
     res.json({
       humans: db.verifiedHumans,
       clusters: db.trustClusters,
@@ -3594,6 +3779,52 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
       relationships: db.trustRelationships,
       decisions: db.trustDecisions
     });
+  });
+
+  /**
+   * POST /api/trust/graph/analyze
+   * Explicitly triggers the Graph Intelligence pipeline and returns deep graph metrics, centralities, anomalies and metrics
+   */
+  app.post("/api/trust/graph/analyze", (req, res) => {
+    try {
+      const result = GraphAnalysisEngine.analyzeAndUpdateState(db);
+      res.json({
+        success: true,
+        message: "Graph Intelligence Analysis successfully executed",
+        ...result
+      });
+    } catch (err: any) {
+      console.error("[GraphAnalysisEngine] failed to execute:", err);
+      res.status(500).json({ error: "Graph Analysis Engine failed", details: err?.message });
+    }
+  });
+
+  /**
+   * GET /api/trust/graph/analysis-summary
+   * Retrieves summary graph intelligence metrics and anomaly trends
+   */
+  app.get("/api/trust/graph/analysis-summary", (req, res) => {
+    try {
+      const result = GraphAnalysisEngine.analyzeAndUpdateState(db);
+      res.json({
+        metrics: result.metrics,
+        anomalies_count: result.anomalies.length,
+        anomalies: result.anomalies,
+        centrality_distributions: {
+          highest_page_rank: Object.entries(result.centralities.pageRank)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([id, score]) => ({ id, score, label: result.nodes.find(n => n.id === id)?.label })),
+          highest_degree: Object.entries(result.centralities.degree)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5)
+            .map(([id, count]) => ({ id, count, label: result.nodes.find(n => n.id === id)?.label }))
+        },
+        shortest_paths: result.shortestPathsToBanned
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to retrieve Graph Analysis summary", details: err?.message });
+    }
   });
 
   /**

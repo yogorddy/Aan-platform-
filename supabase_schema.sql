@@ -709,5 +709,30 @@ CREATE POLICY "Allow authenticated insert trust_relationships"
 ON public.trust_relationships FOR INSERT WITH CHECK (true);
 
 
+-- Create aan_trust_events table
+CREATE TABLE IF NOT EXISTS public.aan_trust_events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id VARCHAR(255) NOT NULL,
+    project_id UUID,
+    external_user_id VARCHAR(255) NOT NULL,
+    decision VARCHAR(50) NOT NULL CHECK (decision IN ('approved', 'review', 'denied')),
+    risk_score INT NOT NULL CHECK (risk_score >= 0 AND risk_score <= 100),
+    reason_codes TEXT[] DEFAULT '{}'::TEXT[],
+    signal_payload JSONB DEFAULT '{}'::jsonb,
+    proof_token TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    completed_at TIMESTAMPTZ
+);
+
+-- Enable RLS for aan_trust_events
+ALTER TABLE public.aan_trust_events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read aan_trust_events" 
+ON public.aan_trust_events FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated insert aan_trust_events" 
+ON public.aan_trust_events FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow authenticated update aan_trust_events" 
+ON public.aan_trust_events FOR UPDATE USING (true);
+
+
 -- Return operational success log in database console
 SELECT 'MIGRATION COMPLETED SUCCESSFULLY' AS status;

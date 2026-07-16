@@ -881,6 +881,86 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
                     </div>
                   )}
 
+                  {/* Real-Time Trust Assessment Checklist */}
+                  <div className="bg-[#0e1017] border border-white/[0.05] p-3.5 rounded-xl space-y-3 mt-4 text-left">
+                    <div className="flex items-center gap-1.5 border-b border-white/[0.04] pb-2">
+                      <span className="p-1 bg-[#58E38A]/10 border border-[#58E38A]/20 text-[#58E38A] rounded-lg">
+                        <Shield className="w-3 h-3" />
+                      </span>
+                      <span className="text-[10px] font-mono text-white uppercase tracking-wider font-bold">AAN Trust Assessment Verdict</span>
+                    </div>
+                    
+                    <div className="space-y-3 text-[10.5px]">
+                      {/* 1. Is this a real human? */}
+                      <div className="space-y-0.5">
+                        <span className="text-slate-400 font-medium block">1. Is this a real human?</span>
+                        <p className="text-[10px] text-slate-300 font-mono">
+                          {selectedEvent.risk_score < 40 || selectedEvent.eventType === 'legit_user' ? (
+                            <span className="text-[#58E38A]">YES — High-confidence passive human signal ({selectedEvent.trust_score}% humanness score).</span>
+                          ) : selectedEvent.eventType === 'suspicious_login' ? (
+                            <span className="text-amber-400">UNSURE — Deviating interaction telemetry. Attestation footprint is volatile.</span>
+                          ) : (
+                            <span className="text-rose-400">NO — Machine traces or headless script execution detected ({selectedEvent.trust_score}% humanness score).</span>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* 2. Is this likely the same returning person? */}
+                      <div className="border-t border-white/[0.02] pt-2 space-y-0.5">
+                        <span className="text-slate-400 font-medium block">2. Is this likely the same returning person?</span>
+                        <p className="text-[10px] text-slate-300 font-mono">
+                          {selectedEvent.eventType === 'legit_user' ? (
+                            <span className="text-[#58E38A]">YES — Match found with unique hardware/browser signature index across sessions.</span>
+                          ) : selectedEvent.eventType === 'ban_evasion' ? (
+                            <span className="text-rose-400">YES — Signature MATCHES previously blacklisted/banned user profile.</span>
+                          ) : (
+                            <span className="text-slate-400">NEW IDENTITY — Establishing brand new trust baseline. No matching index.</span>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* 3. Does this login appear trustworthy? */}
+                      <div className="border-t border-white/[0.02] pt-2 space-y-0.5">
+                        <span className="text-slate-400 font-medium block">3. Does this login appear trustworthy?</span>
+                        <p className="text-[10px] text-slate-300 font-mono">
+                          {selectedEvent.risk_score < 30 ? (
+                            <span className="text-[#58E38A]">HIGHLY TRUSTWORTHY — Minimal risk index ({selectedEvent.risk_score}/100). No travel anomalies.</span>
+                          ) : selectedEvent.risk_score < 70 ? (
+                            <span className="text-amber-400">MODERATE RISK — Elevated indicators ({selectedEvent.risk_score}/100). Network or travel variance.</span>
+                          ) : (
+                            <span className="text-rose-400">HIGH RISK / MALICIOUS — Severe anomalies and bad posture identified ({selectedEvent.risk_score}/100).</span>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* 4. Is additional verification recommended? */}
+                      <div className="border-t border-white/[0.02] pt-2 space-y-0.5">
+                        <span className="text-slate-400 font-medium block">4. Is additional verification recommended?</span>
+                        <p className="text-[10px] text-slate-300 font-mono">
+                          {selectedEvent.decision === 'STEP_UP' ? (
+                            <span className="text-amber-400">YES — STEP_UP challenge recommended (SMS/OTP fallback or secure CAPTCHA).</span>
+                          ) : selectedEvent.decision === 'DENY' ? (
+                            <span className="text-rose-400">IMMEDIATE BLOCK — Posture check failed. Prevent session access.</span>
+                          ) : (
+                            <span className="text-[#58E38A]">NO — Passive validation clean. Proceed without user friction.</span>
+                          )}
+                        </p>
+                      </div>
+
+                      {/* 5. Should this event be flagged for review? */}
+                      <div className="border-t border-white/[0.02] pt-2 space-y-0.5">
+                        <span className="text-slate-400 font-medium block">5. Should this event be flagged for review?</span>
+                        <p className="text-[10px] text-slate-300 font-mono">
+                          {selectedEvent.decision === 'REVIEW' || selectedEvent.risk_score >= 50 ? (
+                            <span className="text-amber-400">YES — Dispatched to organization manual review pool.</span>
+                          ) : (
+                            <span className="text-slate-500">NO — Standard passive evaluation. No admin action needed.</span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* ZK Model Proof Card (REQUESTED STEP 5) */}
                   <div className="bg-black/30 border border-emerald-500/20 p-3.5 rounded-xl space-y-2.5 mt-4 text-left">
                     <div className="flex justify-between items-center border-b border-white/[0.03] pb-1.5">

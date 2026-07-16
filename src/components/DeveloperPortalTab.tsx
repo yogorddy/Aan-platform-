@@ -401,6 +401,109 @@ aan = AanTrustSdk::Client.new(
           
           {/* Main quick start guide */}
           <div className="lg:col-span-8 space-y-6">
+            
+            {/* INVISIBLE INFRASTRUCTURE BLUEPRINT CARD */}
+            <div className="bg-[#111319] border border-white/[0.04] rounded-2xl p-6 space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/[0.02] rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/[0.01] rounded-full blur-2xl pointer-events-none" />
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1b1e28] pb-4">
+                <div>
+                  <span className="text-[10px] font-mono text-[#58E38A] uppercase tracking-widest font-black">Architecture Blueprint</span>
+                  <h3 className="text-base font-semibold text-white tracking-tight mt-0.5">The Invisible Trust Infrastructure</h3>
+                </div>
+                <div className="px-2.5 py-1 bg-white/[0.02] border border-white/[0.05] rounded-lg">
+                  <span className="text-[9px] font-mono text-slate-400 font-bold uppercase tracking-wider">Zero Auth Replacement</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                AAN is a lightweight trust infrastructure layer that integrates into your existing authentication system (Auth0, Supabase, Firebase, Cognito, or custom auth) and provides real-time trust intelligence before, during, and after login. <strong className="text-white font-medium">Your authentication remains completely untouched.</strong>
+              </p>
+
+              {/* Visual Flow Diagram */}
+              <div className="bg-[#08090d] border border-white/[0.02] rounded-2xl p-5 space-y-4 font-mono text-xs">
+                <span className="text-[9px] text-[#78819a] uppercase font-bold tracking-wider block border-b border-white/[0.03] pb-2">
+                  System Flow Diagram
+                </span>
+                
+                <div className="grid grid-cols-1 md:grid-cols-7 gap-3 items-center text-center">
+                  
+                  {/* Step 1 */}
+                  <div className="md:col-span-2 p-3 bg-black/40 border border-white/[0.05] rounded-xl space-y-1">
+                    <span className="text-[9px] text-slate-500 uppercase font-black tracking-wider">1. CUSTOMER APP</span>
+                    <p className="text-[10px] text-slate-300 font-bold font-sans">Platform Entrypoint</p>
+                    <p className="text-[9px] text-slate-500 font-sans leading-tight">Game, Bank, Social, SaaS, E-Commerce</p>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="flex justify-center text-slate-600 font-bold text-base my-0.5 md:my-0">
+                    <span className="md:rotate-0 rotate-90">➔</span>
+                  </div>
+
+                  {/* Step 2 */}
+                  <div className="md:col-span-2 p-3 bg-black/40 border border-white/[0.05] rounded-xl space-y-1">
+                    <span className="text-[9px] text-slate-500 uppercase font-black tracking-wider">2. LOGIN LAYER</span>
+                    <p className="text-[10px] text-white font-bold font-sans">Existing Auth System</p>
+                    <p className="text-[9px] text-slate-500 font-sans leading-tight">Supabase, Auth0, Cognito, Firebase, Custom</p>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="flex justify-center text-slate-600 font-bold text-base my-0.5 md:my-0">
+                    <span className="md:rotate-0 rotate-90">➔</span>
+                  </div>
+
+                  {/* Step 3 */}
+                  <div className="md:col-span-2 p-3 bg-emerald-500/[0.03] border border-emerald-500/20 rounded-xl space-y-1 shadow-[0_0_15px_rgba(16,185,129,0.02)]">
+                    <span className="text-[9px] text-emerald-400 uppercase font-black tracking-wider">3. AAN TRUST LAYER</span>
+                    <p className="text-[10px] text-emerald-300 font-bold font-sans">Passive Trust Analysis</p>
+                    <p className="text-[9px] text-slate-500 font-sans leading-tight">Evaluates risk, human signatures, & devices</p>
+                  </div>
+
+                </div>
+
+                {/* Arrow down to response */}
+                <div className="flex justify-center text-[#58E38A] font-bold text-sm my-1">
+                  <span>▼</span>
+                </div>
+
+                {/* Response / Returned decisions */}
+                <div className="p-3 bg-[#0d0e12] border border-white/[0.03] rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                  <div className="space-y-1 text-left font-sans">
+                    <span className="text-[9px] text-emerald-400 font-mono uppercase font-black tracking-wider">4. SIGNED TRUST SIGNALS RETURNED</span>
+                    <p className="text-[11px] text-slate-300 leading-normal">
+                      AAN responds instantly with cryptographically signed proof tokens containing behavioral trust metrics and recommended actions.
+                    </p>
+                  </div>
+                  <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-300 font-mono text-[10px] font-bold shrink-0">
+                    Decision Verified
+                  </div>
+                </div>
+              </div>
+
+              {/* Strategic Goals & Focus Questions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                <div className="space-y-2">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase font-black tracking-wider">The Trust Intelligence Questions</span>
+                  <ul className="space-y-1 text-xs text-slate-400 font-sans list-none pl-0">
+                    <li className="flex items-start gap-1.5"><span className="text-[#58E38A]">✓</span> “Is this user a real human?”</li>
+                    <li className="flex items-start gap-1.5"><span className="text-[#58E38A]">✓</span> “Is this likely the same returning person?”</li>
+                    <li className="flex items-start gap-1.5"><span className="text-[#58E38A]">✓</span> “Does this login appear trustworthy?”</li>
+                    <li className="flex items-start gap-1.5"><span className="text-[#58E38A]">✓</span> “Has this device been associated with abuse?”</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase font-black tracking-wider">Strategic Design Directive</span>
+                  <div className="p-3 bg-black/20 border border-white/[0.02] rounded-xl space-y-1 text-xs font-sans text-slate-400 leading-relaxed">
+                    <strong className="text-white block font-medium">Simple Engineering Rule:</strong>
+                    "Every new feature must make AAN smarter without making integration harder. If a feature requires overhauling a login stack, it is rejected."
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
             <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-3">
               <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Authentication Protocol</h3>
               <p className="text-xs text-[#78819a] leading-relaxed font-sans">

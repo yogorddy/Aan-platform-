@@ -2288,6 +2288,111 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
               </div>
             </div>
 
+            {/* Real-Time Trust Assessment Checklist */}
+            <div className="bg-[#0e1017] border border-white/[0.05] p-5 rounded-2xl space-y-4 shadow-inner">
+              <div className="flex items-center gap-2 border-b border-white/[0.04] pb-3">
+                <span className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-[#58E38A] rounded-lg">
+                  <Shield className="w-3.5 h-3.5" />
+                </span>
+                <span className="text-xs font-mono text-white uppercase tracking-wider font-bold">Real-Time Trust Assessment Verdict</span>
+              </div>
+              
+              <div className="space-y-3.5 text-xs">
+                {/* 1. Is this a real human? */}
+                <div className="flex items-start gap-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                    selectedGlobalEvent.risk_score < 40 ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' :
+                    selectedGlobalEvent.risk_score < 70 ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                  }`} />
+                  <div>
+                    <span className="text-slate-400 font-medium block">Is this a real human?</span>
+                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                      {selectedGlobalEvent.risk_score < 40 ? (
+                        <span className="text-emerald-400 font-semibold">YES — High-confidence passive human signal evaluated ({100 - selectedGlobalEvent.risk_score}% humanness score).</span>
+                      ) : selectedGlobalEvent.risk_score < 70 ? (
+                        <span className="text-amber-400 font-semibold">UNSURE — Volatile interaction speed. Weak attestation signature.</span>
+                      ) : (
+                        <span className="text-rose-400 font-semibold">NO — Automated botnet patterns or headless browser emulation identified.</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 2. Is this likely the same returning person? */}
+                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                    selectedGlobalEvent.returning_human ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-slate-500'
+                  }`} />
+                  <div>
+                    <span className="text-slate-400 font-medium block">Is this likely the same returning person?</span>
+                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                      {selectedGlobalEvent.returning_human ? (
+                        <span className="text-emerald-400 font-semibold">YES — Match found with unique human signature index across previous sessions.</span>
+                      ) : (
+                        <span className="text-slate-400 font-semibold">NEW BASLINE — Zero matches found. Setting up new passive trust baseline.</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Does this login appear trustworthy? */}
+                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                    selectedGlobalEvent.risk_score < 30 ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' :
+                    selectedGlobalEvent.risk_score < 70 ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                  }`} />
+                  <div>
+                    <span className="text-slate-400 font-medium block">Does this login appear trustworthy?</span>
+                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                      {selectedGlobalEvent.risk_score < 30 ? (
+                        <span className="text-emerald-400 font-semibold">HIGHLY TRUSTWORTHY — Minimal risk rating ({selectedGlobalEvent.risk_score}/100) and clean IP/device profile.</span>
+                      ) : selectedGlobalEvent.risk_score < 70 ? (
+                        <span className="text-amber-400 font-semibold">SUSPICIOUS — Elevated risk indicators ({selectedGlobalEvent.risk_score}/100). Check velocity and network attributes.</span>
+                      ) : (
+                        <span className="text-rose-400 font-semibold">HIGH RISK — Coordinated network anomalies and blacklisted attributes detected ({selectedGlobalEvent.risk_score}/100).</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. Is additional verification recommended? */}
+                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                    selectedGlobalEvent.decision === 'review' || selectedGlobalEvent.decision === 'denied' ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]'
+                  }`} />
+                  <div>
+                    <span className="text-slate-400 font-medium block">Is additional verification recommended?</span>
+                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                      {selectedGlobalEvent.decision === 'review' ? (
+                        <span className="text-amber-400 font-semibold">YES — Challenge recommendation: Trigger Step-up OTP or CAPTCHA challenge.</span>
+                      ) : selectedGlobalEvent.decision === 'denied' ? (
+                        <span className="text-rose-400 font-semibold">IMMEDIATE BLOCK — Severe posture failure. Block session immediately.</span>
+                      ) : (
+                        <span className="text-emerald-400 font-semibold">NO — Clean passive assessment. Proceed without additional friction.</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 5. Should this event be flagged for review? */}
+                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                    selectedGlobalEvent.decision === 'review' || selectedGlobalEvent.risk_score >= 50 ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-slate-500'
+                  }`} />
+                  <div>
+                    <span className="text-slate-400 font-medium block">Should this event be flagged for review?</span>
+                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                      {selectedGlobalEvent.decision === 'review' || selectedGlobalEvent.risk_score >= 50 ? (
+                        <span className="text-amber-400 font-semibold">YES — Dispatched to organization manual review queue.</span>
+                      ) : (
+                        <span className="text-slate-400 font-semibold">NO — Passive evaluation clean. No administrative audit action required.</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* ZK Model Proof Component Card (REQUESTED STEP 5) */}
             <div className="bg-black/40 border border-emerald-500/20 p-5 rounded-2xl space-y-4 shadow-inner">
               <div className="flex justify-between items-center border-b border-white/[0.04] pb-3">

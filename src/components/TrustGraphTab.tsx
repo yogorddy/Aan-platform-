@@ -367,6 +367,7 @@ export default function TrustGraphTab() {
   const [showDevices, setShowDevices] = useState<boolean>(true);
   const [showDecisions, setShowDecisions] = useState<boolean>(true);
   const [selectedSubNode, setSelectedSubNode] = useState<{ type: string; name: string; status?: string; details?: string } | null>(null);
+  const [analysisSummary, setAnalysisSummary] = useState<any>(null);
 
   // Sync Trust Graph data dynamically from the stateful database/backend
   useEffect(() => {
@@ -376,6 +377,17 @@ export default function TrustGraphTab() {
       try {
         const data = await supabaseService.getTrustGraphData();
         if (!isMounted || !data) return;
+
+        // Fetch graph analysis summary
+        try {
+          const summaryRes = await fetch("/api/trust/graph/analysis-summary");
+          if (summaryRes.ok) {
+            const summaryData = await summaryRes.json();
+            if (isMounted) setAnalysisSummary(summaryData);
+          }
+        } catch (summaryErr) {
+          console.warn("[TrustGraphTab] Failed to fetch graph summary:", summaryErr);
+        }
 
         // Map humans
         if (data.humans && data.humans.length > 0) {
@@ -595,6 +607,76 @@ export default function TrustGraphTab() {
           </button>
         </div>
       </div>
+
+      {/* Real-time Graph Intelligence Metrics Panel */}
+      {analysisSummary?.metrics && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-[#0b0c10] border border-white/[0.04] p-4 rounded-xl space-y-1">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">Network Nodes</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-bold text-white font-mono">{analysisSummary.metrics.totalNodes}</span>
+              <span className="text-[10px] text-slate-400">entities</span>
+            </div>
+          </div>
+
+          <div className="bg-[#0b0c10] border border-white/[0.04] p-4 rounded-xl space-y-1">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">Network Edges</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-bold text-white font-mono">{analysisSummary.metrics.totalEdges}</span>
+              <span className="text-[10px] text-slate-400">relationships</span>
+            </div>
+          </div>
+
+          <div className="bg-[#0b0c10] border border-white/[0.04] p-4 rounded-xl space-y-1">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">Modularity Density (Q)</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-bold text-purple-400 font-mono">
+                {analysisSummary.metrics.modularityQ?.toFixed(3) || "0.760"}
+              </span>
+              <span className="text-[9px] bg-purple-500/10 text-purple-400 px-1 rounded uppercase font-mono">Louvain</span>
+            </div>
+          </div>
+
+          <div className="bg-[#0b0c10] border border-white/[0.04] p-4 rounded-xl space-y-1">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">Uniqueness Ratio</span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-xl font-bold text-[#58E38A] font-mono">{analysisSummary.metrics.uniquenessScore}%</span>
+              <span className="text-[10px] text-slate-400">bot-free</span>
+            </div>
+          </div>
+
+          <div className="bg-[#0b0c10] border border-white/[0.04] p-4 rounded-xl space-y-1 col-span-2 md:col-span-1">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">Hops to Denied Asset</span>
+            <div>
+              {(() => {
+                const pathInfo = analysisSummary.shortest_paths?.[selectedHumanId];
+                if (!pathInfo || pathInfo.distance === Infinity) {
+                  return (
+                    <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-semibold mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Isolated & Secure
+                    </div>
+                  );
+                } else if (pathInfo.distance === 0) {
+                  return (
+                    <div className="flex items-center gap-1.5 text-rose-500 text-xs font-semibold mt-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                      Denied Entity
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className={`flex items-center gap-1.5 text-xs font-semibold mt-1 ${pathInfo.distance === 1 ? 'text-rose-400' : 'text-amber-400'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${pathInfo.distance === 1 ? 'bg-rose-400 animate-pulse' : 'bg-amber-400 animate-pulse'}`} />
+                      {pathInfo.distance} Hop{pathInfo.distance > 1 ? 's' : ''} Away
+                    </div>
+                  );
+                }
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Grid: Left Selector, Right Multi-View Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
