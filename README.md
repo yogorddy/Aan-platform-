@@ -8,6 +8,33 @@ Privacy-preserving trust infrastructure that helps online platforms reduce bots,
 > This repository contains the AAN Platform MVP. Several verification components, biometric template matches, and hardware profile evaluations are simulated. Production deployments require certified identity, fraud, security, and cryptographic providers. This MVP is intended for demonstration and is not certified for production use.
 
 ---
+---
+
+## AAN Intelligence Layer
+
+AAN is being designed with an AI-native operations layer that allows authorized platform teams to investigate trust activity and manage the system through natural language.
+
+Instead of navigating through multiple dashboards, an authorized operator could ask:
+
+* **“Why was this verification denied?”**
+* **“Show every high-risk session from today.”**
+* **“Which project has the highest rate of suspicious activity?”**
+* **“Summarize the evidence behind this trust decision.”**
+* **“Draft a stricter policy for newly created accounts.”**
+* **“Generate a trust report for this partner project.”**
+
+The intelligence layer will operate on top of AAN's existing trust events, policies, audit records, reason codes, and signed decisions. It does not replace the deterministic trust engine, partner controls, or human review.
+
+### Operating Boundaries
+
+* Read access is restricted by project membership and role-based authorization.
+* Sensitive raw signals are not exposed through natural-language responses.
+* Every proposed policy or infrastructure change remains reviewable before execution.
+* Every accepted action is written to the audit ledger.
+* Generated explanations must reference the underlying trust evidence and reason codes.
+* The AI layer cannot silently override a signed trust decision.
+
+This creates a conversational control surface for trust infrastructure while preserving deterministic enforcement, evidence-backed decisions, and administrative accountability.
 
 ## Why AAN Exists
 
