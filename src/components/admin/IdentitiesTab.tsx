@@ -68,20 +68,20 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
       {/* Search, Filter, Export Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xs font-mono uppercase tracking-wider text-white font-bold">Attested Human Identity Registry</h2>
-          <p className="text-[11px] text-slate-500 mt-1">
+          <h2 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Attested Human Identity Registry</h2>
+          <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
             Verifiable human uniqueness mappings protected by zero-knowledge identity signatures. No biometric or raw identity metrics are ever stored.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Select Filter */}
-          <div className="flex items-center gap-1 bg-[#08090c] border border-white/[0.06] rounded-xl px-3 py-1.5">
+          <div className="flex items-center gap-1 bg-white border border-slate-200/60 rounded-xl px-3 py-1.5 shadow-sm">
             <Filter className="w-3.5 h-3.5 text-slate-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-transparent border-none text-[10px] font-mono text-white focus:outline-none cursor-pointer"
+              className="bg-transparent border-none text-[10px] font-semibold text-slate-700 focus:outline-none cursor-pointer font-sans"
             >
               <option value="all">Status: All</option>
               <option value="Verified">Verified Only</option>
@@ -93,16 +93,16 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
           {/* Export Buttons */}
           <button
             onClick={() => handleExport('json')}
-            className="inline-flex items-center gap-1.5 bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] text-[10px] font-mono text-white px-3 py-1.5 rounded-xl cursor-pointer transition-all"
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200/60 text-[10px] font-semibold text-slate-700 px-3 py-1.5 rounded-xl cursor-pointer transition-all shadow-sm"
           >
-            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <Download className="w-3.5 h-3.5 text-emerald-600" />
             <span>Export JSON</span>
           </button>
           <button
             onClick={() => handleExport('csv')}
-            className="inline-flex items-center gap-1.5 bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] text-[10px] font-mono text-white px-3 py-1.5 rounded-xl cursor-pointer transition-all"
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200/60 text-[10px] font-semibold text-slate-700 px-3 py-1.5 rounded-xl cursor-pointer transition-all shadow-sm"
           >
-            <Download className="w-3.5 h-3.5 text-emerald-400" />
+            <Download className="w-3.5 h-3.5 text-emerald-600" />
             <span>Export CSV</span>
           </button>
         </div>
@@ -111,42 +111,42 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
         {/* Table List View (Col span 2) */}
-        <div className="lg:col-span-2 bg-[#08090c] border border-white/[0.04] rounded-2xl overflow-hidden">
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-3xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/[0.04] text-[9px] font-mono text-slate-500 uppercase tracking-wider font-bold bg-black/40">
-                  <th className="py-3 px-4">Cryptographic Human ID</th>
-                  <th className="py-3 px-4">Origin Organization</th>
-                  <th className="py-3 px-4">Trust Weight</th>
-                  <th className="py-3 px-4">Token Reputation</th>
-                  <th className="py-3 px-4 text-right">Details</th>
+                <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider font-bold bg-slate-50/50">
+                  <th className="py-3.5 px-4 font-bold">Cryptographic Human ID</th>
+                  <th className="py-3.5 px-4 font-bold">Origin Organization</th>
+                  <th className="py-3.5 px-4 font-bold">Trust Weight</th>
+                  <th className="py-3.5 px-4 font-bold">Token Reputation</th>
+                  <th className="py-3.5 px-4 text-right font-bold">Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.02] text-xs font-mono">
+              <tbody className="divide-y divide-slate-100 text-xs font-mono">
                 {filtered.map((item) => (
                   <tr 
                     key={item.id} 
                     onClick={() => setSelectedIdentity(item)}
-                    className={`hover:bg-white/[0.02] transition-colors cursor-pointer ${selectedIdentity?.id === item.id ? 'bg-[#00E676]/5' : ''}`}
+                    className={`hover:bg-slate-50 transition-colors cursor-pointer ${selectedIdentity?.id === item.id ? 'bg-emerald-50/60' : ''}`}
                   >
-                    <td className="py-3 px-4">
-                      <span className="text-[#00E676] block font-bold text-[11px]">{item.id}</span>
-                      <span className="text-[9px] text-slate-500">Last Active: {item.lastSeen}</span>
+                    <td className="py-3.5 px-4">
+                      <span className="text-[#00C853] block font-bold text-[11px]">{item.id}</span>
+                      <span className="text-[9px] text-slate-400 font-medium">Last Active: {item.lastSeen}</span>
                     </td>
-                    <td className="py-3 px-4 text-slate-300 font-semibold">{item.partner}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${item.trustScore >= 90 ? 'text-[#00E676] bg-[#00E676]/5' : 'text-rose-400 bg-rose-500/5'}`}>
+                    <td className="py-3.5 px-4 text-slate-800 font-bold">{item.partner}</td>
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${item.trustScore >= 90 ? 'text-[#00C853] bg-emerald-50' : 'text-rose-600 bg-rose-50'}`}>
                         {item.trustScore}% Verified
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-slate-400 text-[11px]">
+                    <td className="py-3.5 px-4 text-slate-600 font-semibold text-[11px]">
                       {item.deviceReputation}
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <button className="text-slate-500 hover:text-white inline-flex items-center gap-1 font-bold text-[9px] uppercase cursor-pointer">
+                    <td className="py-3.5 px-4 text-right">
+                      <button className="text-slate-400 hover:text-slate-800 inline-flex items-center gap-1 font-bold text-[9px] uppercase cursor-pointer">
                         <span>Inspect</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>
@@ -157,19 +157,19 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
         </div>
 
         {/* Deep Details Drawer / Side Panel (Col span 1) */}
-        <div className="bg-[#08090c] border border-white/[0.04] p-5 rounded-2xl space-y-6">
+        <div className="bg-white border border-slate-200/60 p-5 rounded-3xl space-y-6 shadow-sm">
           {selectedIdentity ? (
             <div className="space-y-6 animate-[fadeIn_0.15s_ease-out]">
               
               {/* Header Details */}
-              <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-4">
                 <div className="space-y-0.5">
-                  <span className="text-[10px] font-mono text-slate-500 uppercase font-bold">Inspect Identity</span>
-                  <h3 className="text-sm font-bold text-white font-mono">{selectedIdentity.id}</h3>
+                  <span className="text-[10px] font-mono text-slate-400 uppercase font-bold">Inspect Identity</span>
+                  <h3 className="text-sm font-bold text-slate-950 font-mono">{selectedIdentity.id}</h3>
                 </div>
                 <button 
                   onClick={() => setSelectedIdentity(null)}
-                  className="text-slate-500 hover:text-white cursor-pointer"
+                  className="text-slate-400 hover:text-slate-900 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -178,30 +178,30 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
               {/* Core Telemetry Data */}
               <div className="space-y-3.5 text-xs font-mono">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Trust Posture:</span>
-                  <span className={`font-bold ${selectedIdentity.status === 'Verified' ? 'text-[#00E676]' : 'text-rose-400'}`}>
+                  <span className="text-slate-400 font-semibold">Trust Posture:</span>
+                  <span className={`font-bold ${selectedIdentity.status === 'Verified' ? 'text-[#00C853]' : 'text-rose-600'}`}>
                     {selectedIdentity.status}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Verification Source:</span>
-                  <span className="text-slate-300 font-semibold">{selectedIdentity.partner}</span>
+                  <span className="text-slate-400 font-semibold">Verification Source:</span>
+                  <span className="text-slate-800 font-bold">{selectedIdentity.partner}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Reputation Level:</span>
-                  <span className="text-slate-300 font-semibold">{selectedIdentity.deviceReputation}</span>
+                  <span className="text-slate-400 font-semibold">Reputation Level:</span>
+                  <span className="text-slate-800 font-bold">{selectedIdentity.deviceReputation}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Session Security:</span>
-                  <span className="text-slate-300">{selectedIdentity.sessionState}</span>
+                  <span className="text-slate-400 font-semibold">Session Security:</span>
+                  <span className="text-slate-700 font-semibold">{selectedIdentity.sessionState}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Evaluation Node IP:</span>
-                  <span className="text-slate-300">{selectedIdentity.ip} ({selectedIdentity.country})</span>
+                  <span className="text-slate-400 font-semibold">Evaluation Node IP:</span>
+                  <span className="text-slate-700 font-semibold">{selectedIdentity.ip} ({selectedIdentity.country})</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Registered Token:</span>
-                  <span className="text-slate-400 truncate max-w-[150px]" title={selectedIdentity.deviceModel}>
+                  <span className="text-slate-400 font-semibold">Registered Token:</span>
+                  <span className="text-slate-700 truncate max-w-[150px] font-semibold" title={selectedIdentity.deviceModel}>
                     {selectedIdentity.deviceModel}
                   </span>
                 </div>
@@ -209,17 +209,17 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
 
               {/* History Timeline */}
               <div className="space-y-3">
-                <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-bold block">
+                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold block">
                   Identity Audit Timeline
                 </span>
                 
-                <div className="relative border-l border-white/[0.06] pl-4 space-y-4">
+                <div className="relative border-l border-slate-200 pl-4 space-y-4">
                   {selectedIdentity.verificationHistory.map((hist, idx) => (
                     <div key={idx} className="relative text-[11px] font-mono">
-                      <div className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-[#00E676]" />
+                      <div className="absolute -left-[21px] top-1.5 w-2 h-2 rounded-full bg-[#00C853]" />
                       <div className="space-y-0.5">
-                        <span className="text-[9px] text-slate-500 block">{hist.date}</span>
-                        <span className="text-slate-300 block">{hist.action}</span>
+                        <span className="text-[9px] text-slate-400 block">{hist.date}</span>
+                        <span className="text-slate-800 block font-bold">{hist.action}</span>
                         <span className="text-slate-500 block">Result: {hist.status}</span>
                       </div>
                     </div>
@@ -228,23 +228,23 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
               </div>
 
               {/* Risk Score Graph or Triggers */}
-              <div className="space-y-2 bg-black/40 border border-white/[0.04] p-3.5 rounded-xl">
-                <span className="text-[10px] font-mono text-slate-500 uppercase font-bold block">
+              <div className="space-y-2 bg-slate-50 border border-slate-200/50 p-3.5 rounded-2xl">
+                <span className="text-[10px] font-mono text-slate-400 uppercase font-bold block">
                   Anomalous Risk Triggers
                 </span>
                 {selectedIdentity.riskHistory.map((rh, idx) => (
                   <div key={idx} className="flex justify-between items-center text-[11px] font-mono py-1">
-                    <span className="text-slate-400">{rh.trigger}</span>
-                    <span className="text-rose-400">+{rh.score}% Risk</span>
+                    <span className="text-slate-500 font-semibold">{rh.trigger}</span>
+                    <span className="text-rose-600 font-bold">+{rh.score}% Risk</span>
                   </div>
                 ))}
               </div>
 
               {/* Action: Purge identity */}
-              <div className="pt-2 border-t border-white/[0.04]">
+              <div className="pt-2 border-t border-slate-100">
                 <button
                   onClick={() => handlePurgeUser(selectedIdentity.id)}
-                  className="w-full inline-flex items-center justify-center gap-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-mono py-2 rounded-xl transition-all border border-rose-500/20 cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100/60 text-rose-600 text-xs font-mono py-2 rounded-xl transition-all border border-rose-200 cursor-pointer font-bold"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Purge Unique Identity Keys</span>
@@ -253,9 +253,9 @@ export default function IdentitiesTab({ compactMode, searchQuery, role, onLogAud
 
             </div>
           ) : (
-            <div className="py-12 text-center text-slate-500 space-y-2">
-              <Database className="w-8 h-8 text-slate-600 mx-auto" />
-              <p className="text-xs font-mono">Select an attested identity from the registry queue to view detailed historical timelines.</p>
+            <div className="py-12 text-center text-slate-400 space-y-2">
+              <Database className="w-8 h-8 text-slate-300 mx-auto" />
+              <p className="text-xs font-mono leading-relaxed px-4">Select an attested identity from the registry queue to view detailed historical timelines.</p>
             </div>
           )}
         </div>

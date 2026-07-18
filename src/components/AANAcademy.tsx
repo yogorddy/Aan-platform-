@@ -306,49 +306,49 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
   };
 
   return (
-    <div className="flex-1 bg-black text-slate-200 flex flex-col md:flex-row min-h-screen pr-[2px]" id="aan-academy-viewport">
+    <div className="flex-1 bg-slate-50 text-slate-600 flex flex-col md:flex-row min-h-screen pr-[2px] animate-[fadeIn_0.2s_ease-out]" id="aan-academy-viewport">
       
       {/*  LEFT ACADEMY SIDEBAR: LIST & SEARCH */}
-      <div className="w-full md:w-80 bg-[#050507] border-r border-white/[0.06] flex flex-col shrink-0 h-auto md:h-screen sticky top-0 md:top-0">
+      <div className="w-full md:w-80 bg-white border-r border-slate-200/60 flex flex-col shrink-0 h-auto md:h-screen sticky top-0 md:top-0 shadow-sm">
         {/* Search header container */}
-        <div className="p-4 border-b border-white/[0.06]">
+        <div className="p-5 border-b border-slate-200/60">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-[#00E676]" />
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-200">AAN Academy</span>
+              <BookOpen className="w-4 h-4 text-[#00D632]" />
+              <span className="font-bold text-xs uppercase tracking-wider text-slate-900">AAN Academy</span>
             </div>
-            <span className="text-[10px] font-mono text-[#00E676] bg-[#00E676]/10 px-2 py-0.5 border border-[#00E676]/20 rounded font-bold">
+            <span className="text-[10px] font-bold text-[#00C853] bg-[#00D632]/10 px-2 py-0.5 border border-[#00D632]/20 rounded font-mono">
               LIVING DOCS
             </span>
           </div>
           
           {/* Progress Tracker Widget */}
-          <div className="mb-4 bg-black p-3 rounded-lg border border-white/[0.06]">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-[10px] text-slate-400 font-mono">Academic Progress</span>
-              <span className="text-[10px] font-bold font-mono text-[#00E676]">{progressPercent}% ({totalCompleted}/{lessons.length})</span>
+          <div className="mb-4 bg-slate-50 p-4.5 rounded-2xl border border-slate-200/60">
+            <div className="flex justify-between items-center mb-1.5">
+              <span className="text-[10px] text-slate-500 font-semibold">Academic Progress</span>
+              <span className="text-[10px] font-bold text-[#00C853]">{progressPercent}% ({totalCompleted}/{lessons.length})</span>
             </div>
-            <div className="w-full bg-white/[0.04] h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
               <div 
-                className="bg-[#00E676] h-1.5 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(0,230,118,0.3)]"
+                className="bg-[#00D632] h-1.5 rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
 
           {/* RBAC ROLE SELECTOR FOR INTEGRATION TESTING */}
-          <div className="mb-4 bg-black p-3 rounded-lg border border-[#00E676]/10 text-xs space-y-2">
+          <div className="mb-4 bg-slate-50 p-4.5 rounded-2xl border border-slate-200/60 text-xs space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-slate-400 font-mono flex items-center gap-1">
-                <Shield className="w-3 h-3 text-[#00E676]" />
+              <span className="text-[10px] text-slate-500 font-semibold flex items-center gap-1">
+                <Shield className="w-3.5 h-3.5 text-emerald-600" />
                 Active Security Role
               </span>
               <button 
                 onClick={() => setShowRbacSettings(true)}
-                className="text-[10px] text-[#00E676] hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
+                className="text-[10px] text-[#00C853] hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
                 title="Manage Custom Roles & Permissions"
               >
-                <Settings className="w-3 h-3 animate-spin duration-1000 text-[#00E676]" />
+                <Settings className="w-3 h-3 text-[#00C853]" />
                 Manage
               </button>
             </div>
@@ -358,17 +358,17 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                 const newRole = e.target.value;
                 setActiveRole(newRole);
               }}
-              className="w-full bg-[#050507] border border-white/[0.08] rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20 font-mono text-[11px] cursor-pointer"
+              className="w-full bg-white border border-slate-200/60 rounded-xl px-2.5 py-1.5 text-slate-800 focus:outline-none focus:border-[#00D632] font-mono text-xs cursor-pointer"
             >
-              <optgroup label="Default Enterprise Roles" className="bg-[#050507]">
+              <optgroup label="Default Enterprise Roles" className="bg-white">
                 {Object.keys(ROLE_VISIBILITY_RULES).map(r => (
-                  <option key={r} value={r} className="bg-[#050507]">{r}</option>
+                  <option key={r} value={r} className="bg-white">{r}</option>
                 ))}
               </optgroup>
               {Object.keys(customRoles).length > 0 && (
-                <optgroup label="Custom Roles (Database)" className="bg-[#050507]">
+                <optgroup label="Custom Roles (Database)" className="bg-white">
                   {Object.keys(customRoles).map(r => (
-                    <option key={r} value={r} className="bg-[#050507]">{r}</option>
+                    <option key={r} value={r} className="bg-white">{r}</option>
                   ))}
                 </optgroup>
               )}
@@ -376,13 +376,13 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
           </div>
 
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input 
               type="text"
               placeholder="Search components, SQL, APIs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-black border border-white/[0.08] text-xs rounded-lg py-2 pl-9 pr-3 text-slate-300 placeholder-slate-500 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/25 transition-all"
+              className="w-full bg-white border border-slate-200/60 text-xs rounded-xl py-2 pl-9 pr-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#00D632] transition-all"
             />
           </div>
         </div>

@@ -265,15 +265,15 @@ export default function App() {
   const roleDisplay = getRoleDisplay(userEmail);
 
   return (
-    <div className="relative min-h-screen bg-[#050507] flex flex-col text-slate-300">
+    <div className="relative min-h-screen bg-white flex flex-col text-slate-800 selection:bg-[#00D632]/20 font-sans">
       
       {showNavbar && (
-        <div className="sticky top-0 z-50 bg-[#08090c] border-b border-white/[0.06] backdrop-blur-md px-6 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="sticky top-0 z-50 bg-white/90 border-b border-slate-100 backdrop-blur-md px-6 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center justify-between w-full md:w-auto gap-4">
             {/* Back Button */}
             <button
               onClick={goBack}
-              className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-400 hover:text-[#00E676] bg-white/[0.02] hover:bg-[#00E676]/10 border border-white/[0.08] hover:border-[#00E676]/30 px-3 py-1.5 rounded-lg transition-all cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200/60 px-4 py-2 rounded-full transition-all cursor-pointer active:scale-95"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back</span>
@@ -281,18 +281,19 @@ export default function App() {
 
             {/* Platform Logo */}
             <div className="flex items-center gap-2">
-              <AANShieldLogo className="w-4 h-4" strokeWidth={10} />
-              <span className="font-semibold text-white tracking-tight text-xs uppercase">AAN</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#58E38A] animate-ping" />
+              <div className="w-5 h-5 text-[#00D632]">
+                <AANShieldLogo strokeWidth={6} />
+              </div>
+              <span className="font-bold text-black tracking-tight text-sm uppercase">AAN</span>
             </div>
           </div>
 
           {/* Unified Central Tabs */}
-          <div className="flex items-center flex-wrap gap-1 bg-black/40 border border-white/[0.04] p-1 rounded-xl">
+          <div className="flex items-center flex-wrap gap-1 bg-slate-50 border border-slate-100 p-1 rounded-full">
             {isAdmin ? (
               <button
                 onClick={() => navigateTo('admin', '/admin')}
-                className={`flex items-center gap-1.5 text-xs font-mono px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${currentPage === 'admin' ? 'bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/20 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.02] border border-transparent'}`}
+                className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer ${currentPage === 'admin' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-100/50'}`}
               >
                 <Shield className="w-3.5 h-3.5" />
                 <span>Admin Console</span>
@@ -300,7 +301,7 @@ export default function App() {
             ) : (
               <button
                 onClick={() => navigateTo('partner', '/dashboard')}
-                className={`flex items-center gap-1.5 text-xs font-mono px-3.5 py-1.5 rounded-lg transition-all cursor-pointer ${currentPage === 'partner' ? 'bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/20 font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.02] border border-transparent'}`}
+                className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-full transition-all cursor-pointer ${currentPage === 'partner' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-100/50'}`}
               >
                 <Code className="w-3.5 h-3.5" />
                 <span>Partner Portal</span>
@@ -308,23 +309,18 @@ export default function App() {
             )}
           </div>
 
-          {/* Right Hand Side Controls with User Metadata & Badging */}
+          {/* Right Hand Side Controls */}
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex flex-col items-end text-right font-mono">
-              <span className="text-[10px] text-white font-medium leading-none">{userEmail || 'operator@aan.net'}</span>
-              <span className={`text-[8px] px-1.5 py-0.5 rounded-md mt-1 font-bold ${roleDisplay.badgeClass}`}>
+            <div className="hidden md:flex flex-col items-end text-right">
+              <span className="text-xs text-black font-semibold leading-none">{userEmail || 'operator@aan.net'}</span>
+              <span className="text-[10px] text-slate-400 mt-1 font-medium">
                 {roleDisplay.label}
               </span>
             </div>
 
-            <div className="hidden sm:flex items-center gap-1.5 bg-[#00E676]/5 border border-[#00E676]/15 px-2.5 py-1 rounded-lg">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00E676] animate-pulse" />
-              <span className="text-[10px] font-mono text-[#00E676] tracking-wider uppercase font-bold">SESSION SECURED</span>
-            </div>
-
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400 hover:text-rose-400 bg-transparent border-none cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-600 bg-transparent border-none cursor-pointer transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span>Sign Out</span>
@@ -401,48 +397,48 @@ export default function App() {
       </div>
 
       {showNavbar && (
-        <footer className="w-full py-8 border-t border-white/[0.04] bg-[#08090c] mt-auto z-20">
+        <footer className="w-full py-8 border-t border-slate-100 bg-white mt-auto z-20">
           <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Left side: branding/copyright */}
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono text-slate-600">AAN TRUST INFRASTRUCTURE © 2026</span>
+              <span className="text-xs text-slate-400 font-light">© {new Date().getFullYear()} AAN INC. All rights reserved.</span>
             </div>
 
             {/* Right side: links */}
-            <div className="flex flex-wrap items-center justify-center gap-4 text-[10px] font-mono text-slate-500">
+            <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-500">
               <button 
                 onClick={() => navigateTo('academy', '/academy')} 
-                className={`hover:text-[#58E38A] transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'academy' ? 'text-[#58E38A] font-bold' : ''}`}
+                className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'academy' ? 'text-black font-bold' : ''}`}
               >
-                <GraduationCap className="w-3 h-3" />
+                <GraduationCap className="w-3.5 h-3.5" />
                 <span>AAN Academy</span>
               </button>
-              <span className="text-slate-800">•</span>
+              <span className="text-slate-200 font-light">|</span>
               <button 
                 onClick={() => navigateTo('trustdocs', '/docs')} 
-                className={`hover:text-[#58E38A] transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'trustdocs' ? 'text-[#58E38A] font-bold' : ''}`}
+                className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'trustdocs' ? 'text-black font-bold' : ''}`}
               >
-                <FileText className="w-3 h-3" />
-                <span>Resource Docs</span>
+                <FileText className="w-3.5 h-3.5" />
+                <span>Docs</span>
               </button>
-              <span className="text-slate-800">•</span>
+              <span className="text-slate-200 font-light">|</span>
               <button 
                 onClick={() => navigateTo('privacy')} 
-                className={`hover:text-[#58E38A] transition-colors cursor-pointer bg-transparent border-none ${currentPage === 'privacy' ? 'text-[#58E38A] font-bold' : ''}`}
+                className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none ${currentPage === 'privacy' ? 'text-black font-bold' : ''}`}
               >
-                Privacy Policy
+                Privacy
               </button>
-              <span className="text-slate-800">•</span>
+              <span className="text-slate-200 font-light">|</span>
               <button 
                 onClick={() => navigateTo('terms')} 
-                className={`hover:text-[#58E38A] transition-colors cursor-pointer bg-transparent border-none ${currentPage === 'terms' ? 'text-[#58E38A] font-bold' : ''}`}
+                className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none ${currentPage === 'terms' ? 'text-black font-bold' : ''}`}
               >
-                Terms of Service
+                Terms
               </button>
-              <span className="text-slate-800">•</span>
+              <span className="text-slate-200 font-light">|</span>
               <button 
                 onClick={() => navigateTo('contact')} 
-                className={`hover:text-[#58E38A] transition-colors cursor-pointer bg-transparent border-none ${currentPage === 'contact' ? 'text-[#58E38A] font-bold' : ''}`}
+                className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none ${currentPage === 'contact' ? 'text-black font-bold' : ''}`}
               >
                 Contact
               </button>

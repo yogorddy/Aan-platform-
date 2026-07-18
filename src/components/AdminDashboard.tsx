@@ -236,32 +236,32 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   };
 
   return (
-    <div className={`min-h-screen bg-[#050507] text-[#8c919d] font-sans flex flex-col lg:flex-row ${compactMode ? 'text-xs' : ''}`}>
+    <div className={`min-h-screen bg-slate-50 text-slate-600 font-sans flex flex-col lg:flex-row ${compactMode ? 'text-xs' : ''} animate-[fadeIn_0.2s_ease-out]`}>
       
       {/* SIDEBAR: NAV CONTROL */}
-      <aside className="w-full lg:w-64 bg-[#08090c] border-b lg:border-b-0 lg:border-r border-white/[0.04] p-6 flex flex-col justify-between shrink-0">
+      <aside className="w-full lg:w-64 bg-white border-b lg:border-b-0 lg:border-r border-slate-200/60 p-6 flex flex-col justify-between shrink-0">
         <div className="space-y-8">
           
           {/* Brand Logo Header */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-white/[0.03] border border-white/[0.05] flex items-center justify-center">
-              <AANShieldLogo className="w-5 h-5" strokeWidth={8} />
+            <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[#00D632]">
+              <AANShieldLogo className="w-5 h-5" strokeWidth={6} />
             </div>
             <div>
-              <span className="font-semibold text-white tracking-tight text-xs block leading-none">AAN</span>
-              <span className="text-[8px] font-mono uppercase text-[#58E38A] tracking-widest block mt-1">Admin Platform v2.0</span>
+              <span className="font-bold text-slate-950 tracking-tight text-xs block leading-none">AAN</span>
+              <span className="text-[8px] font-mono uppercase text-[#00C853] tracking-widest block mt-1">Admin Platform v2.0</span>
             </div>
           </div>
 
           {/* Active Analyst Role Switcher */}
-          <div className="bg-black/40 border border-white/[0.04] p-3 rounded-xl space-y-1.5 font-mono text-[10px]">
-            <span className="text-slate-500 uppercase block font-bold tracking-wider">Active Credentials</span>
-            <div className="flex items-center gap-1.5 bg-[#050507] border border-white/[0.06] rounded-lg px-2 py-1">
-              <ShieldAlert className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <div className="bg-slate-50 border border-slate-200/50 p-3 rounded-xl space-y-1.5 font-mono text-[10px]">
+            <span className="text-slate-400 uppercase block font-bold tracking-wider">Active Credentials</span>
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200/60 rounded-lg px-2 py-1">
+              <ShieldAlert className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="bg-transparent border-none text-[10px] text-white focus:outline-none cursor-pointer w-full"
+                className="bg-transparent border-none text-[10px] text-slate-800 focus:outline-none cursor-pointer w-full font-sans font-semibold"
               >
                 <option value="super-admin">Super Admin</option>
                 <option value="security-analyst">Security Analyst</option>
@@ -275,49 +275,49 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <nav className="space-y-1.5">
             <button
               onClick={() => setActiveTab('health')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'health' ? 'bg-white/[0.04] text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.01]'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'health' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50'}`}
             >
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              <Activity className={`w-3.5 h-3.5 ${activeTab === 'health' ? 'text-[#00D632]' : 'text-slate-400'}`} />
               <span>System Health</span>
             </button>
             
             <button
               onClick={() => setActiveTab('identities')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'identities' ? 'bg-white/[0.04] text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.01]'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'identities' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50'}`}
             >
-              <Users className="w-3.5 h-3.5 text-emerald-400" />
+              <Users className={`w-3.5 h-3.5 ${activeTab === 'identities' ? 'text-[#00D632]' : 'text-slate-400'}`} />
               <span>Attested Identities</span>
             </button>
 
             <button
               onClick={() => setActiveTab('partners')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'partners' ? 'bg-white/[0.04] text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.01]'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'partners' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50'}`}
             >
-              <Layers className="w-3.5 h-3.5 text-emerald-400" />
+              <Layers className={`w-3.5 h-3.5 ${activeTab === 'partners' ? 'text-[#00D632]' : 'text-slate-400'}`} />
               <span>Partner Tenants</span>
             </button>
 
             <button
               onClick={() => setActiveTab('requests')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'requests' ? 'bg-white/[0.04] text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.01]'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'requests' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50'}`}
             >
-              <Mail className="w-3.5 h-3.5 text-emerald-400" />
+              <Mail className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-[#00D632]' : 'text-slate-400'}`} />
               <span>Integration Requests</span>
             </button>
 
             <button
               onClick={() => setActiveTab('policies')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'policies' ? 'bg-white/[0.04] text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.01]'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'policies' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50'}`}
             >
-              <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+              <Sliders className={`w-3.5 h-3.5 ${activeTab === 'policies' ? 'text-[#00D632]' : 'text-slate-400'}`} />
               <span>Defensive Policies</span>
             </button>
 
             <button
               onClick={() => setActiveTab('audit')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'audit' ? 'bg-white/[0.04] text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-white/[0.01]'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'audit' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50'}`}
             >
-              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <Database className={`w-3.5 h-3.5 ${activeTab === 'audit' ? 'text-[#00D632]' : 'text-slate-400'}`} />
               <span>Audit Trails</span>
             </button>
           </nav>
@@ -325,14 +325,14 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
 
         {/* Console back-link control */}
-        <div className="pt-8 border-t border-white/[0.03] mt-8 text-center hidden lg:block">
+        <div className="pt-8 border-t border-slate-100 mt-8 text-center hidden lg:block">
           
           {/* Customization toggles inside Sidebar Footer */}
-          <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-4 bg-black/20 p-2 rounded-lg border border-white/[0.02]">
+          <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-200/40">
             <span>Compact Density</span>
             <button
               onClick={() => setCompactMode(!compactMode)}
-              className="text-emerald-400 hover:text-emerald-300 bg-transparent border-none cursor-pointer"
+              className="text-[#00C853] hover:underline font-bold bg-transparent border-none cursor-pointer"
             >
               {compactMode ? "ON" : "OFF"}
             </button>
@@ -340,10 +340,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
           <button 
             onClick={() => onNavigate('landing')} 
-            className="text-[10px] font-mono uppercase text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center gap-1 mx-auto bg-transparent border-none cursor-pointer"
+            className="text-xs font-semibold text-slate-500 hover:text-black transition-colors flex items-center justify-center gap-1.5 mx-auto bg-transparent border-none cursor-pointer"
           >
             <span>Exit Admin Console</span>
-            <ExternalLink className="w-2.5 h-2.5" />
+            <ExternalLink className="w-3.5 h-3.5" />
           </button>
         </div>
       </aside>
@@ -352,11 +352,11 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       <main className="flex-1 p-6 lg:p-10 space-y-8 overflow-y-auto w-full relative">
         
         {/* GLOBAL HEADER BAR: Live indicators, Search Filter, Sync */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/[0.03] pb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-6">
           <div className="flex items-center gap-3">
-            <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse shrink-0" />
+            <span className="w-2 h-2 rounded-full bg-[#00D632] animate-pulse shrink-0" />
             <div>
-              <h1 className="font-sans font-bold text-white text-lg tracking-tight uppercase">
+              <h1 className="font-sans font-bold text-slate-900 text-lg tracking-tight uppercase">
                 {activeTab === 'health' && "System Posture Monitor"}
                 {activeTab === 'identities' && "Attested Human Registry"}
                 {activeTab === 'partners' && "Integrating Tenants Directory"}
@@ -364,8 +364,8 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 {activeTab === 'policies' && "Verifiable Policies Cluster"}
                 {activeTab === 'audit' && "Enterprise Ledger Audit Trails"}
               </h1>
-              <p className="text-[11px] text-slate-500">
-                Evaluating cryptographic uniqueness anchors under active role context: <span className="text-white uppercase font-bold">{role.replace('-', ' ')}</span>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Evaluating cryptographic uniqueness anchors under active role context: <span className="text-slate-800 uppercase font-bold">{role.replace('-', ' ')}</span>
               </p>
             </div>
           </div>
@@ -373,20 +373,20 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           {/* Search bar + Compact Button on Mobile */}
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="relative flex-1 md:flex-none">
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search global registry..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full md:w-60 bg-[#08090c] border border-white/[0.05] rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-[#00E676]/40 transition-colors"
+                className="w-full md:w-60 bg-white border border-slate-200/60 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#00D632]/40 transition-colors shadow-sm"
               />
             </div>
 
             <button
               onClick={fetchAdminData}
               title="Refresh Cluster State"
-              className="p-2 bg-[#08090c] hover:bg-white/[0.04] border border-white/[0.04] rounded-xl transition-all cursor-pointer text-slate-400 hover:text-white shrink-0"
+              className="p-2 bg-white hover:bg-slate-50 border border-slate-200/60 rounded-xl transition-all cursor-pointer text-slate-500 hover:text-slate-800 shrink-0 shadow-sm"
             >
               <RefreshCw className="w-4 h-4" />
             </button>

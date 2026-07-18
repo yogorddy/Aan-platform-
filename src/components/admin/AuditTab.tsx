@@ -115,7 +115,6 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
 
   // Enhanced mock audit logs mapped into Enterprise structure
   const enterpriseLogs = auditLogs.map((log, idx) => {
-    // Generate mock enterprise parameters safely
     const mockIPs = ['18.231.14.99', '45.132.88.10', '193.12.144.201', '82.102.23.111'];
     const mockDevices = ['iPhone 15 Pro', 'Chrome MacOS', 'Headless Chrome', 'Linux Client'];
     const mockCountries = ['United States', 'Netherlands', 'Germany', 'United Kingdom'];
@@ -130,7 +129,6 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
       country: mockCountries[seed % mockCountries.length],
       riskLevel: seed % 3 === 0 ? 'High' : 'Low',
       outcome: seed % 4 === 0 ? 'Blocked' : 'Authorized',
-      // Cryptographically Verifiable SHA-256 Digital Signature Block
       signature: Math.random().toString(36).substring(2, 10) + '...' + Math.random().toString(36).substring(2, 12) + 'SHA256'
     };
   });
@@ -157,7 +155,7 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
       ? JSON.stringify(filteredLogs, null, 2)
       : "Timestamp,Actor,Organization,Action,Object,IP,Device,Country,Risk,Outcome,SignatureHash\n" + 
         filteredLogs.map(l => `${l.created_at},${l.actor_id},${l.orgName},${l.action},${l.target_type},${l.ip},${l.device},${l.country},${l.riskLevel},${l.outcome},${l.signature}`).join("\n");
-        
+         
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -174,24 +172,24 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
   };
 
   return (
-    <div className={`space-y-8 animate-[fadeIn_0.2s_ease-out]`}>
+    <div className="space-y-8 animate-[fadeIn_0.2s_ease-out]">
       
       {/* SECTION 1: ENTERPRISE AUDIT LOGS */}
       <div className="space-y-4">
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xs font-mono uppercase tracking-wider text-white font-bold">Immutable Enterprise Audit Trails</h2>
-            <p className="text-[11px] text-slate-500 mt-1">Cryptographically immutable ledger of developer access, verification events, and policy evaluations.</p>
+            <h2 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Immutable Enterprise Audit Trails</h2>
+            <p className="text-[11px] text-slate-500 mt-1 font-sans font-medium">Cryptographically immutable ledger of developer access, verification events, and policy evaluations.</p>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-[#08090c] border border-white/[0.06] rounded-xl px-3 py-1.5 text-xs font-mono">
+            <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 rounded-xl px-3 py-1.5 text-xs font-mono shadow-sm">
               <Filter className="w-3.5 h-3.5 text-slate-400" />
               <select
                 value={outcomeFilter}
                 onChange={(e) => setOutcomeFilter(e.target.value)}
-                className="bg-transparent border-none text-[10px] text-white focus:outline-none cursor-pointer"
+                className="bg-transparent border-none text-[10px] text-slate-700 focus:outline-none cursor-pointer font-sans font-bold"
               >
                 <option value="all">Outcome: All</option>
                 <option value="authorized">Authorized Only</option>
@@ -201,13 +199,13 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
 
             <button
               onClick={() => handleExport('json')}
-              className="bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] text-[10px] font-mono text-white px-3 py-1.5 rounded-xl cursor-pointer transition-all"
+              className="bg-white hover:bg-slate-50 border border-slate-200/80 text-[10px] font-bold text-slate-700 px-3 py-1.5 rounded-xl cursor-pointer transition-all shadow-sm"
             >
               Export JSON
             </button>
             <button
               onClick={() => handleExport('csv')}
-              className="bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] text-[10px] font-mono text-white px-3 py-1.5 rounded-xl cursor-pointer transition-all"
+              className="bg-white hover:bg-slate-50 border border-slate-200/80 text-[10px] font-bold text-slate-700 px-3 py-1.5 rounded-xl cursor-pointer transition-all shadow-sm"
             >
               Export CSV
             </button>
@@ -219,59 +217,59 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
           {/* Audit Log Table Column */}
           <div className={`${selectedLog ? 'lg:col-span-8' : 'lg:col-span-12'} transition-all duration-300 space-y-4`}>
             {/* Audit Log Table */}
-            <div className="bg-[#08090c] border border-white/[0.04] rounded-2xl overflow-hidden shadow-xl">
+            <div className="bg-white border border-slate-200/60 rounded-3xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-white/[0.04] text-[9px] font-mono text-slate-500 uppercase tracking-wider font-bold bg-black/40">
-                      <th className="py-2.5 px-4">Ledger Timestamp</th>
-                      <th className="py-2.5 px-4">Subject Actor</th>
-                      <th className="py-2.5 px-4">Organization Scope</th>
-                      <th className="py-2.5 px-4">Executed Action</th>
-                      <th className="py-2.5 px-4">Outcome</th>
-                      <th className="py-2.5 px-4 text-center">Evidence Report</th>
-                      <th className="py-2.5 px-4 text-right">Verifiable Hash Signature</th>
+                    <tr className="border-b border-slate-200/60 text-[9px] font-mono text-slate-400 uppercase tracking-wider font-bold bg-slate-50/50">
+                      <th className="py-3 px-4">Ledger Timestamp</th>
+                      <th className="py-3 px-4">Subject Actor</th>
+                      <th className="py-3 px-4">Organization Scope</th>
+                      <th className="py-3 px-4">Executed Action</th>
+                      <th className="py-3 px-4">Outcome</th>
+                      <th className="py-3 px-4 text-center">Evidence Report</th>
+                      <th className="py-3 px-4 text-right">Verifiable Hash Signature</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/[0.02] text-xs font-mono text-slate-300">
+                  <tbody className="divide-y divide-slate-100 text-xs font-mono text-slate-600">
                     {filteredLogs.map((log) => {
                       const isSelected = selectedLog?.id === log.id;
                       return (
                         <tr 
                           key={log.id} 
-                          className={`hover:bg-white/[0.01] transition-colors cursor-pointer ${isSelected ? 'bg-[#00E676]/5 border-l-2 border-[#00E676]' : ''}`}
+                          className={`hover:bg-slate-50/40 transition-colors cursor-pointer ${isSelected ? 'bg-emerald-50/40 border-l-2 border-emerald-500' : ''}`}
                           onClick={() => setSelectedLog(log)}
                         >
-                          <td className="py-3 px-4 text-slate-500">{new Date(log.created_at).toLocaleString()}</td>
-                          <td className="py-3 px-4 text-white font-medium">{log.actor_id}</td>
-                          <td className="py-3 px-4 text-slate-400 font-semibold">{log.orgName}</td>
-                          <td className="py-3 px-4 text-[#00E676]">{log.action}</td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${log.outcome === 'Blocked' ? 'bg-rose-500/10 text-rose-400' : 'bg-[#00E676]/10 text-[#00E676]'}`}>
+                          <td className="py-3.5 px-4 text-slate-400 font-medium">{new Date(log.created_at).toLocaleString()}</td>
+                          <td className="py-3.5 px-4 text-slate-800 font-bold font-sans">{log.actor_id}</td>
+                          <td className="py-3.5 px-4 text-slate-500 font-bold font-sans">{log.orgName}</td>
+                          <td className="py-3.5 px-4 text-emerald-600 font-semibold font-sans">{log.action}</td>
+                          <td className="py-3.5 px-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase font-sans border ${log.outcome === 'Blocked' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-emerald-50 border-emerald-100 text-emerald-600'}`}>
                               {log.outcome}
                             </span>
                           </td>
-                          <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3.5 px-4 text-center" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => {
                                 setSelectedLog(log);
                                 onLogAudit('audit.evidence_report_preview', 'session_evidence', log.id, { org: log.orgName });
                               }}
-                              className="inline-flex items-center gap-1.5 bg-[#00E676]/10 hover:bg-[#00E676]/20 border border-[#00E676]/25 text-[#00E676] text-[10px] px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold font-mono"
+                              className="inline-flex items-center gap-1 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-100 text-emerald-700 text-[10px] px-2.5 py-1 rounded-lg transition-all cursor-pointer font-bold font-sans shadow-sm"
                               title="Export Cryptographically Signed Evidence"
                             >
-                              <Code className="w-3.5 h-3.5" />
+                              <Code className="w-3.5 h-3.5 text-emerald-600" />
                               <span>Export</span>
                             </button>
                           </td>
-                          <td className="py-3 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-end items-center gap-1.5">
-                              <span className="px-1.5 py-0.5 rounded bg-[#00E676]/5 border border-[#00E676]/15 text-[#00E676] text-[8px] font-bold tracking-widest uppercase inline-flex items-center gap-0.5">
-                                <ShieldCheck className="w-2.5 h-2.5 text-[#00E676]" />
+                              <span className="px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 text-[8px] font-bold tracking-widest uppercase inline-flex items-center gap-0.5">
+                                <ShieldCheck className="w-2.5 h-2.5 text-emerald-600" />
                               </span>
                               <button
                                 onClick={() => handleCopySignature(log.signature)}
-                                className="text-slate-500 hover:text-white text-[9px] cursor-pointer bg-transparent border-none"
+                                className="text-slate-400 hover:text-slate-800 text-[9px] cursor-pointer bg-transparent border-none font-bold font-mono transition-colors"
                                 title="Copy Signature Hash"
                               >
                                 {copiedHash === log.signature ? "Copied" : log.signature}
@@ -289,43 +287,43 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
 
           {/* Evidence Inspector Side Panel */}
           {selectedLog && (
-            <div className="lg:col-span-4 bg-[#08090c] border border-white/[0.04] p-5 rounded-2xl space-y-5 text-left relative animate-[fadeIn_0.2s_ease-out] font-sans">
+            <div className="lg:col-span-4 bg-white border border-slate-200/60 p-6 rounded-3xl space-y-5 text-left relative animate-[fadeIn_0.2s_ease-out] font-sans shadow-sm">
               
               {/* Header */}
-              <div className="flex justify-between items-start border-b border-white/[0.03] pb-3.5">
+              <div className="flex justify-between items-start border-b border-slate-100 pb-3.5">
                 <div className="space-y-1">
-                  <div className="flex items-center gap-1.5 text-[#00E676]">
-                    <ShieldCheck className="w-4 h-4 animate-pulse" />
+                  <div className="flex items-center gap-1.5 text-emerald-600">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span className="text-[9px] font-mono tracking-widest uppercase font-black">AAN Trusted Evidence</span>
                   </div>
-                  <h3 className="text-xs font-bold text-white font-mono uppercase tracking-tight">Session Evidence Report</h3>
-                  <p className="text-[10px] text-slate-500">Raw cryptographic trust signals and decision logs compiled for audit verification.</p>
+                  <h3 className="text-xs font-bold text-slate-800 font-mono uppercase tracking-tight">Session Evidence Report</h3>
+                  <p className="text-[10px] text-slate-400 font-medium">Raw cryptographic trust signals and decision logs compiled for audit verification.</p>
                 </div>
                 <button 
                   onClick={() => setSelectedLog(null)}
-                  className="p-1 rounded-lg hover:bg-white/[0.03] text-slate-500 hover:text-white transition-colors cursor-pointer bg-transparent border-none"
+                  className="p-1 rounded-lg hover:bg-slate-50 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer bg-transparent border-none"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Session/Log Metadata */}
-              <div className="bg-black/20 border border-white/[0.02] p-3 rounded-xl space-y-1 text-[11px] font-mono">
+              <div className="bg-slate-50/50 border border-slate-200/50 p-3.5 rounded-2xl space-y-1.5 text-[11px] font-mono">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">SESS ID:</span>
-                  <span className="text-slate-350 font-bold truncate max-w-[150px]" title={selectedLog.id}>{selectedLog.id}</span>
+                  <span className="text-slate-400 font-bold">SESS ID:</span>
+                  <span className="text-slate-700 font-bold truncate max-w-[150px] font-sans" title={selectedLog.id}>{selectedLog.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">SUBJECT ACTOR:</span>
-                  <span className="text-white font-bold">{selectedLog.actor_id}</span>
+                  <span className="text-slate-400 font-bold">SUBJECT ACTOR:</span>
+                  <span className="text-slate-800 font-bold font-sans">{selectedLog.actor_id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">TENANT SCOPE:</span>
-                  <span className="text-emerald-400 font-bold">{selectedLog.orgName}</span>
+                  <span className="text-slate-400 font-bold">TENANT SCOPE:</span>
+                  <span className="text-emerald-700 font-bold font-sans">{selectedLog.orgName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">TIMESTAMP:</span>
-                  <span className="text-slate-400">{new Date(selectedLog.created_at).toLocaleString()}</span>
+                  <span className="text-slate-400 font-bold">TIMESTAMP:</span>
+                  <span className="text-slate-600 font-sans">{new Date(selectedLog.created_at).toLocaleString()}</span>
                 </div>
               </div>
 
@@ -338,13 +336,13 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
                   <div className="space-y-4">
                     
                     {/* Visual Badge Card */}
-                    <div className="bg-black/30 border border-white/[0.03] p-4 rounded-xl space-y-3">
+                    <div className="bg-slate-50/30 border border-slate-200/50 p-4 rounded-2xl space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-mono uppercase text-slate-500 font-bold">Policy Verdict</span>
-                        <span className={`text-[10px] font-mono font-black uppercase px-2.5 py-0.5 rounded border ${
+                        <span className="text-[9px] font-mono uppercase text-slate-400 font-bold">Policy Verdict</span>
+                        <span className={`text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border font-sans ${
                           isBlocked 
-                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 shadow-[0_0_8px_rgba(239,68,68,0.05)]' 
-                            : 'bg-emerald-500/10 text-[#00E676] border-emerald-500/20'
+                            ? 'bg-rose-50 text-rose-600 border-rose-100' 
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-100'
                         }`}>
                           {report.trust_decision_verdict.decision}
                         </span>
@@ -353,30 +351,30 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
                       {/* Scores Progress Bars */}
                       <div className="space-y-2.5 text-[10px] font-mono">
                         <div>
-                          <div className="flex justify-between text-slate-400 mb-1">
+                          <div className="flex justify-between text-slate-500 mb-1 font-sans font-bold">
                             <span>TRUST REP SCORE:</span>
-                            <span className={isBlocked ? 'text-rose-400' : 'text-[#00E676] font-bold'}>
+                            <span className={isBlocked ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold'}>
                               {report.trust_decision_verdict.trust_score}/100
                             </span>
                           </div>
-                          <div className="w-full bg-black/50 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                             <div 
-                              className={`h-full rounded-full transition-all duration-500 ${isBlocked ? 'bg-rose-500' : 'bg-[#00E676]'}`} 
+                              className={`h-full rounded-full transition-all duration-500 ${isBlocked ? 'bg-rose-500' : 'bg-emerald-500'}`} 
                               style={{ width: `${report.trust_decision_verdict.trust_score}%` }} 
                             />
                           </div>
                         </div>
 
                         <div>
-                          <div className="flex justify-between text-slate-400 mb-1">
+                          <div className="flex justify-between text-slate-500 mb-1 font-sans font-bold">
                             <span>RISK VELOCITY CONFIDENCE:</span>
-                            <span className="text-white font-bold">
+                            <span className="text-slate-800 font-bold">
                               {report.trust_decision_verdict.risk_score}/100
                             </span>
                           </div>
-                          <div className="w-full bg-black/50 rounded-full h-1.5 overflow-hidden">
+                          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                             <div 
-                              className="bg-slate-500 h-full rounded-full transition-all duration-500" 
+                              className="bg-slate-400 h-full rounded-full transition-all duration-500" 
                               style={{ width: `${report.trust_decision_verdict.risk_score}%` }} 
                             />
                           </div>
@@ -386,11 +384,11 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
 
                     {/* Reasons block */}
                     <div className="space-y-2">
-                      <span className="text-[9px] font-mono uppercase text-slate-500 font-bold block">Decision Rationale Signals:</span>
+                      <span className="text-[9px] font-mono uppercase text-slate-400 font-bold block">Decision Rationale Signals:</span>
                       <div className="space-y-1.5">
                         {report.trust_decision_verdict.reasons.map((r: string, idx: number) => (
-                          <div key={idx} className="flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-400">
-                            <span className={`w-1 h-1 rounded-full mt-1.5 shrink-0 ${isBlocked ? 'bg-rose-400' : 'bg-emerald-400'}`} />
+                          <div key={idx} className="flex items-start gap-1.5 text-[11px] leading-relaxed text-slate-600 font-medium">
+                            <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${isBlocked ? 'bg-rose-500' : 'bg-emerald-500'}`} />
                             <span>{r}</span>
                           </div>
                         ))}
@@ -398,36 +396,36 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
                     </div>
 
                     {/* Compiled Raw Signals Metrics */}
-                    <div className="bg-black/40 border border-white/[0.03] p-3 rounded-xl space-y-2 text-[10px] font-mono text-slate-400">
-                      <span className="text-[8px] text-slate-500 uppercase font-black block">Raw Evaluated Signals Monitor</span>
+                    <div className="bg-slate-50/50 border border-slate-200/50 p-3.5 rounded-2xl space-y-2 text-[10px] font-mono text-slate-500">
+                      <span className="text-[8px] text-slate-400 uppercase font-black block mb-1">Raw Evaluated Signals Monitor</span>
                       
-                      <div className="flex justify-between border-b border-white/[0.02] pb-1.5">
-                        <span>Impossible Travel:</span>
-                        <span className={report.telemetry_signals.impossible_travel ? 'text-rose-400 font-bold' : 'text-slate-500'}>
+                      <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span className="font-bold">Impossible Travel:</span>
+                        <span className={report.telemetry_signals.impossible_travel ? 'text-rose-600 font-bold' : 'text-slate-400 font-bold'}>
                           {report.telemetry_signals.impossible_travel ? 'TRUE (FLAGGED)' : 'FALSE'}
                         </span>
                       </div>
-                      <div className="flex justify-between border-b border-white/[0.02] pb-1.5">
-                        <span>Credential Stuffing:</span>
-                        <span className={report.telemetry_signals.credential_stuffing ? 'text-rose-400 font-bold' : 'text-slate-500'}>
+                      <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span className="font-bold">Credential Stuffing:</span>
+                        <span className={report.telemetry_signals.credential_stuffing ? 'text-rose-600 font-bold' : 'text-slate-400 font-bold'}>
                           {report.telemetry_signals.credential_stuffing ? 'TRUE (FLAGGED)' : 'FALSE'}
                         </span>
                       </div>
-                      <div className="flex justify-between border-b border-white/[0.02] pb-1.5">
-                        <span>Coordinated Bot Indicator:</span>
-                        <span className={report.telemetry_signals.bot_network_indicators ? 'text-rose-400 font-bold' : 'text-slate-500'}>
+                      <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span className="font-bold">Coordinated Bot Indicator:</span>
+                        <span className={report.telemetry_signals.bot_network_indicators ? 'text-rose-600 font-bold' : 'text-slate-400 font-bold'}>
                           {report.telemetry_signals.bot_network_indicators ? 'TRUE (FLAGGED)' : 'FALSE'}
                         </span>
                       </div>
-                      <div className="flex justify-between border-b border-white/[0.02] pb-1.5">
-                        <span>Device Anomaly Score:</span>
-                        <span className={report.telemetry_signals.device_anomaly_rating > 50 ? 'text-amber-400 font-bold' : 'text-[#00E676]'}>
+                      <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                        <span className="font-bold">Device Anomaly Score:</span>
+                        <span className={report.telemetry_signals.device_anomaly_rating > 50 ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'}>
                           {report.telemetry_signals.device_anomaly_rating}% Risk
                         </span>
                       </div>
                       <div className="flex justify-between pt-0.5">
-                        <span>Attestation Proof:</span>
-                        <span className={report.telemetry_signals.humanness_posture_attestation.proof_verified ? 'text-[#00E676] font-bold' : 'text-amber-400 font-bold'}>
+                        <span className="font-bold">Attestation Proof:</span>
+                        <span className={report.telemetry_signals.humanness_posture_attestation.proof_verified ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'}>
                           {report.telemetry_signals.humanness_posture_attestation.proof_verified ? 'PASSED (ZKP)' : 'FAILED/MISSING'}
                         </span>
                       </div>
@@ -436,21 +434,21 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
                     {/* Raw JSON payload export block */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-[9px] font-mono">
-                        <span className="uppercase text-slate-500 font-bold flex items-center gap-1">
-                          <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="uppercase text-slate-400 font-bold flex items-center gap-1 font-mono">
+                          <Terminal className="w-3.5 h-3.5 text-emerald-600" />
                           Verifiable Payload
                         </span>
                         <button
                           onClick={() => handleCopyReportText(selectedLog)}
-                          className="hover:text-white flex items-center gap-1 cursor-pointer transition-colors text-slate-400 uppercase font-black text-[8px] bg-transparent border-none"
+                          className="hover:text-slate-800 flex items-center gap-1 cursor-pointer transition-colors text-slate-400 uppercase font-black text-[8px] bg-transparent border-none font-sans"
                         >
-                          {copiedReport ? <Check className="w-2.5 h-2.5 text-emerald-400" /> : <Copy className="w-2.5 h-2.5" />}
+                          {copiedReport ? <Check className="w-2.5 h-2.5 text-emerald-600" /> : <Copy className="w-2.5 h-2.5" />}
                           {copiedReport ? 'Copied' : 'Copy'}
                         </button>
                       </div>
 
-                      <div className="bg-[#050507] border border-white/[0.05] rounded-xl p-3 font-mono text-[9px] max-h-[140px] overflow-y-auto relative text-[#00E676]/90">
-                        <pre className="whitespace-pre overflow-x-auto text-left leading-normal">
+                      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3.5 font-mono text-[9px] max-h-[140px] overflow-y-auto relative text-slate-700 shadow-inner">
+                        <pre className="whitespace-pre overflow-x-auto text-left leading-normal font-medium">
                           {JSON.stringify(report, null, 2)}
                         </pre>
                       </div>
@@ -460,9 +458,9 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
                     <div className="flex gap-2 pt-1">
                       <button
                         onClick={() => handleDownloadReport(selectedLog)}
-                        className="flex-1 bg-[#00E676]/10 hover:bg-[#00E676]/20 border border-[#00E676]/30 hover:border-[#00E676]/50 text-[#00E676] text-xs font-mono font-bold py-2.5 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(0,230,118,0.04)]"
+                        className="flex-1 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 hover:border-emerald-300 text-emerald-700 text-xs font-bold py-2.5 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm font-sans"
                       >
-                        <Download className="w-4 h-4" />
+                        <Download className="w-4 h-4 text-emerald-600" />
                         <span>Download JSON Report</span>
                       </button>
                     </div>
@@ -478,13 +476,13 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
       </div>
 
       {/* SECTION 2: WEBHOOK CENTER */}
-      <div className="border-t border-white/[0.04] pt-8 space-y-4">
+      <div className="border-t border-slate-200/60 pt-8 space-y-4">
         <div>
-          <h2 className="text-xs font-mono uppercase tracking-wider text-white font-bold flex items-center gap-1.5">
-            <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <h2 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
+            <Radio className="w-4 h-4 text-emerald-600" />
             Outgoing Webhooks Monitor Center
           </h2>
-          <p className="text-[11px] text-slate-500 mt-1">
+          <p className="text-[11px] text-slate-500 mt-1 font-sans font-medium">
             Evaluate, replay, and inspect callback event triggers successfully dispatched to partner servers.
           </p>
         </div>
@@ -492,40 +490,40 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           
           {/* Outgoing Webhooks List */}
-          <div className="lg:col-span-2 bg-[#08090c] border border-white/[0.04] rounded-2xl overflow-hidden">
+          <div className="lg:col-span-2 bg-white border border-slate-200/60 rounded-3xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-white/[0.04] text-[9px] font-mono text-slate-500 uppercase tracking-wider font-bold bg-black/40">
-                    <th className="py-2.5 px-4">Event Topic</th>
-                    <th className="py-2.5 px-4">Recipient Partner</th>
-                    <th className="py-2.5 px-4">HTTP Status</th>
-                    <th className="py-2.5 px-4">Retries</th>
-                    <th className="py-2.5 px-4 text-right">Action</th>
+                  <tr className="border-b border-slate-200/60 text-[9px] font-mono text-slate-400 uppercase tracking-wider font-bold bg-slate-50/50">
+                    <th className="py-3 px-4">Event Topic</th>
+                    <th className="py-3 px-4">Recipient Partner</th>
+                    <th className="py-3 px-4">HTTP Status</th>
+                    <th className="py-3 px-4">Retries</th>
+                    <th className="py-3 px-4 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.02] text-xs font-mono">
+                <tbody className="divide-y divide-slate-100 text-xs font-mono">
                   {webhooks.map((wh) => (
                     <tr 
                       key={wh.id} 
                       onClick={() => setSelectedWebhook(wh)}
-                      className={`hover:bg-white/[0.02] transition-colors cursor-pointer ${selectedWebhook?.id === wh.id ? 'bg-[#00E676]/5' : ''}`}
+                      className={`hover:bg-slate-50/40 transition-colors cursor-pointer ${selectedWebhook?.id === wh.id ? 'bg-emerald-50/30' : ''}`}
                     >
-                      <td className="py-3 px-4 text-white font-bold">{wh.event}</td>
-                      <td className="py-3 px-4 text-slate-400">{wh.partner}</td>
-                      <td className="py-3 px-4">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${wh.code === 200 ? 'bg-[#00E676]/10 text-[#00E676]' : 'bg-rose-500/10 text-rose-400'}`}>
+                      <td className="py-3.5 px-4 text-slate-800 font-bold font-sans">{wh.event}</td>
+                      <td className="py-3.5 px-4 text-slate-500 font-sans font-semibold">{wh.partner}</td>
+                      <td className="py-3.5 px-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold font-sans border ${wh.code === 200 ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
                           {wh.code} {wh.status}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-slate-500">{wh.retries} / 5</td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-3.5 px-4 text-slate-400 font-bold font-sans">{wh.retries} / 5</td>
+                      <td className="py-3.5 px-4 text-right">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleReplayWebhook(wh);
                           }}
-                          className="bg-white/[0.02] hover:bg-white/[0.06] text-slate-300 hover:text-white border border-white/[0.05] px-2 py-1 rounded text-[9px] font-bold uppercase cursor-pointer"
+                          className="bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-950 border border-slate-200/80 px-2.5 py-1 rounded-lg text-[9px] font-extrabold uppercase cursor-pointer transition-colors font-sans shadow-sm"
                         >
                           Replay Event
                         </button>
@@ -538,30 +536,30 @@ export default function AuditTab({ compactMode, searchQuery, role, auditLogs, on
           </div>
 
           {/* Webhook Payload Inspector Panel */}
-          <div className="bg-[#08090c] border border-white/[0.04] p-5 rounded-2xl space-y-4">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider font-bold block flex items-center gap-1">
-              <Terminal className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="bg-white border border-slate-200/60 p-6 rounded-3xl space-y-4 shadow-sm text-left">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-bold block flex items-center gap-1">
+              <Terminal className="w-3.5 h-3.5 text-emerald-600" />
               Webhook Payload Inspector
             </span>
 
             {selectedWebhook ? (
               <div className="space-y-4 font-mono text-xs animate-[fadeIn_0.15s_ease-out]">
                 <div className="text-[11px] space-y-1">
-                  <span className="text-slate-500">Destination Partner:</span>
-                  <p className="text-white font-bold">{selectedWebhook.partner}</p>
-                  <span className="text-slate-500 mt-2 block">Timestamp dispatched:</span>
-                  <p className="text-slate-300">{selectedWebhook.date}</p>
+                  <span className="text-slate-400 font-bold">Destination Partner:</span>
+                  <p className="text-slate-800 font-bold font-sans">{selectedWebhook.partner}</p>
+                  <span className="text-slate-400 font-bold mt-2.5 block">Timestamp dispatched:</span>
+                  <p className="text-slate-600 font-sans">{selectedWebhook.date}</p>
                 </div>
 
-                <div className="bg-black/50 border border-white/[0.04] p-3 rounded-lg">
-                  <span className="text-[10px] text-slate-500 block mb-1">JSON Content:</span>
-                  <pre className="text-[10px] text-[#00E676] overflow-x-auto whitespace-pre-wrap leading-tight">
+                <div className="bg-slate-50 border border-slate-200/50 p-3.5 rounded-2xl shadow-inner">
+                  <span className="text-[10px] text-slate-400 font-bold block mb-1 font-sans">JSON Content:</span>
+                  <pre className="text-[10px] text-slate-700 overflow-x-auto whitespace-pre-wrap leading-tight font-medium">
                     {JSON.stringify(selectedWebhook.payload, null, 2)}
                   </pre>
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-slate-600 font-mono italic">Select a webhook call log to inspect payload payloads.</p>
+              <p className="text-xs text-slate-400 font-sans font-semibold italic">Select a webhook call log to inspect payloads.</p>
             )}
           </div>
 

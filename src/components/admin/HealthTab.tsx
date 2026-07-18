@@ -103,105 +103,105 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
       {/* 1. Infrastructure Health Panels */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <div className="bg-[#08090c] border border-white/[0.04] p-4 rounded-xl flex items-center justify-between">
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Platform Status</span>
-            <span className="text-sm font-semibold text-white flex items-center gap-1.5 font-sans">
-              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Platform Status</span>
+            <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5 font-sans">
+              <span className="w-2 h-2 rounded-full bg-[#00D632] animate-pulse" />
               Operational
             </span>
           </div>
-          <Server className="w-4 h-4 text-emerald-400 opacity-60" />
+          <Server className="w-4 h-4 text-emerald-600 opacity-60" />
         </div>
 
-        <div className="bg-[#08090c] border border-white/[0.04] p-4 rounded-xl flex items-center justify-between">
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Identity Engine</span>
-            <span className="text-sm font-semibold text-white flex items-center gap-1.5 font-sans">
-              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Identity Engine</span>
+            <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5 font-sans">
+              <span className="w-2 h-2 rounded-full bg-[#00D632] animate-pulse" />
               Healthy
             </span>
           </div>
-          <Cpu className="w-4 h-4 text-emerald-400 opacity-60" />
+          <Cpu className="w-4 h-4 text-emerald-600 opacity-60" />
         </div>
 
-        <div className="bg-[#08090c] border border-white/[0.04] p-4 rounded-xl flex items-center justify-between">
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Proof Engine</span>
-            <span className="text-sm font-semibold text-white flex items-center gap-1.5 font-sans">
-              <span className="w-2 h-2 rounded-full bg-[#00E676] animate-pulse" />
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Proof Engine</span>
+            <span className="text-sm font-bold text-slate-900 flex items-center gap-1.5 font-sans">
+              <span className="w-2 h-2 rounded-full bg-[#00D632] animate-pulse" />
               Healthy
             </span>
           </div>
-          <Shield className="w-4 h-4 text-emerald-400 opacity-60" />
+          <Shield className="w-4 h-4 text-emerald-600 opacity-60" />
         </div>
 
-        <div className="bg-[#08090c] border border-white/[0.04] p-4 rounded-xl flex items-center justify-between">
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl flex items-center justify-between shadow-sm">
           <div className="space-y-1">
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Avg API Latency</span>
-            <span className="text-sm font-semibold text-white font-mono">{metrics.latency}ms</span>
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Avg API Latency</span>
+            <span className="text-sm font-bold text-slate-900 font-mono">{metrics.latency}ms</span>
           </div>
-          <Activity className="w-4 h-4 text-emerald-400 opacity-60" />
+          <Activity className="w-4 h-4 text-emerald-600 opacity-60" />
         </div>
 
       </div>
 
       {/* Services Health Matrix */}
-      <div className="bg-[#08090c] border border-white/[0.04] p-5 rounded-2xl">
+      <div className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm">
         <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold mb-4">Core Infrastructure Cluster Posture</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono">
-          <div className="bg-black/30 p-3 rounded-lg border border-white/[0.02] flex items-center justify-between">
-            <span className="text-slate-500">Risk Engine</span>
-            <span className="text-[#00E676] font-bold">ONLINE</span>
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50 flex items-center justify-between">
+            <span className="text-slate-500 font-semibold">Risk Engine</span>
+            <span className="text-[#00C853] font-bold">ONLINE</span>
           </div>
-          <div className="bg-black/30 p-3 rounded-lg border border-white/[0.02] flex items-center justify-between">
-            <span className="text-slate-500">API Gateway</span>
-            <span className="text-[#00E676] font-bold">HEALTHY</span>
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50 flex items-center justify-between">
+            <span className="text-slate-500 font-semibold">API Gateway</span>
+            <span className="text-[#00C853] font-bold">HEALTHY</span>
           </div>
-          <div className="bg-black/30 p-3 rounded-lg border border-white/[0.02] flex items-center justify-between">
-            <span className="text-slate-500">Verify Queue</span>
-            <span className="text-[#00E676] font-bold">ACTIVE</span>
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50 flex items-center justify-between">
+            <span className="text-slate-500 font-semibold">Verify Queue</span>
+            <span className="text-[#00C853] font-bold">ACTIVE</span>
           </div>
-          <div className="bg-black/30 p-3 rounded-lg border border-white/[0.02] flex items-center justify-between">
-            <span className="text-slate-500">DB Replication</span>
-            <span className="text-[#00E676] font-bold">SYNCHRONIZED</span>
+          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/50 flex items-center justify-between">
+            <span className="text-slate-500 font-semibold">DB Replication</span>
+            <span className="text-[#00C853] font-bold">SYNCHRONIZED</span>
           </div>
         </div>
       </div>
 
       {/* 2. Today's Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#08090c] border border-white/[0.04] p-5 rounded-xl">
-          <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold tracking-wider">Protected Requests Today</span>
-          <span className="text-lg md:text-xl font-bold text-white mt-1 block font-mono">{metrics.requestsToday.toLocaleString()}</span>
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm">
+          <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold tracking-wider">Protected Requests Today</span>
+          <span className="text-lg md:text-xl font-bold text-slate-950 mt-1 block font-mono">{metrics.requestsToday.toLocaleString()}</span>
         </div>
-        <div className="bg-[#08090c] border border-white/[0.04] p-5 rounded-xl">
-          <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold tracking-wider">Proofs Issued Today</span>
-          <span className="text-lg md:text-xl font-bold text-white mt-1 block font-mono">{metrics.proofsIssued.toLocaleString()}</span>
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm">
+          <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold tracking-wider">Proofs Issued Today</span>
+          <span className="text-lg md:text-xl font-bold text-slate-950 mt-1 block font-mono">{metrics.proofsIssued.toLocaleString()}</span>
         </div>
-        <div className="bg-[#08090c] border border-white/[0.04] p-5 rounded-xl">
-          <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold tracking-wider">Threats Prevented Today</span>
-          <span className="text-lg md:text-xl font-bold text-rose-400 mt-1 block font-mono">{metrics.threatsPrevented.toLocaleString()}</span>
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm">
+          <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold tracking-wider">Threats Prevented Today</span>
+          <span className="text-lg md:text-xl font-bold text-rose-600 mt-1 block font-mono">{metrics.threatsPrevented.toLocaleString()}</span>
         </div>
-        <div className="bg-[#08090c] border border-white/[0.04] p-5 rounded-xl">
-          <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold tracking-wider">Verification Success Rate</span>
-          <span className="text-lg md:text-xl font-bold text-[#00E676] mt-1 block font-mono">{metrics.successRate}%</span>
+        <div className="bg-white border border-slate-200/60 p-5 rounded-2xl shadow-sm">
+          <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold tracking-wider">Verification Success Rate</span>
+          <span className="text-lg md:text-xl font-bold text-[#00C853] mt-1 block font-mono">{metrics.successRate}%</span>
         </div>
       </div>
 
       {/* 3. Interactive Historical Performance Metrics Graph */}
-      <div className="bg-[#08090c] border border-white/[0.04] p-6 rounded-2xl space-y-6">
+      <div className="bg-white border border-slate-200/60 p-6 rounded-3xl space-y-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xs font-mono uppercase tracking-wider text-white font-bold">Enterprise Traffic & Posture Analytics</h2>
-            <p className="text-[11px] text-slate-500 mt-1">Sovereign identity verification and anomalous requests traffic comparison.</p>
+            <h2 className="text-xs font-mono uppercase tracking-wider text-slate-800 font-bold">Enterprise Traffic & Posture Analytics</h2>
+            <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">Sovereign identity verification and anomalous requests traffic comparison.</p>
           </div>
-          <div className="flex gap-1.5 bg-black/40 p-1 border border-white/[0.04] rounded-lg">
+          <div className="flex gap-1 bg-slate-50 p-1 border border-slate-200/40 rounded-full">
             {(['24h', '7d', '30d'] as const).map((r) => (
               <button
                 key={r}
                 onClick={() => setTimeRange(r)}
-                className={`text-[9px] font-mono px-2.5 py-1 rounded-md uppercase tracking-wider cursor-pointer ${timeRange === r ? 'bg-[#00E676]/10 text-[#00E676] font-bold border border-[#00E676]/20' : 'text-slate-400 hover:text-white'}`}
+                className={`text-[9px] font-mono px-3 py-1.5 rounded-full uppercase tracking-wider cursor-pointer font-bold ${timeRange === r ? 'bg-white text-slate-950 shadow-sm border border-slate-200/30' : 'text-slate-400 hover:text-slate-800'}`}
               >
                 {r === '24h' ? '24 Hours' : r === '7d' ? '7 Days' : '30 Days'}
               </button>
@@ -213,10 +213,10 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
         <div className="h-44 relative flex items-end">
           <svg className="w-full h-full absolute inset-0" preserveAspectRatio="none">
             {/* Draw grid lines */}
-            <line x1="0" y1="20" x2="100%" y2="20" stroke="white" strokeOpacity="0.02" strokeDasharray="3,3" />
-            <line x1="0" y1="60" x2="100%" y2="60" stroke="white" strokeOpacity="0.02" strokeDasharray="3,3" />
-            <line x1="0" y1="100" x2="100%" y2="100" stroke="white" strokeOpacity="0.02" strokeDasharray="3,3" />
-            <line x1="0" y1="140" x2="100%" y2="140" stroke="white" strokeOpacity="0.02" strokeDasharray="3,3" />
+            <line x1="0" y1="20" x2="100%" y2="20" stroke="black" strokeOpacity="0.03" strokeDasharray="3,3" />
+            <line x1="0" y1="60" x2="100%" y2="60" stroke="black" strokeOpacity="0.03" strokeDasharray="3,3" />
+            <line x1="0" y1="100" x2="100%" y2="100" stroke="black" strokeOpacity="0.03" strokeDasharray="3,3" />
+            <line x1="0" y1="140" x2="100%" y2="140" stroke="black" strokeOpacity="0.03" strokeDasharray="3,3" />
 
             {/* Blue Request Line */}
             <path
@@ -226,8 +226,8 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
                 return `${idx === 0 ? 'M' : 'L'} ${x}% ${y}`;
               }).join(' ')}
               fill="none"
-              stroke="#00E676"
-              strokeWidth="2"
+              stroke="#00D632"
+              strokeWidth="2.5"
               strokeOpacity="0.8"
             />
 
@@ -249,18 +249,18 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
           {/* Graph Legend Overlay */}
           <div className="absolute top-0 right-0 flex items-center gap-4 text-[9px] font-mono">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-0.5 bg-[#00E676] inline-block" />
-              <span className="text-slate-400">Attestation Queries</span>
+              <span className="w-2.5 h-1 bg-[#00D632] rounded-full inline-block" />
+              <span className="text-slate-400 font-semibold">Attestation Queries</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-0.5 bg-rose-500 inline-block border-dashed" />
-              <span className="text-slate-400">Threat Indicators</span>
+              <span className="w-2.5 h-1 bg-rose-500 rounded-full inline-block border-dashed" />
+              <span className="text-slate-400 font-semibold">Threat Indicators</span>
             </div>
           </div>
         </div>
 
         {/* Labels X-Axis */}
-        <div className="flex justify-between text-[8px] font-mono text-slate-500 border-t border-white/[0.04] pt-2">
+        <div className="flex justify-between text-[8px] font-mono text-slate-400 border-t border-slate-100 pt-2 font-semibold">
           {currentData.labels.map((lbl, idx) => (
             <span key={idx}>{lbl}</span>
           ))}
@@ -268,24 +268,24 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
       </div>
 
       {/* 4. Real-time Threat Center Panel */}
-      <div className="bg-[#08090c] border border-white/[0.04] p-6 rounded-2xl space-y-4">
+      <div className="bg-white border border-slate-200/60 p-6 rounded-3xl space-y-4 shadow-sm">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xs font-mono uppercase tracking-wider text-white font-bold flex items-center gap-2">
+            <h2 className="text-xs font-mono uppercase tracking-wider text-slate-800 font-bold flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-rose-500 animate-pulse" />
               Real-Time Platform Threat Center
             </h2>
-            <p className="text-[11px] text-slate-500 mt-1">Live mitigation monitoring and proactive endpoint containment.</p>
+            <p className="text-[11px] text-slate-400 mt-1">Live mitigation monitoring and proactive endpoint containment.</p>
           </div>
 
           {/* Interactive Threat Filters */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1 bg-black/40 border border-white/[0.06] rounded-xl px-2 py-1">
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/50 rounded-xl px-2.5 py-1.5">
               <Filter className="w-3 h-3 text-slate-400" />
               <select
                 value={selectedSeverity}
                 onChange={(e) => setSelectedSeverity(e.target.value)}
-                className="bg-transparent border-none text-[10px] font-mono text-white focus:outline-none cursor-pointer"
+                className="bg-transparent border-none text-[10px] font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value="all">Severity: All</option>
                 <option value="critical">Critical</option>
@@ -294,11 +294,11 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
               </select>
             </div>
 
-            <div className="flex items-center gap-1 bg-black/40 border border-white/[0.06] rounded-xl px-2 py-1">
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/50 rounded-xl px-2.5 py-1.5">
               <select
                 value={selectedPartner}
                 onChange={(e) => setSelectedPartner(e.target.value)}
-                className="bg-transparent border-none text-[10px] font-mono text-white focus:outline-none cursor-pointer"
+                className="bg-transparent border-none text-[10px] font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value="all">Partner: All</option>
                 <option value="Stripe Connect">Stripe</option>
@@ -309,11 +309,11 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
               </select>
             </div>
 
-            <div className="flex items-center gap-1 bg-black/40 border border-white/[0.06] rounded-xl px-2 py-1">
+            <div className="flex items-center gap-1 bg-slate-50 border border-slate-200/50 rounded-xl px-2.5 py-1.5">
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="bg-transparent border-none text-[10px] font-mono text-white focus:outline-none cursor-pointer"
+                className="bg-transparent border-none text-[10px] font-semibold text-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value="all">Status: All</option>
                 <option value="blocked">Blocked</option>
@@ -326,74 +326,74 @@ export default function HealthTab({ compactMode, searchQuery, role, onLogAudit }
         </div>
 
         {/* Threat Table */}
-        <div className="border border-white/[0.04] rounded-xl overflow-hidden bg-black/20">
+        <div className="border border-slate-200/50 rounded-2xl overflow-hidden bg-slate-50/50">
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-white/[0.04] text-[9px] font-mono text-slate-500 uppercase tracking-wider font-bold bg-black/40">
-                  <th className="py-2.5 px-4 font-bold">Threat Context</th>
-                  <th className="py-2.5 px-4 font-bold">Partner Scope</th>
-                  <th className="py-2.5 px-4 font-bold">Severity</th>
-                  <th className="py-2.5 px-4 font-bold">IP & Origin</th>
-                  <th className="py-2.5 px-4 font-bold">Risk Score</th>
-                  <th className="py-2.5 px-4 font-bold">Status</th>
-                  <th className="py-2.5 px-4 font-bold text-right">Actions</th>
+                <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider font-bold bg-slate-50/50">
+                  <th className="py-3 px-4 font-bold">Threat Context</th>
+                  <th className="py-3 px-4 font-bold">Partner Scope</th>
+                  <th className="py-3 px-4 font-bold">Severity</th>
+                  <th className="py-3 px-4 font-bold">IP & Origin</th>
+                  <th className="py-3 px-4 font-bold">Risk Score</th>
+                  <th className="py-3 px-4 font-bold">Status</th>
+                  <th className="py-3 px-4 font-bold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.02] text-xs font-mono">
+              <tbody className="divide-y divide-slate-100 text-xs font-mono">
                 {filteredThreats.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-500">
+                    <td colSpan={7} className="py-8 text-center text-slate-400">
                       No matching threats found in current time window.
                     </td>
                   </tr>
                 ) : (
                   filteredThreats.map((t) => (
-                    <tr key={t.id} className="hover:bg-white/[0.01] transition-colors">
+                    <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-3 px-4">
-                        <span className="text-white block font-semibold">{t.threatType}</span>
-                        <span className="text-[9px] text-slate-500">{t.timestamp} • {t.device}</span>
+                        <span className="text-slate-900 block font-semibold">{t.threatType}</span>
+                        <span className="text-[9px] text-slate-400 font-medium">{t.timestamp} • {t.device}</span>
                       </td>
-                      <td className="py-3 px-4 text-slate-300 font-semibold">{t.partner}</td>
+                      <td className="py-3 px-4 text-slate-700 font-bold">{t.partner}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${t.severity === 'critical' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : t.severity === 'high' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'}`}>
+                        <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${t.severity === 'critical' ? 'bg-rose-50 text-rose-600 border border-rose-100' : t.severity === 'high' ? 'bg-amber-50 text-amber-700 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
                           {t.severity}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-slate-400 text-[11px]">
-                        <span className="block">{t.ip}</span>
-                        <span className="text-[9px] text-slate-500 flex items-center gap-1">
+                      <td className="py-3 px-4 text-slate-500 text-[11px]">
+                        <span className="block font-bold">{t.ip}</span>
+                        <span className="text-[9px] text-slate-400 flex items-center gap-1 mt-0.5 font-semibold">
                           <Globe className="w-2.5 h-2.5" />
                           {t.country}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right pr-8">
-                        <span className="text-white font-bold">{t.riskScore}%</span>
+                        <span className="text-slate-900 font-bold">{t.riskScore}%</span>
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold ${t.status === 'Blocked' || t.status === 'Suspended' ? 'bg-rose-500/5 text-rose-400 border border-rose-500/15' : t.status === 'Mitigated' ? 'bg-[#00E676]/5 text-[#00E676] border border-[#00E676]/15' : 'bg-amber-500/5 text-amber-400 border border-amber-500/15'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-bold ${t.status === 'Blocked' || t.status === 'Suspended' ? 'bg-rose-50 text-rose-600 border border-rose-100' : t.status === 'Mitigated' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}`}>
                           {t.status}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
                         {t.status !== 'Blocked' && t.status !== 'Mitigated' && t.status !== 'Suspended' ? (
-                          <div className="flex justify-end gap-1.5">
+                           <div className="flex justify-end gap-1.5">
                             <button
                               onClick={() => handleMitigate(t.id, 'block')}
-                              className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[8px] font-bold uppercase px-2 py-1 rounded border border-rose-500/20 cursor-pointer"
+                              className="bg-rose-50 hover:bg-rose-100 text-rose-600 text-[8px] font-bold uppercase px-2.5 py-1 rounded-md border border-rose-200 cursor-pointer"
                             >
                               Block
                             </button>
                             <button
                               onClick={() => handleMitigate(t.id, 'mitigate')}
-                              className="bg-[#00E676]/10 hover:bg-[#00E676]/20 text-[#00E676] text-[8px] font-bold uppercase px-2 py-1 rounded border border-[#00E676]/20 cursor-pointer"
+                              className="bg-emerald-50 hover:bg-emerald-100 text-[#00C853] text-[8px] font-bold uppercase px-2.5 py-1 rounded-md border border-emerald-200 cursor-pointer"
                             >
                               Mitigate
                             </button>
                           </div>
                         ) : (
-                          <span className="text-[9px] text-slate-600 flex items-center gap-1 justify-end font-bold uppercase">
-                            <Check className="w-3 h-3 text-[#00E676]" /> Securing Posture
+                          <span className="text-[9px] text-slate-400 flex items-center gap-1 justify-end font-bold uppercase">
+                            <Check className="w-3.5 h-3.5 text-[#00D632]" /> Securing Posture
                           </span>
                         )}
                       </td>

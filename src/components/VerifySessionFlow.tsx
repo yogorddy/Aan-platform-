@@ -129,16 +129,16 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
   };
 
   return (
-    <div className="min-h-screen bg-[#030305] text-[#8e939e] font-sans flex flex-col justify-between py-16 px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-white text-slate-600 font-sans flex flex-col justify-between py-16 px-6 relative overflow-hidden">
       
-      {/* Absolute Zero-Theater Grid Overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.01)_0%,transparent_80%)] pointer-events-none" />
+      {/* Subtle background overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,214,50,0.02)_0%,transparent_80%)] pointer-events-none" />
 
       {/* Top Header */}
       <div className="max-w-sm mx-auto w-full text-center relative z-20">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/[0.02] border border-white/[0.04] rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-[9px] font-mono tracking-wider text-slate-400 font-bold uppercase">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00D632] animate-pulse" />
+          <span className="text-[10px] tracking-wider text-slate-500 font-semibold uppercase">
             {platform.domain}
           </span>
         </div>
@@ -159,22 +159,22 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
               className="w-full text-center space-y-6"
             >
               <div className="relative w-12 h-12 mx-auto">
-                <div className="absolute inset-0 rounded-full border border-white/[0.02]" />
-                <div className="absolute inset-0 rounded-full border border-t-[#00E676] border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+                <div className="absolute inset-0 rounded-full border border-slate-100" />
+                <div className="absolute inset-0 rounded-full border border-t-[#00D632] border-r-transparent border-b-transparent border-l-transparent animate-spin" />
               </div>
               
               <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-white tracking-tight">
+                <h3 className="text-sm font-semibold text-black tracking-tight">
                   Establishing Secure Session
                 </h3>
-                <p className="text-[11px] text-slate-500 font-medium">
+                <p className="text-[11px] text-slate-400 font-medium">
                   Connecting to {platform.name}...
                 </p>
               </div>
             </motion.div>
           )}
 
-          {/* STATE 2: STEP UP CHALLENGE (PROPORTIONAL FRICTION) */}
+          {/* STATE 2: STEP UP CHALLENGE */}
           {step === 'step_up' && (
             <motion.div 
               key="step_up"
@@ -186,32 +186,32 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
             >
               {/* Branded Identity Verification Warning */}
               <div className="space-y-2 text-center">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/[0.04] border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto">
-                  <KeyRound className="w-4 h-4" />
+                <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 mx-auto">
+                  <KeyRound className="w-5 h-5" />
                 </div>
-                <h2 className="text-base font-semibold text-white tracking-tight mt-3">
+                <h2 className="text-base font-bold text-black tracking-tight mt-3">
                   Verification Required
                 </h2>
-                <p className="text-xs text-slate-400 leading-relaxed max-w-[280px] mx-auto font-medium">
-                  For your security, Sovereign Digital requires an additional connection verification check to secure your current session.
+                <p className="text-xs text-slate-500 leading-relaxed max-w-[280px] mx-auto font-medium">
+                  For your security, {platform.name} requires an additional connection verification check to secure your current session.
                 </p>
               </div>
 
               {/* Minimal verification status box */}
-              <div className="bg-[#0b0c10] border border-white/[0.04] rounded-xl p-4 space-y-3.5 text-xs">
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3.5 text-xs">
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500 font-mono uppercase tracking-wider font-bold">Requested by</span>
-                  <span className="text-white font-medium">{platform.name}</span>
+                  <span className="text-slate-400 font-semibold uppercase tracking-wider">Requested by</span>
+                  <span className="text-black font-semibold">{platform.name}</span>
                 </div>
-                <div className="border-t border-white/[0.03]" />
+                <div className="border-t border-slate-100" />
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500 font-mono uppercase tracking-wider font-bold">Session IP</span>
-                  <span className="text-slate-300 font-mono font-medium">Verified Tunnel</span>
+                  <span className="text-slate-400 font-semibold uppercase tracking-wider">Session IP</span>
+                  <span className="text-slate-700 font-mono font-medium">Verified Tunnel</span>
                 </div>
-                <div className="border-t border-white/[0.03]" />
+                <div className="border-t border-slate-100" />
                 <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500 font-mono uppercase tracking-wider font-bold">Risk Assessment</span>
-                  <span className="text-amber-400 font-mono font-bold">Step-Up Prompt</span>
+                  <span className="text-slate-400 font-semibold uppercase tracking-wider">Risk Assessment</span>
+                  <span className="text-amber-600 font-semibold">Step-Up Prompt</span>
                 </div>
               </div>
 
@@ -219,11 +219,11 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
               <button
                 onClick={handleStepUpConfirm}
                 disabled={isApproving}
-                className="w-full bg-white hover:bg-slate-100 disabled:bg-white/50 text-slate-950 text-xs font-semibold py-3 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.99] shadow-sm"
+                className="w-full bg-black hover:bg-slate-800 disabled:bg-slate-200 text-white text-xs font-bold py-3.5 px-4 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 active:scale-[0.99] shadow-sm"
               >
                 {isApproving ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                     <span>Verifying session integrity...</span>
                   </>
                 ) : (
@@ -235,7 +235,7 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
               </button>
 
               <div className="text-center">
-                <p className="text-[10px] text-slate-500 font-medium">
+                <p className="text-[10px] text-slate-400 font-medium">
                   AAN trust evaluation runs in the background. No personal data, passwords, or biometrics are shared.
                 </p>
               </div>
@@ -252,15 +252,15 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
               transition={{ duration: 0.15 }}
               className="w-full text-center space-y-4"
             >
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mx-auto">
-                <Check className="w-4.5 h-4.5 stroke-[3]" />
+              <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 mx-auto">
+                <Check className="w-5 h-5 stroke-[3]" />
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-white tracking-tight">
+                <h3 className="text-sm font-semibold text-black tracking-tight">
                   Session Secured
                 </h3>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Redirecting back to platform...
                 </p>
               </div>
@@ -277,22 +277,22 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
               transition={{ duration: 0.2 }}
               className="w-full space-y-6 text-center"
             >
-              <div className="w-10 h-10 rounded-xl bg-amber-500/[0.04] border border-amber-500/20 flex items-center justify-center text-amber-400 mx-auto">
-                <AlertTriangle className="w-4 h-4" />
+              <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 mx-auto">
+                <AlertTriangle className="w-5 h-5" />
               </div>
 
               <div className="space-y-1">
-                <h2 className="text-sm font-semibold text-white tracking-tight">
+                <h2 className="text-sm font-semibold text-black tracking-tight">
                   Temporary Handshake Offline
                 </h2>
-                <p className="text-xs text-slate-400 px-4 leading-relaxed font-medium">
+                <p className="text-xs text-slate-500 px-4 leading-relaxed font-medium">
                   We are experiencing temporary trust synchronization delays. To prevent login disruption, graceful bypass mode has been engaged.
                 </p>
               </div>
 
               <button
                 onClick={onComplete}
-                className="w-full bg-white hover:bg-slate-100 text-slate-950 text-xs font-semibold py-3 px-4 rounded-xl transition-all cursor-pointer"
+                className="w-full bg-black hover:bg-slate-800 text-white text-xs font-semibold py-3.5 px-4 rounded-xl transition-all cursor-pointer"
               >
                 Continue to Platform (Bypass)
               </button>
@@ -304,9 +304,9 @@ export default function VerifySessionFlow({ sessionId: initialSessionId, onCompl
 
       {/* Tiny subtle AAN footer attestation */}
       <div className="text-center mt-12 relative z-10">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/[0.01] border border-white/[0.03] rounded-lg">
-          <Shield className="w-3 h-3 text-slate-500" />
-          <span className="text-[9px] font-mono tracking-wider text-slate-500 font-bold uppercase">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-100 rounded-full">
+          <Shield className="w-3.5 h-3.5 text-slate-400" />
+          <span className="text-[9px] font-semibold tracking-wider text-slate-400 uppercase">
             Protected by AAN Trust Infrastructure
           </span>
         </div>

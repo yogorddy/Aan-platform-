@@ -870,32 +870,32 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
   // RENDER COMPLETE ENTERPRISE TRUST-INFRASTRUCTURE DASHBOARD
   return (
-    <div className="min-h-screen bg-[#050507] text-[#8c919d] font-sans flex flex-col md:flex-row">
+    <div className="min-h-screen bg-slate-50 text-slate-600 font-sans flex flex-col md:flex-row">
       
       {/* Sidebar Navigation */}
-      <aside className="w-full md:w-64 bg-[#08090c] border-b md:border-b-0 md:border-r border-white/[0.04] p-6 flex flex-col justify-between shrink-0">
+      <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200/60 p-6 flex flex-col justify-between shrink-0 animate-[fadeIn_0.2s_ease-out]">
         <div className="space-y-8">
           
           {/* Node Identity Display */}
           <div className="space-y-1">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-white">
-                <Shield className="w-4 h-4 text-[#58E38A]" />
+              <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-emerald-600" />
               </div>
               <div>
-                <span className="font-semibold text-white tracking-tight text-xs block leading-none">AAN Infrastructure</span>
-                <span className="text-[8px] font-mono uppercase text-slate-500 tracking-widest block mt-0.5">Verified Node</span>
+                <span className="font-bold text-slate-900 tracking-tight text-xs block leading-none">AAN Infrastructure</span>
+                <span className="text-[8px] font-bold uppercase text-slate-400 tracking-widest block mt-0.5">Verified Node</span>
               </div>
             </div>
             
             {/* Active Project Card */}
-            <div className="bg-black/30 border border-white/[0.03] p-2.5 rounded-lg space-y-1 mt-4">
+            <div className="bg-slate-50 border border-slate-200/50 p-3 rounded-xl space-y-1 mt-4">
               <div className="flex items-center justify-between">
-                <span className="text-[8px] font-mono text-slate-500 uppercase tracking-wider">Active Trust Project</span>
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Active Trust Project</span>
                 <span className={`w-1.5 h-1.5 rounded-full ${projEnv === 'production' ? 'bg-rose-500' : 'bg-emerald-500'} animate-pulse`} />
               </div>
-              <span className="text-white text-xs font-semibold block truncate leading-tight">{projName || "Default Staging Key"}</span>
-              <span className="text-[8px] font-mono text-slate-500 tracking-wider block truncate uppercase font-bold">{projEnv || 'sandbox'} environment</span>
+              <span className="text-slate-950 text-xs font-semibold block truncate leading-tight">{projName || "Default Staging Key"}</span>
+              <span className="text-[8px] font-mono text-slate-400 tracking-wider block truncate uppercase font-bold">{projEnv || 'sandbox'} environment</span>
             </div>
           </div>
 
@@ -903,76 +903,76 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           <nav className="space-y-1.5">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'overview' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'overview' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Activity className="w-3.5 h-3.5" />
+              <Activity className="w-4 h-4" />
               <span>Trust Overview</span>
             </button>
 
             <button
               onClick={() => setActiveTab('events')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'events' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'events' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Database className="w-3.5 h-3.5" />
+              <Database className="w-4 h-4" />
               <span>Verification Events</span>
             </button>
 
             <button
               onClick={() => setActiveTab('trust_graph')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'trust_graph' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'trust_graph' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Network className="w-3.5 h-3.5" />
+              <Network className="w-4 h-4" />
               <span>Trust Graph</span>
             </button>
 
             <button
               onClick={() => setActiveTab('test_lab')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'test_lab' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'test_lab' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Flame className="w-3.5 h-3.5" />
+              <Flame className="w-4 h-4" />
               <span>Test Lab</span>
             </button>
 
             <button
               onClick={() => setActiveTab('zk_proofs')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'zk_proofs' ? 'bg-white/[0.04] text-[#58E38A] font-semibold border border-[#58E38A]/25' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'zk_proofs' ? 'bg-[#00D632]/10 text-emerald-700 font-bold border border-[#00D632]/25' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Binary className="w-3.5 h-3.5" />
+              <Binary className="w-4 h-4" />
               <div className="flex items-center justify-between w-full">
                 <span>ZK Proofs</span>
-                <span className="text-[8px] bg-[#58E38A]/10 text-[#58E38A] border border-[#58E38A]/20 px-1.5 py-0.5 rounded font-mono font-bold uppercase">EZKL</span>
+                <span className="text-[8px] bg-[#00D632]/10 text-[#00C853] border border-[#00D632]/20 px-1.5 py-0.5 rounded font-mono font-bold uppercase">EZKL</span>
               </div>
             </button>
 
             <button
               onClick={() => setActiveTab('rules')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'rules' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'rules' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Sliders className="w-3.5 h-3.5" />
+              <Sliders className="w-4 h-4" />
               <span>Trust Policies</span>
             </button>
 
             <button
               onClick={() => setActiveTab('credentials')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'credentials' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'credentials' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Key className="w-3.5 h-3.5" />
+              <Key className="w-4 h-4" />
               <span>API Credentials</span>
             </button>
 
             <button
               onClick={() => setActiveTab('docs')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'docs' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'docs' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <BookOpen className="w-3.5 h-3.5" />
+              <BookOpen className="w-4 h-4" />
               <span>Developer Docs</span>
             </button>
 
             <button
               onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center gap-3 text-xs font-medium px-3.5 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'settings' ? 'bg-white/[0.04] text-white font-semibold border border-white/[0.05]' : 'text-slate-400 hover:text-white hover:bg-white/[0.01] border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'settings' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
-              <Settings className="w-3.5 h-3.5" />
+              <Settings className="w-4 h-4" />
               <span>Organization Settings</span>
             </button>
           </nav>
@@ -980,21 +980,21 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         </div>
 
         {/* Sidebar Footer options */}
-        <div className="pt-6 border-t border-white/[0.03] mt-8 text-center space-y-3.5">
-          <div className="bg-black/40 border border-white/[0.04] p-2.5 rounded-xl text-left space-y-1">
+        <div className="pt-6 border-t border-slate-100 mt-8 text-center space-y-3.5">
+          <div className="bg-slate-50 border border-slate-200/40 p-3 rounded-xl text-left space-y-1">
             <div className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#58E38A] inline-block animate-ping" />
-              <span className="text-[9px] font-mono text-[#58E38A] font-bold uppercase">SUPABASE ONLINE</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00D632] inline-block animate-ping" />
+              <span className="text-[9px] font-mono text-[#00D632] font-bold uppercase">SUPABASE ONLINE</span>
             </div>
-            <p className="text-[8px] text-slate-500 leading-normal">RLS policies applied securely. Sandbox storage persistent.</p>
+            <p className="text-[8px] text-slate-400 leading-normal">RLS policies applied securely. Sandbox storage persistent.</p>
           </div>
           
           <button 
             onClick={() => onNavigate('landing')} 
-            className="text-[10px] font-mono uppercase text-slate-500 hover:text-slate-300 transition-colors flex items-center justify-center gap-1 mx-auto cursor-pointer"
+            className="text-xs font-semibold text-slate-500 hover:text-black transition-colors flex items-center justify-center gap-1 mx-auto cursor-pointer"
           >
             <span>Landing Home</span>
-            <ExternalLink className="w-2.5 h-2.5" />
+            <ExternalLink className="w-3 h-3" />
           </button>
         </div>
       </aside>

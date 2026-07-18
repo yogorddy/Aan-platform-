@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import crypto from "crypto";
 import { 
   VerificationSession, 
   AuditLog, 
@@ -40,9 +41,18 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
   );
 }
 
+function getDeterministicUUID(str: string): string {
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)) {
+    return str;
+  }
+  const hash = crypto.createHash("md5").update(str).digest("hex");
+  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(12, 15)}-a${hash.slice(15, 18)}-${hash.slice(18, 30)}`;
+}
+
 export function isSupabaseConnected(): boolean {
   return isConfigured;
 }
+
 
 export function disableRemoteDatabase(): void {
   isConfigured = false;
@@ -740,6 +750,117 @@ export const supabaseService = {
         return localStore[idx];
       }
       return null;
+    }
+  },
+
+  /**
+   * 25. SYNC TRUST GRAPH INTELLIGENCE TO SUPABASE
+   */
+  async syncGraphIntelligenceToDb(dbState: any): Promise<void> {
+    if (!isConfigured || !supabase) {
+      return;
+    }
+    try {
+      console.log("[AAN DB SYNC] Starting asynchronous Supabase Trust Graph sync...");
+
+      // A. Sync trust_clusters
+      if (dbState.trustClusters && dbState.trustClusters.length > 0) {
+        const clustersToUpsert = dbState.trustClusters.map((c: any) => {
+          let id = c.id;
+          if (id.startsWith("cluster_dynamic_")) {
+            id = getDeterministicUUID(id);
+          }
+          return {
+            id,
+            name: c.name,
+            risk_score: c.risk_score,
+            confidence_score: c.confidence_score,
+            status: c.status,
+            algorithm: c.algorithm,
+            verified_humans_count: c.verified_humans_count,
+            partner_accounts_count: c.partner_accounts_count,
+            trust_devices_count: c.trust_devices_count,
+            events_count: c.events_count,
+            decisions_count: c.decisions_count,
+            last_activity: c.last_activity,
+            created_at: c.created_at
+          };
+        });
+
+        const { error: clusterErr } = await supabase
+          .from("trust_clusters")
+          .upsert(clustersToUpsert, { onConflict: "id" });
+        
+        if (clusterErr) {
+          console.warn("[AAN DB SYNC] Failed to sync trust_clusters:", clusterErr.message);
+        }
+      }
+
+      // B. Sync verified_humans
+      if (dbState.verifiedHumans && dbState.verifiedHumans.length > 0) {
+        const humansToUpsert = dbState.verifiedHumans.map((h: any) => {
+          let clusterId = h.primary_cluster_id;
+          if (clusterId && clusterId.startsWith("cluster_dynamic_")) {
+            clusterId = getDeterministicUUID(clusterId);
+          }
+          return {
+            id: h.id,
+            name: h.name,
+            status: h.status === "passed" || h.status === "within_policy" ? "within_policy" : h.status === "failed" || h.status === "exceeds_policy" ? "exceeds_policy" : "needs_review",
+            last_seen: h.last_seen || new Date().toISOString(),
+            avg_trust_score: h.avg_trust_score !== undefined ? h.avg_trust_score : 85,
+            highest_risk_score: h.highest_risk_score !== undefined ? h.highest_risk_score : 15,
+            relationship_confidence: h.relationship_confidence !== undefined ? h.relationship_confidence : 95,
+            total_accounts: h.total_accounts || 1,
+            known_devices_count: h.known_devices_count || 1,
+            primary_cluster_id: clusterId || null,
+            created_at: h.created_at || new Date().toISOString()
+          };
+        });
+
+        const { error: humanErr } = await supabase
+          .from("verified_humans")
+          .upsert(humansToUpsert, { onConflict: "id" });
+
+        if (humanErr) {
+          console.warn("[AAN DB SYNC] Failed to sync verified_humans:", humanErr.message);
+        }
+      }
+
+      // C. Sync trust_relationships
+      if (dbState.trustRelationships && dbState.trustRelationships.length > 0) {
+        const relationshipsToUpsert = dbState.trustRelationships.map((r: any) => {
+          let clusterId = r.cluster_id;
+          if (clusterId && clusterId.startsWith("cluster_dynamic_")) {
+            clusterId = getDeterministicUUID(clusterId);
+          }
+          return {
+            id: r.id,
+            human_id: r.human_id,
+            type: r.type,
+            source: r.source,
+            target: r.target,
+            confidence: r.confidence,
+            evidence: r.evidence,
+            status: r.status === "passed" || r.status === "verified" ? "verified" : r.status || "review",
+            recommendation: r.recommendation || "",
+            cluster_id: clusterId || null,
+            created_at: r.created_at || new Date().toISOString()
+          };
+        });
+
+        const { error: relErr } = await supabase
+          .from("trust_relationships")
+          .upsert(relationshipsToUpsert, { onConflict: "id" });
+
+        if (relErr) {
+          console.warn("[AAN DB SYNC] Failed to sync trust_relationships:", relErr.message);
+        }
+      }
+
+      console.log("[AAN DB SYNC] Asynchronous Supabase Trust Graph sync completed successfully.");
+    } catch (err: any) {
+      console.warn("[AAN DB SYNC] Error inside syncGraphIntelligenceToDb:", err.message || err);
     }
   }
 };

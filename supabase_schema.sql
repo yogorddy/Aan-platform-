@@ -734,5 +734,104 @@ CREATE POLICY "Allow authenticated update aan_trust_events"
 ON public.aan_trust_events FOR UPDATE USING (true);
 
 
+-- ==========================================
+-- 22. TABLE: DEVICES
+-- ==========================================
+-- Stores hardware environment metrics and unique webgl/canvas signature profiles.
+CREATE TABLE IF NOT EXISTS public.devices (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'suspicious', 'blocked')),
+    fingerprint_score INT NOT NULL CHECK (fingerprint_score >= 0 AND fingerprint_score <= 100),
+    last_used_ip VARCHAR(100),
+    human_id VARCHAR(255) REFERENCES public.verified_humans(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Enable RLS & Policies
+ALTER TABLE public.devices ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read devices" ON public.devices FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated insert devices" ON public.devices FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow authenticated update devices" ON public.devices FOR UPDATE USING (true);
+
+
+-- ==========================================
+-- 23. TABLE: PARTNER_USER_LINKS
+-- ==========================================
+-- One-way anonymized connection mapping a partner's user ID to an AAN Verified Human profile.
+CREATE TABLE IF NOT EXISTS public.partner_user_links (
+    id VARCHAR(255) PRIMARY KEY,
+    partner_app_id VARCHAR(255) REFERENCES public.partner_apps(id) ON DELETE CASCADE,
+    partner_user_id VARCHAR(255) NOT NULL,
+    human_id VARCHAR(255) REFERENCES public.verified_humans(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    UNIQUE(partner_app_id, partner_user_id)
+);
+
+-- Enable RLS & Policies
+ALTER TABLE public.partner_user_links ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read partner_user_links" ON public.partner_user_links FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated insert partner_user_links" ON public.partner_user_links FOR INSERT WITH CHECK (true);
+
+
+-- ==========================================
+-- 24. TABLE: TRUST_SIGNALS
+-- ==========================================
+-- Logs dynamic context markers harvested during active verification sessions.
+CREATE TABLE IF NOT EXISTS public.trust_signals (
+    id VARCHAR(255) PRIMARY KEY,
+    session_id VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    value VARCHAR(255) NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    risk_weight INT DEFAULT 0 CHECK (risk_weight >= 0 AND risk_weight <= 100),
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Enable RLS & Policies
+ALTER TABLE public.trust_signals ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read trust_signals" ON public.trust_signals FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated insert trust_signals" ON public.trust_signals FOR INSERT WITH CHECK (true);
+
+
+-- ==========================================
+-- 25. TABLE: BIOMETRIC_TEMPLATES
+-- ==========================================
+-- Retains strictly one-way mathematical signature hashes. Strictly NO raw photos/videos.
+CREATE TABLE IF NOT EXISTS public.biometric_templates (
+    id VARCHAR(255) PRIMARY KEY,
+    human_id VARCHAR(255) REFERENCES public.verified_humans(id) ON DELETE CASCADE,
+    template_hash VARCHAR(255) NOT NULL UNIQUE,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Enable RLS & Policies
+ALTER TABLE public.biometric_templates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read biometric_templates" ON public.biometric_templates FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated insert biometric_templates" ON public.biometric_templates FOR INSERT WITH CHECK (true);
+
+
+-- ==========================================
+-- 26. TABLE: WEBHOOKS
+-- ==========================================
+-- Active listener configuration managing partner endpoint subscriptions.
+CREATE TABLE IF NOT EXISTS public.webhooks (
+    id VARCHAR(255) PRIMARY KEY,
+    project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    secret VARCHAR(255) NOT NULL,
+    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'disabled', 'failed')),
+    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- Enable RLS & Policies
+ALTER TABLE public.webhooks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow authenticated read webhooks" ON public.webhooks FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated insert webhooks" ON public.webhooks FOR INSERT WITH CHECK (true);
+
+
 -- Return operational success log in database console
 SELECT 'MIGRATION COMPLETED SUCCESSFULLY' AS status;
+

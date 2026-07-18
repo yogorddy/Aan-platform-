@@ -70,23 +70,23 @@ export default function RequestsTab({
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xs font-mono uppercase tracking-wider text-white font-bold">Onboarding & Integration Requests Pipeline</h2>
-          <p className="text-[11px] text-slate-500 mt-1">Reviewing submissions from platform partners initiating AAN network node integrations.</p>
+          <h2 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Onboarding & Integration Requests Pipeline</h2>
+          <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">Reviewing submissions from platform partners initiating AAN network node integrations.</p>
         </div>
         <button 
           onClick={fetchAdminData}
-          className="self-start sm:self-auto inline-flex items-center gap-1.5 bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-xs font-mono px-3.5 py-1.5 rounded-xl transition-all text-white cursor-pointer"
+          className="self-start sm:self-auto inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-200/60 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition-all text-slate-700 cursor-pointer shadow-sm"
         >
-          <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+          <RefreshCw className="w-3.5 h-3.5 text-emerald-600" />
           <span>Sync Pipeline</span>
         </button>
       </div>
 
       <div className="space-y-6">
         {requests.length === 0 ? (
-          <div className="bg-[#08090c] border border-white/[0.04] rounded-2xl p-12 text-center text-slate-500">
-            <Mail className="w-8 h-8 text-slate-600 mx-auto mb-3" />
-            <p className="text-xs font-mono">No requests in the administrative queue.</p>
+          <div className="bg-white border border-slate-200/60 rounded-3xl p-12 text-center text-slate-400 shadow-sm">
+            <Mail className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+            <p className="text-xs font-mono">No requests in the onboarding pipeline queue.</p>
           </div>
         ) : (
           requests.map((req) => {
@@ -99,32 +99,32 @@ export default function RequestsTab({
             const sandboxKey = generatedSandboxCreds[req.id];
 
             return (
-              <div key={req.id} className="bg-[#08090c] border border-white/[0.04] rounded-2xl p-6 space-y-6 relative overflow-hidden">
+              <div key={req.id} className="bg-white border border-slate-200/60 rounded-3xl p-6 space-y-6 relative overflow-hidden shadow-sm">
                 
                 {/* 1. Header Details */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-white/[0.03] pb-4 gap-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 gap-4">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-sans font-bold text-white text-base">{req.organization_name}</span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-black/40 border border-white/[0.06] text-[10px] font-mono text-slate-400">
+                      <span className="font-sans font-bold text-slate-900 text-base">{req.organization_name}</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-slate-50 border border-slate-200/60 text-[10px] font-mono text-slate-500 font-bold">
                         {req.request_code}
                       </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold ${prio === 'high' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-slate-800 text-slate-400 border border-white/[0.05]'}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono uppercase font-bold ${prio === 'high' ? 'bg-rose-50 text-rose-600 border border-rose-100' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
                         {prio} Priority
                       </span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] font-mono font-bold uppercase">
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[9px] font-mono font-bold uppercase">
                         {lbl} Label
                       </span>
                     </div>
-                    <div className="text-xs text-slate-400 font-medium">
-                      Representative: <span className="text-white">{req.contact_name}</span> • <span className="text-slate-500">{req.email}</span>
-                      {req.phone && <span className="text-slate-500"> • Phone: {req.phone}</span>}
+                    <div className="text-xs text-slate-500 font-semibold font-sans">
+                      Representative: <span className="text-slate-800 font-bold">{req.contact_name}</span> • <span className="text-slate-500 font-medium">{req.email}</span>
+                      {req.phone && <span className="text-slate-400 font-medium"> • Phone: {req.phone}</span>}
                     </div>
                   </div>
 
                   {/* Onboarding Metadata Status selection */}
                   <div className="flex items-center gap-3">
-                    <label className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Process Status</label>
+                    <label className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block font-bold">Process Status</label>
                     <select
                       value={isPendingTransition ? pendingTransitions[req.id].status : req.status}
                       disabled={role === 'read-only' || role === 'auditor'}
@@ -147,7 +147,7 @@ export default function RequestsTab({
                           }));
                         }
                       }}
-                      className="bg-[#050507] border border-white/[0.08] focus:border-[#00E676]/50 focus:outline-none rounded-xl px-3 py-1.5 text-xs text-white transition-colors cursor-pointer"
+                      className="bg-slate-50 border border-slate-200/60 focus:border-emerald-500 focus:outline-none rounded-xl px-3 py-1.5 text-xs text-slate-700 transition-colors cursor-pointer font-sans font-bold shadow-sm"
                     >
                       <option value="pending">Pending</option>
                       <option value="reviewed">Reviewed</option>
@@ -161,14 +161,14 @@ export default function RequestsTab({
 
                 {/* 2. Transition Reviewer Panel */}
                 {isPendingTransition && (
-                  <div className="bg-black/30 border border-[#00E676]/20 p-4 rounded-xl space-y-3 animate-[fadeIn_0.15s_ease-out]">
-                    <div className="text-xs text-slate-300 font-bold flex items-center gap-1">
-                      <AlertTriangle className="w-4 h-4 text-emerald-400" />
-                      <span>Configure Status Transition to <span className="text-emerald-400 uppercase">{pendingTransitions[req.id].status}</span></span>
+                  <div className="bg-[#00C853]/5 border border-[#00C853]/20 p-4 rounded-2xl space-y-3 animate-[fadeIn_0.15s_ease-out]">
+                    <div className="text-xs text-slate-800 font-bold flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-emerald-600" />
+                      <span>Configure Status Transition to <span className="text-emerald-700 uppercase font-extrabold">{pendingTransitions[req.id].status}</span></span>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div className="space-y-1">
-                        <label className="text-[9px] font-mono uppercase text-slate-500 font-bold">Change Reason <span className="text-rose-500">*</span></label>
+                        <label className="text-[9px] font-mono uppercase text-slate-400 font-bold">Change Reason <span className="text-rose-500">*</span></label>
                         <input
                           type="text"
                           value={pendingTransitions[req.id].reason}
@@ -177,11 +177,11 @@ export default function RequestsTab({
                             [req.id]: { ...prev[req.id], reason: e.target.value }
                           }))}
                           placeholder="e.g., Compliance criteria met"
-                          className="w-full bg-[#050507] border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#00E676]/40"
+                          className="w-full bg-white border border-slate-200/80 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[9px] font-mono uppercase text-slate-500 font-bold">Admin Notes (Internal review logs)</label>
+                        <label className="text-[9px] font-mono uppercase text-slate-400 font-bold">Admin Notes (Internal review logs)</label>
                         <input
                           type="text"
                           value={pendingTransitions[req.id].adminNotes}
@@ -190,7 +190,7 @@ export default function RequestsTab({
                             [req.id]: { ...prev[req.id], adminNotes: e.target.value }
                           }))}
                           placeholder="Internal remarks for security log audits..."
-                          className="w-full bg-[#050507] border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#00E676]/40"
+                          className="w-full bg-white border border-slate-200/80 rounded-lg px-3 py-1.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-500"
                         />
                       </div>
                     </div>
@@ -201,7 +201,7 @@ export default function RequestsTab({
                           delete updated[req.id];
                           return updated;
                         })}
-                        className="px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06] hover:bg-white/[0.06] text-[10px] font-mono text-slate-400 cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200/60 text-[10px] font-bold text-slate-600 cursor-pointer shadow-sm"
                       >
                         Cancel
                       </button>
@@ -213,14 +213,13 @@ export default function RequestsTab({
                           pendingTransitions[req.id].adminNotes
                         )}
                         disabled={!pendingTransitions[req.id].reason.trim()}
-                        className="px-3 py-1.5 rounded-lg bg-[#00E676]/10 border border-[#00E676]/30 hover:bg-[#00E676]/20 text-[10px] font-mono text-[#00E676] disabled:opacity-40 disabled:pointer-events-none cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-[10px] font-bold text-emerald-700 disabled:opacity-40 disabled:pointer-events-none cursor-pointer shadow-sm"
                       >
                         Apply Posture Change
                       </button>
                     </div>
                   </div>
                 )}
-
                 {/* 3. Workflow Control & Allocation Options */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-xs">
                   
@@ -228,75 +227,75 @@ export default function RequestsTab({
                   <div className="lg:col-span-2 space-y-4">
                     {req.use_case && (
                       <div className="space-y-1">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">Integration Use Case</span>
-                        <p className="text-slate-300 font-medium font-sans leading-relaxed">{req.use_case}</p>
+                        <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Integration Use Case</span>
+                        <p className="text-slate-700 font-semibold font-sans leading-relaxed">{req.use_case}</p>
                       </div>
                     )}
                     <div className="space-y-1">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block">Inbound Message Request</span>
-                      <p className="text-slate-300 bg-black/20 p-3.5 rounded-xl border border-white/[0.02] leading-relaxed whitespace-pre-wrap font-sans">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">Inbound Message Request</span>
+                      <p className="text-slate-600 bg-slate-50/55 p-3.5 rounded-2xl border border-slate-200/50 leading-relaxed whitespace-pre-wrap font-sans font-medium">
                         "{req.message}"
                       </p>
                     </div>
 
                     {/* Architectural Integration Path Diagram */}
-                    <div className="space-y-2 bg-black/30 border border-white/[0.03] p-4 rounded-xl">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold block flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5 text-[#00E676]" />
+                    <div className="space-y-2 bg-slate-50/40 border border-slate-200/60 p-4 rounded-2xl">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-600 font-bold block flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-emerald-600" />
                         Proposed Network Node Architecture Pipeline
                       </span>
                       
                       {/* Diagram representation */}
                       <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-2 text-[10px] font-mono">
-                        <div className="bg-[#050507] p-2.5 rounded-lg border border-white/[0.05] text-center w-full sm:w-auto">
-                          <span className="text-slate-400 block">User Device</span>
-                          <span className="text-[8px] text-slate-600 block mt-0.5">MFA Signature</span>
+                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/50 text-center w-full sm:w-auto shadow-sm">
+                          <span className="text-slate-600 block font-bold">User Device</span>
+                          <span className="text-[8px] text-slate-400 block mt-0.5 font-bold">MFA Signature</span>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-[#00E676] shrink-0 rotate-90 sm:rotate-0" />
+                        <ArrowRight className="w-4 h-4 text-[#00C853] shrink-0 rotate-90 sm:rotate-0" />
                         
-                        <div className="bg-[#050507] p-2.5 rounded-lg border border-[#00E676]/30 text-center w-full sm:w-auto">
-                          <span className="text-[#00E676] block">AAN Gateway</span>
-                          <span className="text-[8px] text-emerald-600 block mt-0.5">Policy Check</span>
+                        <div className="bg-emerald-50/40 p-2.5 rounded-xl border border-[#00C853]/35 text-center w-full sm:w-auto shadow-sm">
+                          <span className="text-[#00C853] block font-extrabold">AAN Gateway</span>
+                          <span className="text-[8px] text-emerald-600 block mt-0.5 font-bold">Policy Check</span>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-[#00E676] shrink-0 rotate-90 sm:rotate-0" />
+                        <ArrowRight className="w-4 h-4 text-[#00C853] shrink-0 rotate-90 sm:rotate-0" />
 
-                        <div className="bg-[#050507] p-2.5 rounded-lg border border-white/[0.05] text-center w-full sm:w-auto">
-                          <span className="text-slate-400 block">Proof Engine</span>
-                          <span className="text-[8px] text-slate-600 block mt-0.5">ZKP Generation</span>
+                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/50 text-center w-full sm:w-auto shadow-sm">
+                          <span className="text-slate-600 block font-bold">Proof Engine</span>
+                          <span className="text-[8px] text-slate-400 block mt-0.5 font-bold">ZKP Generation</span>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-[#00E676] shrink-0 rotate-90 sm:rotate-0" />
+                        <ArrowRight className="w-4 h-4 text-[#00C853] shrink-0 rotate-90 sm:rotate-0" />
 
-                        <div className="bg-[#050507] p-2.5 rounded-lg border border-white/[0.05] text-center w-full sm:w-auto">
-                          <span className="text-slate-300 block">{req.organization_name}</span>
-                          <span className="text-[8px] text-slate-500 block mt-0.5">Webhook Hook</span>
+                        <div className="bg-white p-2.5 rounded-xl border border-slate-200/50 text-center w-full sm:w-auto shadow-sm">
+                          <span className="text-slate-600 block font-bold">{req.organization_name}</span>
+                          <span className="text-[8px] text-slate-400 block mt-0.5 font-bold">Webhook Hook</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Developer Sandbox Panel */}
-                    <div className="bg-[#050507] border border-white/[0.04] p-4 rounded-xl space-y-3">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold block flex items-center gap-1.5">
-                        <Code className="w-3.5 h-3.5 text-[#00E676]" />
+                    <div className="bg-slate-50/30 border border-slate-200/50 p-4 rounded-2xl space-y-3">
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block flex items-center gap-1.5">
+                        <Code className="w-3.5 h-3.5 text-emerald-600" />
                         Technical Sandbox Suite
                       </span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleGenerateSandboxKeys(req.id, req.organization_name)}
-                          className="bg-white/[0.02] hover:bg-[#00E676]/10 text-slate-300 hover:text-[#00E676] border border-white/[0.06] hover:border-[#00E676]/30 text-[10px] font-mono px-3 py-1.5 rounded-lg cursor-pointer transition-all"
+                          className="bg-white hover:bg-[#00C853]/5 text-slate-700 hover:text-emerald-700 border border-slate-200/60 hover:border-[#00C853]/20 text-[10px] font-bold px-3 py-1.5 rounded-xl cursor-pointer transition-all shadow-sm"
                         >
                           Generate Sandbox API Keys
                         </button>
                         <button
                           onClick={() => handleTestSandboxWebhook(req.organization_name)}
-                          className="bg-white/[0.02] hover:bg-white/[0.06] text-slate-300 border border-white/[0.06] text-[10px] font-mono px-3 py-1.5 rounded-lg cursor-pointer transition-all"
+                          className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/60 text-[10px] font-bold px-3 py-1.5 rounded-xl cursor-pointer transition-all shadow-sm"
                         >
                           Trigger Webhook Test Event
                         </button>
                       </div>
                       {sandboxKey && (
-                        <div className="p-2 bg-black/40 border border-white/[0.04] rounded-lg font-mono text-[9px] text-emerald-400 flex justify-between items-center">
+                        <div className="p-2 bg-emerald-50/30 border border-emerald-100 rounded-xl font-mono text-[9px] text-[#00C853] flex justify-between items-center font-bold">
                           <span>Sandbox Secret Key: {sandboxKey}</span>
-                          <span className="text-slate-500 text-[8px] uppercase font-bold">READY FOR INTEGRATION</span>
+                          <span className="text-emerald-700 text-[8px] uppercase font-bold bg-emerald-50 px-1.5 py-0.5 rounded">READY FOR INTEGRATION</span>
                         </div>
                       )}
                     </div>
@@ -304,18 +303,17 @@ export default function RequestsTab({
 
                   {/* Right Column: Allocation Controls, Review Checklists */}
                   <div className="space-y-4">
-                    
-                    {/* Allocation Metadata Block */}
-                    <div className="bg-black/30 border border-white/[0.04] p-4 rounded-xl space-y-3 font-mono">
-                      <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold block">Internal Allocation Attributes</span>
+                                     {/* Allocation Metadata Block */}
+                    <div className="bg-slate-50/40 border border-slate-200/60 p-4 rounded-2xl space-y-3 font-mono">
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">Internal Allocation Attributes</span>
                       
                       {/* Reviewer Dropdown */}
                       <div className="space-y-1">
-                        <span className="text-[9px] text-slate-500 block">Reviewer Assigned</span>
+                        <span className="text-[9px] text-slate-400 block font-bold">Reviewer Assigned</span>
                         <select
                           value={rev}
                           onChange={(e) => setReviewerAssign(prev => ({ ...prev, [req.id]: e.target.value }))}
-                          className="w-full bg-[#050507] border border-white/[0.06] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none"
+                          className="w-full bg-white border border-slate-200/80 rounded-lg px-2 py-1 text-[11px] text-slate-800 focus:outline-none focus:border-emerald-500 font-sans font-bold shadow-sm"
                         >
                           <option value="unassigned">Unassigned</option>
                           <option value="alex_compliance">Alex (Compliance)</option>
@@ -326,11 +324,11 @@ export default function RequestsTab({
 
                       {/* Custom Label Dropdown */}
                       <div className="space-y-1">
-                        <span className="text-[9px] text-slate-500 block">Organization Category Label</span>
+                        <span className="text-[9px] text-slate-400 block font-bold">Organization Category Label</span>
                         <select
                           value={lbl}
                           onChange={(e) => setLabelAssign(prev => ({ ...prev, [req.id]: e.target.value }))}
-                          className="w-full bg-[#050507] border border-white/[0.06] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none"
+                          className="w-full bg-white border border-slate-200/80 rounded-lg px-2 py-1 text-[11px] text-slate-800 focus:outline-none focus:border-emerald-500 font-sans font-bold shadow-sm"
                         >
                           <option value="Fintech">Fintech Partner</option>
                           <option value="Web3">Sovereign Web3 / DAO</option>
@@ -341,55 +339,55 @@ export default function RequestsTab({
 
                       {/* Targeted Completion date */}
                       <div className="space-y-1">
-                        <span className="text-[9px] text-slate-500 block">Target Deployment Date</span>
+                        <span className="text-[9px] text-slate-400 block font-bold">Target Deployment Date</span>
                         <input
                           type="date"
                           value={target}
                           onChange={(e) => setTargetCompletion(prev => ({ ...prev, [req.id]: e.target.value }))}
-                          className="w-full bg-[#050507] border border-white/[0.06] rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none"
+                          className="w-full bg-white border border-slate-200/80 rounded-lg px-2 py-1 text-[11px] text-slate-800 focus:outline-none focus:border-emerald-500 font-sans font-bold shadow-sm"
                         />
                       </div>
                     </div>
 
                     {/* Interactive Reviewer Checklist */}
-                    <div className="bg-black/30 border border-white/[0.04] p-4 rounded-xl space-y-3 font-mono">
-                      <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold block">
+                    <div className="bg-slate-50/40 border border-slate-200/60 p-4 rounded-2xl space-y-3 font-mono">
+                      <span className="text-[10px] uppercase tracking-wider text-slate-400 font-bold block">
                         Compliance Checklist
                       </span>
                       
                       <div className="space-y-2 text-[11px]">
-                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-700 hover:text-slate-950 font-bold font-sans">
                           <input
                             type="checkbox"
                             checked={chk.domain}
                             onChange={() => toggleChecklistItem(req.id, 'domain')}
-                            className="accent-[#00E676] rounded"
+                            className="accent-[#00C853] rounded"
                           />
-                          <span className={chk.domain ? 'line-through text-slate-500' : ''}>Verify Enterprise Domain Domain</span>
+                          <span className={chk.domain ? 'line-through text-slate-400 font-normal' : ''}>Verify Enterprise Domain Domain</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-700 hover:text-slate-950 font-bold font-sans">
                           <input
                             type="checkbox"
                             checked={chk.security}
                             onChange={() => toggleChecklistItem(req.id, 'security')}
-                            className="accent-[#00E676] rounded"
+                            className="accent-[#00C853] rounded"
                           />
-                          <span className={chk.security ? 'line-through text-slate-500' : ''}>Complete Sandbox Webhook Test</span>
+                          <span className={chk.security ? 'line-through text-slate-400 font-normal' : ''}>Complete Sandbox Webhook Test</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                        <label className="flex items-center gap-2 cursor-pointer text-slate-700 hover:text-slate-950 font-bold font-sans">
                           <input
                             type="checkbox"
                             checked={chk.terms}
                             onChange={() => toggleChecklistItem(req.id, 'terms')}
-                            className="accent-[#00E676] rounded"
+                            className="accent-[#00C853] rounded"
                           />
-                          <span className={chk.terms ? 'line-through text-slate-500' : ''}>Approve Compliance Terms SLA</span>
+                          <span className={chk.terms ? 'line-through text-slate-400 font-normal' : ''}>Approve Compliance Terms SLA</span>
                         </label>
                       </div>
 
-                      <div className="pt-1.5 border-t border-white/[0.04] flex items-center justify-between text-[9px] text-slate-400">
+                      <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-500 font-bold">
                         <span>Checklist Completion:</span>
-                        <span className="text-[#00E676] font-bold">
+                        <span className="text-[#00C853] font-bold text-xs">
                           {Object.values(chk).filter(Boolean).length} / 3 Complete
                         </span>
                       </div>
@@ -400,10 +398,10 @@ export default function RequestsTab({
                 </div>
 
                 {/* 4. Collapsible History Audit Timeline Selector */}
-                <div className="border-t border-white/[0.03] pt-4 flex items-center justify-between">
+                <div className="border-t border-slate-100 pt-4 flex items-center justify-between">
                   <button
                     onClick={() => toggleTimeline(req.id)}
-                    className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 hover:text-emerald-300 bg-transparent border-none cursor-pointer p-0 font-bold"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-emerald-600 hover:text-emerald-700 bg-transparent border-none cursor-pointer p-0 font-bold"
                   >
                     <span>{expandedTimelineId === req.id ? 'Hide Audit Log Timeline' : 'View Status History & Audit Timeline'}</span>
                     <ArrowRight className={`w-3.5 h-3.5 transform transition-transform duration-150 ${expandedTimelineId === req.id ? 'rotate-90' : ''}`} />
@@ -412,36 +410,36 @@ export default function RequestsTab({
 
                 {/* Timeline rendering */}
                 {expandedTimelineId === req.id && (
-                  <div className="mt-2 bg-black/40 border border-white/[0.03] rounded-xl p-4 space-y-4 animate-[fadeIn_0.2s_ease-out]">
-                    <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-bold">Inbound Status Transition Records</h4>
+                  <div className="mt-2 bg-slate-50/50 border border-slate-200/50 rounded-2xl p-4 space-y-4 animate-[fadeIn_0.2s_ease-out]">
+                    <h4 className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold">Inbound Status Transition Records</h4>
                     {historyLoading && !historyCache[req.id] ? (
-                      <div className="text-center py-4 text-slate-500 text-xs font-mono flex items-center justify-center gap-2">
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                      <div className="text-center py-4 text-slate-400 text-xs font-mono flex items-center justify-center gap-2">
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
                         <span>Fetching credentials database...</span>
                       </div>
                     ) : !historyCache[req.id] || historyCache[req.id].length === 0 ? (
-                      <p className="text-slate-600 text-xs font-mono italic">No status transitions recorded yet for this request in this terminal session.</p>
+                      <p className="text-slate-500 text-xs font-mono italic">No status transitions recorded yet for this request in this terminal session.</p>
                     ) : (
-                      <div className="relative border-l border-white/[0.06] ml-2 pl-4 space-y-4">
+                      <div className="relative border-l border-slate-200/80 ml-2 pl-4 space-y-4">
                         {historyCache[req.id].map((hist, idx) => (
                           <div key={hist.id || idx} className="relative text-xs">
-                            <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-[#00E676]/20 border border-emerald-400" />
+                            <div className="absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full bg-emerald-50 border border-emerald-500" />
                             <div className="space-y-1">
                               <div className="flex items-center gap-2 flex-wrap text-[10px] font-mono">
-                                <span className="text-slate-500">{new Date(hist.changed_at).toLocaleString()}</span>
-                                {hist.previous_status && <span className="text-slate-500 line-through uppercase">{hist.previous_status}</span>}
-                                <span className="text-slate-500">→</span>
-                                <span className="text-emerald-400 uppercase font-semibold">{hist.new_status}</span>
+                                <span className="text-slate-400 font-medium">{new Date(hist.changed_at).toLocaleString()}</span>
+                                {hist.previous_status && <span className="text-slate-400 line-through uppercase font-medium">{hist.previous_status}</span>}
+                                <span className="text-slate-400 font-bold">→</span>
+                                <span className="text-emerald-600 uppercase font-bold">{hist.new_status}</span>
                               </div>
-                              <div className="text-slate-300 font-sans">
-                                Reason: <span className="text-white">{hist.change_reason || "No compliance details provided."}</span>
+                              <div className="text-slate-700 font-sans font-medium">
+                                Reason: <span className="text-slate-900 font-bold">{hist.change_reason || "No compliance details provided."}</span>
                               </div>
                               {hist.metadata?.admin_notes && (
-                                <div className="text-[10px] text-amber-300 italic font-sans">
+                                <div className="text-[10px] text-amber-600 italic font-sans font-semibold">
                                   Notes: "{hist.metadata.admin_notes}"
                                 </div>
                               )}
-                              <div className="text-slate-500 text-[10px] font-mono">
+                              <div className="text-slate-400 text-[10px] font-mono font-medium">
                                 Action Actor ID: {hist.changed_by || "admin_super_user"}
                               </div>
                             </div>

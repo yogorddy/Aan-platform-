@@ -332,37 +332,36 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
   }
 
   return (
-    <div className="min-h-screen bg-[#050507] text-[#8c919d] flex flex-col font-sans selection:bg-emerald-500/10 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-600 flex flex-col font-sans selection:bg-[#00D632]/20 selection:text-black relative overflow-hidden animate-[fadeIn_0.2s_ease-out]">
       
       {/* Background Ambience */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-emerald-500/[0.01] rounded-full blur-[180px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[#00D632]/[0.02] rounded-full blur-[180px] pointer-events-none" />
 
       {/* Global breadcrumb & anchor */}
-      <div className="bg-[#08090c] border-b border-white/[0.04] py-3.5 px-6 z-10">
+      <div className="bg-white border-b border-slate-200/60 py-3.5 px-6 z-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <div 
               onClick={() => onNavigate('landing')}
-              className="flex gap-0.5 items-end cursor-pointer group"
+              className="flex gap-1 items-center cursor-pointer group"
             >
-              <span className="w-1.5 h-3.5 bg-emerald-400 rounded-sm group-hover:bg-emerald-300 transition-all" />
-              <span className="w-1.5 h-4.5 bg-white rounded-sm" />
-              <span className="font-sans font-semibold text-white text-xs ml-2 tracking-tight">AAN Trust & Resource Center</span>
+              <span className="w-1.5 h-3 bg-[#00D632] rounded-full group-hover:scale-110 transition-all" />
+              <span className="font-sans font-bold text-black text-sm tracking-tight">AAN Trust & Resource Center</span>
             </div>
-            <span className="text-white/20 text-xs">/</span>
-            <span className="font-mono text-[9px] bg-white/[0.02] px-2 py-0.5 rounded text-emerald-400 uppercase tracking-widest border border-white/[0.05]">
+            <span className="text-slate-200 text-xs">/</span>
+            <span className="font-mono text-[9px] bg-[#00D632]/5 px-2.5 py-1 rounded text-[#00C853] uppercase tracking-widest border border-[#00D632]/10 font-semibold">
               {activeTab}
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-[10px] font-mono">
-            <span className="text-[#646e7a] flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <div className="flex items-center gap-4 text-xs">
+            <span className="text-slate-400 flex items-center gap-1.5 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#00D632] animate-pulse" />
               Live Trust Ledger Active
             </span>
             <button 
               onClick={() => onNavigate('landing')}
-              className="bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] text-white font-medium px-2.5 py-1 rounded-lg transition-all text-[9px] uppercase tracking-wide cursor-pointer"
+              className="bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-800 font-semibold px-3 py-1.5 rounded-full transition-all text-xs cursor-pointer"
             >
               Return Home
             </button>
@@ -374,11 +373,11 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
         
         {/* LEFT COLUMN: Clean Category Selector */}
         <aside className="lg:col-span-3 space-y-4">
-          <div className="bg-[#08090c] border border-white/[0.04] p-4 rounded-xl sticky top-6">
-            <div className="mb-4 pb-3 border-b border-white/[0.04]">
-              <span className="font-mono text-[9px] text-emerald-400 tracking-wider font-semibold uppercase">Resource Directory</span>
-              <h2 className="text-sm font-semibold text-white tracking-tight mt-0.5">Chapters & Assets</h2>
-              <p className="text-[10px] text-[#646e7a] mt-1 leading-relaxed">Select a category to view specifications, live vectors, or sandbox environments.</p>
+          <div className="bg-white border border-slate-200/60 p-5 rounded-2xl sticky top-6 shadow-sm">
+            <div className="mb-4 pb-3 border-b border-slate-100">
+              <span className="font-mono text-[9px] text-[#00C853] tracking-wider font-bold uppercase">Resource Directory</span>
+              <h2 className="text-sm font-bold text-slate-900 tracking-tight mt-0.5">Chapters & Assets</h2>
+              <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">Select a category to view specifications, live vectors, or sandbox environments.</p>
             </div>
 
             <nav className="flex flex-col gap-1">
@@ -391,15 +390,15 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                     onClick={() => handleCategoryChange(cat.id)}
                     className={`w-full text-left font-sans text-xs py-2 px-3 rounded-lg transition-all flex items-center justify-between group cursor-pointer ${
                       isActive 
-                        ? 'bg-emerald-500/[0.03] border border-emerald-500/[0.12] text-white font-medium shadow-sm' 
-                        : 'border border-transparent text-[#646e7a] hover:text-slate-300 hover:bg-white/[0.01]'
+                        ? 'bg-slate-50 border border-slate-200/60 text-slate-900 font-semibold shadow-sm' 
+                        : 'border border-transparent text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-400' : 'text-[#404652] group-hover:text-slate-400'}`} />
+                      <Icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                       <span className="truncate">{cat.label}</span>
                     </div>
-                    <ArrowRight className={`w-3 h-3 transition-transform ${isActive ? 'text-emerald-400 translate-x-0.5' : 'text-transparent group-hover:text-[#404652]'}`} />
+                    <ArrowRight className={`w-3 h-3 transition-transform ${isActive ? 'text-emerald-600 translate-x-0.5' : 'text-transparent group-hover:text-slate-400'}`} />
                   </button>
                 );
               })}
@@ -408,19 +407,19 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
         </aside>
 
         {/* RIGHT COLUMN: Streamlined Bento Space */}
-        <main className="lg:col-span-9 bg-[#08090c]/40 border border-white/[0.04] rounded-2xl p-6 md:p-8 space-y-6">
+        <main className="lg:col-span-9 bg-white border border-slate-200/60 rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
           
           {/* ==================== 1. CORE PLATFORM & APIs ==================== */}
           {activeTab === 'docs' && (
-            <div className="space-y-6 animate-fade-in">
+            <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
               {/* Inner Tabs for Docs */}
-              <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                  <span className="font-mono text-[9px] text-emerald-400 tracking-wider font-bold uppercase block">Chapter 01</span>
-                  <h1 className="text-xl font-semibold text-white tracking-tight">Core Platform & APIs</h1>
+                  <span className="font-mono text-[9px] text-emerald-600 tracking-wider font-bold uppercase block">Chapter 01</span>
+                  <h1 className="text-xl font-bold text-slate-900 tracking-tight">Core Platform & APIs</h1>
                 </div>
                 
-                <div className="flex gap-1.5 bg-black/40 p-1 rounded-lg border border-white/[0.04] text-[10px] font-mono">
+                <div className="flex gap-1 bg-slate-50 p-1 rounded-full border border-slate-100 text-[10px] font-semibold">
                   {[
                     { id: 'overview', label: 'Overview' },
                     { id: 'api-ref', label: 'API Reference' },
@@ -429,10 +428,10 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                     <button
                       key={sub.id}
                       onClick={() => setInnerSubTab(sub.id)}
-                      className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-full transition-all cursor-pointer ${
                         innerSubTab === sub.id
-                          ? 'bg-white/[0.03] text-white font-medium border border-white/[0.06]'
-                          : 'text-[#646e7a] hover:text-slate-300'
+                          ? 'bg-white text-slate-950 shadow-sm font-semibold'
+                          : 'text-slate-500 hover:text-slate-900'
                       }`}
                     >
                       {sub.label}
@@ -444,10 +443,10 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
               {/* Sub-tab 1A: Overview */}
               {innerSubTab === 'overview' && (
                 <div className="space-y-6">
-                  <div className="p-4 bg-white/[0.01] border border-white/[0.04] rounded-xl font-mono text-xs text-slate-300 space-y-2">
-                    <div className="flex justify-between items-center text-[#646e7a] pb-2 border-b border-white/[0.04] text-[10px]">
+                  <div className="p-5 bg-slate-50 border border-slate-200/50 rounded-2xl font-mono text-xs text-slate-700 space-y-2">
+                    <div className="flex justify-between items-center text-slate-400 pb-2 border-b border-slate-150 text-[10px]">
                       <span>SYSTEM ARCHITECTURE SUMMARY</span>
-                      <span className="text-emerald-400 font-bold">VERSION 0.3.0</span>
+                      <span className="text-[#00C853] font-bold">VERSION 0.3.0</span>
                     </div>
                     <p className="leading-relaxed">
                       AAN serves as a decentralized, non-custodial humanness verification standard. It is an active decision layer that allows developers to prove client integrity instantly without permanent storage of user identifiers.

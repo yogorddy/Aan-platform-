@@ -3767,6 +3767,10 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
     try {
       // Run stateful Graph Analysis Engine on live state
       GraphAnalysisEngine.analyzeAndUpdateState(db);
+      // Synchronize dynamic results to Supabase asynchronously
+      supabaseService.syncGraphIntelligenceToDb(db).catch(err => {
+        console.warn("[AAN DB SYNC] Async trust graph sync failed:", err);
+      });
     } catch (err) {
       console.warn("[GraphAnalysisEngine] live run failed:", err);
     }
@@ -3788,6 +3792,10 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
   app.post("/api/trust/graph/analyze", (req, res) => {
     try {
       const result = GraphAnalysisEngine.analyzeAndUpdateState(db);
+      // Synchronize dynamic results to Supabase asynchronously
+      supabaseService.syncGraphIntelligenceToDb(db).catch(err => {
+        console.warn("[AAN DB SYNC] Async trust graph sync failed:", err);
+      });
       res.json({
         success: true,
         message: "Graph Intelligence Analysis successfully executed",
@@ -3806,6 +3814,10 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
   app.get("/api/trust/graph/analysis-summary", (req, res) => {
     try {
       const result = GraphAnalysisEngine.analyzeAndUpdateState(db);
+      // Synchronize dynamic results to Supabase asynchronously
+      supabaseService.syncGraphIntelligenceToDb(db).catch(err => {
+        console.warn("[AAN DB SYNC] Async trust graph sync failed:", err);
+      });
       res.json({
         metrics: result.metrics,
         anomalies_count: result.anomalies.length,
