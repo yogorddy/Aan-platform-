@@ -3,7 +3,7 @@ import {
   Shield, Activity, Users, Database, Sliders, Mail, RefreshCw, Layers, Layout, Eye, Search, Maximize2, Minimize2, Check, ExternalLink, Settings, ShieldAlert, Cpu
 } from 'lucide-react';
 import { AuditLog, IntegrationRequest, IntegrationRequestStatusHistory } from '../types';
-import AANShieldLogo from './AANShieldLogo';
+import AanShieldLogo from './AanShieldLogo';
 
 // Import our highly polished, enterprise modular subcomponents
 import HealthTab from './admin/HealthTab';
@@ -245,10 +245,10 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           {/* Brand Logo Header */}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-[#00D632]">
-              <AANShieldLogo className="w-5 h-5" strokeWidth={6} />
+              <AanShieldLogo className="w-5 h-5" strokeWidth={6} />
             </div>
             <div>
-              <span className="font-bold text-slate-950 tracking-tight text-xs block leading-none">AAN</span>
+              <span className="font-bold text-slate-950 tracking-tight text-xs block leading-none">Aan</span>
               <span className="text-[8px] font-mono uppercase text-[#00C853] tracking-widest block mt-1">Admin Platform v2.0</span>
             </div>
           </div>

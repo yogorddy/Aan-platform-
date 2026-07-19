@@ -48,12 +48,12 @@ import {
   canRoleAccessLesson
 } from "../academyPermissions";
 
-interface AANAcademyProps {
+interface AanAcademyProps {
   initialLessonId?: string;
   onNavigatePage?: (pageId: string) => void;
 }
 
-export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcademyProps) {
+export default function AanAcademy({ initialLessonId, onNavigatePage }: AanAcademyProps) {
   const [lessons] = useState<AcademyLesson[]>(() => {
     const list = getCompleteLessonsList();
     const unique: AcademyLesson[] = [];
@@ -232,7 +232,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
     let colorClass = "text-emerald-400 bg-emerald-950 border border-emerald-900";
     if (score >= 70) {
       tier = "CRITICAL_FRAUD";
-      colorClass = "text-rose-400 bg-rose-950 border border-rose-900";
+      colorClass = "text-rose-600 bg-rose-50 border border-rose-200";
     } else if (score >= 40) {
       tier = "STAGE_1_REVIEW";
       colorClass = "text-amber-400 bg-amber-950 border border-amber-900";
@@ -315,9 +315,9 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-[#00D632]" />
-              <span className="font-bold text-xs uppercase tracking-wider text-slate-900">AAN Academy</span>
+              <span className="font-bold text-xs uppercase tracking-wider text-slate-900">Aan Academy</span>
             </div>
-            <span className="text-[10px] font-bold text-[#00C853] bg-[#00D632]/10 px-2 py-0.5 border border-[#00D632]/20 rounded font-mono">
+            <span className="text-[10px] font-bold text-emerald-700 bg-[#00D632]/10 px-2 py-0.5 border border-[#00D632]/20 rounded font-mono">
               LIVING DOCS
             </span>
           </div>
@@ -326,7 +326,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
           <div className="mb-4 bg-slate-50 p-4.5 rounded-2xl border border-slate-200/60">
             <div className="flex justify-between items-center mb-1.5">
               <span className="text-[10px] text-slate-500 font-semibold">Academic Progress</span>
-              <span className="text-[10px] font-bold text-[#00C853]">{progressPercent}% ({totalCompleted}/{lessons.length})</span>
+              <span className="text-[10px] font-bold text-emerald-700">{progressPercent}% ({totalCompleted}/{lessons.length})</span>
             </div>
             <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
               <div 
@@ -345,10 +345,10 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               </span>
               <button 
                 onClick={() => setShowRbacSettings(true)}
-                className="text-[10px] text-[#00C853] hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
+                className="text-[10px] text-emerald-700 hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
                 title="Manage Custom Roles & Permissions"
               >
-                <Settings className="w-3 h-3 text-[#00C853]" />
+                <Settings className="w-3 h-3 text-emerald-700" />
                 Manage
               </button>
             </div>
@@ -376,7 +376,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
           </div>
 
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
             <input 
               type="text"
               placeholder="Search components, SQL, APIs..."
@@ -388,7 +388,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
         </div>
 
         {/* Category switcher */}
-        <div className="px-3 py-2 border-b border-white/[0.06] max-h-32 overflow-y-auto flex md:flex-wrap gap-1.5 scrollbar-thin">
+        <div className="px-3 py-2 border-b border-slate-200 max-h-32 overflow-y-auto flex md:flex-wrap gap-1.5 scrollbar-thin">
           {categories.map(cat => (
             <button
               key={cat.id}
@@ -398,8 +398,8 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               }}
               className={`text-[10px] px-2.5 py-1 rounded-md font-sans transition-all shrink-0 cursor-pointer ${
                 selectedCategory === cat.id 
-                  ? "bg-[#00E676] text-black font-semibold shadow-[0_0_12px_rgba(0,230,118,0.2)]" 
-                  : "bg-white/[0.01] text-slate-400 hover:text-slate-200 border border-white/[0.04]"
+                  ? "bg-emerald-500 text-white font-semibold shadow-[0_0_12px_rgba(0,230,118,0.2)]" 
+                  : "bg-white text-slate-500 hover:text-slate-800 border border-slate-200"
               }`}
             >
               {cat.name}
@@ -414,7 +414,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               <p className="text-xs text-slate-500 font-mono">No matching lessons found.</p>
               <button 
                 onClick={() => setSearchQuery("")}
-                className="mt-2 text-[10px] text-[#00E676] hover:underline"
+                className="mt-2 text-[10px] text-emerald-600 hover:underline"
               >
                 Clear Search
               </button>
@@ -433,36 +433,36 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                   }}
                   className={`w-full text-left p-2.5 rounded-lg flex items-center justify-between group transition-all cursor-pointer ${
                     isSelected 
-                      ? "bg-[#00E676]/10 border border-[#00E676]/35 shadow-md"
-                      : "hover:bg-white/[0.02] border border-transparent"
+                      ? "bg-emerald-50 border border-emerald-300 shadow-md"
+                      : "hover:bg-slate-50 border border-transparent"
                   }`}
                 >
                   <div className="space-y-1 min-w-0 pr-2 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className={`text-[10px] font-mono leading-none tracking-wide text-xs font-semibold ${
-                        isSelected ? "text-[#00E676]" : "text-slate-200"
-                      } ${!isAccessible ? "text-slate-400" : ""}`}>
+                        isSelected ? "text-emerald-600" : "text-slate-800"
+                      } ${!isAccessible ? "text-slate-500" : ""}`}>
                         {lesson.title}
                       </span>
                       {isDone && (
-                        <CheckCircle className="w-3.5 h-3.5 text-[#00E676] fill-[#00E676]/10 shrink-0" />
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600 fill-[#00E676]/10 shrink-0" />
                       )}
                       {!isAccessible && (
-                        <span className="text-[8px] font-mono bg-rose-950 text-rose-400 border border-rose-900 px-1 rounded shrink-0">
+                        <span className="text-[8px] font-mono bg-rose-50 text-rose-600 border border-rose-200 px-1 rounded shrink-0">
                           Locked
                         </span>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-400 line-clamp-1">
+                    <p className="text-[10px] text-slate-500 line-clamp-1">
                       {lesson.overview}
                     </p>
                   </div>
                   <div className="shrink-0 ml-1.5">
                     {!isAccessible ? (
-                      <Lock className="w-3 h-3 text-rose-400" />
+                      <Lock className="w-3 h-3 text-rose-600" />
                     ) : (
                       <ChevronRight className={`w-3.5 h-3.5 text-slate-500 select-none transition-transform ${
-                        isSelected ? "translate-x-0.5 text-[#00E676]" : "group-hover:translate-x-0.5"
+                        isSelected ? "translate-x-0.5 text-emerald-600" : "group-hover:translate-x-0.5"
                       }`} />
                     )}
                   </div>
@@ -473,14 +473,14 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
         </div>
         
         {/* Suggested Searches Footer */}
-        <div className="p-4 border-t border-white/[0.06] bg-black/40 hidden md:block select-none">
+        <div className="p-4 border-t border-slate-200 bg-slate-100/40 hidden md:block select-none">
           <span className="text-[9px] font-mono uppercase tracking-wider text-slate-500 block mb-1.5">Suggested Queries</span>
           <div className="flex flex-wrap gap-1 leading-normal">
             {["GDPR compliance", "Risk Engine", "Row Level Security", "API Keys", "Liveness Check"].map(term => (
               <button
                 key={term}
                 onClick={() => setSearchQuery(term)}
-                className="text-[9px] font-mono hover:text-[#00E676] hover:border-[#00E676]/30 bg-black border border-white/[0.04] px-1.5 py-0.5 rounded text-slate-400 cursor-pointer"
+                className="text-[9px] font-mono hover:text-emerald-600 hover:border-[#00E676]/30 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded text-slate-500 cursor-pointer"
               >
                 "{term}"
               </button>
@@ -490,26 +490,26 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
       </div>
  
       {/*  RIGHT ACADEMY ACTIVE LESSON GRID */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#050507]">
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
         {showRbacSettings ? (
           <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 scrollbar-thin">
             {/* Header banner */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/[0.04] pb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-6">
               <div className="space-y-1.5 text-left">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-rose-400 font-extrabold bg-rose-950/80 px-2.5 py-0.5 border border-rose-900/40 rounded">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-rose-600 font-extrabold bg-rose-50/80 px-2.5 py-0.5 border border-rose-200/40 rounded">
                   ADMINISTRATIVE PORTAL
                 </span>
-                <h1 className="text-xl sm:text-2xl font-mono tracking-tight font-extrabold text-white flex items-center gap-2">
-                  <Shield className="w-6 h-6 text-[#00E676] animate-pulse" />
+                <h1 className="text-xl sm:text-2xl font-mono tracking-tight font-extrabold text-slate-900 flex items-center gap-2">
+                  <Shield className="w-6 h-6 text-emerald-600 animate-pulse" />
                   Enterprise RBAC & Identity System
                 </h1>
-                <p className="text-xs text-slate-400 font-sans max-w-2xl leading-relaxed">
+                <p className="text-xs text-slate-500 font-sans max-w-2xl leading-relaxed">
                   Configure real-time Role-Based Access Control policies. Switch user identities to simulate client compliance boundaries or spin up dynamic custom roles with custom lesson permissions.
                 </p>
               </div>
               <button
                 onClick={() => setShowRbacSettings(false)}
-                className="px-4 py-2 bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] rounded-lg text-xs font-mono font-bold text-slate-300 flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
+                className="px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-700 flex items-center gap-1.5 cursor-pointer transition-all shrink-0"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Return to Lessons
@@ -517,7 +517,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
             </div>
  
             {rbacNotification && (
-              <div className="bg-[#00E676]/10 border border-[#00E676]/20 text-[#00E676] text-xs py-3 px-4 rounded-lg flex items-center gap-2 animate-fadeIn font-mono">
+              <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 text-xs py-3 px-4 rounded-lg flex items-center gap-2 animate-fadeIn font-mono">
                 <Check className="w-4 h-4 animate-bounce" />
                 <span>{rbacNotification}</span>
               </div>
@@ -528,9 +528,9 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               
               {/* Left Column: Role Directory (7 cols) */}
               <div className="xl:col-span-7 space-y-6">
-                <div className="bg-white/[0.01] border border-white/[0.04] rounded-xl p-5 space-y-4">
-                  <h3 className="text-xs font-mono font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                    <Users className="w-4 h-4 text-[#00E676]" />
+                <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+                  <h3 className="text-xs font-mono font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <Users className="w-4 h-4 text-emerald-600" />
                     Enterprise Roles Directory & Policies
                   </h3>
                   
@@ -544,21 +544,21 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                           key={roleName}
                           className={`p-3.5 rounded-lg border transition-all ${
                             isAc 
-                              ? "bg-[#00E676]/5 border-[#00E676]/25 shadow-md shadow-black" 
-                              : "bg-black border-white/[0.04]"
+                              ? "bg-emerald-50/60 border-[#00E676]/25 shadow-md shadow-black" 
+                              : "bg-slate-50 border-slate-200"
                           }`}
                         >
                           <div className="flex justify-between items-start gap-3 text-left">
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-mono text-xs font-black text-white">{roleName}</span>
+                                <span className="font-mono text-xs font-black text-slate-900">{roleName}</span>
                                 {isAc && (
-                                  <span className="text-[9px] font-mono uppercase bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/20 px-1.5 py-0.5 rounded font-black font-mono">
+                                  <span className="text-[9px] font-mono uppercase bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded font-black font-mono">
                                     Active Simulation Identity
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-slate-400 font-sans mt-1 leading-relaxed">
+                              <p className="text-[11px] text-slate-500 font-sans mt-1 leading-relaxed">
                                 {ROLE_DESCRIPTION_MAP[roleName as AcademyRole] || "Default preconfigured standard enterprise policy model."}
                               </p>
                             </div>
@@ -569,19 +569,19 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                                   setRbacNotification(`Simulated profile updated to: ${roleName}`);
                                   setTimeout(() => setRbacNotification(""), 3000);
                                 }}
-                                className="px-2.5 py-1 text-[10px] font-mono text-[#00E676] bg-[#00E676]/10 hover:bg-[#00E676]/20 border border-[#00E676]/20 rounded cursor-pointer transition-all shrink-0"
+                                className="px-2.5 py-1 text-[10px] font-mono text-emerald-600 bg-emerald-50 hover:bg-[#00E676]/20 border border-emerald-200 rounded cursor-pointer transition-all shrink-0"
                               >
                                 Test Role
                               </button>
                             )}
                           </div>
                           
-                          <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex flex-wrap items-center gap-1.5">
+                          <div className="mt-3 pt-2.5 border-t border-slate-200 flex flex-wrap items-center gap-1.5">
                             <span className="text-[9px] font-mono uppercase text-slate-500 mr-1.5">Authorized Level:</span>
                             {permissionsList.map((vis) => (
                               <span 
                                 key={vis}
-                                className="text-[9px] font-mono bg-white/[0.02] border border-white/[0.05] text-slate-400 px-1.5 py-0.5 rounded"
+                                className="text-[9px] font-mono bg-slate-50 border border-slate-200 text-slate-500 px-1.5 py-0.5 rounded"
                               >
                                 {vis}
                               </span>
@@ -599,24 +599,24 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                           key={cr.name}
                           className={`p-3.5 rounded-lg border transition-all ${
                             isAc 
-                              ? "bg-[#00E676]/5 border-[#00E676]/25 shadow-md shadow-black" 
-                              : "bg-black border-white/[0.04]"
+                              ? "bg-emerald-50/60 border-[#00E676]/25 shadow-md shadow-black" 
+                              : "bg-slate-50 border-slate-200"
                           }`}
                         >
                           <div className="flex justify-between items-start gap-3">
                             <div className="text-left">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-mono text-xs font-black text-white">{cr.name}</span>
+                                <span className="font-mono text-xs font-black text-slate-900">{cr.name}</span>
                                 <span className="text-[9px] font-mono uppercase bg-purple-950 text-purple-400 border border-purple-900/30 px-1.5 py-0.5 rounded font-black leading-none">
                                   Custom Role (Saved)
                                 </span>
                                 {isAc && (
-                                  <span className="text-[9px] font-mono uppercase bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/20 px-1.5 py-0.5 rounded font-black px-1 leading-none py-0.2">
+                                  <span className="text-[9px] font-mono uppercase bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded font-black px-1 leading-none py-0.2">
                                     Active
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-slate-400 font-sans mt-2 leading-relaxed">
+                              <p className="text-[11px] text-slate-500 font-sans mt-2 leading-relaxed">
                                 {cr.description || "Database persistent user custom role definitions."}
                               </p>
                             </div>
@@ -628,7 +628,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                                       setRbacNotification(`Simulated profile updated to: ${cr.name}`);
                                       setTimeout(() => setRbacNotification(""), 3000);
                                     }}
-                                    className="px-2.5 py-1 text-[10px] font-mono text-[#00E676] bg-[#00E676]/10 hover:bg-[#00E676]/20 border border-[#00E676]/20 rounded cursor-pointer transition-all shrink-0"
+                                    className="px-2.5 py-1 text-[10px] font-mono text-emerald-600 bg-emerald-50 hover:bg-[#00E676]/20 border border-emerald-200 rounded cursor-pointer transition-all shrink-0"
                                   >
                                     Test
                                   </button>
@@ -645,7 +645,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                                   setRbacNotification(`Role "${cr.name}" removed successfully.`);
                                   setTimeout(() => setRbacNotification(""), 3000);
                                 }}
-                                className="px-2 py-1 text-[10px] font-mono text-rose-400 hover:text-rose-300 hover:bg-rose-950/20 bg-black border border-rose-950/40 rounded cursor-pointer transition-all"
+                                className="px-2 py-1 text-[10px] font-mono text-rose-600 hover:text-rose-600 hover:bg-rose-50/20 bg-slate-50 border border-rose-950/40 rounded cursor-pointer transition-all"
                                 title="Delete Custom Role"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -653,7 +653,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             </div>
                           </div>
                           
-                          <div className="mt-3 pt-2.5 border-t border-white/[0.04] flex flex-wrap items-center gap-1.5 font-mono">
+                          <div className="mt-3 pt-2.5 border-t border-slate-200 flex flex-wrap items-center gap-1.5 font-mono">
                             <span className="text-[9px] font-mono uppercase text-slate-500 mr-1.5">Allowed Lessons:</span>
                             <span className="text-[9px] font-mono bg-purple-950/40 border border-purple-900/30 text-purple-400 px-1.5 py-0.5 rounded font-black leading-none">
                               {cr.allowedLessonIds.length} of {lessons.length} Modules
@@ -671,10 +671,10 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
               {/* Right Column: Custom Role Creator (5 cols) */}
               <div className="xl:col-span-5 space-y-6">
-                <div className="bg-white/[0.01] border border-white/[0.04] rounded-xl p-5 space-y-4">
+                <div className="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
                   <div className="space-y-1 text-left">
-                    <h3 className="text-xs font-mono font-extrabold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                      <Plus className="w-4 h-4 text-[#00E676] animate-pulse" />
+                    <h3 className="text-xs font-mono font-extrabold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                      <Plus className="w-4 h-4 text-emerald-600 animate-pulse" />
                       Dynamic Custom Role Creator
                     </h3>
                     <p className="text-[10px] text-slate-500 font-sans leading-relaxed">
@@ -684,37 +684,37 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
                   {/* Name field */}
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-mono text-slate-400 uppercase font-black">Role Name / Handle</label>
+                    <label className="text-[10px] font-mono text-slate-500 uppercase font-black">Role Name / Handle</label>
                     <input
                       type="text"
                       placeholder="e.g., Compliance Auditor-1"
                       value={newRoleName}
                       onChange={(e) => setNewRoleName(e.target.value)}
-                      className="w-full bg-black border border-white/[0.08] rounded px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20 font-mono"
+                      className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-xs text-slate-800 placeholder-slate-600 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20 font-mono"
                     />
                   </div>
 
                   {/* Description field */}
                   <div className="space-y-1.5 text-left">
-                    <label className="text-[10px] font-mono text-slate-400 uppercase font-black">Description</label>
+                    <label className="text-[10px] font-mono text-slate-500 uppercase font-black">Description</label>
                     <textarea
                       placeholder="e.g., Handles network privacy compliance reports."
                       value={newRoleDesc}
                       onChange={(e) => setNewRoleDesc(e.target.value)}
                       rows={2}
-                      className="w-full bg-black border border-white/[0.08] rounded px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20 font-sans"
+                      className="w-full bg-slate-50 border border-slate-200 rounded px-3 py-2 text-xs text-slate-800 placeholder-slate-600 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20 font-sans"
                     />
                   </div>
 
                   {/* Lessons selection checklist */}
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center bg-black px-2 py-1 border border-white/[0.04] rounded">
-                      <label className="text-[10px] font-mono text-slate-400 uppercase font-black">Topic Permissions ({newRoleLessons.length})</label>
+                    <div className="flex justify-between items-center bg-slate-50 px-2 py-1 border border-slate-200 rounded">
+                      <label className="text-[10px] font-mono text-slate-500 uppercase font-black">Topic Permissions ({newRoleLessons.length})</label>
                       <div className="flex gap-2">
                         <button
                           type="button"
                           onClick={() => setNewRoleLessons(lessons.map(l => l.id))}
-                          className="text-[9px] font-mono text-[#00E676] hover:underline cursor-pointer"
+                          className="text-[9px] font-mono text-emerald-600 hover:underline cursor-pointer"
                         >
                           All
                         </button>
@@ -728,13 +728,13 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       </div>
                     </div>
                     
-                    <div className="h-44 overflow-y-auto border border-white/[0.04] rounded-lg p-2.5 bg-black/40 space-y-1.5 scrollbar-thin">
+                    <div className="h-44 overflow-y-auto border border-slate-200 rounded-lg p-2.5 bg-slate-100/40 space-y-1.5 scrollbar-thin">
                       {lessons.map((lesson) => {
                         const isChecked = newRoleLessons.includes(lesson.id);
                         return (
                           <label 
                             key={lesson.id}
-                            className="flex items-center gap-2 cursor-pointer py-1 hover:bg-white/[0.02] rounded px-1 min-w-0"
+                            className="flex items-center gap-2 cursor-pointer py-1 hover:bg-slate-50 rounded px-1 min-w-0"
                           >
                             <input
                               type="checkbox"
@@ -746,10 +746,10 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                                   setNewRoleLessons([...newRoleLessons, lesson.id]);
                                 }
                               }}
-                              className="rounded border-white/[0.08] text-[#00E676] bg-black focus:ring-[#00E676] focus:ring-offset-black h-3.5 w-3.5 cursor-pointer shrink-0"
+                              className="rounded border-slate-200 text-emerald-600 bg-slate-50 focus:ring-[#00E676] focus:ring-offset-black h-3.5 w-3.5 cursor-pointer shrink-0"
                             />
                             <div className="min-w-0 leading-none text-left">
-                              <span className="font-mono text-[10px] font-black block text-slate-300 truncate">{lesson.title}</span>
+                              <span className="font-mono text-[10px] font-black block text-slate-700 truncate">{lesson.title}</span>
                               <span className="text-[8px] font-mono text-slate-500 uppercase font-bold pr-1">{LESSON_VISIBILITY_MAP[lesson.id]} Mode</span>
                             </div>
                           </label>
@@ -788,7 +788,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       setRbacNotification(`Role "${trimmedName}" created and persistent in database!`);
                       setTimeout(() => setRbacNotification(""), 3000);
                     }}
-                    className="w-full py-2.5 bg-[#00E676] hover:bg-[#00ff87] text-black font-semibold font-mono text-xs font-bold uppercase rounded-lg cursor-pointer transition-all shadow-lg active:scale-[0.98] text-center"
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold font-mono text-xs font-bold uppercase rounded-lg cursor-pointer transition-all shadow-lg active:scale-[0.98] text-center"
                   >
                     Save Custom Role Record
                   </button>
@@ -799,36 +799,36 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
           </div>
         ) : !canRoleAccessLesson(activeRole, activeLesson.id, customRoles) ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-2xl mx-auto space-y-6">
-            <div className="w-16 h-16 rounded-full bg-rose-950/40 border border-rose-800 flex items-center justify-center shadow-lg shadow-rose-950/50 animate-pulse mt-8">
+            <div className="w-16 h-16 rounded-full bg-rose-50/40 border border-rose-800 flex items-center justify-center shadow-lg shadow-rose-950/50 animate-pulse mt-8">
               <Lock className="w-8 h-8 text-rose-500" />
             </div>
             
             <div className="space-y-2">
-              <span className="text-[10px] font-mono uppercase bg-rose-950/60 text-rose-400 border border-rose-900/30 px-2.5 py-1 rounded font-bold font-mono">
+              <span className="text-[10px] font-mono uppercase bg-rose-50/60 text-rose-600 border border-rose-200/30 px-2.5 py-1 rounded font-bold font-mono">
                 SECURE ACCESS PROTOCOL BLOCKED
               </span>
-              <h2 className="text-xl font-mono font-extrabold text-white tracking-tight">
+              <h2 className="text-xl font-mono font-extrabold text-slate-900 tracking-tight">
                 Section Level Restricted
               </h2>
             </div>
 
-            <div className="bg-white/[0.01] border border-white/[0.05] rounded-xl p-5 text-left w-full space-y-4 text-xs font-mono">
-              <div className="grid grid-cols-2 gap-2 border-b border-white/[0.04] pb-3">
-                <span className="text-slate-400">Target Resource:</span>
-                <span className="text-white text-right font-bold">{activeLesson.title}</span>
-                <span className="text-slate-400">Class Rating:</span>
-                <span className="text-[#00E676] text-right font-bold uppercase">{LESSON_VISIBILITY_MAP[activeLesson.id] || "Super Admin"} Level</span>
+            <div className="bg-white border border-slate-200 rounded-xl p-5 text-left w-full space-y-4 text-xs font-mono">
+              <div className="grid grid-cols-2 gap-2 border-b border-slate-200 pb-3">
+                <span className="text-slate-500">Target Resource:</span>
+                <span className="text-slate-900 text-right font-bold">{activeLesson.title}</span>
+                <span className="text-slate-500">Class Rating:</span>
+                <span className="text-emerald-600 text-right font-bold uppercase">{LESSON_VISIBILITY_MAP[activeLesson.id] || "Super Admin"} Level</span>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <span className="text-slate-400">Authenticated Identity:</span>
+                <span className="text-slate-500">Authenticated Identity:</span>
                 <span className="text-amber-400 text-right font-bold">{activeRole}</span>
-                <span className="text-slate-400">Permission Check:</span>
+                <span className="text-slate-500">Permission Check:</span>
                 <span className="text-rose-500 text-right font-bold">DENIED </span>
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm font-sans text-slate-400 leading-relaxed">
-              Explain This Integration error: You do not have permission to view the technical specifications, database architecture, or endpoints for <strong className="text-slate-200">"{activeLesson.title}"</strong> under your current simulated role profiles.
+            <p className="text-xs sm:text-sm font-sans text-slate-500 leading-relaxed">
+              Explain This Integration error: You do not have permission to view the technical specifications, database architecture, or endpoints for <strong className="text-slate-800">"{activeLesson.title}"</strong> under your current simulated role profiles.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row gap-3 w-full justify-center">
@@ -850,13 +850,13 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                   
                   setActiveRole(recommendedRole);
                 }}
-                className="px-5 py-2.5 rounded-lg bg-[#00E676] hover:bg-[#00ff87] text-black font-semibold font-mono text-xs font-bold transition-all shadow-lg active:scale-95 cursor-pointer"
+                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold font-mono text-xs font-bold transition-all shadow-lg active:scale-95 cursor-pointer"
               >
                 Switch Role to Authorized Profile
               </button>
               <button
                 onClick={() => setShowRbacSettings(true)}
-                className="px-5 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06] text-slate-300 hover:text-slate-100 font-mono text-xs font-bold transition-all hover:border-white/[0.12] cursor-pointer"
+                className="px-5 py-2.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-950 font-mono text-xs font-bold transition-all hover:border-slate-300 cursor-pointer"
               >
                 Configure Custom Policies
               </button>
@@ -865,26 +865,26 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
         ) : (
           <>
             {/* Topic Banner Header */}
-            <div className="p-6 border-b border-white/[0.04] bg-white/[0.01] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="p-6 border-b border-slate-200 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="space-y-1.5 min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#00E676] font-extrabold bg-[#00E676]/10 px-2 py-0.5 border border-[#00E676]/25 rounded">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-600 font-extrabold bg-emerald-50 px-2 py-0.5 border border-[#00E676]/25 rounded">
                 Category: {activeLesson.category.replace("-", " & ").toUpperCase()}
               </span>
-              <span className="text-[10px] font-mono uppercase text-slate-400 bg-white/[0.03] px-2 py-0.5 rounded">
+              <span className="text-[10px] font-mono uppercase text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                 Version: {activeLesson.version}
               </span>
               <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
                 activeLesson.status === "Production Ready" 
-                  ? "bg-emerald-950/60 border-emerald-900/40 text-[#00E676]" 
+                  ? "bg-emerald-950/60 border-emerald-900/40 text-emerald-600" 
                   : activeLesson.status === "MVP"
-                  ? "bg-[#00E676]/10 border-[#00E676]/25 text-[#00E676]"
+                  ? "bg-emerald-50 border-[#00E676]/25 text-emerald-600"
                   : "bg-amber-950/60 border-amber-900/40 text-amber-400"
               }`}>
                 {activeLesson.status}
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-mono tracking-tight font-extrabold text-white">
+            <h1 className="text-xl sm:text-2xl font-mono tracking-tight font-extrabold text-slate-900">
               {activeLesson.title}
             </h1>
           </div>
@@ -895,13 +895,13 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               onClick={() => toggleLessonCompleted(activeLesson.id)}
               className={`w-full sm:w-auto px-4 py-2 rounded-lg text-xs font-mono font-bold flex items-center justify-center gap-2 border transition-all cursor-pointer ${
                 completedLessons[activeLesson.id]
-                  ? "bg-[#00E676]/10 border-[#00E676]/35 text-[#00E676]"
-                  : "bg-white/[0.02] border-white/[0.06] text-slate-400 hover:text-slate-200"
+                  ? "bg-emerald-50 border-emerald-300 text-emerald-600"
+                  : "bg-slate-50 border-slate-200 text-slate-500 hover:text-slate-800"
               }`}
             >
               {completedLessons[activeLesson.id] ? (
                 <>
-                  <Check className="w-4 h-4 text-[#00E676]" />
+                  <Check className="w-4 h-4 text-emerald-600" />
                   <span>Topic Completed</span>
                 </>
               ) : (
@@ -930,7 +930,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                   };
                   onNavigatePage(viewMap[activeLesson.id] || "landing");
                 }}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white/[0.04] text-[#00E676] hover:bg-[#00E676]/10 hover:text-[#00E676] border border-[#00E676]/35 font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-slate-100 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-600 border border-emerald-300 font-mono text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg active:scale-95"
               >
                 <Terminal className="w-4 h-4" />
                 <span>Test in Sandbox</span>
@@ -940,13 +940,13 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
         </div>
 
         {/* Sub-Tabs: Learn Content vs. Quiz Check */}
-        <div className="border-b border-white/[0.06] flex px-6 select-none">
+        <div className="border-b border-slate-200 flex px-6 select-none">
           <button
             onClick={() => setActiveTab("learn")}
             className={`px-4 py-3 text-xs font-mono font-bold border-b-2 uppercase tracking-wide cursor-pointer transition-colors ${
               activeTab === "learn" 
-                ? "border-[#00E676] text-[#00E676]" 
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                ? "border-[#00E676] text-emerald-600" 
+                : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
               Learn Lesson
@@ -955,8 +955,8 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
             onClick={() => setActiveTab("quiz")}
             className={`px-4 py-3 text-xs font-mono font-bold border-b-2 uppercase tracking-wide cursor-pointer transition-colors ${
               activeTab === "quiz" 
-                ? "border-[#00E676] text-[#00E676]" 
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                ? "border-[#00E676] text-emerald-600" 
+                : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
               Knowledge Test
@@ -969,68 +969,68 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
           {activeTab === "learn" ? (
             <>
               {/* Highlight Overlay: Overview Text */}
-              <div className="bg-[#00E676]/5 border-l-4 border-[#00E676] p-4 rounded-r-lg space-y-1">
-                <span className="text-[10px] font-mono text-[#00E676] uppercase tracking-wider font-extrabold">OVERVIEW</span>
-                <p className="text-sm font-sans text-slate-300 leading-relaxed font-medium">
+              <div className="bg-emerald-50/60 border-l-4 border-emerald-500 p-4 rounded-r-lg space-y-1">
+                <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-wider font-extrabold">OVERVIEW</span>
+                <p className="text-sm font-sans text-slate-700 leading-relaxed font-medium">
                   {activeLesson.overview}
                 </p>
               </div>
 
               {/* 1. WHY THIS EXISTS */}
               <div className="space-y-2">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                   1. Why This Exists / Problem Statement
                 </h3>
-                <p className="text-xs sm:text-sm font-sans text-slate-300 leading-relaxed">
+                <p className="text-xs sm:text-sm font-sans text-slate-700 leading-relaxed">
                   {activeLesson.whyExists}
                 </p>
               </div>
 
               {/* 2. PLAIN ENGLISH ANALOGY */}
-              <div className="bg-white/[0.01] p-6 rounded-xl border border-white/[0.05] space-y-3">
-                <span className="text-[10px] font-mono text-[#00E676] uppercase tracking-wider font-extrabold flex items-center gap-2">
+              <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-3">
+                <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-wider font-extrabold flex items-center gap-2">
                   <Compass className="w-3.5 h-3.5" />
                   2. Plain English explanation (Analogy): {activeLesson.plainEnglish.analogy}
                 </span>
-                <p className="text-xs sm:text-sm font-sans italic text-slate-400 leading-relaxed pl-3 border-l-2 border-white/[0.08]">
+                <p className="text-xs sm:text-sm font-sans italic text-slate-500 leading-relaxed pl-3 border-l-2 border-slate-200">
                   "{activeLesson.plainEnglish.analogyText}"
                 </p>
-                <p className="text-xs sm:text-sm font-sans text-slate-200 leading-relaxed">
+                <p className="text-xs sm:text-sm font-sans text-slate-800 leading-relaxed">
                   {activeLesson.plainEnglish.simplifiedText}
                 </p>
               </div>
 
               {/* 3. TECHNICAL EXPLANATION */}
               <div className="space-y-4">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                   3. Under the Hood (Technical Math)
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-2">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Process Inputs & Outputs</span>
-                    <ul className="text-xs space-y-1.5 list-disc list-inside text-slate-300 font-sans">
+                    <ul className="text-xs space-y-1.5 list-disc list-inside text-slate-700 font-sans">
                       {activeLesson.technicalExplanation.inputs.map((inp, idx) => (
-                        <li key={idx}><span className="font-semibold text-slate-300">Input:</span> {inp}</li>
+                        <li key={idx}><span className="font-semibold text-slate-700">Input:</span> {inp}</li>
                       ))}
                       {activeLesson.technicalExplanation.outputs?.map((out, idx) => (
-                        <li key={idx}><span className="font-semibold text-slate-300">Output:</span> {out}</li>
+                        <li key={idx}><span className="font-semibold text-slate-700">Output:</span> {out}</li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-2">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Key Libraries & Controls</span>
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {activeLesson.technicalExplanation.dependencies.map((dep, idx) => (
-                        <span key={idx} className="bg-white/[0.02] text-slate-400 text-[10px] px-2 py-1 rounded font-mono border border-white/[0.04]">
+                        <span key={idx} className="bg-slate-50 text-slate-500 text-[10px] px-2 py-1 rounded font-mono border border-slate-200">
                           {dep}
                         </span>
                       ))}
                     </div>
-                    <ul className="text-xs space-y-1.5 text-slate-300 font-sans mt-2">
+                    <ul className="text-xs space-y-1.5 text-slate-700 font-sans mt-2">
                       {activeLesson.technicalExplanation.security?.map((sec, idx) => (
                         <li key={idx} className="flex items-start gap-1.5">
-                          <span className="text-[#00E676] mt-0.5">•</span>
+                          <span className="text-emerald-600 mt-0.5">•</span>
                           <span>{sec}</span>
                         </li>
                       ))}
@@ -1038,12 +1038,12 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                   </div>
                 </div>
 
-                <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-2">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2">
                   <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Logical Flow Description</span>
                   <div className="space-y-1.5">
                     {activeLesson.technicalExplanation.processing.map((proc, idx) => (
-                      <p key={idx} className="text-xs text-slate-300 font-sans leading-relaxed">
-                        <span className="text-[#00E676] font-mono font-bold mr-1">{`[Step ${idx + 1}]`}</span> {proc}
+                      <p key={idx} className="text-xs text-slate-700 font-sans leading-relaxed">
+                        <span className="text-emerald-600 font-mono font-bold mr-1">{`[Step ${idx + 1}]`}</span> {proc}
                       </p>
                     ))}
                   </div>
@@ -1052,11 +1052,11 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
               {/* 4. HIGH FIDELITY SYSTEM WORKFLOW */}
               <div className="space-y-3">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                   4. High-Fidelity Sequence Workflow
                 </h3>
-                <div className="bg-white/[0.01] border border-white/[0.04] p-5 rounded-xl space-y-4">
-                  <span className="text-[10px] font-mono text-[#00E676] uppercase tracking-wider block font-bold">Sequential Execution Path</span>
+                <div className="bg-white border border-slate-200 p-5 rounded-xl space-y-4">
+                  <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-wider block font-bold">Sequential Execution Path</span>
                   <div className="relative pl-6 space-y-4">
                     {activeLesson.workflow.map((step, idx) => (
                       <div key={idx} className="relative flex items-start gap-3">
@@ -1066,7 +1066,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                           <div className="absolute -left-5 top-3 w-0.5 h-6 bg-white/[0.06]" />
                         )}
                         <span className="text-xs font-mono text-slate-500 font-bold shrink-0">{`0${idx + 1}.`}</span>
-                        <p className="text-xs sm:text-sm font-sans text-slate-300 font-medium">
+                        <p className="text-xs sm:text-sm font-sans text-slate-700 font-medium">
                           {step}
                         </p>
                       </div>
@@ -1077,16 +1077,16 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
               {/* 5. DYNAMIC INTERACTIVE VISUAL SIMULATORS FOR KEY TOPICS */}
               <div className="space-y-3">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#00E676]" />
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
                   5. Interactive Sandbox Simulator Widget
                 </h3>
                 
                 {activeLesson.id === "risk_engine" ? (
-                  <div className="bg-white/[0.01] p-5 rounded-xl border border-white/[0.04] space-y-4">
-                    <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
-                      <span className="text-xs font-mono font-bold text-slate-200 uppercase">Risk Evaluation Simulator</span>
-                      <span className="text-[10px] font-mono text-slate-400">Toggle parameters to view computed risk output</span>
+                  <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <span className="text-xs font-mono font-bold text-slate-800 uppercase">Risk Evaluation Simulator</span>
+                      <span className="text-[10px] font-mono text-slate-500">Toggle parameters to view computed risk output</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1094,7 +1094,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       <div className="space-y-2">
                         <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Threat Indicators Context</span>
                         <div className="space-y-1.5 select-none">
-                          <label className="flex items-center gap-2 text-xs text-slate-300 font-sans cursor-pointer hover:text-white transition-colors">
+                          <label className="flex items-center gap-2 text-xs text-slate-700 font-sans cursor-pointer hover:text-slate-900 transition-colors">
                             <input 
                               type="checkbox"
                               checked={riskEngineInputs.failedLiveness}
@@ -1103,7 +1103,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             />
                             <span>Failed Liveness (+55 Risk)</span>
                           </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-300 font-sans cursor-pointer hover:text-white transition-colors">
+                          <label className="flex items-center gap-2 text-xs text-slate-700 font-sans cursor-pointer hover:text-slate-900 transition-colors">
                             <input 
                               type="checkbox"
                               checked={riskEngineInputs.duplicateHash}
@@ -1112,7 +1112,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             />
                             <span>Duplicate Biometric Template (+40 Risk)</span>
                           </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-300 font-sans cursor-pointer hover:text-white transition-colors">
+                          <label className="flex items-center gap-2 text-xs text-slate-700 font-sans cursor-pointer hover:text-slate-900 transition-colors">
                             <input 
                               type="checkbox"
                               checked={riskEngineInputs.manyDeviceAccounts}
@@ -1121,7 +1121,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             />
                             <span>Many Accounts on One Device (+25 Risk)</span>
                           </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-300 font-sans cursor-pointer hover:text-white transition-colors">
+                          <label className="flex items-center gap-2 text-xs text-slate-700 font-sans cursor-pointer hover:text-slate-900 transition-colors">
                             <input 
                               type="checkbox"
                               checked={riskEngineInputs.newDeviceExistingUser}
@@ -1130,7 +1130,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             />
                             <span>New Device on Existing User (+15 Risk)</span>
                           </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-300 font-sans cursor-pointer hover:text-white transition-colors">
+                          <label className="flex items-center gap-2 text-xs text-slate-700 font-sans cursor-pointer hover:text-slate-900 transition-colors">
                             <input 
                               type="checkbox"
                               checked={riskEngineInputs.rapidAttempts}
@@ -1139,7 +1139,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             />
                             <span>Rapid repeated attempts (+20 Risk)</span>
                           </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-300 font-sans cursor-pointer hover:text-white transition-colors">
+                          <label className="flex items-center gap-2 text-xs text-slate-700 font-sans cursor-pointer hover:text-slate-900 transition-colors">
                             <input 
                               type="checkbox"
                               checked={riskEngineInputs.missingConsent}
@@ -1148,7 +1148,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                             />
                             <span>Missing Consent Check (+100 Risk)</span>
                           </label>
-                          <label className="flex items-center gap-2 text-xs text-slate-300 font-sans cursor-pointer hover:text-white transition-colors">
+                          <label className="flex items-center gap-2 text-xs text-slate-700 font-sans cursor-pointer hover:text-slate-900 transition-colors">
                             <input 
                               type="checkbox"
                               checked={riskEngineInputs.expiredSession}
@@ -1161,19 +1161,19 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       </div>
 
                       {/* Score Result Gauge */}
-                      <div className="bg-black p-4 rounded-lg border border-white/[0.04] flex flex-col justify-between">
+                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col justify-between">
                         <div className="space-y-2">
                           <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Live Computed Metric Result</span>
                           <div className="flex items-baseline gap-2">
                             <span className={`text-4xl font-mono font-bold tracking-tight ${
-                              calculatedRisk.score >= 70 ? "text-rose-400" : calculatedRisk.score >= 40 ? "text-amber-400" : "text-[#00E676]"
+                              calculatedRisk.score >= 70 ? "text-rose-600" : calculatedRisk.score >= 40 ? "text-amber-400" : "text-emerald-600"
                             }`}>
                               {calculatedRisk.score}
                             </span>
-                            <span className="text-xs text-slate-400 font-mono">/ 100 Risk pts</span>
+                            <span className="text-xs text-slate-500 font-mono">/ 100 Risk pts</span>
                           </div>
                           
-                          <div className={`text-[10px] font-mono font-extrabold uppercase px-2.5 py-1 rounded border border-[#00E676]/20 inline-block ${calculatedRisk.colorClass}`}>
+                          <div className={`text-[10px] font-mono font-extrabold uppercase px-2.5 py-1 rounded border border-emerald-200 inline-block ${calculatedRisk.colorClass}`}>
                             Status: {calculatedRisk.tier.replace(/_/g, " ")}
                           </div>
                         </div>
@@ -1181,9 +1181,9 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                         <div className="space-y-1 mt-4">
                           <span className="text-[9px] font-mono text-slate-500 uppercase block font-bold">Applied Risk Flags</span>
                           {calculatedRisk.factors.length === 0 ? (
-                            <p className="text-[10px] text-slate-400 italic">No suspicious indicators checked. Score normal.</p>
+                            <p className="text-[10px] text-slate-500 italic">No suspicious indicators checked. Score normal.</p>
                           ) : (
-                            <ul className="text-[10px] text-slate-300 font-mono space-y-1">
+                            <ul className="text-[10px] text-slate-700 font-mono space-y-1">
                               {calculatedRisk.factors.map((f, i) => (
                                 <li key={i} className="flex items-start gap-1">
                                   <span className="text-rose-500"></span>
@@ -1197,62 +1197,62 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                     </div>
                   </div>
                 ) : activeLesson.id === "api_keys" ? (
-                  <div className="bg-white/[0.01] p-5 rounded-xl border border-white/[0.04] space-y-4">
-                    <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
-                      <span className="text-xs font-mono font-bold text-slate-200 uppercase">One-way API Key Hashing Simulator</span>
-                      <span className="text-[10px] font-mono text-slate-400">Interact to understand why secret keys can never be leaked</span>
+                  <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <span className="text-xs font-mono font-bold text-slate-800 uppercase">One-way API Key Hashing Simulator</span>
+                      <span className="text-[10px] font-mono text-slate-500">Interact to understand why secret keys can never be leaked</span>
                     </div>
 
                     <div className="space-y-3">
                       <div>
-                        <label className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Pass Plaintext Bearer API Key String</label>
+                        <label className="text-[10px] font-mono uppercase text-slate-500 block mb-1">Pass Plaintext Bearer API Key String</label>
                         <input
                           type="text"
                           value={apiKeyPlaintext}
                           onChange={(e) => setApiKeyPlaintext(e.target.value)}
-                          className="w-full bg-black border border-white/[0.08] font-mono text-xs rounded-lg py-2 px-3 text-slate-300 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20 transition-all font-semibold"
+                          className="w-full bg-slate-50 border border-slate-200 font-mono text-xs rounded-lg py-2 px-3 text-slate-700 focus:outline-none focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20 transition-all font-semibold"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-                        <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-1.5">
-                          <span className="text-[10px] font-mono text-[#00E676] uppercase tracking-wider block font-bold">1. Plain Value Displayed</span>
-                          <p className="text-xs font-mono bg-white/[0.02] p-2.5 rounded border border-white/[0.04] select-all font-semibold text-slate-300 break-all leading-normal">
-                            {apiKeyPlaintext || <span className="text-slate-400">No key typed...</span>}
+                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1.5">
+                          <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-wider block font-bold">1. Plain Value Displayed</span>
+                          <p className="text-xs font-mono bg-slate-50 p-2.5 rounded border border-slate-200 select-all font-semibold text-slate-700 break-all leading-normal">
+                            {apiKeyPlaintext || <span className="text-slate-500">No key typed...</span>}
                           </p>
                           <span className="text-[9px] text-slate-500 font-sans block leading-relaxed">
                             This plaintext value is only generated once inside browser interfaces. If closed, it can never be rendered or reconstructed again.
                           </span>
                         </div>
 
-                        <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-1.5">
-                          <span className="text-[10px] font-mono text-[#00E676] uppercase tracking-wider block font-bold">2. SHA-256 Hashed Postgres Value</span>
-                          <p className="text-xs font-mono bg-white/[0.02] p-2.5 rounded border border-white/[0.04] font-semibold text-slate-300 break-all leading-normal">
+                        <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1.5">
+                          <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-wider block font-bold">2. SHA-256 Hashed Postgres Value</span>
+                          <p className="text-xs font-mono bg-slate-50 p-2.5 rounded border border-slate-200 font-semibold text-slate-700 break-all leading-normal">
                             {apiKeyHashed}
                           </p>
                           <span className="text-[9px] text-slate-500 font-sans block leading-relaxed">
-                            Only this hashed representation is saved inside the <span className="font-mono bg-white/[0.02] px-1 py-0.5 rounded text-[8px] text-slate-300">partner_apps.api_key_hash</span> SQL column.
+                            Only this hashed representation is saved inside the <span className="font-mono bg-slate-50 px-1 py-0.5 rounded text-[8px] text-slate-700">partner_apps.api_key_hash</span> SQL column.
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 ) : activeLesson.id === "webhook_system" ? (
-                  <div className="bg-white/[0.01] p-5 rounded-xl border border-white/[0.04] space-y-4">
-                    <div className="flex justify-between items-center border-b border-white/[0.04] pb-2">
-                      <span className="text-xs font-mono font-bold text-slate-200 uppercase">Webhook Payload Dispatcher Simulator</span>
-                      <span className="text-[10px] font-mono text-slate-400">Trigger test hooks to simulate developer integration</span>
+                  <div className="bg-white p-5 rounded-xl border border-slate-200 space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                      <span className="text-xs font-mono font-bold text-slate-800 uppercase">Webhook Payload Dispatcher Simulator</span>
+                      <span className="text-[10px] font-mono text-slate-500">Trigger test hooks to simulate developer integration</span>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Controls parameters */}
                       <div className="space-y-3">
                         <div>
-                          <label className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Select Event Type</label>
+                          <label className="text-[10px] font-mono uppercase text-slate-500 block mb-1">Select Event Type</label>
                           <select 
                             value={simulatedWebhookEvent}
                             onChange={(e) => setSimulatedWebhookEvent(e.target.value)}
-                            className="w-full bg-black border border-white/[0.08] font-mono text-xs rounded-lg py-2 px-3 text-slate-300 focus:outline-none cursor-pointer focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20"
+                            className="w-full bg-slate-50 border border-slate-200 font-mono text-xs rounded-lg py-2 px-3 text-slate-700 focus:outline-none cursor-pointer focus:border-[#00E676] focus:ring-1 focus:ring-[#00E676]/20"
                           >
                             <option value="session.completed">session.completed (User Scanned Green)</option>
                             <option value="session.failed">session.failed (User Red Risk Spike)</option>
@@ -1264,7 +1264,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                         <button
                           onClick={executeSimulatedWebhook}
                           disabled={simulatedWebhookLoading}
-                          className="w-full py-2.5 bg-[#00E676] hover:bg-[#00ff87] text-black rounded-lg font-mono text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-mono text-xs font-bold uppercase transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                         >
                           {simulatedWebhookLoading ? (
                             <>
@@ -1281,13 +1281,13 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       </div>
 
                       {/* Webhook Response Console */}
-                      <div className="bg-black p-4 rounded-lg border border-white/[0.06] flex flex-col justify-between min-h-36">
+                      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col justify-between min-h-36">
                         <div className="space-y-1">
                           <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Simulator Response Terminal</span>
                           {simulatedWebhookLoading ? (
-                            <p className="text-xs font-mono text-[#00E676] animate-pulse italic">Awaiting response handshake from virtual server url...</p>
+                            <p className="text-xs font-mono text-emerald-600 animate-pulse italic">Awaiting response handshake from virtual server url...</p>
                           ) : simulatedWebhookResponse ? (
-                            <pre className="text-[10px] font-mono bg-white/[0.02] border border-white/[0.04] rounded p-2.5 text-slate-300 overflow-x-auto leading-normal">
+                            <pre className="text-[10px] font-mono bg-slate-50 border border-slate-200 rounded p-2.5 text-slate-700 overflow-x-auto leading-normal">
                               {simulatedWebhookResponse}
                             </pre>
                           ) : (
@@ -1299,15 +1299,15 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                   </div>
                 ) : (
                   // General topic simulator
-                  <div className="bg-white/[0.01] border border-white/[0.04] p-5 rounded-xl">
+                  <div className="bg-white border border-slate-200 p-5 rounded-xl">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 bg-[#00E676]/10 border border-[#00E676]/25 rounded-lg text-[#00E676]">
-                        <Brain className="w-4 h-4 text-[#00E676]" />
+                      <div className="p-2.5 bg-emerald-50 border border-[#00E676]/25 rounded-lg text-emerald-600">
+                        <Brain className="w-4 h-4 text-emerald-600" />
                       </div>
                       <div className="space-y-0.5">
-                        <span className="text-[10px] font-mono text-slate-400 block uppercase">Continuous Assessment Simulator</span>
-                        <p className="text-xs text-slate-300 font-sans">
-                          AAN implements live compliance sandboxing. Use the <strong className="font-mono text-slate-200">Knowledge Test</strong> sub-tab above to certify complete understanding.
+                        <span className="text-[10px] font-mono text-slate-500 block uppercase">Continuous Assessment Simulator</span>
+                        <p className="text-xs text-slate-700 font-sans">
+                          Aan (Antigravity Assurance Network) implements live compliance sandboxing. Use the <strong className="font-mono text-slate-800">Knowledge Test</strong> sub-tab above to certify complete understanding.
                         </p>
                       </div>
                     </div>
@@ -1318,26 +1318,26 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               {/* 6. DATABASE SCHEMA DEFINITION */}
               {activeLesson.databaseTables && activeLesson.databaseTables.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold flex items-center gap-2">
-                    <Database className="w-4 h-4 text-[#00E676] animate-none shrink-0" />
+                  <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold flex items-center gap-2">
+                    <Database className="w-4 h-4 text-emerald-600 animate-none shrink-0" />
                     6. Database Schemas / Supabase Tables Context
                   </h3>
                   
                   <div className="space-y-4">
                     {activeLesson.databaseTables.map((table, idx) => (
-                      <div key={idx} className="bg-white/[0.01] p-5 rounded-xl border border-white/[0.04]">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-white/[0.04] pb-2 mb-3">
+                      <div key={idx} className="bg-white p-5 rounded-xl border border-slate-200">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-200 pb-2 mb-3">
                           <div className="flex items-center gap-2">
-                            <span className="bg-[#00E676]/10 text-[#00E676] font-mono text-[11px] font-bold px-2 py-0.5 rounded border border-[#00E676]/20">
+                            <span className="bg-emerald-50 text-emerald-600 font-mono text-[11px] font-bold px-2 py-0.5 rounded border border-emerald-200">
                               Table: {table.name}
                             </span>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-400">
+                          <span className="text-[10px] font-mono text-slate-500">
                             Relation rules: {table.relationships}
                           </span>
                         </div>
 
-                        <p className="text-xs sm:text-sm font-sans text-slate-300 mb-3 font-medium">
+                        <p className="text-xs sm:text-sm font-sans text-slate-700 mb-3 font-medium">
                           {table.purpose}
                         </p>
 
@@ -1345,7 +1345,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                           <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">SQL Columns Layout</span>
                           <div className="flex flex-wrap gap-1.5">
                             {table.columns.map((col, cIdx) => (
-                              <span key={cIdx} className="bg-black text-slate-300 font-mono text-[10px] px-2 py-1 rounded border border-white/[0.06]">
+                              <span key={cIdx} className="bg-slate-50 text-slate-700 font-mono text-[10px] px-2 py-1 rounded border border-slate-200">
                                 {col}
                               </span>
                             ))}
@@ -1360,38 +1360,38 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               {/* 7. SECURE REST API ENDPOINTS */}
               {activeLesson.apiEndpoints && activeLesson.apiEndpoints.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold flex items-center gap-2">
-                    <Code className="w-4 h-4 text-[#00E676] shrink-0" />
+                  <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold flex items-center gap-2">
+                    <Code className="w-4 h-4 text-emerald-600 shrink-0" />
                     7. Rest API Specifications
                   </h3>
                   
                   <div className="space-y-4">
                     {activeLesson.apiEndpoints.map((api, idx) => (
-                      <div key={idx} className="bg-white/[0.01] p-5 rounded-xl border border-white/[0.04] space-y-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/[0.04] pb-2">
+                      <div key={idx} className="bg-white p-5 rounded-xl border border-slate-200 space-y-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
                           <div className="flex items-center gap-2.5">
                             <span className={`font-mono text-xs font-extrabold px-2.5 py-0.5 rounded uppercase tracking-wider ${
-                              api.method === "POST" ? "bg-cyan-950 text-cyan-400 border border-cyan-900/40" : api.method === "DELETE" ? "bg-rose-950 text-rose-400 border border-rose-900/40" : "bg-[#00E676]/10 text-[#00E676] border border-[#00E676]/20"
+                              api.method === "POST" ? "bg-cyan-50 text-cyan-700 border border-cyan-200" : api.method === "DELETE" ? "bg-rose-50 text-rose-600 border border-rose-200/40" : "bg-emerald-50 text-emerald-600 border border-emerald-200"
                             }`}>
                               {api.method}
                             </span>
-                            <span className="text-xs sm:text-sm font-mono font-bold text-slate-100">
+                            <span className="text-xs sm:text-sm font-mono font-bold text-slate-950">
                               {api.path}
                             </span>
                           </div>
-                          <span className="text-[10px] font-mono text-slate-400">
+                          <span className="text-[10px] font-mono text-slate-500">
                             Auth Req: {api.auth}
                           </span>
                         </div>
 
-                        <p className="text-xs sm:text-sm font-sans text-slate-300 font-medium">
+                        <p className="text-xs sm:text-sm font-sans text-slate-700 font-medium">
                           {api.purpose}
                         </p>
 
                         {api.payload && (
                           <div className="space-y-1">
                             <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Request JSON Payload Params</span>
-                            <pre className="text-[10px] font-mono bg-black border border-white/[0.06] p-2.5 rounded text-slate-300 overflow-x-auto select-all leading-normal">
+                            <pre className="text-[10px] font-mono bg-slate-50 border border-slate-200 p-2.5 rounded text-slate-700 overflow-x-auto select-all leading-normal">
                               {api.payload}
                             </pre>
                           </div>
@@ -1399,7 +1399,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
                         <div className="space-y-1">
                           <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">HTTP Response Payload Example</span>
-                          <pre className="text-[10px] font-mono bg-black border border-white/[0.06] p-2.5 rounded text-slate-300 overflow-x-auto select-all leading-normal">
+                          <pre className="text-[10px] font-mono bg-slate-50 border border-slate-200 p-2.5 rounded text-slate-700 overflow-x-auto select-all leading-normal">
                             {api.response}
                           </pre>
                         </div>
@@ -1411,21 +1411,21 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
               {/* 8. DASHBOARD INTEGRATIONS */}
               <div className="space-y-3">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                   8. Dashboard Navigation & Integrations
                 </h3>
-                <div className="bg-black p-5 rounded-xl border border-white/[0.04] space-y-4">
+                <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">UI Path Location</span>
-                      <p className="text-xs sm:text-sm font-sans text-slate-200 font-medium">
+                      <p className="text-xs sm:text-sm font-sans text-slate-800 font-medium">
                         {activeLesson.dashboardIntegration.location}
                       </p>
                     </div>
 
                     <div className="space-y-1">
                       <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Access Permissions Required</span>
-                      <ul className="text-xs font-sans text-slate-300 list-inside list-disc">
+                      <ul className="text-xs font-sans text-slate-700 list-inside list-disc">
                         {activeLesson.dashboardIntegration.permissions.map((perm, pIdx) => (
                           <li key={pIdx}>{perm}</li>
                         ))}
@@ -1433,10 +1433,10 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/[0.04] pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-200 pt-4">
                     <div className="space-y-1">
                       <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Available Dynamic Actions</span>
-                      <ul className="text-xs font-sans text-slate-300 space-y-1.5">
+                      <ul className="text-xs font-sans text-slate-700 space-y-1.5">
                         {activeLesson.dashboardIntegration.actions.map((act, aIdx) => (
                           <li key={aIdx} className="flex items-center gap-1.5">
                             <span className="w-1 h-1 bg-[#00E676] rounded-full shrink-0" />
@@ -1450,7 +1450,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">UI Diagnostic Metrics</span>
                       <div className="flex flex-wrap gap-1.5 pt-1">
                         {activeLesson.dashboardIntegration.metrics?.map((met, mIdx) => (
-                          <span key={mIdx} className="bg-white/[0.02] text-slate-400 text-[10px] px-2 py-1 rounded font-mono border border-white/[0.04]">
+                          <span key={mIdx} className="bg-slate-50 text-slate-500 text-[10px] px-2 py-1 rounded font-mono border border-slate-200">
                             {met}
                           </span>
                         ))}
@@ -1462,17 +1462,17 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
               {/* 9. SECURITY MODEL */}
               <div className="space-y-3">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-[#00E676] shrink-0" />
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-emerald-600 shrink-0" />
                   9. Security Model & GDPR Compliance Parameters
                 </h3>
-                <div className="bg-white/[0.01] p-6 rounded-xl border border-white/[0.04] space-y-4">
+                <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <span className="text-[10px] font-mono text-rose-400 uppercase block font-bold flex items-center gap-1">
+                      <span className="text-[10px] font-mono text-rose-600 uppercase block font-bold flex items-center gap-1">
                         <ShieldAlert className="w-3.5 h-3.5" /> Key Vulnerability Risks Targeted
                       </span>
-                      <ul className="text-xs font-sans text-slate-300 space-y-1.5">
+                      <ul className="text-xs font-sans text-slate-700 space-y-1.5">
                         {activeLesson.securityModel.risks.map((risk, rIdx) => (
                           <li key={rIdx} className="flex items-start gap-1.5 leading-relaxed">
                             <span className="text-rose-500 font-bold shrink-0"></span>
@@ -1483,16 +1483,16 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                     </div>
 
                     <div className="space-y-1.5">
-                      <span className="text-[10px] font-mono text-slate-400 uppercase block font-bold">GDPR Privacy & Masking Rules</span>
-                      <ul className="text-xs font-sans text-slate-300 space-y-1.5">
+                      <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">GDPR Privacy & Masking Rules</span>
+                      <ul className="text-xs font-sans text-slate-700 space-y-1.5">
                         {activeLesson.securityModel.privacy.map((priv, pIdx) => (
                           <li key={pIdx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-[#00E676] font-bold shrink-0"></span>
+                            <span className="text-emerald-600 font-bold shrink-0"></span>
                             <span>{priv}</span>
                           </li>
                         ))}
                         {activeLesson.securityModel.hiddenData.map((hid, hIdx) => (
-                          <li key={hIdx} className="flex items-start gap-1.5 leading-relaxed italic text-slate-400">
+                          <li key={hIdx} className="flex items-start gap-1.5 leading-relaxed italic text-slate-500">
                             <span className="font-bold text-slate-500 shrink-0">○</span>
                             <span>Securely Masked: {hid}</span>
                           </li>
@@ -1501,17 +1501,17 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-white/[0.04] pt-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-200 pt-4">
                     <div className="space-y-1">
                       <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Authentication Hooks Required</span>
-                      <p className="text-xs sm:text-sm font-sans text-slate-200">
+                      <p className="text-xs sm:text-sm font-sans text-slate-800">
                         {activeLesson.securityModel.authReq}
                       </p>
                     </div>
 
                     <div className="space-y-1">
                       <span className="text-[10px] font-mono text-slate-500 uppercase block font-bold">Validation Limitations/Exceptions</span>
-                      <p className="text-xs sm:text-sm font-sans text-slate-400 leading-relaxed italic">
+                      <p className="text-xs sm:text-sm font-sans text-slate-500 leading-relaxed italic">
                         {activeLesson.securityModel.limitations?.join(", ") || activeLesson.securityModel.limitations}
                       </p>
                     </div>
@@ -1521,35 +1521,35 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
               {/* 10. MULTI-DIMENSIONAL ENTERPRISE VALUE */}
               <div className="space-y-3">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                   10. Multi-Dimensional Enterprise Value
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   
-                  <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-1">
-                    <span className="text-[9px] font-mono text-[#00E676] uppercase block font-extrabold">Executive / Admin Value</span>
-                    <p className="text-xs font-sans text-slate-300 leading-normal">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1">
+                    <span className="text-[9px] font-mono text-emerald-600 uppercase block font-extrabold">Executive / Admin Value</span>
+                    <p className="text-xs font-sans text-slate-700 leading-normal">
                       {activeLesson.enterpriseValue.administrative}
                     </p>
                   </div>
 
-                  <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-1">
-                    <span className="text-[9px] font-mono text-[#00E676] uppercase block font-extrabold">Security / compliance Value</span>
-                    <p className="text-xs font-sans text-slate-300 leading-normal">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1">
+                    <span className="text-[9px] font-mono text-emerald-600 uppercase block font-extrabold">Security / compliance Value</span>
+                    <p className="text-xs font-sans text-slate-700 leading-normal">
                       {activeLesson.enterpriseValue.security}
                     </p>
                   </div>
 
-                  <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-1">
-                    <span className="text-[9px] font-mono text-[#00E676] uppercase block font-extrabold">Developer Integration Value</span>
-                    <p className="text-xs font-sans text-slate-300 leading-normal">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1">
+                    <span className="text-[9px] font-mono text-emerald-600 uppercase block font-extrabold">Developer Integration Value</span>
+                    <p className="text-xs font-sans text-slate-700 leading-normal">
                       {activeLesson.enterpriseValue.developer}
                     </p>
                   </div>
 
-                  <div className="bg-black p-4 rounded-lg border border-white/[0.06] space-y-1">
-                    <span className="text-[9px] font-mono text-[#00E676] uppercase block font-extrabold">Operational & SRE Value</span>
-                    <p className="text-xs font-sans text-slate-300 leading-normal">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-1">
+                    <span className="text-[9px] font-mono text-emerald-600 uppercase block font-extrabold">Operational & SRE Value</span>
+                    <p className="text-xs font-sans text-slate-700 leading-normal">
                       {activeLesson.enterpriseValue.operational}
                     </p>
                   </div>
@@ -1558,31 +1558,31 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               </div>
 
               {/* 11. MVP LIMITATIONS */}
-              <div className="space-y-2 border-t border-white/[0.04] pt-4">
-                <h3 className="text-sm font-mono text-rose-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+              <div className="space-y-2 border-t border-slate-200 pt-4">
+                <h3 className="text-sm font-mono text-rose-600 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                   11. Sandbox MVP Limits / Gaps
                 </h3>
-                <p className="text-xs sm:text-sm font-mono text-rose-300 bg-rose-950/20 p-4 rounded-lg border border-rose-950/35 leading-relaxed">
+                <p className="text-xs sm:text-sm font-mono text-rose-600 bg-rose-50/20 p-4 rounded-lg border border-rose-950/35 leading-relaxed">
                   <u className="font-extrabold uppercase">MOCK IMPLEMENTATION NOTICE:</u> {activeLesson.mvpLimitations}
                 </p>
               </div>
 
               {/* 12. REAL-WORLD SCALABILITY & FUTURE IMPROVEMENTS */}
               <div className="space-y-3">
-                <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+                <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                   12. Real-World Scalability Roadmap
                 </h3>
                 <div className="space-y-2.5">
                   {activeLesson.futureImprovements?.map((imp, idx) => (
-                    <div key={idx} className="bg-black p-4 rounded-lg border border-white/[0.06] flex items-start gap-3">
-                      <span className="text-xs font-mono font-bold bg-white/[0.02] text-[#00E676] px-2 py-0.5 rounded border border-white/[0.04]">
+                    <div key={idx} className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex items-start gap-3">
+                      <span className="text-xs font-mono font-bold bg-slate-50 text-emerald-600 px-2 py-0.5 rounded border border-slate-200">
                         {imp.phase}
                       </span>
                       <div className="space-y-0.5 min-w-0">
-                        <h4 className="text-xs font-mono font-bold text-slate-200">
+                        <h4 className="text-xs font-mono font-bold text-slate-800">
                           {imp.title}
                         </h4>
-                        <p className="text-[11px] font-sans text-slate-400 leading-normal">
+                        <p className="text-[11px] font-sans text-slate-500 leading-normal">
                           {imp.desc}
                         </p>
                       </div>
@@ -1594,14 +1594,14 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
               {/* 13. HYPER-SPECIFIC GLOSSARY KEYWORDS */}
               {activeLesson.glossary && activeLesson.glossary.length > 0 && (
                 <div className="space-y-3">
-                  <h3 className="text-sm font-mono text-slate-400 uppercase tracking-widest border-b border-white/[0.04] pb-1 font-extrabold">
+                  <h3 className="text-sm font-mono text-slate-500 uppercase tracking-widest border-b border-slate-200 pb-1 font-extrabold">
                     13. Technical Glossary References
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {activeLesson.glossary.map((glo, gIdx) => (
-                      <div key={gIdx} className="bg-white/[0.01] p-4 rounded-lg border border-white/[0.04] space-y-1">
-                        <dt className="text-xs font-mono font-bold text-[#00E676]">{glo.term}</dt>
-                        <dd className="text-xs font-sans text-slate-300 leading-normal">{glo.definition}</dd>
+                      <div key={gIdx} className="bg-white p-4 rounded-lg border border-slate-200 space-y-1">
+                        <dt className="text-xs font-mono font-bold text-emerald-600">{glo.term}</dt>
+                        <dd className="text-xs font-sans text-slate-700 leading-normal">{glo.definition}</dd>
                       </div>
                     ))}
                   </div>
@@ -1610,7 +1610,7 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
 
               {/* 14. RELATED LESSONS LINKS */}
               {activeLesson.relatedLessons && activeLesson.relatedLessons.length > 0 && (
-                <div className="space-y-3 pt-4 border-t border-white/[0.04]">
+                <div className="space-y-3 pt-4 border-t border-slate-200">
                   <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">14. Traverse Document Trees (Related Topics)</span>
                   <div className="flex flex-wrap gap-2">
                     {activeLesson.relatedLessons.map((relId, idx) => {
@@ -1620,9 +1620,9 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                         <button
                           key={`${relId}-${idx}`}
                           onClick={() => handleSelectLessonById(relId)}
-                          className="text-xs font-mono bg-white/[0.02] hover:bg-white/[0.04] text-slate-300 border border-white/[0.06] rounded-lg px-3 py-1.5 transition-all text-left flex items-center gap-1.5 cursor-pointer"
+                          className="text-xs font-mono bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg px-3 py-1.5 transition-all text-left flex items-center gap-1.5 cursor-pointer"
                         >
-                          <BookOpen className="w-3.5 h-3.5 text-[#00E676]" />
+                          <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
                           <span>{found.title}</span>
                           <ChevronRight className="w-3 h-3 text-slate-600" />
                         </button>
@@ -1635,9 +1635,9 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
           ) : (
             /*  SUB-TAB: QUIZ KNOWLEDGE CHECK */
             <div className="space-y-6">
-              <div className="bg-[#00E676]/5 p-4 rounded-lg border border-[#00E676]/20 space-y-1">
-                <span className="text-[10px] font-mono text-[#00E676] uppercase tracking-wider font-extrabold">CONCEPTS TEST</span>
-                <p className="text-xs text-slate-400 leading-normal font-sans">
+              <div className="bg-emerald-50/60 p-4 rounded-lg border border-emerald-200 space-y-1">
+                <span className="text-[10px] font-mono text-emerald-600 uppercase tracking-wider font-extrabold">CONCEPTS TEST</span>
+                <p className="text-xs text-slate-500 leading-normal font-sans">
                   Solve the following assessment containing hyper-specific situations to certify key understanding of {activeLesson.title}.
                 </p>
               </div>
@@ -1649,27 +1649,27 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                 const isCorrect = selectedOption === quiz.answerIndex;
 
                 return (
-                  <div key={qIdx} className="bg-white/[0.01] p-5 sm:p-6 rounded-xl border border-white/[0.04] space-y-4">
-                    <span className="text-xs font-mono font-extrabold text-[#00E676] uppercase">{`QUESTION 0${qIdx + 1}`}</span>
-                    <h3 className="text-sm sm:text-base font-sans font-bold text-white leading-relaxed">
+                  <div key={qIdx} className="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 space-y-4">
+                    <span className="text-xs font-mono font-extrabold text-emerald-600 uppercase">{`QUESTION 0${qIdx + 1}`}</span>
+                    <h3 className="text-sm sm:text-base font-sans font-bold text-slate-900 leading-relaxed">
                       {quiz.question}
                     </h3>
 
                     <div className="space-y-2 select-none">
                       {quiz.options.map((option, oIdx) => {
                         const isChosen = selectedOption === oIdx;
-                        let optionStyle = "bg-black border-white/[0.08] text-slate-300 hover:border-[#00E676] hover:text-white";
+                        let optionStyle = "bg-slate-50 border-slate-200 text-slate-700 hover:border-[#00E676] hover:text-slate-900";
                         
                         if (submitted) {
                           if (oIdx === quiz.answerIndex) {
-                            optionStyle = "bg-[#00E676]/10 border-[#00E676] text-[#00E676] font-semibold";
+                            optionStyle = "bg-emerald-50 border-[#00E676] text-emerald-600 font-semibold";
                           } else if (isChosen) {
-                            optionStyle = "bg-rose-950/45 border-rose-500 text-rose-400 font-semibold";
+                            optionStyle = "bg-rose-50/45 border-rose-500 text-rose-600 font-semibold";
                           } else {
-                            optionStyle = "bg-black/30 border-white/[0.04] text-slate-500 cursor-not-allowed";
+                            optionStyle = "bg-slate-50/30 border-slate-200 text-slate-500 cursor-not-allowed";
                           }
                         } else if (isChosen) {
-                          optionStyle = "bg-[#00E676]/10 border-[#00E676] text-[#00E676] font-bold";
+                          optionStyle = "bg-emerald-50 border-[#00E676] text-emerald-600 font-bold";
                         }
 
                         return (
@@ -1690,28 +1690,28 @@ export default function AANAcademy({ initialLessonId, onNavigatePage }: AANAcade
                       <button
                         onClick={() => submitQuiz(qIdx)}
                         disabled={selectedOption === undefined}
-                        className="py-2 px-5 bg-[#00E676] hover:bg-[#00ff87] disabled:opacity-40 disabled:cursor-not-allowed text-black font-semibold font-mono text-xs font-bold uppercase rounded-lg cursor-pointer transition-all active:scale-[0.98]"
+                        className="py-2 px-5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-black font-semibold font-mono text-xs font-bold uppercase rounded-lg cursor-pointer transition-all active:scale-[0.98]"
                       >
                         Submit Response
                       </button>
                     ) : (
                       <div className={`p-4 rounded-lg border leading-relaxed space-y-1.5 ${
-                        isCorrect ? "bg-[#00E676]/10 border-[#00E676]/30 text-[#00E676]" : "bg-rose-950/20 border-rose-900/35 text-rose-300"
+                        isCorrect ? "bg-emerald-50 border-[#00E676]/30 text-emerald-600" : "bg-rose-50/20 border-rose-200/35 text-rose-600"
                       }`}>
                         <div className="flex items-center gap-2 font-mono text-xs font-black uppercase">
                           {isCorrect ? (
                             <>
-                              <CheckCircle className="w-4 h-4 text-[#00E676] fill-black" />
+                              <CheckCircle className="w-4 h-4 text-emerald-600 fill-black" />
                               <span>Response Correct!</span>
                             </>
                           ) : (
                             <>
-                              <ShieldAlert className="w-4 h-4 text-rose-400 fill-rose-950" />
+                              <ShieldAlert className="w-4 h-4 text-rose-600 fill-rose-950" />
                               <span>Incorrect Choice</span>
                             </>
                           )}
                         </div>
-                        <p className="text-xs font-sans text-slate-300">
+                        <p className="text-xs font-sans text-slate-700">
                           {quiz.explanation}
                         </p>
                       </div>

@@ -22,8 +22,9 @@ import {
   Zap,
   AlertCircle
 } from 'lucide-react';
-import AANShieldLogo from './AANShieldLogo';
-import AANSignupForm from './AANSignupForm';
+import AanShieldLogo from './AanShieldLogo';
+import AanSignupForm from './AanSignupForm';
+import Footer from './Footer';
 
 interface LandingPageProps {
   onNavigate: (page: string, customPath?: string) => void;
@@ -36,6 +37,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionLogs, setConnectionLogs] = useState<string[]>([]);
   const [activeSpeedStep, setActiveSpeedStep] = useState(0);
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('Gaming');
 
   // Auto-running fast animation for Section 8
   useEffect(() => {
@@ -93,9 +95,9 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
         <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 text-[#00D632]">
-              <AANShieldLogo strokeWidth={6} />
+              <AanShieldLogo strokeWidth={6} />
             </div>
-            <span className="text-xl font-bold tracking-tight text-black">AAN</span>
+            <span className="text-xl font-bold tracking-tight text-black">Aan</span>
           </div>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500">
@@ -110,7 +112,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
               onClick={handleOpenAuth}
               className="px-5 py-2.5 rounded-full bg-black hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-all active:scale-95"
             >
-              Launch Sandbox
+              Get Started
             </button>
           </div>
         </div>
@@ -122,7 +124,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
           <div className="lg:col-span-7 space-y-8 text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
               <span className="w-2 h-2 rounded-full bg-[#00D632]" />
-              <span className="text-[10px] font-mono tracking-wider text-slate-500 uppercase font-bold">Autonomous Account Network</span>
+              <span className="text-[10px] font-mono tracking-wider text-slate-500 uppercase font-bold">Antigravity Assurance Network</span>
             </div>
             
             <h1 className="text-5xl sm:text-7xl font-black tracking-tight text-black leading-[1.05] max-w-xl">
@@ -423,15 +425,18 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
       </section>
 
       {/* ================= SECTION 7: BUILT FOR EVERY PLATFORM ================= */}
-      <section className="min-h-[80vh] flex flex-col justify-center bg-white px-6 py-24">
-        <div className="max-w-6xl mx-auto w-full text-center space-y-16">
+      <section className="min-h-[90vh] flex flex-col justify-center bg-white px-6 py-24">
+        <div className="max-w-6xl mx-auto w-full text-center space-y-12">
           <div className="space-y-4 max-w-2xl mx-auto">
             <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-black">
               Built for every platform.
             </h2>
+            <p className="text-slate-500 text-sm sm:text-base font-light">
+              Select any ecosystem below to see how AAN integrates zero-knowledge trust assertions.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
             {[
               { label: "Gaming", icon: Gamepad2 },
               { label: "Social", icon: Users },
@@ -440,15 +445,158 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
               { label: "Education", icon: GraduationCap }
             ].map((platform, idx) => {
               const IconComp = platform.icon;
+              const isSelected = selectedPlatform === platform.label;
               return (
-                <div key={idx} className="bg-slate-50 border border-slate-100/70 p-8 rounded-2xl flex flex-col items-center justify-center space-y-4 hover:bg-slate-100/40 transition-colors shadow-sm group">
-                  <div className="w-14 h-14 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-700 group-hover:text-[#00D632] group-hover:border-[#00D632]/20 transition-all duration-300">
+                <button
+                  key={idx}
+                  onClick={() => setSelectedPlatform(platform.label)}
+                  className={`p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-center space-y-4 transition-all duration-300 shadow-sm border text-center cursor-pointer ${
+                    isSelected 
+                      ? "bg-slate-50/50 border-[#00D632]/40 ring-1 ring-[#00D632]/10" 
+                      : "bg-white border-slate-100 hover:bg-slate-50/50 hover:border-slate-200"
+                  }`}
+                >
+                  <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center transition-all duration-300 ${
+                    isSelected 
+                      ? "bg-[#00D632]/5 border-[#00D632]/30 text-[#00D632]" 
+                      : "bg-slate-50 border-slate-100 text-slate-700 hover:text-[#00D632]"
+                  }`}>
                     <IconComp className="w-6 h-6 stroke-[1.8]" />
                   </div>
-                  <span className="text-sm font-bold text-black">{platform.label}</span>
-                </div>
+                  <span className={`text-xs sm:text-sm font-bold transition-colors ${isSelected ? "text-[#00D632]" : "text-slate-800"}`}>
+                    {platform.label}
+                  </span>
+                </button>
               );
             })}
+          </div>
+
+          {/* Platform Detail Card */}
+          <div className="max-w-4xl mx-auto mt-8">
+            <AnimatePresence mode="wait">
+              {(() => {
+                const platformOverviews: Record<string, {
+                  headline: string;
+                  description: string;
+                  bullets: { title: string; text: string }[];
+                  integrations: string[];
+                  technicalDetail: string;
+                }> = {
+                  Gaming: {
+                    headline: "Enforce competitive fairness and hardware integrity.",
+                    description: "Secure multiplayer matchmaking and high-stakes competitive leagues without compromising player privacy.",
+                    bullets: [
+                      { title: "Hardware Attestation", text: "Cryptographically verify user hardware and client binary signatures before letting players join lobbies." },
+                      { title: "Anti-Sybil Protections", text: "Flag automated farm networks, multi-boxing setups, and bot account clusters using privacy-safe posture telemetry." },
+                      { title: "Seamless Matchmaking Integration", text: "Inject ZK-backed humanness assertions into existing queue systems to secure rank-tier matchmaking." }
+                    ],
+                    integrations: ["Unreal Engine SDK", "Unity Integration Package", "C++ Native Library"],
+                    technicalDetail: "Attestation hashes are verified off-path via secure enclaves with less than 15ms latency."
+                  },
+                  Social: {
+                    headline: "Establish peer trust and clean up spam at the edge.",
+                    description: "Build robust, high-integrity human networks by verifying real humans without intrusive ID tracking.",
+                    bullets: [
+                      { title: "Privacy-Preserved Proof", text: "Verify that each profile corresponds to a unique living person using non-reversible biometric hashes." },
+                      { title: "Edge Spam Mitigation", text: "Stop bot swarms, coordinated astroturfing campaigns, and auto-generated content spam before it impacts feeds." },
+                      { title: "No Personal Linkage", text: "No phone numbers, emails, or government IDs are ever stored or linked to social profiles in cleartext." }
+                    ],
+                    integrations: ["REST API / Webhooks", "React Web Components", "OAuth App Gateway"],
+                    technicalDetail: "Leverages decentralized zero-knowledge proofs (ZKP) to attest uniqueness without data replication."
+                  },
+                  Finance: {
+                    headline: "Secure transaction pipelines with zero-knowledge posture compliance.",
+                    description: "Ensure that sensitive account actions and high-volume trades originate from secure, authorized environments.",
+                    bullets: [
+                      { title: "Isolated Secure Enclaves", text: "Perform critical risk evaluations and proof verifications inside hardware-hardened TEE environments." },
+                      { title: "ZK-AML / Compliance", text: "Confirm standard anti-money laundering and geographical blocklist requirements without exposing identity fields." },
+                      { title: "Account Takeover Shield", text: "Instantly challenge session-jacking, credential stuffing, and advanced device spoofing attempts." }
+                    ],
+                    integrations: ["gRPC Core Interface", "Backend Node SDK", "Hardware Security Module Proxy"],
+                    technicalDetail: "Fully certified SOC2 Type II and GDPR compliant workflow. Private data never touches cleartext servers."
+                  },
+                  Commerce: {
+                    headline: "Defeat release scalpers and fraud networks instantly.",
+                    description: "Deliver highly-demanded physical and digital drops exclusively to real, loyal human customers.",
+                    bullets: [
+                      { title: "Advanced Bot Mitigation", text: "Filter checkout scripts and scalping automation software before they can deplete limited inventory reserves." },
+                      { title: "Payment Fingerprint Analysis", text: "Correlate harmless device postures with transaction signals to block fraudulent credit card syndicates." },
+                      { title: "Frictionless Human Experience", text: "Loyal customers bypass verification steps entirely, while suspicious postures are challenged silently." }
+                    ],
+                    integrations: ["Shopify Custom Plugin", "Edge Worker Middleware", "API Route Gateway"],
+                    technicalDetail: "Real-time posture evaluations are processed directly inside Cloudflare Workers or Vercel Edge networks."
+                  },
+                  Education: {
+                    headline: "Protect assessment integrity and issue tamper-proof credentials.",
+                    description: "Enable modern academic verification and secure digital testing environments while respecting student privacy rights.",
+                    bullets: [
+                      { title: "Cryptographic Achievement Ledgers", text: "Issue persistent, tamper-proof digital degrees and certificates verified with a single click." },
+                      { title: "Privacy-Respecting Exam Integrity", text: "Audit local session parameters during online assessments without invasive proctor screen recording." },
+                      { title: "Instant Academic Onboarding", text: "Authenticate legitimate student status to automatically grant appropriate access privileges." }
+                    ],
+                    integrations: ["LTI Standard Integration", "Verifiable Credentials API", "Student Portal Widgets"],
+                    technicalDetail: "Supports W3C Verifiable Credentials and Decentralized Identifier (DID) open-source standards."
+                  }
+                };
+
+                const data = platformOverviews[selectedPlatform] || platformOverviews.Gaming;
+
+                return (
+                  <motion.div
+                    key={selectedPlatform}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="bg-slate-50 rounded-3xl p-8 sm:p-10 border border-slate-100 text-left space-y-8 shadow-sm relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-[#00D632]/5 rounded-full blur-2xl pointer-events-none" />
+
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-mono font-bold tracking-widest text-[#00D632] uppercase bg-[#00D632]/5 px-2.5 py-1 rounded-full border border-[#00D632]/10 inline-block">
+                        {selectedPlatform} Ecosystem Integration
+                      </span>
+                      <h3 className="text-xl sm:text-2xl font-black text-black tracking-tight leading-tight">
+                        {data.headline}
+                      </h3>
+                      <p className="text-slate-500 text-sm font-light">
+                        {data.description}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-200/50">
+                      {data.bullets.map((bullet, idx) => (
+                        <div key={idx} className="space-y-2 bg-white/50 border border-slate-100/50 p-5 rounded-2xl">
+                          <div className="flex items-center gap-2 text-[#00D632]">
+                            <CheckCircle2 className="w-4 h-4 stroke-[2]" />
+                            <h4 className="text-xs font-bold text-black uppercase tracking-wider">{bullet.title}</h4>
+                          </div>
+                          <p className="text-xs text-slate-500 leading-relaxed font-light">{bullet.text}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="pt-6 border-t border-slate-200/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="space-y-1.5">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Supported Integration Points</span>
+                        <div className="flex flex-wrap gap-2">
+                          {data.integrations.map((item, idx) => (
+                            <span key={idx} className="text-[10px] font-mono font-medium text-slate-600 bg-white border border-slate-100 px-2.5 py-1 rounded-md">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="sm:text-right max-w-xs space-y-1">
+                        <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest block font-bold">Cryptographic Spec</span>
+                        <p className="text-[10px] font-mono text-slate-500">{data.technicalDetail}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })()}
+            </AnimatePresence>
           </div>
         </div>
       </section>
@@ -591,26 +739,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-white border-t border-slate-100 py-16 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-3">
-            <div className="w-6 h-6 text-[#00D632]">
-              <AANShieldLogo strokeWidth={6} />
-            </div>
-            <span className="text-base font-bold text-black tracking-tight">AAN</span>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-x-8 gap-y-4 text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">
-            <button onClick={() => onNavigate('privacy')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none">Privacy Policy</button>
-            <button onClick={() => onNavigate('terms')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none">Terms of Service</button>
-            <button onClick={() => onNavigate('contact')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none">Contact Integration</button>
-          </div>
-
-          <span className="text-xs text-slate-400 font-light">
-            © {new Date().getFullYear()} Autonomous Account Network Inc.
-          </span>
-        </div>
-      </footer>
+      <Footer onNavigate={onNavigate} />
 
       {/* ================= MODAL SLIDE-OVER OVERLAY FOR AUTH & CONNECTION HANDSHAKE ================= */}
       <AnimatePresence>
@@ -670,7 +799,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
                 </div>
               ) : showSignup ? (
                 // Sign Up form
-                <AANSignupForm 
+                <AanSignupForm 
                   onBack={() => setShowSignup(false)} 
                   onSuccess={(email) => {
                     setShowAuthOverlay(false);
@@ -681,8 +810,8 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
                 // Gate Select
                 <div className="space-y-8 py-4">
                   <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="w-14 h-14 bg-[#00D632]/10 border border-[#00D632]/20 rounded-2xl flex items-center justify-center text-[#00D632] p-3">
-                      <AANShieldLogo strokeWidth={5} />
+                     <div className="w-14 h-14 bg-[#00D632]/10 border border-[#00D632]/20 rounded-2xl flex items-center justify-center text-[#00D632] p-3">
+                      <AanShieldLogo strokeWidth={5} />
                     </div>
                     <h3 className="text-xl font-bold tracking-tight text-black">Establish Secure Connection</h3>
                     <p className="text-xs text-slate-500 font-light max-w-xs">
@@ -696,7 +825,7 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
                       className="w-full py-4 rounded-2xl bg-black hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.98] shadow-sm"
                     >
                       <Shield className="w-4 h-4 text-[#00D632] stroke-[2.5]" />
-                      <span>Continue with AAN Guest Sandbox</span>
+                      <span>Continue with Aan Guest Sandbox</span>
                     </button>
 
                     <button 

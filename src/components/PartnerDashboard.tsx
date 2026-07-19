@@ -492,21 +492,21 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
   // Render ONBOARDING FLOW if not complete
   if (!onboardingCompleted) {
     return (
-      <div className="min-h-screen bg-[#050507] text-slate-300 flex flex-col justify-center items-center px-4 py-16 font-sans">
+      <div className="min-h-screen bg-slate-50 text-slate-700 flex flex-col justify-center items-center px-4 py-16 font-sans">
         
         {/* Onboarding Container */}
-        <div className="w-full max-w-2xl bg-[#090a0f] border border-white/[0.05] rounded-2xl shadow-2xl p-8 space-y-8 relative overflow-hidden">
+        <div className="w-full max-w-2xl bg-white border border-slate-200 rounded-2xl shadow-2xl p-8 space-y-8 relative overflow-hidden">
           
           {/* Subtle Ambient Accent */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-1 bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
 
           {/* Header */}
           <div className="text-center space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/[0.04] border border-emerald-500/20 rounded-full mb-2">
-              <Shield className="w-3.5 h-3.5 text-[#58E38A]" />
-              <span className="text-[10px] font-mono text-[#58E38A] uppercase tracking-wider font-semibold">Trust Infrastructure</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full mb-2">
+              <Shield className="w-3.5 h-3.5 text-emerald-700" />
+              <span className="text-[10px] font-mono text-emerald-700 uppercase tracking-wider font-semibold">Trust Infrastructure</span>
             </div>
-            <h1 className="text-xl font-semibold text-white tracking-tight">Setup AAN Proof-of-Human Identity</h1>
+            <h1 className="text-xl font-semibold text-slate-900 tracking-tight">Setup AAN Proof-of-Human Identity</h1>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
               Configure your tenant node to evaluate secure, privacy-preserving client integrity signals and verify unique human actors.
             </p>
@@ -526,7 +526,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   }`}>
                     {onboardingStep > step ? "✓" : step}
                   </div>
-                  <span className={`text-[10px] font-mono hidden sm:inline ${onboardingStep === step ? 'text-white font-medium' : 'text-slate-500'}`}>
+                  <span className={`text-[10px] font-mono hidden sm:inline ${onboardingStep === step ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>
                     {step === 1 && "Organization"}
                     {step === 2 && "Project"}
                     {step === 3 && "Credentials"}
@@ -543,7 +543,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {onboardingStep === 1 && (
               <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Step 1: Create Your Organization</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 1: Create Your Organization</h3>
                   <p className="text-[11px] text-slate-500">Provide registration details to anchor your decentralized credential issuer node.</p>
                 </div>
                 
@@ -555,7 +555,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       placeholder="e.g. Acme Corporation"
                       value={orgName}
                       onChange={(e) => setOrgName(e.target.value)}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 transition-all"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-600 transition-all"
                     />
                   </div>
 
@@ -564,7 +564,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     <select 
                       value={orgType}
                       onChange={(e) => setOrgType(e.target.value)}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white transition-all"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900 transition-all"
                     >
                       <option value="SaaS">SaaS Platform</option>
                       <option value="marketplace">Digital Marketplace</option>
@@ -585,7 +585,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       placeholder="https://acme.com"
                       value={orgWebsite}
                       onChange={(e) => setOrgWebsite(e.target.value)}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 transition-all"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-600 transition-all"
                     />
                   </div>
 
@@ -594,7 +594,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     <select 
                       value={orgUseCase}
                       onChange={(e) => setOrgUseCase(e.target.value)}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white transition-all"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900 transition-all"
                     >
                       <option value="bot_defense">Coordinate Bot Defense</option>
                       <option value="duplicate_account_prevention">Prevent Duplicate Signups (Sybil Defense)</option>
@@ -611,7 +611,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {onboardingStep === 2 && (
               <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Step 2: Create Your First Trust Project</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 2: Create Your First Trust Project</h3>
                   <p className="text-[11px] text-slate-500">Configure the primary evaluation context for your integrated endpoints.</p>
                 </div>
 
@@ -623,7 +623,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       placeholder="e.g. Acme Core API Shield"
                       value={projName}
                       onChange={(e) => setProjName(e.target.value)}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-600 transition-all"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-600 transition-all"
                     />
                   </div>
 
@@ -634,8 +634,8 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                         onClick={() => setProjEnv('sandbox')}
                         className={`flex-1 text-xs py-2 px-3.5 rounded-xl border font-mono uppercase tracking-wider transition-all ${
                           projEnv === 'sandbox' 
-                            ? 'bg-[#58E38A]/10 border-[#58E38A]/30 text-[#58E38A] font-semibold' 
-                            : 'bg-transparent border-white/[0.05] text-slate-500 hover:text-white hover:border-white/10'
+                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700 font-semibold' 
+                            : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-900 hover:border-white/10'
                         }`}
                       >
                         Sandbox Mode
@@ -645,7 +645,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                         className={`flex-1 text-xs py-2 px-3.5 rounded-xl border font-mono uppercase tracking-wider transition-all ${
                           projEnv === 'production' 
                             ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 font-semibold' 
-                            : 'bg-transparent border-white/[0.05] text-slate-500 hover:text-white hover:border-white/10'
+                            : 'bg-transparent border-slate-200 text-slate-500 hover:text-slate-900 hover:border-white/10'
                         }`}
                       >
                         Production Node
@@ -660,7 +660,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     <select 
                       value={projVolume}
                       onChange={(e) => setProjVolume(e.target.value)}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white transition-all"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900 transition-all"
                     >
                       <option value="under_1k">Less than 1,000 / mo (Free Sandbox)</option>
                       <option value="1k_10k">1,000 - 10,000 / mo</option>
@@ -674,7 +674,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     <select 
                       value={projSurface}
                       onChange={(e) => setProjSurface(e.target.value)}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white transition-all"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900 transition-all"
                     >
                       <option value="signup">User Registration Flow (Signup)</option>
                       <option value="login">Authentication Layer (Login Shield)</option>
@@ -690,24 +690,24 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {onboardingStep === 3 && (
               <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Step 3: Cryptographic Integration Credentials</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 3: Cryptographic Integration Credentials</h3>
                   <p className="text-[11px] text-slate-500">Your secure access keys have been provisioned in the sandbox ring. Store them safely.</p>
                 </div>
 
-                <div className="space-y-3 bg-black/30 border border-white/[0.04] p-4 rounded-xl">
+                <div className="space-y-3 bg-black/30 border border-slate-200/80 p-4 rounded-xl">
                   {/* Publishable Key */}
                   <div className="space-y-1">
                     <div className="flex justify-between items-center text-[9px] font-mono text-slate-500">
                       <span>PUBLISHABLE CLIENT KEY</span>
                       <button 
                         onClick={() => copyText(pubKey, 'pub')}
-                        className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
+                        className="text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
                       >
                         {keysCopied['pub'] ? <span className="text-emerald-400">Copied</span> : <span>Copy</span>}
                         <Copy className="w-2.5 h-2.5" />
                       </button>
                     </div>
-                    <div className="bg-black/50 border border-white/[0.04] p-2 rounded-lg font-mono text-xs text-slate-200 truncate select-all">
+                    <div className="bg-black/50 border border-slate-200/80 p-2 rounded-lg font-mono text-xs text-slate-800 truncate select-all">
                       <code>{pubKey}</code>
                     </div>
                   </div>
@@ -722,20 +722,20 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       <div className="flex gap-3">
                         <button 
                           onClick={() => setSecretShown(!secretShown)}
-                          className="text-slate-400 hover:text-white transition-colors"
+                          className="text-slate-500 hover:text-slate-900 transition-colors"
                         >
                           {secretShown ? "Hide" : "Show"}
                         </button>
                         <button 
                           onClick={() => copyText(secKey, 'sec')}
-                          className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
+                          className="text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
                         >
                           {keysCopied['sec'] ? <span className="text-emerald-400">Copied</span> : <span>Copy</span>}
                           <Copy className="w-2.5 h-2.5" />
                         </button>
                       </div>
                     </div>
-                    <div className="bg-black/50 border border-white/[0.04] p-2 rounded-lg font-mono text-xs text-slate-200 flex justify-between items-center overflow-hidden">
+                    <div className="bg-black/50 border border-slate-200/80 p-2 rounded-lg font-mono text-xs text-slate-800 flex justify-between items-center overflow-hidden">
                       <code className="truncate flex-1">
                         {secretShown ? secKey : "••••••••••••••••••••••••••••••••••••••••"}
                       </code>
@@ -748,13 +748,13 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       <span>WEBHOOK SIGNING SECRET</span>
                       <button 
                         onClick={() => copyText(whSecret, 'wh')}
-                        className="text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
+                        className="text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
                       >
                         {keysCopied['wh'] ? <span className="text-emerald-400">Copied</span> : <span>Copy</span>}
                         <Copy className="w-2.5 h-2.5" />
                       </button>
                     </div>
-                    <div className="bg-black/50 border border-white/[0.04] p-2 rounded-lg font-mono text-xs text-slate-200 truncate select-all">
+                    <div className="bg-black/50 border border-slate-200/80 p-2 rounded-lg font-mono text-xs text-slate-800 truncate select-all">
                       <code>{whSecret}</code>
                     </div>
                   </div>
@@ -765,46 +765,46 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {onboardingStep === 4 && (
               <div className="space-y-4 animate-[fadeIn_0.2s_ease-out]">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Step 4: Real-time Trust Architecture</h3>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 4: Real-time Trust Architecture</h3>
                   <p className="text-[11px] text-slate-500">How AAN seamlessly integrates alongside your existing stack.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="bg-black/20 border border-white/[0.03] p-3 rounded-xl space-y-1.5 text-center">
+                  <div className="bg-black/20 border border-slate-200 p-3 rounded-xl space-y-1.5 text-center">
                     <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 mx-auto">
                       <Code className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300 font-semibold block">1. Frontend Scan</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-700 font-semibold block">1. Frontend Scan</span>
                     <p className="text-[9px] text-slate-500 leading-normal">
                       The browser client calls the AAN modal to gather local non-custodial integrity telemetry.
                     </p>
                   </div>
 
-                  <div className="bg-black/20 border border-white/[0.03] p-3 rounded-xl space-y-1.5 text-center">
-                    <div className="w-6 h-6 rounded-lg bg-[#58E38A]/10 flex items-center justify-center text-[#58E38A] mx-auto">
+                  <div className="bg-black/20 border border-slate-200 p-3 rounded-xl space-y-1.5 text-center">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-700 mx-auto">
                       <Terminal className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300 font-semibold block">2. Signed Token</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-700 font-semibold block">2. Signed Token</span>
                     <p className="text-[9px] text-slate-500 leading-normal">
                       AAN returns a cryptographically signed token verifying human presence and score.
                     </p>
                   </div>
 
-                  <div className="bg-black/20 border border-white/[0.03] p-3 rounded-xl space-y-1.5 text-center">
-                    <div className="w-6 h-6 rounded-lg bg-[#58E38A]/10 flex items-center justify-center text-[#58E38A] mx-auto">
+                  <div className="bg-black/20 border border-slate-200 p-3 rounded-xl space-y-1.5 text-center">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-700 mx-auto">
                       <Server className="w-3.5 h-3.5" />
                     </div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-300 font-semibold block">3. Server Proof</span>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-slate-700 font-semibold block">3. Server Proof</span>
                     <p className="text-[9px] text-slate-500 leading-normal">
                       Your backend validates the signed token against our API to grant trust decisions instantly.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-3 bg-[#58E38A]/5 border border-[#58E38A]/10 rounded-xl flex items-start gap-3 text-[10px]">
-                  <HelpCircle className="w-4 h-4 text-[#58E38A] shrink-0 mt-0.5" />
+                <div className="p-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-start gap-3 text-[10px]">
+                  <HelpCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                   <div className="space-y-1">
-                    <span className="text-white font-semibold">Privacy Affirmation</span>
+                    <span className="text-slate-900 font-semibold">Privacy Affirmation</span>
                     <p className="text-slate-500 leading-normal">
                       AAN operates purely as a zero-knowledge trust standard. We do not store, index, or parse any personal data.
                     </p>
@@ -815,11 +815,11 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           </div>
 
           {/* Stepper Footer Controls */}
-          <div className="flex justify-between items-center pt-4 border-t border-white/[0.04]">
+          <div className="flex justify-between items-center pt-4 border-t border-slate-200/80">
             {onboardingStep > 1 ? (
               <button
                 onClick={() => setOnboardingStep(onboardingStep - 1)}
-                className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400 hover:text-white transition-all cursor-pointer"
+                className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-900 transition-all cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -847,7 +847,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 }
               }}
               disabled={loading}
-              className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-950 font-mono font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-xl shadow-white/5 cursor-pointer active:scale-[0.98]"
+              className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs px-5 py-2.5 rounded-xl transition-all shadow-xl shadow-sm cursor-pointer active:scale-[0.98]"
             >
               {loading ? (
                 <>
@@ -884,18 +884,18 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               </div>
               <div>
                 <span className="font-bold text-slate-900 tracking-tight text-xs block leading-none">AAN Infrastructure</span>
-                <span className="text-[8px] font-bold uppercase text-slate-400 tracking-widest block mt-0.5">Verified Node</span>
+                <span className="text-[8px] font-bold uppercase text-slate-500 tracking-widest block mt-0.5">Verified Node</span>
               </div>
             </div>
             
             {/* Active Project Card */}
             <div className="bg-slate-50 border border-slate-200/50 p-3 rounded-xl space-y-1 mt-4">
               <div className="flex items-center justify-between">
-                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Active Trust Project</span>
+                <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Active Trust Project</span>
                 <span className={`w-1.5 h-1.5 rounded-full ${projEnv === 'production' ? 'bg-rose-500' : 'bg-emerald-500'} animate-pulse`} />
               </div>
               <span className="text-slate-950 text-xs font-semibold block truncate leading-tight">{projName || "Default Staging Key"}</span>
-              <span className="text-[8px] font-mono text-slate-400 tracking-wider block truncate uppercase font-bold">{projEnv || 'sandbox'} environment</span>
+              <span className="text-[8px] font-mono text-slate-500 tracking-wider block truncate uppercase font-bold">{projEnv || 'sandbox'} environment</span>
             </div>
           </div>
 
@@ -903,7 +903,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           <nav className="space-y-1.5">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'overview' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'overview' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <Activity className="w-4 h-4" />
               <span>Trust Overview</span>
@@ -911,7 +911,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             <button
               onClick={() => setActiveTab('events')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'events' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'events' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <Database className="w-4 h-4" />
               <span>Verification Events</span>
@@ -919,7 +919,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             <button
               onClick={() => setActiveTab('trust_graph')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'trust_graph' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'trust_graph' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <Network className="w-4 h-4" />
               <span>Trust Graph</span>
@@ -927,7 +927,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             <button
               onClick={() => setActiveTab('test_lab')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'test_lab' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'test_lab' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <Flame className="w-4 h-4" />
               <span>Test Lab</span>
@@ -946,7 +946,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             <button
               onClick={() => setActiveTab('rules')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'rules' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'rules' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <Sliders className="w-4 h-4" />
               <span>Trust Policies</span>
@@ -954,7 +954,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             <button
               onClick={() => setActiveTab('credentials')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'credentials' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'credentials' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <Key className="w-4 h-4" />
               <span>API Credentials</span>
@@ -962,7 +962,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             <button
               onClick={() => setActiveTab('docs')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'docs' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'docs' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <BookOpen className="w-4 h-4" />
               <span>Developer Docs</span>
@@ -970,7 +970,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             <button
               onClick={() => setActiveTab('settings')}
-              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'settings' ? 'bg-black text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
+              className={`w-full flex items-center gap-3 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all text-left cursor-pointer ${activeTab === 'settings' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500 hover:text-black hover:bg-slate-50 border border-transparent'}`}
             >
               <Settings className="w-4 h-4" />
               <span>Organization Settings</span>
@@ -986,7 +986,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               <span className="w-1.5 h-1.5 rounded-full bg-[#00D632] inline-block animate-ping" />
               <span className="text-[9px] font-mono text-[#00D632] font-bold uppercase">SUPABASE ONLINE</span>
             </div>
-            <p className="text-[8px] text-slate-400 leading-normal">RLS policies applied securely. Sandbox storage persistent.</p>
+            <p className="text-[8px] text-slate-500 leading-normal">RLS policies applied securely. Sandbox storage persistent.</p>
           </div>
           
           <button 
@@ -1009,69 +1009,69 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-white tracking-tight">Trust Node Dashboard</h2>
-                <p className="text-xs text-[#58E38A] mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
+                <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Trust Node Dashboard</h2>
+                <p className="text-xs text-emerald-700 mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/[0.02] border border-white/[0.05] rounded-full">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/[0.02] border border-slate-200 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-                <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">Passive Mode Active</span>
+                <span className="text-[10px] font-mono text-slate-500 font-bold uppercase tracking-wider">Passive Mode Active</span>
               </div>
             </div>
 
             {/* Core Architectural Pillars Status Panel */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-[#08090d] border border-white/[0.03] rounded-2xl">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-slate-50 border border-slate-200 rounded-2xl">
               {/* FAST */}
-              <div className="space-y-2 p-3 bg-black/25 border border-white/[0.02] rounded-xl hover:border-emerald-500/10 transition-all">
+              <div className="space-y-2 p-3 bg-black/25 border border-slate-100 rounded-xl hover:border-emerald-500/10 transition-all">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-emerald-500/[0.04] border border-emerald-500/15 flex items-center justify-center text-emerald-400">
                     <Clock className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">1. FAST</span>
+                  <span className="text-[10px] font-mono text-slate-500 font-bold uppercase tracking-wider">1. FAST</span>
                 </div>
                 <div className="space-y-0.5">
-                  <div className="text-lg font-semibold text-white font-mono">45ms <span className="text-xs text-emerald-400 font-medium">avg</span></div>
+                  <div className="text-lg font-semibold text-slate-900 font-mono">45ms <span className="text-xs text-emerald-400 font-medium">avg</span></div>
                   <p className="text-[9px] text-slate-500 leading-snug">Target &lt; 300ms. Caching layer active with 99.2% hit-rate.</p>
                 </div>
               </div>
 
               {/* LIGHTWEIGHT */}
-              <div className="space-y-2 p-3 bg-black/25 border border-white/[0.02] rounded-xl hover:border-[#58E38A]/10 transition-all">
+              <div className="space-y-2 p-3 bg-black/25 border border-slate-100 rounded-xl hover:border-emerald-100 transition-all">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-[#58E38A]/[0.04] border border-[#58E38A]/15 flex items-center justify-center text-[#58E38A]">
+                  <div className="w-6 h-6 rounded-lg bg-[#58E38A]/[0.04] border border-emerald-200 flex items-center justify-center text-emerald-700">
                     <Cpu className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">2. LIGHTWEIGHT</span>
+                  <span className="text-[10px] font-mono text-slate-500 font-bold uppercase tracking-wider">2. LIGHTWEIGHT</span>
                 </div>
                 <div className="space-y-0.5">
-                  <div className="text-lg font-semibold text-white font-mono">0.4 KB <span className="text-xs text-slate-400 font-medium">SDK</span></div>
+                  <div className="text-lg font-semibold text-slate-900 font-mono">0.4 KB <span className="text-xs text-slate-500 font-medium">SDK</span></div>
                   <p className="text-[9px] text-slate-500 leading-snug">Zero auth replacement. Zero-friction passive telemetry signals.</p>
                 </div>
               </div>
 
               {/* SECURE */}
-              <div className="space-y-2 p-3 bg-black/25 border border-white/[0.02] rounded-xl hover:border-sky-500/10 transition-all">
+              <div className="space-y-2 p-3 bg-black/25 border border-slate-100 rounded-xl hover:border-sky-500/10 transition-all">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-sky-500/[0.04] border border-sky-500/15 flex items-center justify-center text-sky-400">
                     <Lock className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">3. SECURE</span>
+                  <span className="text-[10px] font-mono text-slate-500 font-bold uppercase tracking-wider">3. SECURE</span>
                 </div>
                 <div className="space-y-0.5">
-                  <div className="text-lg font-semibold text-white font-mono">Zero-Trust</div>
+                  <div className="text-lg font-semibold text-slate-900 font-mono">Zero-Trust</div>
                   <p className="text-[9px] text-slate-500 leading-snug">No raw biometrics, face templates, or SSNs stored. Signed JWTs.</p>
                 </div>
               </div>
 
               {/* RELIABLE */}
-              <div className="space-y-2 p-3 bg-black/25 border border-white/[0.02] rounded-xl hover:border-amber-500/10 transition-all">
+              <div className="space-y-2 p-3 bg-black/25 border border-slate-100 rounded-xl hover:border-amber-500/10 transition-all">
                 <div className="flex items-center gap-2">
                   <div className="w-6 h-6 rounded-lg bg-amber-500/[0.04] border border-amber-500/15 flex items-center justify-center text-amber-400">
                     <Server className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider">4. RELIABLE</span>
+                  <span className="text-[10px] font-mono text-slate-500 font-bold uppercase tracking-wider">4. RELIABLE</span>
                 </div>
                 <div className="space-y-0.5">
-                  <div className="text-lg font-semibold text-white font-mono">Fail-Open</div>
+                  <div className="text-lg font-semibold text-slate-900 font-mono">Fail-Open</div>
                   <p className="text-[9px] text-slate-500 leading-snug">Offline queue synchronizer with automatic graceful bypass fallback.</p>
                 </div>
               </div>
@@ -1079,53 +1079,53 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-[#0b0c10] border border-white/[0.03] p-4 rounded-xl space-y-1">
+              <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
                 <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block">Verification Attempts</span>
-                <span className="text-2xl font-light text-white font-sans">{totalAttempts}</span>
+                <span className="text-2xl font-light text-slate-900 font-sans">{totalAttempts}</span>
               </div>
 
-              <div className="bg-[#0b0c10] border border-white/[0.03] p-4 rounded-xl space-y-1">
-                <span className="text-[9px] font-mono text-[#58E38A] uppercase tracking-wider block">Approved Humans</span>
-                <span className="text-2xl font-light text-white font-sans">{approvedHumans}</span>
+              <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
+                <span className="text-[9px] font-mono text-emerald-700 uppercase tracking-wider block">Approved Humans</span>
+                <span className="text-2xl font-light text-slate-900 font-sans">{approvedHumans}</span>
               </div>
 
-              <div className="bg-[#0b0c10] border border-white/[0.03] p-4 rounded-xl space-y-1">
+              <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
                 <span className="text-[9px] font-mono text-rose-400 uppercase tracking-wider block">Blocked Bots</span>
-                <span className="text-2xl font-light text-white font-sans">{blockedBots}</span>
+                <span className="text-2xl font-light text-slate-900 font-sans">{blockedBots}</span>
               </div>
 
-              <div className="bg-[#0b0c10] border border-white/[0.03] p-4 rounded-xl space-y-1">
+              <div className="bg-white border border-slate-200 p-4 rounded-xl space-y-1">
                 <span className="text-[9px] font-mono text-amber-400 uppercase tracking-wider block">Manual Reviews</span>
-                <span className="text-2xl font-light text-white font-sans">{reviewCount}</span>
+                <span className="text-2xl font-light text-slate-900 font-sans">{reviewCount}</span>
               </div>
             </div>
 
             {/* Additional Premium Metrics Rows */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-[#0b0c10]/40 border border-white/[0.02] p-4 rounded-xl flex items-center justify-between">
+              <div className="bg-white/40 border border-slate-100 p-4 rounded-xl flex items-center justify-between">
                 <div>
                   <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest block">Associated Accounts Detected</span>
-                  <span className="text-white text-base font-semibold block mt-0.5">17 accounts linked</span>
+                  <span className="text-slate-900 text-base font-semibold block mt-0.5">17 accounts linked</span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-emerald-500/[0.03] border border-emerald-500/10 flex items-center justify-center text-emerald-400">
                   <UserCheck className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="bg-[#0b0c10]/40 border border-white/[0.02] p-4 rounded-xl flex items-center justify-between">
+              <div className="bg-white/40 border border-slate-100 p-4 rounded-xl flex items-center justify-between">
                 <div>
                   <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest block">Relationships Reviewed</span>
-                  <span className="text-white text-base font-semibold block mt-0.5">3 human groups</span>
+                  <span className="text-slate-900 text-base font-semibold block mt-0.5">3 human groups</span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-rose-500/[0.03] border border-rose-500/10 flex items-center justify-center text-rose-400">
                   <Layers className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="bg-[#0b0c10]/40 border border-white/[0.02] p-4 rounded-xl flex items-center justify-between">
+              <div className="bg-white/40 border border-slate-100 p-4 rounded-xl flex items-center justify-between">
                 <div>
                   <span className="text-[8px] font-mono text-slate-500 uppercase tracking-widest block">Policies Triggered</span>
-                  <span className="text-white text-base font-semibold block mt-0.5">{policies.filter(p => p.enabled).length} active policies</span>
+                  <span className="text-slate-900 text-base font-semibold block mt-0.5">{policies.filter(p => p.enabled).length} active policies</span>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-amber-500/[0.03] border border-amber-500/10 flex items-center justify-center text-amber-400">
                   <Cpu className="w-4 h-4" />
@@ -1135,12 +1135,12 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             {/* Premium Empty State and Seeding controls */}
             {totalAttempts === 0 ? (
-              <div className="bg-[#0b0c10] border border-white/[0.04] p-8 rounded-2xl text-center space-y-4 animate-[fadeIn_0.3s_ease-out]">
-                <div className="w-10 h-10 rounded-full bg-[#58E38A]/5 border border-[#58E38A]/15 flex items-center justify-center text-[#58E38A] mx-auto animate-pulse">
+              <div className="bg-white border border-slate-200/80 p-8 rounded-2xl text-center space-y-4 animate-[fadeIn_0.3s_ease-out]">
+                <div className="w-10 h-10 rounded-full bg-emerald-50/50 border border-emerald-200 flex items-center justify-center text-emerald-700 mx-auto animate-pulse">
                   <Activity className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-white text-sm font-semibold tracking-tight">Your project is ready.</h3>
+                  <h3 className="text-slate-900 text-sm font-semibold tracking-tight">Your project is ready.</h3>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto leading-normal">
                     Send your first verification request to see real-time, privacy-preserving trust decisions appear here.
                   </p>
@@ -1148,7 +1148,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 <div className="flex justify-center gap-3.5 pt-2">
                   <button
                     onClick={handleSeedEvents}
-                    className="bg-[#58E38A]/15 hover:bg-[#58E38A]/25 border border-[#58E38A]/20 text-[#58E38A] text-[10px] font-mono font-bold uppercase tracking-wider py-2 px-4 rounded-lg transition-colors cursor-pointer"
+                    className="bg-[#58E38A]/15 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-[10px] font-mono font-bold uppercase tracking-wider py-2 px-4 rounded-lg transition-colors cursor-pointer"
                   >
                     Load Sandbox Demonstration Events
                   </button>
@@ -1157,15 +1157,15 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             ) : (
               <>
                 {/* Risk Distribution and Interactive analytical charts block */}
-                <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-xl space-y-6">
+                <div className="bg-white border border-slate-200/80 p-6 rounded-xl space-y-6">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="text-sm font-semibold text-white tracking-tight">Trust Verdict Distribution</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 tracking-tight">Trust Verdict Distribution</h3>
                       <p className="text-xs text-slate-500 mt-0.5">Evaluating real-time trust signals and verification claims across your registered domains.</p>
                     </div>
                     <button
                       onClick={handleClearEvents}
-                      className="text-[9px] font-mono text-slate-500 hover:text-slate-300 transition-colors uppercase border border-white/[0.04] hover:bg-white/[0.02] py-1 px-2.5 rounded-lg cursor-pointer"
+                      className="text-[9px] font-mono text-slate-500 hover:text-slate-700 transition-colors uppercase border border-slate-200/80 hover:bg-white/[0.02] py-1 px-2.5 rounded-lg cursor-pointer"
                     >
                       Clear Events (Test Empty State)
                     </button>
@@ -1175,9 +1175,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <div className="space-y-3.5 pt-2 font-mono text-[10px]">
                     {/* Approved humans percentage bar */}
                     <div className="space-y-1">
-                      <div className="flex justify-between text-slate-400">
+                      <div className="flex justify-between text-slate-500">
                         <span>HUMAN SIGNATURE VERIFIED (AUTO-APPROVE)</span>
-                        <span className="text-white font-semibold">{Math.round((approvedHumans / totalAttempts) * 100)}%</span>
+                        <span className="text-slate-900 font-semibold">{Math.round((approvedHumans / totalAttempts) * 100)}%</span>
                       </div>
                       <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
                         <div 
@@ -1189,9 +1189,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
                     {/* Denied bots percentage bar */}
                     <div className="space-y-1">
-                      <div className="flex justify-between text-slate-400">
+                      <div className="flex justify-between text-slate-500">
                         <span>SUSPICIOUS TEMPLATE / BOT PATTERN DETECTED (AUTO-DENY)</span>
-                        <span className="text-white font-semibold">{Math.round((blockedBots / totalAttempts) * 100)}%</span>
+                        <span className="text-slate-900 font-semibold">{Math.round((blockedBots / totalAttempts) * 100)}%</span>
                       </div>
                       <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
                         <div 
@@ -1203,9 +1203,9 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
                     {/* Manual reviews percentage bar */}
                     <div className="space-y-1">
-                      <div className="flex justify-between text-slate-400">
+                      <div className="flex justify-between text-slate-500">
                         <span>DEVIATING SIGNAL PROFILE (MANUAL REVIEW REQUIRED)</span>
-                        <span className="text-white font-semibold">{Math.round((reviewCount / totalAttempts) * 100)}%</span>
+                        <span className="text-slate-900 font-semibold">{Math.round((reviewCount / totalAttempts) * 100)}%</span>
                       </div>
                       <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
                         <div 
@@ -1223,19 +1223,19 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 {/* Recent Events table overview */}
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Recent Trust Assessments</h3>
+                    <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Recent Trust Assessments</h3>
                     <button 
                       onClick={() => setActiveTab('events')} 
-                      className="text-[10px] font-mono text-[#58E38A] hover:underline"
+                      className="text-[10px] font-mono text-emerald-700 hover:underline"
                     >
                       View All Events →
                     </button>
                   </div>
 
-                  <div className="bg-[#0b0c10] border border-white/[0.04] rounded-xl overflow-hidden text-xs">
+                  <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden text-xs">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-white/[0.04] text-[9px] font-mono text-slate-500 uppercase tracking-wider bg-black/10">
+                        <tr className="border-b border-slate-200/80 text-[9px] font-mono text-slate-500 uppercase tracking-wider bg-black/10">
                           <th className="py-2.5 px-4 font-bold">Event ID</th>
                           <th className="py-2.5 px-4 font-bold">Partner Ref</th>
                           <th className="py-2.5 px-4 font-bold">Risk Score</th>
@@ -1244,11 +1244,11 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                           <th className="py-2.5 px-4 font-bold text-right">Timestamp</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/[0.02] text-slate-300">
+                      <tbody className="divide-y divide-white/[0.02] text-slate-700">
                         {events.slice(0, 3).map((e) => (
                           <tr key={e.id} onClick={() => setSelectedGlobalEvent(e)} className="hover:bg-white/[0.01] cursor-pointer">
-                            <td className="py-3 px-4 font-mono text-white">{e.id}</td>
-                            <td className="py-3 px-4 text-slate-400 font-mono">{e.external_user_id}</td>
+                            <td className="py-3 px-4 font-mono text-slate-900">{e.id}</td>
+                            <td className="py-3 px-4 text-slate-500 font-mono">{e.external_user_id}</td>
                             <td className="py-3 px-4 font-mono font-semibold">{e.risk_score}%</td>
                             <td className="py-3 px-4">
                               <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
@@ -1315,15 +1315,15 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-white tracking-tight">Trust Assessment Log</h2>
-                <p className="text-xs text-[#58E38A] mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
+                <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Trust Assessment Log</h2>
+                <p className="text-xs text-emerald-700 mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
               </div>
 
               {/* Seeding Controls if empty */}
               {events.length === 0 && (
                 <button
                   onClick={handleSeedEvents}
-                  className="bg-white hover:bg-slate-200 text-slate-950 text-xs font-mono font-bold px-4 py-2 rounded-xl transition-all cursor-pointer"
+                  className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-mono font-bold px-4 py-2 rounded-xl transition-all cursor-pointer"
                 >
                   Load Sandbox Seeds
                 </button>
@@ -1331,7 +1331,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             </div>
 
             {/* Filtering Options */}
-            <div className="flex flex-col sm:flex-row gap-4 bg-[#0b0c10] border border-white/[0.04] p-4 rounded-xl text-xs">
+            <div className="flex flex-col sm:flex-row gap-4 bg-white border border-slate-200/80 p-4 rounded-xl text-xs">
               <div className="flex-1 space-y-1">
                 <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Search by User Reference</label>
                 <div className="relative">
@@ -1341,7 +1341,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     placeholder="Search e.g. usr_verified_alice..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl pl-9 pr-4 py-2 text-xs text-white transition-all placeholder-slate-600"
+                    className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900 transition-all placeholder-slate-600"
                   />
                 </div>
               </div>
@@ -1351,7 +1351,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 <select
                   value={decisionFilter}
                   onChange={(e) => setDecisionFilter(e.target.value)}
-                  className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-white transition-all"
+                  className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-slate-900 transition-all"
                 >
                   <option value="all">All Decisions</option>
                   <option value="approved">Approved Only</option>
@@ -1363,23 +1363,23 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             {/* Events registry empty states */}
             {events.length === 0 ? (
-              <div className="bg-[#0b0c10] border border-white/[0.04] p-8 rounded-2xl text-center space-y-4">
-                <div className="w-10 h-10 rounded-full bg-[#58E38A]/5 border border-[#58E38A]/15 flex items-center justify-center text-[#58E38A] mx-auto">
+              <div className="bg-white border border-slate-200/80 p-8 rounded-2xl text-center space-y-4">
+                <div className="w-10 h-10 rounded-full bg-emerald-50/50 border border-emerald-200 flex items-center justify-center text-emerald-700 mx-auto">
                   <Database className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-white text-sm font-semibold tracking-tight">Your project is ready.</h3>
+                  <h3 className="text-slate-900 text-sm font-semibold tracking-tight">Your project is ready.</h3>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto leading-normal">
                     Send your first verification request to see trust decisions appear here.
                   </p>
                 </div>
               </div>
             ) : (
-              <div className="bg-[#0b0c10] border border-white/[0.04] rounded-2xl overflow-hidden">
+              <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-white/[0.04] text-[9px] font-mono text-slate-500 uppercase tracking-wider bg-black/10">
+                      <tr className="border-b border-slate-200/80 text-[9px] font-mono text-slate-500 uppercase tracking-wider bg-black/10">
                         <th className="py-3 px-5 font-bold">Event ID / Project</th>
                         <th className="py-3 px-5 font-bold">Platform Reference</th>
                         <th className="py-3 px-5 font-bold">Score & Decision</th>
@@ -1389,7 +1389,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                         <th className="py-3 px-5 font-bold text-right">Timestamp</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/[0.02] text-slate-300">
+                    <tbody className="divide-y divide-white/[0.02] text-slate-700">
                       {events
                         .filter(e => e.external_user_id.toLowerCase().includes(searchQuery.toLowerCase()))
                         .filter(e => decisionFilter === 'all' ? true : e.decision === decisionFilter)
@@ -1397,17 +1397,17 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                           <tr key={e.id} onClick={() => setSelectedGlobalEvent(e)} className="hover:bg-white/[0.01] transition-colors cursor-pointer">
                             
                             <td className="py-3.5 px-5 space-y-1">
-                              <span className="font-mono text-white block font-medium">{e.id}</span>
+                              <span className="font-mono text-slate-900 block font-medium">{e.id}</span>
                               <span className="text-[9px] text-slate-500 font-mono uppercase font-bold block">{e.project || projName || "Core Node"}</span>
                             </td>
 
-                            <td className="py-3.5 px-5 font-mono text-slate-400 font-medium">
+                            <td className="py-3.5 px-5 font-mono text-slate-500 font-medium">
                               {e.external_user_id}
                             </td>
 
                             <td className="py-3.5 px-5 space-y-1">
                               <div className="flex items-center gap-1.5 font-mono">
-                                <span className="text-white font-semibold block">{e.risk_score}%</span>
+                                <span className="text-slate-900 font-semibold block">{e.risk_score}%</span>
                                 <span className="text-[9px] text-slate-500">risk</span>
                               </div>
                               <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
@@ -1422,7 +1422,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                             <td className="py-3.5 px-5">
                               <div className="flex flex-wrap gap-1 max-w-[200px]">
                                 {e.reason_codes.map((code: string, idx: number) => (
-                                  <span key={idx} className="bg-black/30 text-slate-400 px-1.5 py-0.5 rounded font-mono text-[8px] border border-white/[0.02]">
+                                  <span key={idx} className="bg-black/30 text-slate-500 px-1.5 py-0.5 rounded font-mono text-[8px] border border-slate-100">
                                     {code}
                                   </span>
                                 ))}
@@ -1430,17 +1430,17 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                             </td>
 
                             <td className="py-3.5 px-5 space-y-1 leading-normal">
-                              <span className="text-slate-400 block">{e.device_signal}</span>
+                              <span className="text-slate-500 block">{e.device_signal}</span>
                               <div className="text-[9px] font-mono text-slate-500 flex items-center gap-1.5">
                                 <span>IP RISK:</span>
-                                <span className={e.ip_risk_signal.includes('High') ? 'text-rose-400 font-bold' : 'text-slate-400'}>
+                                <span className={e.ip_risk_signal.includes('High') ? 'text-rose-400 font-bold' : 'text-slate-500'}>
                                   {e.ip_risk_signal}
                                 </span>
                               </div>
                             </td>
 
                             <td className="py-3.5 px-5 space-y-1">
-                              <span className={`text-[10px] font-mono font-semibold ${e.returning_human ? 'text-[#58E38A]' : 'text-slate-400'}`}>
+                              <span className={`text-[10px] font-mono font-semibold ${e.returning_human ? 'text-emerald-700' : 'text-slate-500'}`}>
                                 {e.returning_human ? "Returning Match" : "New Identity"}
                               </span>
                               <span className="text-[9px] text-slate-500 block font-mono">
@@ -1469,8 +1469,8 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             
             {/* Page Header */}
             <div>
-              <h2 className="text-lg font-semibold text-white tracking-tight">Trust Policies</h2>
-              <p className="text-xs text-[#58E38A] mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
+              <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Trust Policies</h2>
+              <p className="text-xs text-emerald-700 mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
             </div>
 
             {/* Success Notifications */}
@@ -1485,14 +1485,14 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
               {/* Left Column: Numeric Thresholds */}
-              <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-5 md:col-span-2">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Automated Score Routing</h3>
+              <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-5 md:col-span-2">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Automated Score Routing</h3>
                 <p className="text-[11px] text-slate-500">Instruct AAN how to automatically issue proof decisions based on telemetry risk score margins.</p>
                 
                 {/* Auto Approve Slider */}
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-white">Auto Approve Below Risk Score</span>
+                    <span className="font-semibold text-slate-900">Auto Approve Below Risk Score</span>
                     <span className="font-mono bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">
                       &lt; {trustRules.autoApproveBelow}%
                     </span>
@@ -1528,7 +1528,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 {/* Auto Deny Slider */}
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-semibold text-white">Auto Deny Above Risk Score</span>
+                    <span className="font-semibold text-slate-900">Auto Deny Above Risk Score</span>
                     <span className="font-mono bg-rose-500/10 border border-rose-500/20 text-rose-400 px-2 py-0.5 rounded font-bold">
                       &gt; {trustRules.denyAbove}%
                     </span>
@@ -1546,8 +1546,8 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               </div>
 
               {/* Right Column: Actions Configurations */}
-              <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-4">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Risk Policies</h3>
+              <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Risk Policies</h3>
                 <p className="text-[11px] text-slate-500">Select behavioral responses for system anomalies and security events.</p>
 
                 {/* Duplicate Action */}
@@ -1556,7 +1556,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <select
                     value={trustRules.duplicateAction}
                     onChange={(e) => setTrustRules({ ...trustRules, duplicateAction: e.target.value })}
-                    className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                    className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-slate-900"
                   >
                     <option value="flag">Flag & Continue (Monitor Only)</option>
                     <option value="block">Block Duplicate Signatures</option>
@@ -1570,7 +1570,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <select
                     value={trustRules.botSuspicionAction}
                     onChange={(e) => setTrustRules({ ...trustRules, botSuspicionAction: e.target.value })}
-                    className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                    className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-slate-900"
                   >
                     <option value="verify">Enforce Volatile Video Proof</option>
                     <option value="block_immediate">Block Immediately</option>
@@ -1584,7 +1584,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <select
                     value={trustRules.fallbackNoCamera}
                     onChange={(e) => setTrustRules({ ...trustRules, fallbackNoCamera: e.target.value })}
-                    className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-white"
+                    className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3 py-2 text-xs text-slate-900"
                   >
                     <option value="allow_with_risk_penalty">Allow with Risk Penalty (+30 Score)</option>
                     <option value="deny">Deny access immediately</option>
@@ -1600,7 +1600,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               <button
                 onClick={handleSaveTrustRules}
                 disabled={savingRules}
-                className="bg-white hover:bg-slate-200 text-slate-950 text-xs font-mono font-bold py-2.5 px-6 rounded-xl transition-all shadow-xl shadow-white/5 flex items-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-mono font-bold py-2.5 px-6 rounded-xl transition-all shadow-xl shadow-sm flex items-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 {savingRules ? (
                   <>
@@ -1617,10 +1617,10 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             </div>
 
             {/* Expanded Organization Relationship Policies */}
-            <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-white/[0.04] pb-4 text-left">
+            <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-200/80 pb-4 text-left">
                 <div>
-                  <h3 className="text-sm font-semibold text-white tracking-tight">Trust Intelligence Policies</h3>
+                  <h3 className="text-sm font-semibold text-slate-900 tracking-tight">Trust Intelligence Policies</h3>
                   <p className="text-xs text-slate-500 mt-0.5">Define constraints for account associations, device matches, and velocity rules.</p>
                 </div>
                 <div className="text-[10px] font-mono text-slate-500">
@@ -1633,13 +1633,13 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <div key={p.id} className="py-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs">
                     <div className="space-y-1.5 max-w-xl text-left">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-white font-medium">{p.name}</span>
-                        <span className="bg-black/40 border border-white/[0.05] text-slate-500 font-mono text-[9px] px-2 py-0.5 rounded uppercase">
+                        <span className="text-slate-900 font-medium">{p.name}</span>
+                        <span className="bg-black/40 border border-slate-200 text-slate-500 font-mono text-[9px] px-2 py-0.5 rounded uppercase">
                           {p.type}
                         </span>
                       </div>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-500 text-[11px] font-light">
-                        <span>Threshold: <strong className="text-slate-300 font-mono font-normal">{p.threshold}</strong></span>
+                        <span>Threshold: <strong className="text-slate-700 font-mono font-normal">{p.threshold}</strong></span>
                         <span className="flex items-center gap-1.5">
                           Action: 
                           <select
@@ -1648,7 +1648,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                               const updatedAction = e.target.value as any;
                               setPolicies(prev => prev.map(item => item.id === p.id ? { ...item, recommendedAction: updatedAction } : item));
                             }}
-                            className="bg-black/40 border border-white/[0.08] focus:outline-none rounded px-2 py-0.5 text-[10px] font-mono text-[#58E38A] cursor-pointer"
+                            className="bg-black/40 border border-slate-200 focus:outline-none rounded px-2 py-0.5 text-[10px] font-mono text-emerald-700 cursor-pointer"
                           >
                             <option value="ALLOW">ALLOW</option>
                             <option value="STEP_UP">STEP_UP</option>
@@ -1666,7 +1666,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                           setEditingPolicyId(p.id);
                           setEditingJson(p.jsonRule);
                         }}
-                        className="text-[10px] font-mono text-[#58E38A] hover:underline cursor-pointer flex items-center gap-1 bg-black/40 border border-white/[0.06] py-1 px-2.5 rounded-lg"
+                        className="text-[10px] font-mono text-emerald-700 hover:underline cursor-pointer flex items-center gap-1 bg-black/40 border border-white/[0.06] py-1 px-2.5 rounded-lg"
                       >
                         <Code className="w-3 h-3" />
                         <span>Edit JSON Rules</span>
@@ -1680,7 +1680,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                         className={`text-[10px] font-mono uppercase px-3 py-1 rounded-lg transition-all cursor-pointer font-bold border ${
                           p.enabled 
                             ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                            : 'bg-black/40 text-slate-500 border-white/[0.04]'
+                            : 'bg-black/40 text-slate-500 border-slate-200/80'
                         }`}
                       >
                         {p.enabled ? "Enabled" : "Disabled"}
@@ -1694,17 +1694,17 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {/* JSON Rule Editor Modal Overlay */}
             {editingPolicyId && (
               <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-[#0b0c10] border border-white/[0.08] w-full max-w-lg rounded-3xl p-6 space-y-4 shadow-2xl animate-[fadeIn_0.15s_ease-out]">
-                  <div className="flex justify-between items-center border-b border-white/[0.04] pb-3">
+                <div className="bg-white border border-slate-200 w-full max-w-lg rounded-3xl p-6 space-y-4 shadow-2xl animate-[fadeIn_0.15s_ease-out]">
+                  <div className="flex justify-between items-center border-b border-slate-200/80 pb-3">
                     <div className="space-y-0.5 text-left">
                       <span className="text-[10px] font-mono text-slate-500 uppercase">Policy Rules Editor</span>
-                      <h4 className="text-white text-xs font-semibold">
+                      <h4 className="text-slate-900 text-xs font-semibold">
                         {policies.find(p => p.id === editingPolicyId)?.name}
                       </h4>
                     </div>
                     <button
                       onClick={() => setEditingPolicyId(null)}
-                      className="text-slate-500 hover:text-slate-300 font-mono text-xs cursor-pointer"
+                      className="text-slate-500 hover:text-slate-700 font-mono text-xs cursor-pointer"
                     >
                       Close
                     </button>
@@ -1716,14 +1716,14 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                       value={editingJson}
                       onChange={(e) => setEditingJson(e.target.value)}
                       rows={8}
-                      className="w-full bg-black/40 border border-white/[0.08] focus:border-[#58E38A]/30 focus:outline-none rounded-xl p-3 text-[11px] font-mono text-emerald-400 leading-normal"
+                      className="w-full bg-black/40 border border-slate-200 focus:border-emerald-200 focus:outline-none rounded-xl p-3 text-[11px] font-mono text-emerald-400 leading-normal"
                     />
                   </div>
 
                   <div className="flex justify-end gap-3.5 pt-2">
                     <button
                       onClick={() => setEditingPolicyId(null)}
-                      className="bg-black/30 text-slate-400 hover:text-white border border-white/[0.05] text-xs font-mono py-2 px-4 rounded-xl transition-all cursor-pointer"
+                      className="bg-black/30 text-slate-500 hover:text-slate-900 border border-slate-200 text-xs font-mono py-2 px-4 rounded-xl transition-all cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -1738,7 +1738,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                           alert("Invalid JSON schema. Please check syntax.");
                         }
                       }}
-                      className="bg-white hover:bg-slate-200 text-slate-950 text-xs font-mono font-bold py-2 px-4 rounded-xl transition-all cursor-pointer"
+                      className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-mono font-bold py-2 px-4 rounded-xl transition-all cursor-pointer"
                     >
                       Apply Rules
                     </button>
@@ -1756,14 +1756,14 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             
             {/* Page Header */}
             <div>
-              <h2 className="text-lg font-semibold text-white tracking-tight">Integration Credentials</h2>
-              <p className="text-xs text-[#58E38A] mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
+              <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Integration Credentials</h2>
+              <p className="text-xs text-emerald-700 mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
             </div>
 
             {/* Warning card */}
-            <div className="bg-[#0b0c10] border border-white/[0.04] p-5 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="bg-white border border-slate-200/80 p-5 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div className="space-y-1 max-w-xl text-xs">
-                <span className="text-white font-semibold flex items-center gap-2">
+                <span className="text-slate-900 font-semibold flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
                   <span>Sandbox Environment Credentials</span>
                 </span>
@@ -1775,23 +1775,23 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             {/* Active Keys Cards */}
             <div className="space-y-4">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Active Integration Keys</h3>
+              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Active Integration Keys</h3>
               
-              <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-4">
+              <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4">
                 
                 {/* Publishable Key */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                   <div className="md:col-span-1 space-y-0.5">
-                    <span className="text-xs font-semibold text-white block">Publishable Key</span>
+                    <span className="text-xs font-semibold text-slate-900 block">Publishable Key</span>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">Frontend embed</span>
                   </div>
                   <div className="md:col-span-3 flex items-center gap-3">
-                    <div className="bg-black/40 border border-white/[0.04] p-2.5 rounded-xl font-mono text-xs text-slate-200 select-all truncate flex-1">
+                    <div className="bg-black/40 border border-slate-200/80 p-2.5 rounded-xl font-mono text-xs text-slate-800 select-all truncate flex-1">
                       <code>{pubKey || "aan_pub_sb_unconfigured"}</code>
                     </div>
                     <button
                       onClick={() => copyText(pubKey, 'p_pub')}
-                      className="bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] p-2.5 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer"
+                      className="bg-white/[0.02] border border-slate-200 hover:bg-white/[0.05] p-2.5 rounded-xl text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                     >
                       {keysCopied['p_pub'] ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     </button>
@@ -1803,24 +1803,24 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 {/* Secret Key */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                   <div className="md:col-span-1 space-y-0.5">
-                    <span className="text-xs font-semibold text-white block">Secret Key</span>
+                    <span className="text-xs font-semibold text-slate-900 block">Secret Key</span>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">Backend proxy only</span>
                   </div>
                   <div className="md:col-span-3 flex items-center gap-3">
-                    <div className="bg-black/40 border border-white/[0.04] p-2.5 rounded-xl font-mono text-xs text-slate-200 truncate flex-1 flex justify-between items-center">
+                    <div className="bg-black/40 border border-slate-200/80 p-2.5 rounded-xl font-mono text-xs text-slate-800 truncate flex-1 flex justify-between items-center">
                       <code>
                         {secretShown ? (secKey || "aan_sec_sb_unconfigured") : "••••••••••••••••••••••••••••••••••••••••"}
                       </code>
                       <button 
                         onClick={() => setSecretShown(!secretShown)} 
-                        className="text-[10px] font-mono text-slate-500 hover:text-slate-300 ml-2"
+                        className="text-[10px] font-mono text-slate-500 hover:text-slate-700 ml-2"
                       >
                         {secretShown ? "HIDE" : "SHOW"}
                       </button>
                     </div>
                     <button
                       onClick={() => copyText(secKey, 'p_sec')}
-                      className="bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] p-2.5 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer"
+                      className="bg-white/[0.02] border border-slate-200 hover:bg-white/[0.05] p-2.5 rounded-xl text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                     >
                       {keysCopied['p_sec'] ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     </button>
@@ -1832,16 +1832,16 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                 {/* Webhook Secret */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                   <div className="md:col-span-1 space-y-0.5">
-                    <span className="text-xs font-semibold text-white block">Webhook Secret</span>
+                    <span className="text-xs font-semibold text-slate-900 block">Webhook Secret</span>
                     <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">Payload signature</span>
                   </div>
                   <div className="md:col-span-3 flex items-center gap-3">
-                    <div className="bg-black/40 border border-white/[0.04] p-2.5 rounded-xl font-mono text-xs text-slate-200 select-all truncate flex-1">
+                    <div className="bg-black/40 border border-slate-200/80 p-2.5 rounded-xl font-mono text-xs text-slate-800 select-all truncate flex-1">
                       <code>{whSecret || "whsec_sb_unconfigured"}</code>
                     </div>
                     <button
                       onClick={() => copyText(whSecret, 'p_wh')}
-                      className="bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] p-2.5 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer"
+                      className="bg-white/[0.02] border border-slate-200 hover:bg-white/[0.05] p-2.5 rounded-xl text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                     >
                       {keysCopied['p_wh'] ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     </button>
@@ -1860,15 +1860,15 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             
             {/* Page Header */}
             <div>
-              <h2 className="text-lg font-semibold text-white tracking-tight">Developer Integration Guide</h2>
-              <p className="text-xs text-[#58E38A] mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
+              <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Developer Integration Guide</h2>
+              <p className="text-xs text-emerald-700 mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
             </div>
 
             {/* Core Architectural Definition */}
-            <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-3.5 text-xs">
-              <h3 className="text-white text-sm font-semibold">Trust Infrastructure Model</h3>
+            <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-3.5 text-xs">
+              <h3 className="text-slate-900 text-sm font-semibold">Trust Infrastructure Model</h3>
               <p className="text-slate-500 leading-relaxed font-normal">
-                AAN <strong className="text-slate-300 font-semibold">integrates alongside your existing authentication system</strong>, evaluating registrations, logins, and high-risk actions before access is granted.
+                AAN <strong className="text-slate-700 font-semibold">integrates alongside your existing authentication system</strong>, evaluating registrations, logins, and high-risk actions before access is granted.
               </p>
               <p className="text-slate-500 leading-relaxed font-normal">
                 After evaluation, AAN returns a signed trust token containing verified trust claims that your backend can validate instantly. Your backend verifies this token with the AAN trust service and grants secure access.
@@ -1877,35 +1877,35 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
             {/* Interactive Code snippets tabs */}
             <div className="space-y-4">
-              <div className="flex border-b border-white/[0.04] gap-4 font-mono text-[10px]">
+              <div className="flex border-b border-slate-200/80 gap-4 font-mono text-[10px]">
                 <button
                   onClick={() => setCodeTab('frontend')}
-                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'frontend' ? 'border-b-2 border-[#58E38A] text-white' : 'text-slate-500'}`}
+                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'frontend' ? 'border-b-2 border-[#58E38A] text-slate-900' : 'text-slate-500'}`}
                 >
                   1. FRONTEND EMBED
                 </button>
                 <button
                   onClick={() => setCodeTab('backend')}
-                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'backend' ? 'border-b-2 border-[#58E38A] text-white' : 'text-slate-500'}`}
+                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'backend' ? 'border-b-2 border-[#58E38A] text-slate-900' : 'text-slate-500'}`}
                 >
                   2. SERVER VERIFICATION
                 </button>
                 <button
                   onClick={() => setCodeTab('webhook')}
-                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'webhook' ? 'border-b-2 border-[#58E38A] text-white' : 'text-slate-500'}`}
+                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'webhook' ? 'border-b-2 border-[#58E38A] text-slate-900' : 'text-slate-500'}`}
                 >
                   3. WEBHOOK INTEGRATION
                 </button>
                 <button
                   onClick={() => setCodeTab('token')}
-                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'token' ? 'border-b-2 border-[#58E38A] text-white' : 'text-slate-500'}`}
+                  className={`pb-2 transition-all cursor-pointer font-bold ${codeTab === 'token' ? 'border-b-2 border-[#58E38A] text-slate-900' : 'text-slate-500'}`}
                 >
                   4. TRUST TOKEN CLAIMS
                 </button>
               </div>
 
               {/* Code Blocks */}
-              <div className="bg-black/60 border border-white/[0.05] rounded-xl p-5 font-mono text-[11px] leading-relaxed text-slate-300 overflow-x-auto select-all">
+              <div className="bg-black/60 border border-slate-200 rounded-xl p-5 font-mono text-[11px] leading-relaxed text-slate-700 overflow-x-auto select-all">
                 {codeTab === 'frontend' && (
                   <pre>{`// 1. Install client SDK
 import { AANClient } from '@aan/web-sdk';
@@ -2031,8 +2031,8 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
             
             {/* Page Header */}
             <div>
-              <h2 className="text-lg font-semibold text-white tracking-tight">Organization Settings</h2>
-              <p className="text-xs text-[#58E38A] mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
+              <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Organization Settings</h2>
+              <p className="text-xs text-emerald-700 mt-1 font-medium">AAN delivers real-time trust decisions without replacing your authentication system.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -2041,8 +2041,8 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
               <div className="space-y-6 md:col-span-2 text-xs">
                 
                 {/* Node Settings Form */}
-                <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-4">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Trust Configuration</h3>
+                <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4">
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Trust Configuration</h3>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
@@ -2051,7 +2051,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                         type="text"
                         value={orgName}
                         onChange={(e) => setOrgName(e.target.value)}
-                        className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white"
+                        className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900"
                       />
                     </div>
 
@@ -2061,7 +2061,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                         type="text"
                         value={projName}
                         onChange={(e) => setProjName(e.target.value)}
-                        className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white"
+                        className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900"
                       />
                     </div>
                   </div>
@@ -2074,7 +2074,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                         placeholder="localhost:3000, acme.com"
                         value={orgWebsite}
                         onChange={(e) => setOrgWebsite(e.target.value)}
-                        className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white"
+                        className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900"
                       />
                     </div>
 
@@ -2083,7 +2083,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                       <input
                         type="text"
                         placeholder="https://acme.com/webhooks/aan"
-                        className="w-full bg-black/40 border border-white/[0.08] focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-white"
+                        className="w-full bg-black/40 border border-slate-200 focus:border-white/20 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs text-slate-900"
                         defaultValue="https://acme.com/webhooks/aan"
                       />
                     </div>
@@ -2096,7 +2096,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                         localStorage.setItem('aan_project_name', projName);
                         alert("Node configurations saved successfully.");
                       }}
-                      className="bg-white hover:bg-slate-200 text-slate-950 font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all cursor-pointer"
+                      className="bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs py-2 px-4 rounded-xl transition-all cursor-pointer"
                     >
                       Save Node Configurations
                     </button>
@@ -2104,16 +2104,16 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                 </div>
 
                 {/* Expanded Technical Metadata Profile */}
-                <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-4">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">System Metadata & Status</h3>
+                <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4">
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">System Metadata & Status</h3>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-[11px]">
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">Organization ID</span>
-                      <span className="font-mono text-white select-all">{projectId || 'org_sandbox_aan_201'}</span>
+                      <span className="font-mono text-slate-900 select-all">{projectId || 'org_sandbox_aan_201'}</span>
                     </div>
 
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">Node Status</span>
                       <span className="text-emerald-400 font-semibold flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
@@ -2121,34 +2121,34 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                       </span>
                     </div>
 
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">Environment</span>
                       <span className="font-mono text-amber-400 uppercase font-bold text-[10px]">{projEnv || 'sandbox'}</span>
                     </div>
 
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">Last Verification Request</span>
-                      <span className="text-slate-300 font-medium">Just now</span>
+                      <span className="text-slate-700 font-medium">Just now</span>
                     </div>
 
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">API Version</span>
-                      <span className="font-mono text-slate-300 font-medium font-semibold">v1.2.0 (Stable)</span>
+                      <span className="font-mono text-slate-700 font-medium font-semibold">v1.2.0 (Stable)</span>
                     </div>
 
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">Current Plan</span>
-                      <span className="text-slate-300 font-medium">Sandbox Developer Plan</span>
+                      <span className="text-slate-700 font-medium">Sandbox Developer Plan</span>
                     </div>
 
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">SDK Version</span>
-                      <span className="font-mono text-slate-300 font-medium font-semibold">@aan/web-sdk@2.4.1</span>
+                      <span className="font-mono text-slate-700 font-medium font-semibold">@aan/web-sdk@2.4.1</span>
                     </div>
 
-                    <div className="flex justify-between py-1.5 border-b border-white/[0.02]">
+                    <div className="flex justify-between py-1.5 border-b border-slate-100">
                       <span className="text-slate-500">Rate Limits</span>
-                      <span className="text-slate-300 font-medium">60 req/min (10,000/mo)</span>
+                      <span className="text-slate-700 font-medium">60 req/min (10,000/mo)</span>
                     </div>
                   </div>
                 </div>
@@ -2156,14 +2156,14 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
               </div>
 
               {/* Expanded Compliance & Organization Status checklist */}
-              <div className="bg-[#0b0c10] border border-white/[0.04] p-6 rounded-2xl space-y-4 h-fit">
-                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Organization Status</h3>
+              <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4 h-fit">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Organization Status</h3>
                 
                 <div className="space-y-4 text-xs leading-normal">
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">✓</div>
                     <div>
-                      <span className="text-white font-medium block">Organization Registered</span>
+                      <span className="text-slate-900 font-medium block">Organization Registered</span>
                       <p className="text-[10px] text-slate-500">Legal entity registered on verified node.</p>
                     </div>
                   </div>
@@ -2171,7 +2171,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">✓</div>
                     <div>
-                      <span className="text-white font-medium block">Domain Verified</span>
+                      <span className="text-slate-900 font-medium block">Domain Verified</span>
                       <p className="text-[10px] text-slate-500">Allowed domains matched and verified.</p>
                     </div>
                   </div>
@@ -2179,7 +2179,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">✓</div>
                     <div>
-                      <span className="text-white font-medium block">Sandbox Enabled</span>
+                      <span className="text-slate-900 font-medium block">Sandbox Enabled</span>
                       <p className="text-[10px] text-slate-500">Developer sandbox node initialized.</p>
                     </div>
                   </div>
@@ -2187,7 +2187,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">✓</div>
                     <div>
-                      <span className="text-white font-medium block">API Credentials Generated</span>
+                      <span className="text-slate-900 font-medium block">API Credentials Generated</span>
                       <p className="text-[10px] text-slate-500">Integration keys generated successfully.</p>
                     </div>
                   </div>
@@ -2195,7 +2195,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">✓</div>
                     <div>
-                      <span className="text-white font-medium block">Webhook Configured</span>
+                      <span className="text-slate-900 font-medium block">Webhook Configured</span>
                       <p className="text-[10px] text-slate-500">Inbound event payload url active.</p>
                     </div>
                   </div>
@@ -2203,7 +2203,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-black/40 border border-white/10 text-slate-500 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">○</div>
                     <div>
-                      <span className="text-slate-400 font-medium block">Billing Configured</span>
+                      <span className="text-slate-500 font-medium block">Billing Configured</span>
                       <p className="text-[10px] text-slate-500">Provide payment method for live requests.</p>
                     </div>
                   </div>
@@ -2211,7 +2211,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-black/40 border border-white/10 text-slate-500 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">○</div>
                     <div>
-                      <span className="text-slate-400 font-medium block">Production Approved</span>
+                      <span className="text-slate-500 font-medium block">Production Approved</span>
                       <p className="text-[10px] text-slate-500">Corporate verification and approval.</p>
                     </div>
                   </div>
@@ -2219,7 +2219,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                   <div className="flex items-start gap-2.5">
                     <div className="w-4 h-4 rounded-full bg-black/40 border border-white/10 text-slate-500 flex items-center justify-center text-[10px] shrink-0 mt-0.5 font-bold">○</div>
                     <div>
-                      <span className="text-slate-400 font-medium block">Trust Network Active</span>
+                      <span className="text-slate-500 font-medium block">Trust Network Active</span>
                       <p className="text-[10px] text-slate-500">Full attestation authority enabled.</p>
                     </div>
                   </div>
@@ -2236,19 +2236,19 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
       {/* GLOBAL EVENT INSPECT MODAL (ZK Proof linked details) */}
       {selectedGlobalEvent && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-sans text-left">
-          <div className="bg-[#0b0c10] border border-white/[0.08] w-full max-w-xl rounded-3xl p-6 space-y-5 shadow-2xl animate-[fadeIn_0.15s_ease-out] max-h-[90vh] overflow-y-auto">
+          <div className="bg-white border border-slate-200 w-full max-w-xl rounded-3xl p-6 space-y-5 shadow-2xl animate-[fadeIn_0.15s_ease-out] max-h-[90vh] overflow-y-auto">
             
             {/* Header */}
-            <div className="flex justify-between items-center border-b border-white/[0.04] pb-3">
+            <div className="flex justify-between items-center border-b border-slate-200/80 pb-3">
               <div className="space-y-0.5">
-                <span className="text-[9px] font-mono text-[#58E38A] uppercase tracking-wider font-bold">Trust Assessment Detail</span>
-                <h4 className="text-white text-xs font-semibold font-mono">
+                <span className="text-[9px] font-mono text-emerald-700 uppercase tracking-wider font-bold">Trust Assessment Detail</span>
+                <h4 className="text-slate-900 text-xs font-semibold font-mono">
                   {selectedGlobalEvent.id}
                 </h4>
               </div>
               <button
                 onClick={() => setSelectedGlobalEvent(null)}
-                className="text-slate-500 hover:text-slate-300 font-mono text-xs cursor-pointer bg-white/[0.02] border border-white/[0.05] py-1 px-3 rounded-lg"
+                className="text-slate-500 hover:text-slate-700 font-mono text-xs cursor-pointer bg-white/[0.02] border border-slate-200 py-1 px-3 rounded-lg"
               >
                 Close
               </button>
@@ -2256,22 +2256,22 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
 
             {/* Standard Event Details */}
             <div className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3 bg-black/20 p-3.5 rounded-xl border border-white/[0.02] font-mono text-[11px]">
+              <div className="grid grid-cols-2 gap-3 bg-black/20 p-3.5 rounded-xl border border-slate-100 font-mono text-[11px]">
                 <div>
                   <span className="text-slate-500 text-[9px] uppercase tracking-wider block">Partner Reference ID</span>
-                  <span className="text-white font-semibold block">{selectedGlobalEvent.external_user_id}</span>
+                  <span className="text-slate-900 font-semibold block">{selectedGlobalEvent.external_user_id}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 text-[9px] uppercase tracking-wider block">Decision Timestamp</span>
-                  <span className="text-white block">{new Date(selectedGlobalEvent.timestamp).toLocaleString()}</span>
+                  <span className="text-slate-900 block">{new Date(selectedGlobalEvent.timestamp).toLocaleString()}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 text-[9px] uppercase tracking-wider block">Device Footprint</span>
-                  <span className="text-slate-300 block truncate">{selectedGlobalEvent.device_signal}</span>
+                  <span className="text-slate-700 block truncate">{selectedGlobalEvent.device_signal}</span>
                 </div>
                 <div>
                   <span className="text-slate-500 text-[9px] uppercase tracking-wider block">IP Risk Status</span>
-                  <span className="text-slate-300 block">{selectedGlobalEvent.ip_risk_signal}</span>
+                  <span className="text-slate-700 block">{selectedGlobalEvent.ip_risk_signal}</span>
                 </div>
               </div>
 
@@ -2280,7 +2280,7 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                 <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider block font-bold">Reason Signal Flags</span>
                 <div className="flex flex-wrap gap-1 font-mono text-[9px]">
                   {selectedGlobalEvent.reason_codes.map((code: string, idx: number) => (
-                    <span key={idx} className="bg-black/40 border border-white/[0.05] text-slate-300 px-2 py-0.5 rounded">
+                    <span key={idx} className="bg-black/40 border border-slate-200 text-slate-700 px-2 py-0.5 rounded">
                       {code}
                     </span>
                   ))}
@@ -2289,12 +2289,12 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
             </div>
 
             {/* Real-Time Trust Assessment Checklist */}
-            <div className="bg-[#0e1017] border border-white/[0.05] p-5 rounded-2xl space-y-4 shadow-inner">
-              <div className="flex items-center gap-2 border-b border-white/[0.04] pb-3">
-                <span className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-[#58E38A] rounded-lg">
+            <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl space-y-4 shadow-inner">
+              <div className="flex items-center gap-2 border-b border-slate-200/80 pb-3">
+                <span className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-lg">
                   <Shield className="w-3.5 h-3.5" />
                 </span>
-                <span className="text-xs font-mono text-white uppercase tracking-wider font-bold">Real-Time Trust Assessment Verdict</span>
+                <span className="text-xs font-mono text-slate-900 uppercase tracking-wider font-bold">Real-Time Trust Assessment Verdict</span>
               </div>
               
               <div className="space-y-3.5 text-xs">
@@ -2305,8 +2305,8 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                     selectedGlobalEvent.risk_score < 70 ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
                   }`} />
                   <div>
-                    <span className="text-slate-400 font-medium block">Is this a real human?</span>
-                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                    <span className="text-slate-500 font-medium block">Is this a real human?</span>
+                    <p className="text-[11px] text-slate-700 font-mono mt-0.5">
                       {selectedGlobalEvent.risk_score < 40 ? (
                         <span className="text-emerald-400 font-semibold">YES — High-confidence passive human signal evaluated ({100 - selectedGlobalEvent.risk_score}% humanness score).</span>
                       ) : selectedGlobalEvent.risk_score < 70 ? (
@@ -2319,31 +2319,31 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                 </div>
 
                 {/* 2. Is this likely the same returning person? */}
-                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                <div className="flex items-start gap-3 border-t border-slate-200 pt-3">
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                     selectedGlobalEvent.returning_human ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'bg-slate-500'
                   }`} />
                   <div>
-                    <span className="text-slate-400 font-medium block">Is this likely the same returning person?</span>
-                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                    <span className="text-slate-500 font-medium block">Is this likely the same returning person?</span>
+                    <p className="text-[11px] text-slate-700 font-mono mt-0.5">
                       {selectedGlobalEvent.returning_human ? (
                         <span className="text-emerald-400 font-semibold">YES — Match found with unique human signature index across previous sessions.</span>
                       ) : (
-                        <span className="text-slate-400 font-semibold">NEW BASLINE — Zero matches found. Setting up new passive trust baseline.</span>
+                        <span className="text-slate-500 font-semibold">NEW BASLINE — Zero matches found. Setting up new passive trust baseline.</span>
                       )}
                     </p>
                   </div>
                 </div>
 
                 {/* 3. Does this login appear trustworthy? */}
-                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                <div className="flex items-start gap-3 border-t border-slate-200 pt-3">
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                     selectedGlobalEvent.risk_score < 30 ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]' :
                     selectedGlobalEvent.risk_score < 70 ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
                   }`} />
                   <div>
-                    <span className="text-slate-400 font-medium block">Does this login appear trustworthy?</span>
-                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                    <span className="text-slate-500 font-medium block">Does this login appear trustworthy?</span>
+                    <p className="text-[11px] text-slate-700 font-mono mt-0.5">
                       {selectedGlobalEvent.risk_score < 30 ? (
                         <span className="text-emerald-400 font-semibold">HIGHLY TRUSTWORTHY — Minimal risk rating ({selectedGlobalEvent.risk_score}/100) and clean IP/device profile.</span>
                       ) : selectedGlobalEvent.risk_score < 70 ? (
@@ -2356,13 +2356,13 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                 </div>
 
                 {/* 4. Is additional verification recommended? */}
-                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                <div className="flex items-start gap-3 border-t border-slate-200 pt-3">
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                     selectedGlobalEvent.decision === 'review' || selectedGlobalEvent.decision === 'denied' ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]'
                   }`} />
                   <div>
-                    <span className="text-slate-400 font-medium block">Is additional verification recommended?</span>
-                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                    <span className="text-slate-500 font-medium block">Is additional verification recommended?</span>
+                    <p className="text-[11px] text-slate-700 font-mono mt-0.5">
                       {selectedGlobalEvent.decision === 'review' ? (
                         <span className="text-amber-400 font-semibold">YES — Challenge recommendation: Trigger Step-up OTP or CAPTCHA challenge.</span>
                       ) : selectedGlobalEvent.decision === 'denied' ? (
@@ -2375,17 +2375,17 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
                 </div>
 
                 {/* 5. Should this event be flagged for review? */}
-                <div className="flex items-start gap-3 border-t border-white/[0.03] pt-3">
+                <div className="flex items-start gap-3 border-t border-slate-200 pt-3">
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
                     selectedGlobalEvent.decision === 'review' || selectedGlobalEvent.risk_score >= 50 ? 'bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]' : 'bg-slate-500'
                   }`} />
                   <div>
-                    <span className="text-slate-400 font-medium block">Should this event be flagged for review?</span>
-                    <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                    <span className="text-slate-500 font-medium block">Should this event be flagged for review?</span>
+                    <p className="text-[11px] text-slate-700 font-mono mt-0.5">
                       {selectedGlobalEvent.decision === 'review' || selectedGlobalEvent.risk_score >= 50 ? (
                         <span className="text-amber-400 font-semibold">YES — Dispatched to organization manual review queue.</span>
                       ) : (
-                        <span className="text-slate-400 font-semibold">NO — Passive evaluation clean. No administrative audit action required.</span>
+                        <span className="text-slate-500 font-semibold">NO — Passive evaluation clean. No administrative audit action required.</span>
                       )}
                     </p>
                   </div>
@@ -2395,14 +2395,14 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
 
             {/* ZK Model Proof Component Card (REQUESTED STEP 5) */}
             <div className="bg-black/40 border border-emerald-500/20 p-5 rounded-2xl space-y-4 shadow-inner">
-              <div className="flex justify-between items-center border-b border-white/[0.04] pb-3">
+              <div className="flex justify-between items-center border-b border-slate-200/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <span className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-[#58E38A] rounded-lg">
+                  <span className="p-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 rounded-lg">
                     <Binary className="w-3.5 h-3.5" />
                   </span>
-                  <h4 className="text-white text-xs font-semibold uppercase tracking-wider font-mono">ZK Model Proof</h4>
+                  <h4 className="text-slate-900 text-xs font-semibold uppercase tracking-wider font-mono">ZK Model Proof</h4>
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold uppercase bg-emerald-500/10 text-[#58E38A] border border-emerald-500/20">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold uppercase bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-ping" />
                   Verified
                 </span>
@@ -2412,47 +2412,47 @@ app.post('/webhooks/aan', express.raw({ type: 'application/json' }), (req, res) 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5 text-[11px] font-mono">
                 <div>
                   <span className="text-slate-500 block uppercase text-[8px] tracking-wider font-semibold">Model Name & Circuit</span>
-                  <span className="text-white font-semibold">AAN Risk Model v0.1-sandbox</span>
+                  <span className="text-slate-900 font-semibold">AAN Risk Model v0.1-sandbox</span>
                 </div>
 
                 <div>
                   <span className="text-slate-500 block uppercase text-[8px] tracking-wider font-semibold">Verified Output Score</span>
-                  <span className="text-[#58E38A] font-bold text-xs">{selectedGlobalEvent.risk_score}% Output</span>
+                  <span className="text-emerald-700 font-bold text-xs">{selectedGlobalEvent.risk_score}% Output</span>
                 </div>
 
                 <div className="sm:col-span-2">
                   <span className="text-slate-500 block uppercase text-[8px] tracking-wider font-semibold">Cryptographic Proof Hash</span>
-                  <span className="text-slate-300 truncate block max-w-sm">
+                  <span className="text-slate-700 truncate block max-w-sm">
                     {selectedGlobalEvent.zk_proof_id ? `0x${selectedGlobalEvent.zk_proof_id.replace("zkp_aan_", "")}e1e51b6a71e82b7cfdc1d7c92b2ef81977a4ee40c5eb` : "0x7a8df1e51b6a71e82b7cfdc1d7c92b2ef81977a4ee40c5ebf092adcf1b6a71e8"}
                   </span>
                 </div>
 
                 <div className="sm:col-span-2">
                   <span className="text-slate-500 block uppercase text-[8px] tracking-wider font-semibold">Public Inputs payload Hash</span>
-                  <span className="text-slate-300 truncate block max-w-sm">
+                  <span className="text-slate-700 truncate block max-w-sm">
                     0x3fa99bcfdc1d7c92b2ef81977a4ee40882c1628d42cdd01a5ebf092adcf1b6a
                   </span>
                 </div>
 
                 <div>
                   <span className="text-slate-500 block uppercase text-[8px] tracking-wider font-semibold">Proving circuit Verifier</span>
-                  <span className="text-white">EZKL Halo2</span>
+                  <span className="text-slate-900">EZKL Halo2</span>
                 </div>
 
                 <div>
                   <span className="text-slate-500 block uppercase text-[8px] tracking-wider font-semibold">Verification Time</span>
-                  <span className="text-[#58E38A]">182 ms</span>
+                  <span className="text-emerald-700">182 ms</span>
                 </div>
               </div>
 
               {/* Descriptive caption */}
-              <p className="text-[10px] text-slate-400 leading-normal bg-black/40 p-3 rounded-xl border border-white/[0.02]">
+              <p className="text-[10px] text-slate-500 leading-normal bg-black/40 p-3 rounded-xl border border-slate-100">
                 “This proof verifies that the published AAN risk model produced this risk score for the trust event. Raw private inputs are not exposed.”
               </p>
               
               <div className="flex justify-between items-center text-[8px] font-mono text-slate-500 font-bold uppercase tracking-wider">
                 <span>Verification Keys Linked (vk)</span>
-                <span className="text-[#58E38A]">RAW INPUTS HIDDEN</span>
+                <span className="text-emerald-700">RAW INPUTS HIDDEN</span>
               </div>
             </div>
 

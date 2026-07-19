@@ -536,7 +536,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
         <div>
           <h2 className="text-lg font-semibold text-white tracking-tight">Trust Lab Simulation</h2>
           <p className="text-xs text-[#58E38A] mt-1 font-medium">
-            Run automated threat scenarios against the AAN Demo Platform to validate real-time trust metrics.
+            Run automated threat scenarios against the Aan (Antigravity Assurance Network) Demo Platform to validate real-time trust metrics.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -563,10 +563,10 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
         </div>
       </div>
 
-      {/* Comparative Dashboard Cards (Before vs After AAN) */}
+      {/* Comparative Dashboard Cards (Before vs After Aan) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">AAN Trust Metrics Comparison</h3>
+          <h3 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold">Aan Trust Metrics Comparison</h3>
           <span className="text-[10px] text-slate-500">Demo platform benchmarks based on {stats.totalEvents} mock evaluations</span>
         </div>
 
@@ -582,11 +582,11 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div>
-                <span className="text-slate-500 text-[9px] block">Without AAN</span>
+                <span className="text-slate-500 text-[9px] block">Without Aan</span>
                 <span className="text-base text-slate-400 font-mono font-medium line-through decoration-slate-600">100 allowed</span>
               </div>
               <div className="border-l border-white/[0.04] pl-3.5">
-                <span className="text-[#58E38A] text-[9px] block">With AAN</span>
+                <span className="text-[#58E38A] text-[9px] block">With Aan</span>
                 <span className="text-base text-white font-mono font-bold">15 allowed</span>
               </div>
             </div>
@@ -602,11 +602,11 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div>
-                <span className="text-slate-500 text-[9px] block">Without AAN</span>
+                <span className="text-slate-500 text-[9px] block">Without Aan</span>
                 <span className="text-base text-slate-400 font-mono font-medium line-through decoration-slate-600">100 passed</span>
               </div>
               <div className="border-l border-white/[0.04] pl-3.5">
-                <span className="text-[#58E38A] text-[9px] block">With AAN</span>
+                <span className="text-[#58E38A] text-[9px] block">With Aan</span>
                 <span className="text-base text-white font-mono font-bold">10 passed</span>
               </div>
             </div>
@@ -622,11 +622,11 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div>
-                <span className="text-slate-500 text-[9px] block">Without AAN</span>
+                <span className="text-slate-500 text-[9px] block">Without Aan</span>
                 <span className="text-base text-slate-400 font-mono font-medium line-through decoration-slate-600">100 breached</span>
               </div>
               <div className="border-l border-white/[0.04] pl-3.5">
-                <span className="text-[#58E38A] text-[9px] block">With AAN</span>
+                <span className="text-[#58E38A] text-[9px] block">With Aan</span>
                 <span className="text-base text-white font-mono font-bold">5 challenged</span>
               </div>
             </div>
@@ -642,11 +642,11 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div>
-                <span className="text-slate-500 text-[9px] block">Without AAN</span>
+                <span className="text-slate-500 text-[9px] block">Without Aan</span>
                 <span className="text-sm text-slate-400 font-mono font-medium">1,200s (Manual)</span>
               </div>
               <div className="border-l border-white/[0.04] pl-3.5">
-                <span className="text-[#58E38A] text-[9px] block">With AAN</span>
+                <span className="text-[#58E38A] text-[9px] block">With Aan</span>
                 <span className="text-sm text-white font-mono font-bold">1.2s (Real-Time)</span>
               </div>
             </div>
@@ -717,7 +717,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
             {isSimulating && simulationSpeed === 'benchmark' ? (
               <div className="space-y-2 pt-2">
                 <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-slate-400">BENCHMARKING AAN...</span>
+                  <span className="text-slate-400">BENCHMARKING Aan...</span>
                   <span className="text-white">{simulationProgress}%</span>
                 </div>
                 <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden">
@@ -741,7 +741,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
             <div className="border-t border-white/[0.03] pt-4 space-y-2.5 text-[11px]">
               <div className="flex justify-between py-1 border-b border-white/[0.02]">
                 <span className="text-slate-500">Demo App Title</span>
-                <span className="text-white font-medium">AAN Demo Platform</span>
+                <span className="text-white font-medium">Aan Demo Platform</span>
               </div>
               <div className="flex justify-between py-1 border-b border-white/[0.02]">
                 <span className="text-slate-500">Evaluation Speed</span>
@@ -887,7 +887,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
                       <span className="p-1 bg-[#58E38A]/10 border border-[#58E38A]/20 text-[#58E38A] rounded-lg">
                         <Shield className="w-3 h-3" />
                       </span>
-                      <span className="text-[10px] font-mono text-white uppercase tracking-wider font-bold">AAN Trust Assessment Verdict</span>
+                      <span className="font-mono text-white uppercase tracking-wider font-bold">Aan Trust Assessment Verdict</span>
                     </div>
                     
                     <div className="space-y-3 text-[10.5px]">
@@ -980,7 +980,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[8px] uppercase">Model</span>
-                        <span className="text-white truncate block">AAN Risk Model v0.1-sandbox</span>
+                        <span className="text-white truncate block">Aan Risk Model v0.1-sandbox</span>
                       </div>
                       <div>
                         <span className="text-slate-500 block text-[8px] uppercase">Verifier</span>
@@ -1009,7 +1009,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
                     </div>
 
                     <p className="text-[9.5px] text-slate-400 leading-normal border-t border-white/[0.03] pt-1.5">
-                      “This proof verifies that the published AAN risk model produced this risk score for the trust event. Raw private inputs are not exposed.”
+                      “This proof verifies that the published Aan risk model produced this risk score for the trust event. Raw private inputs are not exposed.”
                     </p>
                     <div className="text-right text-[8px] font-mono text-slate-500 uppercase font-bold tracking-wider">
                       RAW INPUTS HIDDEN
@@ -1037,7 +1037,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
                             device: selectedEvent.metadata.device,
                             zk_proof: {
                               status: "verified",
-                              model: "AAN Risk Model v0.1-sandbox",
+                              model: "Aan Risk Model v0.1-sandbox",
                               proof_hash: "0x7a8df1e51b6a71e82b7cfdc1d7c92b2ef81977a4ee40c5ebf092adcf1b6a71e8",
                               public_inputs_hash: "0x3fa99bcfdc1d7c92b2ef81977a4ee40c882c1628d42cdd01a5ebf092adcf1b6a",
                               verified_output: selectedEvent.risk_score,

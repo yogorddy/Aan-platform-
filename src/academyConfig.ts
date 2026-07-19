@@ -35,6 +35,6 @@ export function isAcademyEnabled(): boolean {
     return processEnv === "true" || processEnv === "1";
   }
 
-  // 3. Default to enabled to provide full UX experience
-  return true;
+  // 3. Default to disabled as requested by the user
+  return false;
 }

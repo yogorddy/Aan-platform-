@@ -418,7 +418,7 @@ aan = AanTrustSdk::Client.new(
               </div>
 
               <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                AAN is a lightweight trust infrastructure layer that integrates into your existing authentication system (Auth0, Supabase, Firebase, Cognito, or custom auth) and provides real-time trust intelligence before, during, and after login. <strong className="text-white font-medium">Your authentication remains completely untouched.</strong>
+                Aan (Antigravity Assurance Network) is a lightweight trust infrastructure layer that integrates into your existing authentication system (Auth0, Supabase, Firebase, Cognito, or custom auth) and provides real-time trust intelligence before, during, and after login. <strong className="text-white font-medium">Your authentication remains completely untouched.</strong>
               </p>
 
               {/* Visual Flow Diagram */}
@@ -455,7 +455,7 @@ aan = AanTrustSdk::Client.new(
 
                   {/* Step 3 */}
                   <div className="md:col-span-2 p-3 bg-emerald-500/[0.03] border border-emerald-500/20 rounded-xl space-y-1 shadow-[0_0_15px_rgba(16,185,129,0.02)]">
-                    <span className="text-[9px] text-emerald-400 uppercase font-black tracking-wider">3. AAN TRUST LAYER</span>
+                    <span className="text-[9px] text-emerald-400 uppercase font-black tracking-wider">3. Aan (Antigravity Assurance Network) TRUST LAYER</span>
                     <p className="text-[10px] text-emerald-300 font-bold font-sans">Passive Trust Analysis</p>
                     <p className="text-[9px] text-slate-500 font-sans leading-tight">Evaluates risk, human signatures, & devices</p>
                   </div>
@@ -472,7 +472,7 @@ aan = AanTrustSdk::Client.new(
                   <div className="space-y-1 text-left font-sans">
                     <span className="text-[9px] text-emerald-400 font-mono uppercase font-black tracking-wider">4. SIGNED TRUST SIGNALS RETURNED</span>
                     <p className="text-[11px] text-slate-300 leading-normal">
-                      AAN responds instantly with cryptographically signed proof tokens containing behavioral trust metrics and recommended actions.
+                      Aan (Antigravity Assurance Network) responds instantly with cryptographically signed proof tokens containing behavioral trust metrics and recommended actions.
                     </p>
                   </div>
                   <div className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded text-emerald-300 font-mono text-[10px] font-bold shrink-0">
@@ -497,7 +497,7 @@ aan = AanTrustSdk::Client.new(
                   <span className="text-[10px] font-mono text-slate-500 uppercase font-black tracking-wider">Strategic Design Directive</span>
                   <div className="p-3 bg-black/20 border border-white/[0.02] rounded-xl space-y-1 text-xs font-sans text-slate-400 leading-relaxed">
                     <strong className="text-white block font-medium">Simple Engineering Rule:</strong>
-                    "Every new feature must make AAN smarter without making integration harder. If a feature requires overhauling a login stack, it is rejected."
+                    "Every new feature must make Aan (Antigravity Assurance Network) smarter without making integration harder. If a feature requires overhauling a login stack, it is rejected."
                   </div>
                 </div>
               </div>
@@ -507,7 +507,7 @@ aan = AanTrustSdk::Client.new(
             <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-3">
               <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Authentication Protocol</h3>
               <p className="text-xs text-[#78819a] leading-relaxed font-sans">
-                Every API call to AAN servers must include the custom header <code className="text-white font-mono bg-[#0d0e12] px-1.5 py-0.5 rounded border border-[#1b1e28]">x-api-key</code> containing your secure hash. Authorization is handled at the edge with <span className="text-white underline font-medium">HMAC verification</span>.
+                Every API call to Aan (Antigravity Assurance Network) servers must include the custom header <code className="text-white font-mono bg-[#0d0e12] px-1.5 py-0.5 rounded border border-[#1b1e28]">x-api-key</code> containing your secure hash. Authorization is handled at the edge with <span className="text-white underline font-medium">HMAC verification</span>.
               </p>
               
               <div className="bg-[#0d0e12] border border-[#1b1e28] rounded p-3 font-mono text-[11px] text-emerald-404">
@@ -522,7 +522,7 @@ Content-Type: application/json`}
             <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-3.5">
               <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Rate Limit Policy Intervals</h3>
               <p className="text-xs text-[#78819a] leading-normal font-sans">
-                AAN employs strict IP and Organization-level rate filters to prevent denial-of-service attempts and duplicate account validation abuse:
+                Aan (Antigravity Assurance Network) employs strict IP and Organization-level rate filters to prevent denial-of-service attempts and duplicate account validation abuse:
               </p>
               
               <div className="grid grid-cols-3 gap-3">
@@ -588,7 +588,7 @@ Content-Type: application/json`}
               
               <div className="space-y-3 font-sans">
                 <div className="border-b border-[#1b1e28] pb-2.5">
-                  <span className="font-mono font-bold text-slate-300 block text-[11px]">Does AAN store personal assets?</span>
+                  <span className="font-mono font-bold text-slate-300 block text-[11px]">Does Aan (Antigravity Assurance Network) store personal assets?</span>
                   <span className="text-[#78819a] mt-1 block">No. Raw hardware credentials compile locally into mathematical hashes before being destroyed forever.</span>
                 </div>
                 <div className="border-b border-[#1b1e28] pb-2.5">
@@ -904,7 +904,7 @@ ${explorerEndpoint === "verify-session" ? `  -d '{
             <div className="bg-[#111319] border border-[#1b1e28] rounded-xl p-5 space-y-4">
               <h3 className="font-mono text-xs font-black uppercase text-blue-404 tracking-wider">Payload signature validation guide</h3>
               <p className="text-xs text-[#78819a] leading-relaxed font-sans">
-                AAN signs every outgoing webhook POST bundle using your cryptographic webhook secret. Secure systems check the header <code className="text-white bg-[#0d0e12] px-1 border border-[#1b1e28] p-0.5 rounded">x-aan-signature</code> with HMAC-SHA256 protocol.
+                Aan (Antigravity Assurance Network) signs every outgoing webhook POST bundle using your cryptographic webhook secret. Secure systems check the header <code className="text-white bg-[#0d0e12] px-1 border border-[#1b1e28] p-0.5 rounded">x-aan-signature</code> with HMAC-SHA256 protocol.
               </p>
               
               <div className="bg-[#0d0e12] border border-[#1b1e28] rounded p-4 font-mono text-[10px]">

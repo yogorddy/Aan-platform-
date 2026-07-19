@@ -1,18 +1,18 @@
 import React from 'react';
 
-interface AANShieldLogoProps {
+interface AanShieldLogoProps {
   className?: string;
   size?: number | string;
   strokeWidth?: number;
   color?: string;
 }
 
-export default function AANShieldLogo({ 
+export default function AanShieldLogo({ 
   className = "w-full h-full", 
   size, 
   strokeWidth = 5,
   color = "#58E38A"
-}: AANShieldLogoProps) {
+}: AanShieldLogoProps) {
   return (
     <svg 
       viewBox="0 0 128 128" 

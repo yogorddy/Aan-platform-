@@ -241,7 +241,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
     const strokeColor = theme === 'emerald' ? '#00E676' : theme === 'white' ? '#FFFFFF' : '#000000';
     
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
-  <!-- AAN Master Logo Symbol - Geometric Monogram -->
+  <!-- Aan Master Logo Symbol - Geometric Monogram -->
   <g fill="none" stroke="${strokeColor}" stroke-width="${thickness}" stroke-linecap="round" stroke-linejoin="round">
     <path d="M 28 96 L 52 36 L 68 76" />
     <path d="M 68 80 L 92 20 L 108 60" />
@@ -309,7 +309,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
   const categories = [
     { id: "docs", label: "Core Platform & APIs", icon: BookOpen, desc: "Developer docs, REST specifications, and SDK references." },
     { id: "security", label: "Trust & Security Hub", icon: ShieldCheck, desc: "Sovereign data principles and vulnerability disclosure board." },
-    ...(isBrandEnabled() ? [{ id: "brand", label: "Logo & Brand Book", icon: Palette, desc: "Official AAN monogram vector geometry and assets." }] : []),
+    ...(isBrandEnabled() ? [{ id: "brand", label: "Logo & Brand Book", icon: Palette, desc: "Official Aan monogram vector geometry and assets." }] : []),
     { id: "enterprise", label: "Enterprise Support", icon: HeartHandshake, desc: "Licensing tiers, sales pipeline, and live ticketing desks." },
     { id: "terms", label: "Terms & Privacy", icon: Lock, desc: "System service conditions and strict minimization policies." }
   ];
@@ -346,7 +346,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
               className="flex gap-1 items-center cursor-pointer group"
             >
               <span className="w-1.5 h-3 bg-[#00D632] rounded-full group-hover:scale-110 transition-all" />
-              <span className="font-sans font-bold text-black text-sm tracking-tight">AAN Trust & Resource Center</span>
+              <span className="font-sans font-bold text-black text-sm tracking-tight">Aan (Antigravity Assurance Network) Trust & Resource Center</span>
             </div>
             <span className="text-slate-200 text-xs">/</span>
             <span className="font-mono text-[9px] bg-[#00D632]/5 px-2.5 py-1 rounded text-[#00C853] uppercase tracking-widest border border-[#00D632]/10 font-semibold">
@@ -449,7 +449,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                       <span className="text-[#00C853] font-bold">VERSION 0.3.0</span>
                     </div>
                     <p className="leading-relaxed">
-                      AAN serves as a decentralized, non-custodial humanness verification standard. It is an active decision layer that allows developers to prove client integrity instantly without permanent storage of user identifiers.
+                      Aan (Antigravity Assurance Network) serves as a decentralized, non-custodial humanness verification standard. It is an active decision layer that allows developers to prove client integrity instantly without permanent storage of user identifiers.
                     </p>
                   </div>
 
@@ -463,7 +463,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
     ephemeral telemetry)                                            via POST /v1/session)
            │                                                                 │
            ▼                                                                 ▼
-   [ Sandbox Challenge ] <─────(4. Fires if Risk Score > 35)───── [   AAN Decision API   ]
+   [ Sandbox Challenge ] <─────(4. Fires if Risk Score > 35)───── [   Aan Decision API   ]
    (Liveness verification)                                         (Calculates Risk Index)
            │                                                                 │
            └───────────────────(5. Syncs Proof Token Assertion)──────────────┘`}
@@ -1311,7 +1311,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                 <div>
                   <span className="font-mono text-[9px] text-emerald-400 tracking-wider font-bold uppercase block">Chapter 05</span>
                   <h1 className="text-xl font-semibold text-white tracking-tight">Contact Sales Desk</h1>
-                  <p className="text-xs text-[#646e7a] mt-1">Direct pipeline to AAN Enterprise architects and sovereign deployment teams.</p>
+                  <p className="text-xs text-[#646e7a] mt-1">Direct pipeline to Aan (Antigravity Assurance Network) Enterprise architects and sovereign deployment teams.</p>
                 </div>
               </div>
 
@@ -1320,7 +1320,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                   <div className="p-6 bg-emerald-500/[0.03] border border-emerald-500/[0.12] rounded-xl text-center space-y-2 animate-fade-in">
                     <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto animate-bounce" />
                     <h4 className="text-white font-medium">Sales Pipeline Connected</h4>
-                    <p className="text-xs text-[#646e7a]">Thank you. An AAN accounts representative will email you shortly.</p>
+                    <p className="text-xs text-[#646e7a]">Thank you. An Aan (Antigravity Assurance Network) accounts representative will email you shortly.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1359,7 +1359,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                           value={contactForm.organization}
                           onChange={(e) => setContactForm({ ...contactForm, organization: e.target.value })}
                           placeholder="Mercer Industries"
-                          className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-500/40"
                         />
                       </div>
 
@@ -1371,13 +1371,13 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
                           value={contactForm.message}
                           onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                           placeholder="We need to verify 10,000 users/day with custom WebAuthn logic."
-                          className="w-full bg-black/40 border border-white/[0.06] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500/40"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-emerald-500/40"
                         />
                       </div>
 
                       <button 
                         type="submit"
-                        className="w-full bg-white text-slate-950 hover:bg-slate-200 transition-all font-bold text-xs py-2 rounded-lg cursor-pointer shadow-md"
+                        className="w-full bg-slate-900 text-white hover:bg-slate-800 transition-all font-bold text-xs py-2 rounded-lg cursor-pointer shadow-md"
                       >
                         Request API Token Access
                       </button>
@@ -1391,8 +1391,8 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
         </main>
       </div>
 
-      <footer className="bg-[#08090c] border-t border-white/[0.04] py-6 text-center text-xs font-mono text-[#404652] z-10">
-        © 2026 AAN Trust Infrastructure. Safe, decoupled proof-of-human middleware.
+      <footer className="bg-slate-50 border-t border-slate-200 py-6 text-center text-xs font-mono text-slate-400 z-10">
+        © 2026 Aan (Antigravity Assurance Network) Trust Infrastructure. Safe, decoupled proof-of-human middleware.
       </footer>
 
     </div>

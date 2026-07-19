@@ -4,11 +4,11 @@ import VerifySessionFlow from './components/VerifySessionFlow';
 import PartnerDashboard from './components/PartnerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import TrustDocsPortal from './components/TrustDocsPortal';
-import AANAcademy from './components/AANAcademy';
+import AanAcademy from './components/AanAcademy';
 import TermsOfServiceView from './components/TermsOfServiceView';
 import PrivacyPolicyView from './components/PrivacyPolicyView';
 import ContactView from './components/ContactView';
-import AANShieldLogo from './components/AANShieldLogo';
+import AanShieldLogo from './components/AanShieldLogo';
 import { Shield, Hammer, Users, HeartHandshake, FileText, Settings, Code, BookOpen, ChevronDown, ChevronUp, GraduationCap, Lock, Unlock, ArrowLeft, LogOut, Home, Activity } from 'lucide-react';
 import { isAcademyEnabled } from './academyConfig';
 import { isBrandEnabled } from './brandConfig';
@@ -28,6 +28,8 @@ export default function App() {
     return localStorage.getItem('aan_user_email');
   });
   const [pageHistory, setPageHistory] = useState<string[]>([]);
+  const [showInactivityAlert, setShowInactivityAlert] = useState<boolean>(false);
+  const isUserAuthenticated = isAanAccessed || localStorage.getItem('aan_authenticated') === 'true';
 
   // Clean SPA custom routing synchronized with standard window.history and role-based guards
   useEffect(() => {
@@ -77,9 +79,14 @@ export default function App() {
         setDocsSubSection(sub);
         setCurrentPage('trustdocs');
       } else if (path === '/academy' || path.startsWith('/academy/')) {
-        const lessonId = path.replace('/academy/', '') || "intro";
-        setAcademySelectedId(lessonId);
-        setCurrentPage('academy');
+        if (!isAcademyEnabled()) {
+          setCurrentPage('landing');
+          window.history.replaceState({}, '', '/');
+        } else {
+          const lessonId = path.replace('/academy/', '') || "intro";
+          setAcademySelectedId(lessonId);
+          setCurrentPage('academy');
+        }
       } else if (path === '/terms' || path === '/terms/') {
         setCurrentPage('terms');
       } else if (path === '/privacy' || path === '/privacy/') {
@@ -128,7 +135,7 @@ export default function App() {
         targetPath = '/dashboard';
       }
     } else {
-      const publicPages = ['landing', 'terms', 'privacy', 'contact', 'trustdocs', 'academy', 'verify'];
+      const publicPages = ['landing', 'terms', 'privacy', 'contact', 'trustdocs', 'verify', ...(isAcademyEnabled() ? ['academy'] : [])];
       if (!publicPages.includes(targetPage)) {
         targetPage = 'landing';
         targetPath = '/';
@@ -204,6 +211,45 @@ export default function App() {
     navigateTo('landing', '/');
   };
 
+  // Cryptographically secure inactivity detection (10 minutes)
+  useEffect(() => {
+    if (!isUserAuthenticated) return;
+
+    const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
+    let timeoutId: NodeJS.Timeout;
+
+    const handleInactivity = () => {
+      console.log("[SECURITY] Inactivity limit of 10 minutes reached. Auto-logging out...");
+      handleLogout();
+      setShowInactivityAlert(true);
+    };
+
+    const resetInactivityTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleInactivity, INACTIVITY_TIMEOUT);
+    };
+
+    // Listen to standard interaction triggers
+    const interactionEvents = [
+      'mousedown', 'mousemove', 'keydown', 
+      'scroll', 'touchstart', 'click'
+    ];
+
+    interactionEvents.forEach(event => {
+      window.addEventListener(event, resetInactivityTimer, { passive: true });
+    });
+
+    // Initialize timer on mount or auth change
+    resetInactivityTimer();
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      interactionEvents.forEach(event => {
+        window.removeEventListener(event, resetInactivityTimer);
+      });
+    };
+  }, [isUserAuthenticated]);
+
   // Helper trigger to start a custom onboarding verification instantly from landing triggers
   const startDemoVerification = (email?: string) => {
     if (email) {
@@ -251,7 +297,7 @@ export default function App() {
     },
     {
       id: 'academy',
-      name: '6. AAN Academy (/academy)',
+      name: '6. Aan (Antigravity Assurance Network) Academy (/academy)',
       description: 'Structured learn module cataloging dynamic specs, SQL databases columns, schemas and REST APIs.',
       icon: GraduationCap,
       path: '/academy'
@@ -259,7 +305,6 @@ export default function App() {
   ];
 
   const activeItem = menuItems.find(item => item.id === currentPage) || menuItems[0];
-  const isUserAuthenticated = isAanAccessed || localStorage.getItem('aan_authenticated') === 'true';
   const showNavbar = isUserAuthenticated && currentPage !== 'landing' && currentPage !== 'verify';
   const isAdmin = isPrivilegedEmail(userEmail);
   const roleDisplay = getRoleDisplay(userEmail);
@@ -271,20 +316,22 @@ export default function App() {
         <div className="sticky top-0 z-50 bg-white/90 border-b border-slate-100 backdrop-blur-md px-6 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center justify-between w-full md:w-auto gap-4">
             {/* Back Button */}
-            <button
-              onClick={goBack}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200/60 px-4 py-2 rounded-full transition-all cursor-pointer active:scale-95"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>Back</span>
-            </button>
+            {!(currentPage === 'partner' && userEmail) && (
+              <button
+                onClick={goBack}
+                className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200/60 px-4 py-2 rounded-full transition-all cursor-pointer active:scale-95"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back</span>
+              </button>
+            )}
 
             {/* Platform Logo */}
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 text-[#00D632]">
-                <AANShieldLogo strokeWidth={6} />
+                <AanShieldLogo strokeWidth={6} />
               </div>
-              <span className="font-bold text-black tracking-tight text-sm uppercase">AAN</span>
+              <span className="font-bold text-black tracking-tight text-sm">Aan</span>
             </div>
           </div>
 
@@ -364,7 +411,7 @@ export default function App() {
         )}
 
         {currentPage === 'academy' && (
-          <AANAcademy 
+          <AanAcademy 
             initialLessonId={academySelectedId || "intro"} 
             onNavigatePage={(pageId) => navigateTo(pageId)} 
           />
@@ -401,19 +448,23 @@ export default function App() {
           <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Left side: branding/copyright */}
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 font-light">© {new Date().getFullYear()} AAN INC. All rights reserved.</span>
+              <span className="text-xs text-slate-400 font-light">© {new Date().getFullYear()} Aan (Antigravity Assurance Network) Inc. All rights reserved.</span>
             </div>
 
             {/* Right side: links */}
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold text-slate-500">
-              <button 
-                onClick={() => navigateTo('academy', '/academy')} 
-                className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'academy' ? 'text-black font-bold' : ''}`}
-              >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>AAN Academy</span>
-              </button>
-              <span className="text-slate-200 font-light">|</span>
+              {isAcademyEnabled() && (
+                <>
+                  <button 
+                    onClick={() => navigateTo('academy', '/academy')} 
+                    className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'academy' ? 'text-black font-bold' : ''}`}
+                  >
+                    <GraduationCap className="w-3.5 h-3.5" />
+                    <span>Aan Academy</span>
+                  </button>
+                  <span className="text-slate-200 font-light">|</span>
+                </>
+              )}
               <button 
                 onClick={() => navigateTo('trustdocs', '/docs')} 
                 className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'trustdocs' ? 'text-black font-bold' : ''}`}
@@ -446,6 +497,38 @@ export default function App() {
           </div>
         </footer>
       )}
+
+      {/* Inactivity Alert Toast */}
+      <AnimatePresence>
+        {showInactivityAlert && (
+          <div className="fixed bottom-6 right-6 z-[100] max-w-sm w-full px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="bg-black text-white p-5 rounded-2xl border border-slate-800 shadow-2xl flex flex-col gap-3 text-left"
+            >
+              <div className="flex items-center gap-2.5 text-[#00D632]">
+                <Lock className="w-4 h-4 stroke-[2.5]" />
+                <span className="text-xs font-mono font-bold tracking-wider uppercase">Inactivity Timeout</span>
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-white">Session Expired</h4>
+                <p className="text-xs text-slate-400 font-light leading-relaxed">
+                  You have been automatically signed out after 10 minutes of inactivity to safeguard your dashboard data.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowInactivityAlert(false)}
+                className="w-full text-center py-2.5 bg-[#00D632]/10 hover:bg-[#00D632]/20 border border-[#00D632]/20 text-[#00D632] hover:text-white rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer"
+              >
+                Acknowledge & Dismiss
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

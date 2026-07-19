@@ -611,7 +611,7 @@ function appendSecurityEvent(
     actor_type: actorType,
     actor_id: actorId,
     ip_address: ipAddress || "127.0.0.1",
-    user_agent: userAgent || "AAN-Defensive-Core",
+    user_agent: userAgent || "Aan-Defensive-Core",
     session_id: sessionId,
     partner_app_id: partnerAppId,
     request_path: requestPath,
@@ -751,7 +751,7 @@ function verifyHardwareProofToken(proofToken: string, req: any): { valid: boolea
       'unauthorized_api_client',
       ip,
       ua,
-      "Block Malicious Payload: Structural damage detected. The digital token was not minted by AAN.",
+      "Block Malicious Payload: Structural damage detected. The digital token was not minted by Aan.",
       { parts_count: parts.length, token_stub: proofToken.substring(0, 15) },
       undefined,
       undefined,
@@ -902,13 +902,13 @@ const mockIntegrationRequests: IntegrationRequest[] = [
     email: "evelyn@aethergrid.io",
     website: "https://aethergrid.io",
     use_case: "Sovereign liveness verification for decentralized high-density node validators.",
-    message: "We want to verify our grid operators' uniqueness without holding any of their facial metadata or biometric signatures. AAN is the only platform we found that supports zero-knowledge signature templates.",
+    message: "We want to verify our grid operators' uniqueness without holding any of their facial metadata or biometric signatures. Aan is the only platform we found that supports zero-knowledge signature templates.",
     phone: "+1 (555) 382-9901",
     company_size: "11-50",
     urgency: "high",
     status: "pending",
     source: "contact_form",
-    request_code: "AAN-REQ-000481",
+    request_code: "Aan-REQ-000481",
     created_at: new Date(Date.now() - 3.5 * 3600 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 3.5 * 3600 * 1000).toISOString()
   },
@@ -919,13 +919,13 @@ const mockIntegrationRequests: IntegrationRequest[] = [
     email: "l.oconnor@vertex.network",
     website: "https://vertex.network",
     use_case: "Sybil protection for a distributed governance community.",
-    message: "We are preparing for our season 3 governance vote and need to ensure each member represents a distinct human. Integrations with existing tools took too long; we'd like to run AAN directly.",
+    message: "We are preparing for our season 3 governance vote and need to ensure each member represents a distinct human. Integrations with existing tools took too long; we'd like to run Aan directly.",
     phone: "",
     company_size: "1-10",
     urgency: "normal",
     status: "reviewed",
     source: "contact_form",
-    request_code: "AAN-REQ-000480",
+    request_code: "Aan-REQ-000480",
     created_at: new Date(Date.now() - 18 * 3600 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 12 * 3600 * 1000).toISOString()
   }
@@ -1223,7 +1223,7 @@ const seededTrustTimeline = [
   { id: "tl_c1", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "Account Created", timestamp: "2024-11-12T10:00:00Z", description: "Old account johnny_banned_fraud@gmail.com created", trust_score_change: "+30" },
   { id: "tl_c2", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "Suspicious Activity Detected", timestamp: "2026-07-03T18:00:00Z", description: "Payment fraud triggers full account ban", trust_score_change: "-80" },
   { id: "tl_c3", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "New Account Attempt", timestamp: "2026-07-05T23:20:00Z", description: "Attempted registration with fresh email alias (johnny.vaughn+signup@gmail.com)", trust_score_change: "-5" },
-  { id: "tl_c4", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "Review Recommended", timestamp: "2026-07-05T23:22:00Z", description: "AAN flag triggered due to blacklisted hardware profile match", trust_score_change: "-10" }
+  { id: "tl_c4", human_id: "vh_7f2d5e3c", event_id: "evt_aan_9c4f8d21", event: "Review Recommended", timestamp: "2026-07-05T23:22:00Z", description: "Aan flag triggered due to blacklisted hardware profile match", trust_score_change: "-10" }
 ];
 
 const seededPartnerAlerts = [
@@ -1296,7 +1296,7 @@ const db = {
   organizations: [
     {
       id: "org_enterprise_999",
-      name: "AAN Global Enterprise",
+      name: "Aan Global Enterprise",
       created_at: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
     }
   ],
@@ -1752,7 +1752,7 @@ async function startServer() {
   });
 
   // 3a. POST /api/v1/verification-sessions/:id/signals
-  // AAN Secure Handshake - Source of truth endpoint
+  // Aan Secure Handshake - Source of truth endpoint
   app.post("/api/v1/verification-sessions/:id/signals", async (req, res) => {
     const sessionId = req.params.id;
     const session = db.verificationSessions.find(s => s.id === sessionId);
@@ -1786,7 +1786,7 @@ async function startServer() {
         dbFailed = true;
       }
     } catch (err) {
-      console.error("[AAN HANDSHAKE] Supabase insert failed (failing safely):", err);
+      console.error("[Aan HANDSHAKE] Supabase insert failed (failing safely):", err);
       dbFailed = true;
       // Fallback local insert to guarantee resilience
       db.aanTrustEvents.unshift(initialEvent);
@@ -1869,7 +1869,7 @@ async function startServer() {
     try {
       updatedEventRecord = await supabaseService.updateTrustEvent(sessionId, finalUpdates, db.aanTrustEvents);
     } catch (err) {
-      console.error("[AAN HANDSHAKE] Supabase update failed (failing safely):", err);
+      console.error("[Aan HANDSHAKE] Supabase update failed (failing safely):", err);
       const idx = db.aanTrustEvents.findIndex(e => e.session_id === sessionId);
       if (idx >= 0) {
         db.aanTrustEvents[idx] = { ...db.aanTrustEvents[idx], ...finalUpdates };
@@ -2156,7 +2156,7 @@ async function startServer() {
   });
 
   // 5. POST /api/v1/verify-session
-  // Core REST Integration API between partner login system and AAN risk grading
+  // Core REST Integration API between partner login system and Aan risk grading
   app.post("/api/v1/verify-session", (req, res) => {
     const { partner_user_id, email_hash, phone_hash, ip_address, device_fingerprint, session_id, timestamp } = req.body;
 
@@ -2347,7 +2347,7 @@ async function startServer() {
   });
 
   // 6. POST /api/v1/verify-proof-token
-  // Proof verification endpoint confirming that a token was issued by AAN and matches the signature
+  // Proof verification endpoint confirming that a token was issued by Aan and matches the signature
   app.post("/api/v1/verify-proof-token", (req, res) => {
     const { proof_token } = req.body;
 
@@ -2395,7 +2395,7 @@ async function startServer() {
     console.log(`Subject: New Integration Request Submitted: ${request.request_code}`);
     console.log(`Body:`);
     console.log(`  Dear Admin,`);
-    console.log(`  A new integration request has been submitted on the AAN Platform.`);
+    console.log(`  A new integration request has been submitted on the Aan Platform.`);
     console.log(`  `);
     console.log(`  Request Code:      ${request.request_code}`);
     console.log(`  Organization:      ${request.organization_name}`);
@@ -2411,7 +2411,7 @@ async function startServer() {
     console.log(`  Message Detail:`);
     console.log(`  "${request.message}"`);
     console.log(`  `);
-    console.log(`  Please review this request in the AAN Admin Portal:`);
+    console.log(`  Please review this request in the Aan Admin Portal:`);
     console.log(`  http://localhost:3000/admin`);
     console.log(`================================================================================\n`);
   }
@@ -2435,7 +2435,7 @@ async function startServer() {
       let requestCode = req.body.request_code;
       if (!requestCode) {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        requestCode = 'AAN-REQ-';
+        requestCode = 'Aan-REQ-';
         for (let i = 0; i < 6; i++) {
           requestCode += chars.charAt(Math.floor(Math.random() * chars.length));
         }
@@ -2925,7 +2925,7 @@ async function startServer() {
       }
 
       let prompt = "";
-      let systemInstruction = "You are AAN's decoupled AI Risk Analyzer. Summarize the raw data, highlight any anomalies, and explain the threat landscape. Keep the analysis factual and clear.";
+      let systemInstruction = "You are Aan's decoupled AI Risk Analyzer. Summarize the raw data, highlight any anomalies, and explain the threat landscape. Keep the analysis factual and clear.";
 
       if (type === 'user') {
         const user = db.users.find(u => u.id === targetId);
@@ -2977,7 +2977,7 @@ Request Path: ${event.request_path}
 Detection Reason: ${event.detection_reason}
 Metadata: ${JSON.stringify(event.raw_metadata, null, 2)}
 
-Explain the nature of this attack vector (e.g. JWT signature bypass, impossible state transition), its potential business impact, and how AAN's deterministic core defended against it.`;
+Explain the nature of this attack vector (e.g. JWT signature bypass, impossible state transition), its potential business impact, and how Aan's deterministic core defended against it.`;
       } else {
         return res.status(400).json({ error: "Invalid type specified. Must be 'user', 'session', or 'security-event'" });
       }
@@ -2997,7 +2997,7 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
         return res.status(400).json({ error: "Prompt is required." });
       }
 
-      const systemInstruction = "You are AAN's Independent AI Security Investigator. Assist the compliance officer by searching and describing anomalies in logs. Emphasize that you are a cognitive copilot and do not make final trust decisions.";
+      const systemInstruction = "You are Aan's Independent AI Security Investigator. Assist the compliance officer by searching and describing anomalies in logs. Emphasize that you are a cognitive copilot and do not make final trust decisions.";
       const aiResponse = await AIEngine.generateText(prompt, systemInstruction);
       res.json(aiResponse);
     } catch (err: any) {
@@ -3008,7 +3008,7 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
 
 
   // ============================================================================
-  // ENTERPRISE TRUST OPERATIONAL ENDPOINTS (AAN POLICY, TIMELINE, ENFORCEMENT)
+  // ENTERPRISE TRUST OPERATIONAL ENDPOINTS (Aan POLICY, TIMELINE, ENFORCEMENT)
   // ============================================================================
 
   // ============================================================================
@@ -3377,7 +3377,7 @@ Explain the nature of this attack vector (e.g. JWT signature bypass, impossible 
         verified_assertion_signature: session.proof_token ? crypto.createHash('sha256').update(session.proof_token).digest('hex').substring(0, 32) : "unsigned_evidence_unapproved"
       },
       recommendation,
-      policy_advisory: `Recommendation is advisory. AAN never enforces lockout unilaterally without approved institutional policy instructions.`
+      policy_advisory: `Recommendation is advisory. Aan never enforces lockout unilaterally without approved institutional policy instructions.`
     });
   });
 

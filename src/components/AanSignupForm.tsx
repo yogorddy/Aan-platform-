@@ -5,14 +5,14 @@ import {
   AlertCircle, CheckCircle2, Loader2, Eye, EyeOff, 
   User, Mail, Lock, Building, ArrowRight, ArrowLeft 
 } from 'lucide-react';
-import AANShieldLogo from './AANShieldLogo';
+import AanShieldLogo from './AanShieldLogo';
 
-interface AANSignupFormProps {
+interface AanSignupFormProps {
   onBack: () => void;
   onSuccess: (email: string) => void;
 }
 
-export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps) {
+export default function AanSignupForm({ onBack, onSuccess }: AanSignupFormProps) {
   // Auth mode toggle
   const [authMode, setAuthMode] = useState<'signup' | 'signin'>('signup');
 
@@ -219,13 +219,13 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
     <div className="w-full max-w-sm space-y-6">
       {/* Signup Form Header */}
       <div className="flex flex-col items-center space-y-2 text-center">
-        <div className="w-14 h-14 bg-[#58E38A]/10 border border-[#58E38A]/20 rounded-2xl flex items-center justify-center p-3">
-          <AANShieldLogo strokeWidth={6} />
+        <div className="w-14 h-14 bg-[#00D632]/10 border border-[#00D632]/20 rounded-2xl flex items-center justify-center p-3">
+          <AanShieldLogo strokeWidth={6} />
         </div>
-        <h2 className="text-xl font-bold tracking-tight text-white mt-2">
-          {authMode === 'signup' ? 'Create Your AAN Account' : 'Sign In to AAN'}
+        <h2 className="text-xl font-bold tracking-tight text-slate-900 mt-2">
+          {authMode === 'signup' ? 'Create Your Aan (Antigravity Assurance Network) Account' : 'Sign In to Aan'}
         </h2>
-        <p className="text-xs text-slate-400 font-light">
+        <p className="text-xs text-slate-500 font-light">
           {authMode === 'signup' 
             ? "Register with your professional email to establish your organization's trust infrastructure." 
             : 'Access your secure trust infrastructure and developer dashboards.'}
@@ -234,7 +234,7 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
 
       {/* Tabs */}
       {!successMsg && (
-        <div className="grid grid-cols-2 gap-1 bg-black/40 border border-white/[0.04] p-1 rounded-xl">
+        <div className="grid grid-cols-2 gap-1 bg-slate-100 border border-slate-200 p-1 rounded-xl">
           <button
             type="button"
             onClick={() => {
@@ -242,7 +242,7 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
               setErrorMsg('');
               setValidationErrors({});
             }}
-            className={`py-2 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${authMode === 'signup' ? 'bg-[#58E38A]/10 text-[#58E38A] border border-[#58E38A]/20 font-semibold' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`py-2 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${authMode === 'signup' ? 'bg-white text-slate-900 border border-slate-200 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-800'}`}
           >
             Register
           </button>
@@ -253,7 +253,7 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
               setErrorMsg('');
               setValidationErrors({});
             }}
-            className={`py-2 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${authMode === 'signin' ? 'bg-[#58E38A]/10 text-[#58E38A] border border-[#58E38A]/20 font-semibold' : 'text-slate-500 hover:text-slate-300'}`}
+            className={`py-2 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-all cursor-pointer ${authMode === 'signin' ? 'bg-white text-slate-900 border border-slate-200 shadow-sm font-bold' : 'text-slate-500 hover:text-slate-800'}`}
           >
             Sign In
           </button>
@@ -268,11 +268,11 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
             exit={{ opacity: 0 }}
             className="bg-[#10B981]/10 border border-[#10B981]/20 rounded-xl p-6 text-center space-y-3"
           >
-            <CheckCircle2 className="w-10 h-10 text-[#58E38A] mx-auto animate-bounce" />
-            <p className="text-[#58E38A] font-bold text-sm tracking-wide">
+            <CheckCircle2 className="w-10 h-10 text-[#00D632] mx-auto animate-bounce" />
+            <p className="text-[#00D632] font-bold text-sm tracking-wide">
               {successMsg}
             </p>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               Initiating secure onboarding and telemetry scanner...
             </p>
           </motion.div>
@@ -286,125 +286,125 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
           >
             {/* Global Error Banner */}
             {errorMsg && (
-              <div className="bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[11px] p-3 rounded-xl flex items-start gap-2 leading-relaxed">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div className="bg-rose-500/10 border border-rose-500/20 text-rose-700 text-[11px] p-3 rounded-xl flex items-start gap-2 leading-relaxed">
+                <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {/* Full Name */}
             {authMode === 'signup' && (
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
+              <div className="space-y-1 text-left">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">
                   Full Name *
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="e.g. John Doe"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className={`w-full bg-white/[0.02] border ${validationErrors.fullName ? 'border-rose-500/50' : 'border-white/[0.08] focus:border-[#58E38A]/50'} rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.04] transition-colors`}
+                    className={`w-full bg-slate-50 border ${validationErrors.fullName ? 'border-rose-500/50' : 'border-slate-200 focus:border-[#00D632]/50'} rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white transition-colors`}
                   />
                 </div>
                 {validationErrors.fullName && (
-                  <span className="text-[10px] text-rose-400 block">{validationErrors.fullName}</span>
+                  <span className="text-[10px] text-rose-500 block">{validationErrors.fullName}</span>
                 )}
               </div>
             )}
 
             {/* Email */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
+            <div className="space-y-1 text-left">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">
                 Email Address *
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full bg-white/[0.02] border ${validationErrors.email ? 'border-rose-500/50' : 'border-white/[0.08] focus:border-[#58E38A]/50'} rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.04] transition-colors`}
+                  className={`w-full bg-slate-50 border ${validationErrors.email ? 'border-rose-500/50' : 'border-slate-200 focus:border-[#00D632]/50'} rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white transition-colors`}
                 />
               </div>
               {validationErrors.email && (
-                <span className="text-[10px] text-rose-400 block">{validationErrors.email}</span>
+                <span className="text-[10px] text-rose-500 block">{validationErrors.email}</span>
               )}
             </div>
 
             {/* Optional Organization */}
             {authMode === 'signup' && (
-              <div className="space-y-1">
+              <div className="space-y-1 text-left">
                 <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">
-                  Organization / Platform Name <span className="text-slate-600">(Optional)</span>
+                  Organization / Platform Name <span className="text-slate-400">(Optional)</span>
                 </label>
                 <div className="relative">
-                  <Building className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Building className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="e.g. Stripe, Supabase"
                     value={organizationName}
                     onChange={(e) => setOrganizationName(e.target.value)}
-                    className="w-full bg-white/[0.02] border border-white/[0.08] focus:border-[#58E38A]/50 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.04] transition-colors"
+                    className="w-full bg-slate-50 border border-slate-200 focus:border-[#00D632]/50 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white transition-colors"
                   />
                 </div>
               </div>
             )}
 
             {/* Password */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
+            <div className="space-y-1 text-left">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">
                 Password *
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full bg-white/[0.02] border ${validationErrors.password ? 'border-rose-500/50' : 'border-white/[0.08] focus:border-[#58E38A]/50'} rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.04] transition-colors`}
+                  className={`w-full bg-slate-50 border ${validationErrors.password ? 'border-rose-500/50' : 'border-slate-200 focus:border-[#00D632]/50'} rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white transition-colors`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white bg-transparent border-none cursor-pointer p-0"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 bg-transparent border-none cursor-pointer p-0"
                 >
                   {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
               </div>
               {validationErrors.password && (
-                <span className="text-[10px] text-rose-400 block">{validationErrors.password}</span>
+                <span className="text-[10px] text-rose-500 block">{validationErrors.password}</span>
               )}
             </div>
 
             {/* Confirm Password */}
             {authMode === 'signup' && (
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block">
+              <div className="space-y-1 text-left">
+                <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">
                   Confirm Password *
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`w-full bg-white/[0.02] border ${validationErrors.confirmPassword ? 'border-rose-500/50' : 'border-white/[0.08] focus:border-[#58E38A]/50'} rounded-xl pl-10 pr-10 py-2.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:bg-white/[0.04] transition-colors`}
+                    className={`w-full bg-slate-50 border ${validationErrors.confirmPassword ? 'border-rose-500/50' : 'border-slate-200 focus:border-[#00D632]/50'} rounded-xl pl-10 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white transition-colors`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white bg-transparent border-none cursor-pointer p-0"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-900 bg-transparent border-none cursor-pointer p-0"
                   >
                     {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
                 {validationErrors.confirmPassword && (
-                  <span className="text-[10px] text-rose-400 block">{validationErrors.confirmPassword}</span>
+                  <span className="text-[10px] text-rose-500 block">{validationErrors.confirmPassword}</span>
                 )}
               </div>
             )}
@@ -415,7 +415,7 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
                 type="button"
                 onClick={onBack}
                 disabled={loading}
-                className="col-span-2 py-3 px-4 rounded-xl border border-white/[0.08] hover:bg-white/[0.03] text-slate-300 font-medium text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                className="col-span-2 py-3 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-950 font-medium text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -424,7 +424,7 @@ export default function AANSignupForm({ onBack, onSuccess }: AANSignupFormProps)
               <button
                 type="submit"
                 disabled={loading}
-                className="col-span-3 py-3 px-4 rounded-xl bg-[#58E38A] hover:bg-[#46cc77] text-black font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-[0_4px_20px_rgba(88,227,138,0.2)]"
+                className="col-span-3 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 shadow-md"
               >
                 {loading ? (
                   <>

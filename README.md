@@ -1,6 +1,36 @@
 # AAN Platform
+### Trust Infrastructure for the Internet
 
 Privacy-preserving trust infrastructure that helps online platforms reduce bots, duplicate accounts, and suspicious activity while minimizing the collection of personal information.
+
+---
+
+## The AAN Stack
+
+```
+AAN Platform
+
+┌──────────────────────────┐
+│ AAN Command              │
+│ Conversational Operations│
+└────────────▲─────────────┘
+             │
+┌────────────┴─────────────┐
+│ Trust Engine             │
+│ Risk • Policy • Proofs   │
+└────────────▲─────────────┘
+             │
+┌────────────┴─────────────┐
+│ Verification Layer       │
+│ Sessions • Signals       │
+└────────────▲─────────────┘
+             │
+┌────────────┴─────────────┐
+│ APIs • SDKs • Webhooks   │
+└────────────▲─────────────┘
+             │
+      Partner Platforms
+```
 
 ---
 
@@ -8,33 +38,6 @@ Privacy-preserving trust infrastructure that helps online platforms reduce bots,
 > This repository contains the AAN Platform MVP. Several verification components, biometric template matches, and hardware profile evaluations are simulated. Production deployments require certified identity, fraud, security, and cryptographic providers. This MVP is intended for demonstration and is not certified for production use.
 
 ---
----
-
-## AAN Intelligence Layer
-
-AAN is being designed with an AI-native operations layer that allows authorized platform teams to investigate trust activity and manage the system through natural language.
-
-Instead of navigating through multiple dashboards, an authorized operator could ask:
-
-* **“Why was this verification denied?”**
-* **“Show every high-risk session from today.”**
-* **“Which project has the highest rate of suspicious activity?”**
-* **“Summarize the evidence behind this trust decision.”**
-* **“Draft a stricter policy for newly created accounts.”**
-* **“Generate a trust report for this partner project.”**
-
-The intelligence layer will operate on top of AAN's existing trust events, policies, audit records, reason codes, and signed decisions. It does not replace the deterministic trust engine, partner controls, or human review.
-
-### Operating Boundaries
-
-* Read access is restricted by project membership and role-based authorization.
-* Sensitive raw signals are not exposed through natural-language responses.
-* Every proposed policy or infrastructure change remains reviewable before execution.
-* Every accepted action is written to the audit ledger.
-* Generated explanations must reference the underlying trust evidence and reason codes.
-* The AI layer cannot silently override a signed trust decision.
-
-This creates a conversational control surface for trust infrastructure while preserving deterministic enforcement, evidence-backed decisions, and administrative accountability.
 
 ## Why AAN Exists
 
@@ -73,6 +76,62 @@ AAN does not share raw biometric templates, physical hardware markers, or teleme
 * **Heuristic Risk Engine**: Evaluates session timing anomalies, device count limits, rapid repeated attempts, and network properties.
 * **Interactive Developer Portal**: A self-serve interface for managing API keys, testing webhook payloads, and simulating trial integration sessions.
 * **Audit Logging**: An immutable, write-only system ledger tracking all administrative actions and security events.
+
+---
+
+## AAN Command
+
+AAN Command is the operational interface for the AAN Trust Engine.
+
+It enables authorized platform operators to investigate, understand, and manage trust events using natural language while preserving deterministic enforcement, privacy, and complete auditability.
+
+Every response is generated from verifiable trust evidence—not assumptions.
+
+### What You Can Ask
+
+#### Investigate
+- Why was this verification denied?
+- Explain this trust score.
+- Show the evidence behind this decision.
+
+#### Observe
+- Show today's high-risk verification sessions.
+- Which partner is experiencing the highest bot activity?
+- Compare this week's trust metrics with last week.
+
+#### Report
+- Generate a trust report for this project.
+- Summarize suspicious activity over the last 30 days.
+- Export verification statistics.
+
+#### Recommend
+- Recommend a policy to reduce ban evasion.
+- Identify unusual verification patterns.
+- Suggest improvements based on recent activity.
+
+#### Simulate
+- What happens if the minimum trust score becomes 85?
+- Simulate a stricter verification policy before deployment.
+
+#### Audit
+- Who modified this policy?
+- Show every administrative action for this project.
+- Explain why this decision was made.
+
+### Operating Principles
+
+- AI never becomes the source of truth.
+- The AAN Trust Engine always makes the final trust decision.
+- Every recommendation is evidence-based.
+- Every administrative action is logged.
+- Every decision is explainable.
+- Every policy change remains reviewable before execution.
+- Sensitive raw signals are never exposed through conversational responses.
+- Access is enforced through project membership and role-based authorization.
+
+AAN Command is not another chatbot.
+
+It is the conversational operating system for trust infrastructure.
 
 ---
 

@@ -1,5 +1,5 @@
 {
-  "name": "AAN Platform",
+  "name": "Aan Platform",
   "description": "Authentication intelligence and session trust signals infrastructure to help platforms reduce fake accounts, bots, automation, and registration abuse.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
