@@ -4,21 +4,26 @@ import {
   Check, 
   Globe, 
   ChevronDown, 
-  ArrowUpRight,
-  Twitter,
-  Linkedin,
-  Github,
-  Youtube
+  ArrowUpRight
 } from 'lucide-react';
 import AanShieldLogo from './AanShieldLogo';
+import { translations, Language } from '../lib/translations';
 
 interface FooterProps {
   onNavigate: (page: string, customPath?: string) => void;
+  onLanguageChange?: (lang: string) => void;
+  currentLanguage?: string;
 }
 
-export default function Footer({ onNavigate }: FooterProps) {
+export default function Footer({ onNavigate, onLanguageChange, currentLanguage }: FooterProps) {
   const [regionDropdown, setRegionDropdown] = useState(false);
-  const [selectedRegion, setSelectedRegion] = useState('English');
+  
+  const selectedRegion = currentLanguage || 'English';
+
+  const t = (key: string) => {
+    const dict = translations[selectedRegion as Language] || translations['English'];
+    return dict[key] || translations['English'][key] || key;
+  };
 
   return (
     <footer className="bg-white border-t border-slate-100 pt-12 pb-10 px-6 font-sans text-left relative overflow-hidden select-none">
@@ -39,42 +44,43 @@ export default function Footer({ onNavigate }: FooterProps) {
             <div className="hidden sm:block h-6 w-px bg-slate-200" />
             
             <p className="text-[11px] text-slate-400 font-normal leading-relaxed max-w-[200px]">
-              Trust infrastructure for the next generation of digital platforms.
+              {t('footer_tagline')}
             </p>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links (Products and Interactive Demo links removed as requested) */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-500">
-            <button 
-              onClick={() => onNavigate('verify')}
-              className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0"
-            >
-              Interactive Demo
-            </button>
-            <div className="h-3 w-px bg-slate-200" />
             <button 
               onClick={() => onNavigate('trustdocs', '/docs')}
               className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0"
             >
-              Developer Docs
+              {t('nav_docs')}
             </button>
             <div className="h-3 w-px bg-slate-200" />
             <button 
-              onClick={() => onNavigate('trustdocs', '/pricing')}
+              onClick={() => {
+                // Smooth scroll to the landing page pricing section if on landing page, otherwise navigate
+                const element = document.getElementById('pricing-plans-section');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                  onNavigate('landing', '/#pricing-plans-section');
+                }
+              }}
               className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0"
             >
-              Enterprise & Pricing
+              {t('nav_pricing')}
             </button>
             <div className="h-3 w-px bg-slate-200" />
             <button 
               onClick={() => onNavigate('contact')}
               className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0"
             >
-              Contact Sales
+              {t('nav_contact')}
             </button>
           </div>
 
-          {/* Controls: Region Selector & Socials */}
+          {/* Controls: Region Selector (Social media icons removed as requested) */}
           <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
             {/* Region/Language selector */}
             <div className="relative">
@@ -93,32 +99,18 @@ export default function Footer({ onNavigate }: FooterProps) {
                     <button
                       key={region}
                       onClick={() => {
-                        setSelectedRegion(region);
+                        if (onLanguageChange) {
+                          onLanguageChange(region);
+                        }
                         setRegionDropdown(false);
                       }}
-                      className="w-full text-left px-3 py-1.5 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all cursor-pointer"
+                      className={`w-full text-left px-3 py-1.5 hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-all cursor-pointer ${selectedRegion === region ? 'bg-slate-50 font-bold text-black' : ''}`}
                     >
                       {region}
                     </button>
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Social Icons */}
-            <div className="flex items-center gap-3 text-slate-400">
-              <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-black transition-colors" aria-label="X">
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-black transition-colors" aria-label="LinkedIn">
-                <Linkedin className="w-4 h-4" />
-              </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-black transition-colors" aria-label="GitHub">
-                <Github className="w-4 h-4" />
-              </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-black transition-colors" aria-label="YouTube">
-                <Youtube className="w-4 h-4" />
-              </a>
             </div>
           </div>
 
@@ -131,22 +123,22 @@ export default function Footer({ onNavigate }: FooterProps) {
             {/* Verified Badge */}
             <div className="flex items-center gap-1 text-slate-900 font-semibold pr-2 border-r border-slate-200">
               <Shield className="w-3.5 h-3.5 text-blue-600 fill-blue-100" />
-              <span>Verified by AAN</span>
+              <span>{t('footer_verified')}</span>
               <Check className="w-3 h-3 text-blue-600 stroke-[3.5]" />
             </div>
 
             {/* Copyright */}
-            <span>© {new Date().getFullYear()} AAN, Inc. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} AAN, Inc. {t('footer_rights')}</span>
 
             <div className="h-3.5 w-px bg-slate-200 hidden sm:block" />
 
             {/* Policy & Legal inline links */}
             <div className="flex flex-wrap items-center gap-x-3 text-slate-400">
-              <button onClick={() => onNavigate('terms')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0">Terms of Use</button>
+              <button onClick={() => onNavigate('terms')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0">{t('footer_terms')}</button>
               <span className="text-slate-200">•</span>
-              <button onClick={() => onNavigate('privacy')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0">Privacy Policy</button>
+              <button onClick={() => onNavigate('privacy')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0">{t('footer_privacy')}</button>
               <span className="text-slate-200">•</span>
-              <button onClick={() => onNavigate('trustdocs', '/security')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0">Security</button>
+              <button onClick={() => onNavigate('security')} className="hover:text-black transition-colors cursor-pointer bg-transparent border-none p-0">{t('footer_security')}</button>
             </div>
           </div>
 
@@ -154,7 +146,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="flex items-center gap-4 self-stretch sm:self-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
             <div className="flex items-center gap-1.5 font-semibold text-slate-900">
               <span className="w-1.5 h-1.5 rounded-full bg-[#00D632] inline-block animate-pulse" />
-              <span>All Systems Operational</span>
+              <span>{t('footer_systems_ok')}</span>
             </div>
 
             <div className="h-3.5 w-px bg-slate-200" />
@@ -163,7 +155,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               onClick={() => onNavigate('trustdocs', '/status')}
               className="text-blue-600 hover:text-blue-700 font-bold flex items-center gap-0.5 cursor-pointer bg-transparent border-none p-0 transition-colors"
             >
-              <span>Status Page</span>
+              <span>{t('footer_status_page')}</span>
               <ArrowUpRight className="w-3 h-3 stroke-[2.5]" />
             </button>
           </div>

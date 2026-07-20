@@ -13,9 +13,10 @@ import { isBrandEnabled } from '../brandConfig';
 interface TrustDocsPortalProps {
   activeSubSection?: string;
   onNavigate: (page: string, customPath?: string) => void;
+  hideFooter?: boolean;
 }
 
-export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate }: TrustDocsPortalProps) {
+export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate, hideFooter = false }: TrustDocsPortalProps) {
   // Helper to map individual sub-sections to their parent consolidated categories
   const mapSubSectionToCategory = (sub: string): string => {
     if (['docs', 'api-ref', 'sdks', 'changelog', 'github'].includes(sub)) return 'docs';
@@ -317,6 +318,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
   if (activeTab === 'terms') {
     return (
       <TermsOfServiceView 
+        hideFooter={hideFooter}
         onNavigate={(page, path) => {
           if (page === 'trustdocs' && path) {
             const section = path.startsWith('/') ? path.substring(1) : path;
@@ -1391,9 +1393,11 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate 
         </main>
       </div>
 
-      <footer className="bg-slate-50 border-t border-slate-200 py-6 text-center text-xs font-mono text-slate-400 z-10">
-        © 2026 Aan (Antigravity Assurance Network) Trust Infrastructure. Safe, decoupled proof-of-human middleware.
-      </footer>
+      {!hideFooter && (
+        <footer className="bg-slate-50 border-t border-slate-200 py-6 text-center text-xs font-mono text-slate-400 z-10">
+          © 2026 Aan (Antigravity Assurance Network) Trust Infrastructure. Safe, decoupled proof-of-human middleware.
+        </footer>
+      )}
 
     </div>
   );

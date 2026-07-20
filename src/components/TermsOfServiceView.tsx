@@ -6,9 +6,11 @@ import {
   Clock, ArrowLeft, ChevronDown, ChevronUp, Check, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import Footer from './Footer';
 
 interface TermsOfServiceViewProps {
   onNavigate: (page: string, customPath?: string) => void;
+  hideFooter?: boolean;
 }
 
 interface Section {
@@ -20,7 +22,7 @@ interface Section {
   content: string[];
 }
 
-export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewProps) {
+export default function TermsOfServiceView({ onNavigate, hideFooter = false }: TermsOfServiceViewProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [activeSection, setActiveSection] = useState<string>('section-1');
@@ -269,26 +271,6 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
         />
       </div>
 
-      {/* BACK BAR */}
-      <div className="border-b border-slate-200 bg-white/80 backdrop-blur px-6 py-4 sticky top-1 z-40 print:hidden">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <button 
-            onClick={() => onNavigate('landing')}
-            className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-900 transition-all font-mono font-semibold uppercase tracking-wider group cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4 text-emerald-500 group-hover:-translate-x-1 transition-transform" />
-            <span>Return to Home</span>
-          </button>
-          <div className="flex items-center gap-3 text-xs font-mono text-slate-500">
-            <span>DECENTRALIZED ASSURANCE CONTRACT</span>
-            <span className="text-slate-200">|</span>
-            <span className="bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded text-emerald-600 text-[10px] font-bold">
-              v2.4.0-ENTERPRISE
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* 2. HERO SECTION */}
       <header className="py-24 px-6 md:py-32 border-b border-slate-200 bg-white print:py-10 relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-emerald-500/[0.01] rounded-full blur-[160px] pointer-events-none" />
@@ -489,17 +471,9 @@ export default function TermsOfServiceView({ onNavigate }: TermsOfServiceViewPro
         </main>
       </div>
 
-      <footer className="border-t border-slate-200 bg-white py-16 px-6 mt-32 print:hidden text-center text-xs text-slate-500">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
-          <span>© 2026 Aan (Antigravity Assurance Network) Trust Infrastructure. All rights reserved.</span>
-          <button 
-            onClick={() => onNavigate('landing')}
-            className="text-emerald-600 hover:underline font-mono"
-          >
-            Aan Trust Handshake Home
-          </button>
-        </div>
-      </footer>
+      {!hideFooter && (
+        <Footer onNavigate={onNavigate} />
+      )}
 
     </div>
   );

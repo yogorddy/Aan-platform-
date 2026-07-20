@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 
 interface ContactViewProps {
   onNavigate: (page: string, customPath?: string) => void;
+  hideHeader?: boolean;
 }
 
 let supabaseClient: any = null;
@@ -49,7 +50,7 @@ function getSupabaseClient() {
   return supabaseClient;
 }
 
-export default function ContactView({ onNavigate }: ContactViewProps) {
+export default function ContactView({ onNavigate, hideHeader = false }: ContactViewProps) {
   const [form, setForm] = useState({
     organization_name: '',
     contact_name: '',
@@ -250,32 +251,6 @@ export default function ContactView({ onNavigate }: ContactViewProps) {
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.015)_0%,transparent_70%)] pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-[#00D632]/[0.01] rounded-full blur-[180px] pointer-events-none" />
-
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-40 px-6 md:px-12 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <button 
-            onClick={() => onNavigate('landing')} 
-            className="flex items-center gap-3 group text-left cursor-pointer focus:outline-none bg-transparent border-none"
-          >
-            <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center transition-all group-hover:border-slate-300">
-              <Shield className="w-3.5 h-3.5 text-emerald-500" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-sans font-semibold text-slate-900 tracking-widest text-xs leading-none">Aan</span>
-              <span className="text-[7px] font-mono tracking-widest text-[#646e7a] mt-0.5 uppercase">Antigravity Assurance Network</span>
-            </div>
-          </button>
-
-          <button 
-            onClick={() => onNavigate('landing')}
-            className="inline-flex items-center gap-1.5 text-[10px] font-mono text-slate-500 hover:text-slate-800 transition-colors bg-transparent border-none cursor-pointer"
-          >
-            <ArrowLeft className="w-3 h-3" />
-            <span>Platform Home</span>
-          </button>
-        </div>
-      </header>
 
       {/* Main Form Area */}
       <main className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full relative z-10 px-6 py-12 my-auto">
@@ -573,17 +548,6 @@ export default function ContactView({ onNavigate }: ContactViewProps) {
 
         </div>
       </main>
-
-      {/* Refined Timelines Footer */}
-      <footer className="max-w-7xl mx-auto w-full py-12 px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between text-[10px] font-mono text-[#525a66] gap-4 z-10">
-        <span>© 2026 Aan. Decoupled Authenticity & Digital Trust Standard.</span>
-        <div className="flex gap-6">
-          <button onClick={() => onNavigate('privacy', '/privacy')} className="hover:text-slate-800 cursor-pointer bg-transparent border-none">Privacy Charter</button>
-          <button onClick={() => onNavigate('terms', '/terms')} className="hover:text-slate-800 cursor-pointer bg-transparent border-none">Terms of Service</button>
-          <button onClick={() => onNavigate('trustdocs')} className="hover:text-slate-800 cursor-pointer bg-transparent border-none">Resource Hub</button>
-        </div>
-      </footer>
-
     </div>
   );
 }

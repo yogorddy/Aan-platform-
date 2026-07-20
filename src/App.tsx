@@ -7,6 +7,7 @@ import TrustDocsPortal from './components/TrustDocsPortal';
 import AanAcademy from './components/AanAcademy';
 import TermsOfServiceView from './components/TermsOfServiceView';
 import PrivacyPolicyView from './components/PrivacyPolicyView';
+import SecurityView from './components/SecurityView';
 import ContactView from './components/ContactView';
 import AanShieldLogo from './components/AanShieldLogo';
 import { Shield, Hammer, Users, HeartHandshake, FileText, Settings, Code, BookOpen, ChevronDown, ChevronUp, GraduationCap, Lock, Unlock, ArrowLeft, LogOut, Home, Activity } from 'lucide-react';
@@ -91,6 +92,8 @@ export default function App() {
         setCurrentPage('terms');
       } else if (path === '/privacy' || path === '/privacy/') {
         setCurrentPage('privacy');
+      } else if (path === '/security' || path === '/security/') {
+        setCurrentPage('security');
       } else if (validSubSections.includes(cleanPath)) {
         setDocsSubSection(cleanPath);
         setCurrentPage('trustdocs');
@@ -135,7 +138,7 @@ export default function App() {
         targetPath = '/dashboard';
       }
     } else {
-      const publicPages = ['landing', 'terms', 'privacy', 'contact', 'trustdocs', 'verify', ...(isAcademyEnabled() ? ['academy'] : [])];
+      const publicPages = ['landing', 'terms', 'privacy', 'security', 'contact', 'trustdocs', 'verify', ...(isAcademyEnabled() ? ['academy'] : [])];
       if (!publicPages.includes(targetPage)) {
         targetPage = 'landing';
         targetPath = '/';
@@ -157,6 +160,7 @@ export default function App() {
         verify: '/verify/session/' + (sessionIdParam || "vss_session_unconfirmed_9a4"),
         terms: '/terms',
         privacy: '/privacy',
+        security: '/security',
         contact: '/contact',
         trustdocs: '/docs'
       };
@@ -192,6 +196,7 @@ export default function App() {
         verify: '/verify/session/' + (sessionIdParam || "vss_session_unconfirmed_9a4"),
         terms: '/terms',
         privacy: '/privacy',
+        security: '/security',
         contact: '/contact',
         trustdocs: '/docs'
       };
@@ -316,7 +321,7 @@ export default function App() {
         <div className="sticky top-0 z-50 bg-white/90 border-b border-slate-100 backdrop-blur-md px-6 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center justify-between w-full md:w-auto gap-4">
             {/* Back Button */}
-            {!(currentPage === 'partner' && userEmail) && (
+            {currentPage !== 'partner' && currentPage !== 'admin' && (
               <button
                 onClick={goBack}
                 className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-black bg-slate-50 hover:bg-slate-100 border border-slate-200/60 px-4 py-2 rounded-full transition-all cursor-pointer active:scale-95"
@@ -421,24 +426,35 @@ export default function App() {
           <TrustDocsPortal 
             activeSubSection={docsSubSection}
             onNavigate={(page, customPath) => navigateTo(page, customPath)}
+            hideFooter={showNavbar}
           />
         )}
 
         {currentPage === 'terms' && (
           <TermsOfServiceView 
             onNavigate={(page, customPath) => navigateTo(page, customPath)}
+            hideFooter={showNavbar}
           />
         )}
 
         {currentPage === 'privacy' && (
           <PrivacyPolicyView 
             onNavigate={(page, customPath) => navigateTo(page, customPath)}
+            hideFooter={showNavbar}
+          />
+        )}
+
+        {currentPage === 'security' && (
+          <SecurityView 
+            onNavigate={(page, customPath) => navigateTo(page, customPath)}
+            hideFooter={showNavbar}
           />
         )}
 
         {currentPage === 'contact' && (
           <ContactView 
             onNavigate={(page, customPath) => navigateTo(page, customPath)}
+            hideHeader={showNavbar}
           />
         )}
       </div>
@@ -465,6 +481,13 @@ export default function App() {
                   <span className="text-slate-200 font-light">|</span>
                 </>
               )}
+              <button 
+                onClick={() => navigateTo('landing', '/#product')} 
+                className="hover:text-black transition-colors cursor-pointer bg-transparent border-none"
+              >
+                Products
+              </button>
+              <span className="text-slate-200 font-light">|</span>
               <button 
                 onClick={() => navigateTo('trustdocs', '/docs')} 
                 className={`hover:text-black transition-colors cursor-pointer bg-transparent border-none flex items-center gap-1 ${currentPage === 'trustdocs' ? 'text-black font-bold' : ''}`}
