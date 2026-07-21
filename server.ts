@@ -2634,6 +2634,422 @@ async function startServer() {
 
 
   // ============================================================================
+  // CANONICAL PORTAL BACKEND OPERATIONS
+  // ============================================================================
+
+  app.get("/api/internal/db-health", async (req, res) => {
+    const isConnected = isSupabaseConnected();
+    if (!isConnected) {
+      return res.json({
+        configured: false,
+        connected: false,
+        error: "SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables are missing."
+      });
+    }
+
+    try {
+      const supabaseClient = (supabaseService as any).supabase;
+      if (!supabaseClient) {
+        return res.json({
+          configured: true,
+          connected: false,
+          error: "Supabase client failed to initialize."
+        });
+      }
+
+      // Try a lightweight query to verify the remote connection health.
+      const { data, error } = await supabaseClient.from("organizations").select("id").limit(1);
+      if (error) {
+        return res.json({
+          configured: true,
+          connected: false,
+          error: `Database connection error: [${error.code}] ${error.message}`
+        });
+      }
+
+      return res.json({
+        configured: true,
+        connected: true
+      });
+    } catch (err: any) {
+      return res.json({
+        configured: true,
+        connected: false,
+        error: err?.message || String(err)
+      });
+    }
+  });
+
+  app.get("/api/internal/session-context", async (req, res) => {
+    const userEmail = req.headers["x-user-email"] as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) {
+      return res.status(503).json({ error: "Database not configured" });
+    }
+
+    try {
+      // 1. Fetch user profile matching userEmail
+      const { data: profile, error: pErr } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("email", userEmail)
+        .maybeSingle();
+
+      if (pErr) throw pErr;
+      if (!profile) {
+        return res.json({ onboarded: false });
+      }
+
+      // 2. Fetch organization membership
+      const { data: membership, error: mErr } = await supabaseClient
+        .from("organization_members")
+        .select("*, organizations(*)")
+        .eq("user_id", profile.id)
+        .maybeSingle();
+
+      if (mErr) throw mErr;
+      if (!membership || !membership.organizations) {
+        return res.json({ onboarded: false, profile });
+      }
+
+      const org = membership.organizations;
+
+      // 3. Fetch projects
+      const { data: projects, error: projErr } = await supabaseClient
+        .from("projects")
+        .select("*")
+        .eq("organization_id", org.id);
+
+      if (projErr) throw projErr;
+
+      // 4. Fetch API keys
+      let apiKeys: any[] = [];
+      if (projects && projects.length > 0) {
+        const projIds = projects.map((p: any) => p.id);
+        const { data: keys, error: keysErr } = await supabaseClient
+          .from("api_keys")
+          .select("*")
+          .in("project_id", projIds);
+
+        if (keysErr) throw keysErr;
+        apiKeys = keys || [];
+      }
+
+      res.json({
+        onboarded: true,
+        profile,
+        membership: {
+          role: membership.role,
+          created_at: membership.created_at
+        },
+        organization: org,
+        projects: projects || [],
+        apiKeys: apiKeys.map((k: any) => ({
+          id: k.id,
+          project_id: k.project_id,
+          name: k.name,
+          publishable_key: k.publishable_key,
+          webhook_signing_secret: k.webhook_signing_secret,
+          status: k.status,
+          created_at: k.created_at
+        }))
+      });
+    } catch (err: any) {
+      console.error("Session context fetch failed:", err);
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+  app.post("/api/internal/onboard", async (req, res) => {
+    const { userEmail, orgName, orgWebsite, projName, projEnv } = req.body;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+    if (!orgName) return res.status(400).json({ error: "Missing organization name" });
+    if (!projName) return res.status(400).json({ error: "Missing project name" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) {
+      return res.status(503).json({ error: "Database not configured" });
+    }
+
+    try {
+      // 1. Get or create user profile
+      let { data: profile, error: pErr } = await supabaseClient
+        .from("profiles")
+        .select("*")
+        .eq("email", userEmail)
+        .maybeSingle();
+
+      if (pErr) throw pErr;
+
+      if (!profile) {
+        const { data: newProfile, error: createPErr } = await supabaseClient
+          .from("profiles")
+          .insert({
+            email: userEmail,
+            full_name: userEmail.split("@")[0]
+          })
+          .select()
+          .single();
+
+        if (createPErr) throw createPErr;
+        profile = newProfile;
+      }
+
+      // 2. Check if user already has a membership to prevent double-onboarding
+      const { data: existingMember, error: mErr } = await supabaseClient
+        .from("organization_members")
+        .select("*")
+        .eq("user_id", profile.id)
+        .limit(1);
+
+      if (mErr) throw mErr;
+      if (existingMember && existingMember.length > 0) {
+        return res.status(400).json({ error: "User is already associated with an organization." });
+      }
+
+      // 3. Create organization
+      const { data: org, error: orgErr } = await supabaseClient
+        .from("organizations")
+        .insert({
+          name: orgName,
+          type: "SaaS",
+          website: orgWebsite || "",
+          use_case: "bot_defense"
+        })
+        .select()
+        .single();
+
+      if (orgErr) throw orgErr;
+
+      // 4. Create organization member as owner
+      const { error: memberErr } = await supabaseClient
+        .from("organization_members")
+        .insert({
+          organization_id: org.id,
+          user_id: profile.id,
+          role: "owner"
+        });
+
+      if (memberErr) throw memberErr;
+
+      // 5. Create project
+      const { data: project, error: projErr } = await supabaseClient
+        .from("projects")
+        .insert({
+          organization_id: org.id,
+          name: projName,
+          environment: projEnv || "sandbox",
+          expected_verifications: "10k-50k",
+          integration_surface: "api"
+        })
+        .select()
+        .single();
+
+      if (projErr) throw projErr;
+
+      // 6. Generate secure credentials
+      const keyToken = `aan_live_${crypto.randomBytes(16).toString('hex')}`;
+      const keyHash = crypto.createHash('sha256').update(keyToken).digest('hex');
+      const whSecret = `whsec_${crypto.randomBytes(16).toString('hex')}`;
+
+      const { data: apiKey, error: keyErr } = await supabaseClient
+        .from("api_keys")
+        .insert({
+          project_id: project.id,
+          name: "Default API Key",
+          publishable_key: `aan_pub_${crypto.randomBytes(16).toString('hex')}`,
+          secret_key_hash: keyHash,
+          webhook_signing_secret: whSecret,
+          status: "active"
+        })
+        .select()
+        .single();
+
+      if (keyErr) throw keyErr;
+
+      res.json({
+        success: true,
+        organization: org,
+        project,
+        api_key: apiKey,
+        plain_secret_key: keyToken
+      });
+    } catch (err: any) {
+      console.error("Onboarding failed:", err);
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+  app.get("/api/internal/decisions", async (req, res) => {
+    const userEmail = req.headers["x-user-email"] as string;
+    const projectId = req.query.projectId as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+
+    try {
+      let query = supabaseClient.from("verification_events").select("*");
+      if (projectId) {
+        query = query.eq("project_id", projectId);
+      }
+      const { data, error } = await query.order("created_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      res.json(data || []);
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+  app.get("/api/internal/events", async (req, res) => {
+    const userEmail = req.headers["x-user-email"] as string;
+    const projectId = req.query.projectId as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+
+    try {
+      let query = supabaseClient.from("aan_trust_events").select("*");
+      if (projectId) {
+        query = query.eq("project_id", projectId);
+      }
+      const { data, error } = await query.order("created_at", { ascending: false }).limit(100);
+      if (error) throw error;
+      res.json(data || []);
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+  app.get("/api/internal/api-keys", async (req, res) => {
+    const userEmail = req.headers["x-user-email"] as string;
+    const projectId = req.query.projectId as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+    if (!projectId) return res.status(400).json({ error: "Missing project ID" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+
+    try {
+      const { data, error } = await supabaseClient
+        .from("api_keys")
+        .select("*")
+        .eq("project_id", projectId);
+
+      if (error) throw error;
+
+      res.json((data || []).map((k: any) => ({
+        id: k.id,
+        project_id: k.project_id,
+        name: k.name,
+        publishable_key: k.publishable_key,
+        webhook_signing_secret: k.webhook_signing_secret,
+        status: k.status,
+        created_at: k.created_at
+      })));
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+  app.post("/api/internal/api-keys/rotate", async (req, res) => {
+    const { project_id, key_id } = req.body;
+    const userEmail = req.headers["x-user-email"] as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+    if (!project_id || !key_id) return res.status(400).json({ error: "Missing parameters" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+
+    try {
+      const keyToken = `aan_live_${crypto.randomBytes(16).toString('hex')}`;
+      const keyHash = crypto.createHash('sha256').update(keyToken).digest('hex');
+
+      const { data, error } = await supabaseClient
+        .from("api_keys")
+        .update({
+          secret_key_hash: keyHash,
+          created_at: new Date().toISOString()
+        })
+        .eq("id", key_id)
+        .eq("project_id", project_id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.json({
+        success: true,
+        api_key: {
+          id: data.id,
+          project_id: data.project_id,
+          name: data.name,
+          publishable_key: data.publishable_key,
+          webhook_signing_secret: data.webhook_signing_secret,
+          status: data.status,
+          created_at: data.created_at
+        },
+        plain_secret_key: keyToken
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+  app.get("/api/internal/webhooks", async (req, res) => {
+    const userEmail = req.headers["x-user-email"] as string;
+    const projectId = req.query.projectId as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+
+    try {
+      let query = supabaseClient.from("webhooks").select("*");
+      if (projectId) {
+        query = query.eq("project_id", projectId);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      res.json(data || []);
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+  app.post("/api/internal/webhooks", async (req, res) => {
+    const { url, project_id } = req.body;
+    const userEmail = req.headers["x-user-email"] as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+    if (!url || !project_id) return res.status(400).json({ error: "Missing parameters" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+
+    try {
+      const { data, error } = await supabaseClient
+        .from("webhooks")
+        .insert({
+          project_id,
+          url,
+          secret: `whsec_${crypto.randomBytes(16).toString('hex')}`,
+          status: "active"
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err?.message || String(err) });
+    }
+  });
+
+
+  // ============================================================================
   // INTERNAL FE DASHBOARD OPERATIONS (UI Data Bindings)
   // ============================================================================
 

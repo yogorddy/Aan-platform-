@@ -17,7 +17,7 @@ import {
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
 
-let supabase: SupabaseClient | null = null;
+export let supabase: SupabaseClient | null = null;
 let isConfigured = false;
 
 if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
@@ -31,14 +31,18 @@ if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
     isConfigured = true;
     console.log("[AAN INFRASTRUCTURE] Database Status: SECURE REMOTE SUPABASE DB CONNECTED (Service-Role Client Initialized)");
   } catch (err: any) {
-    console.warn("[AAN INFRASTRUCTURE] Failed to initialize Supabase client (using local state fallback):", err.message || err);
+    console.error("[AAN INFRASTRUCTURE] Failed to initialize Supabase client:", err.message || err);
   }
 } else {
-  console.log(
-    "[AAN INFRASTRUCTURE] DEVELOPMENT-ONLY FALLBACK: Remote Supabase database is not configured. " +
-    "Simulating all active database transactions and RLS in-memory. " +
-    "To connect a live cloud database, configure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY inside .env"
-  );
+  console.log("[AAN INFRASTRUCTURE] SUPABASE NOT CONFIGURED IN ENVIRONMENT");
+}
+
+export function isSupabaseConnected(): boolean {
+  return isConfigured && supabase !== null;
+}
+
+export function disableRemoteDatabase(): void {
+  // Deprecated under the "No Simulated Fallback" directive. We keep the function signature to avoid preflight breaks.
 }
 
 function getDeterministicUUID(str: string): string {
@@ -49,39 +53,9 @@ function getDeterministicUUID(str: string): string {
   return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-4${hash.slice(12, 15)}-a${hash.slice(15, 18)}-${hash.slice(18, 30)}`;
 }
 
-export function isSupabaseConnected(): boolean {
-  return isConfigured;
-}
-
-
-export function disableRemoteDatabase(): void {
-  isConfigured = false;
-}
-
-/**
- * Centralized DB Error and Table Missing handler to guarantee graceful fallback
- */
-function handleDbError(error: any, operationName: string) {
-  const msg = error.message || "";
-  if (
-    msg.includes("relation") || 
-    msg.includes("table") || 
-    msg.includes("schema cache") || 
-    msg.includes("does not exist") || 
-    msg.includes("not found")
-  ) {
-    console.warn(`[AAN DB NOTICE] Required table or relation is missing in remote database during "${operationName}": "${msg}".`);
-    console.warn("[AAN DB NOTICE] Switching AAN Platform to offline sandbox memory mode. Please run supabase_schema.sql in your Supabase SQL Editor to link remote tables.");
-    isConfigured = false; // Gracefully switch to memory state to prevent continuous error logging
-  } else {
-    console.warn(`[AAN DB GRACEFUL FALLBACK] Failed during ${operationName}:`, msg);
-  }
-}
-
 /**
  * Service/Repository layer wrapping data access for AAN Identity Platform.
- * If Supabase variables are set, writes and reads from Postgres tables.
- * Otherwise, routes to local memory state fallback (passed in or resolved).
+ * Strictly communicates with Supabase. All fallback/offline state code has been removed.
  */
 export const supabaseService = {
   
@@ -90,39 +64,33 @@ export const supabaseService = {
    */
   async createVerificationSession(
     session: VerificationSession,
-    localStore: VerificationSession[]
+    _localStore?: any[]
   ): Promise<VerificationSession> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] INSERT verification_session ${session.id} to Supabase`);
-      const { data, error } = await supabase
-        .from("verification_sessions")
-        .insert({
-          id: session.id,
-          partner_app_id: session.partner_app_id,
-          external_user_id: session.external_user_id,
-          status: session.status,
-          risk_score: session.risk_score,
-          duplicate_candidate: session.duplicate_candidate,
-          result_reason: session.result_reason,
-          risk_reasons: session.risk_reasons,
-          proof_token: session.proof_token,
-          created_at: session.created_at,
-          completed_at: session.completed_at
-        })
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] INSERT verification_session ${session.id} to Supabase`);
+    const { data, error } = await supabase
+      .from("verification_sessions")
+      .insert({
+        id: session.id,
+        partner_app_id: session.partner_app_id,
+        external_user_id: session.external_user_id,
+        status: session.status,
+        risk_score: session.risk_score,
+        duplicate_candidate: session.duplicate_candidate,
+        result_reason: session.result_reason,
+        risk_reasons: session.risk_reasons,
+        proof_token: session.proof_token,
+        created_at: session.created_at,
+        completed_at: session.completed_at
+      })
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "createVerificationSession");
-        localStore.unshift(session);
-        return session;
-      }
-      return data as VerificationSession;
-    } else {
-      // Local development fallback
-      localStore.unshift(session);
-      return session;
+    if (error) {
+      console.error("[AAN DB ERROR] createVerificationSession failed:", error.message);
+      throw error;
     }
+    return data as VerificationSession;
   },
 
   /**
@@ -131,28 +99,25 @@ export const supabaseService = {
   async updateVerificationSession(
     sessionId: string,
     updates: Partial<VerificationSession>,
-    localStore: VerificationSession[]
+    _localStore?: any[]
   ): Promise<VerificationSession | null> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] UPDATE verification_session ${sessionId} in Supabase`);
-      const { data, error } = await supabase
-        .from("verification_sessions")
-        .update({
-          ...updates,
-          completed_at: updates.completed_at || (updates.status === "passed" || updates.status === "failed" ? new Date().toISOString() : null)
-        })
-        .eq("id", sessionId)
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] UPDATE verification_session ${sessionId} in Supabase`);
+    const { data, error } = await supabase
+      .from("verification_sessions")
+      .update({
+        ...updates,
+        completed_at: updates.completed_at || (updates.status === "passed" || updates.status === "failed" ? new Date().toISOString() : null)
+      })
+      .eq("id", sessionId)
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "updateVerificationSession");
-        return fallbackUpdate(sessionId, updates, localStore);
-      }
-      return data as VerificationSession;
-    } else {
-      return fallbackUpdate(sessionId, updates, localStore);
+    if (error) {
+      console.error("[AAN DB ERROR] updateVerificationSession failed:", error.message);
+      throw error;
     }
+    return data as VerificationSession;
   },
 
   /**
@@ -160,35 +125,30 @@ export const supabaseService = {
    */
   async recordAuditEvent(
     log: AuditLog,
-    localStore: AuditLog[]
+    _localStore?: any[]
   ): Promise<AuditLog> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] APPEND audit_log event: ${log.action}`);
-      const { data, error } = await supabase
-        .from("audit_logs")
-        .insert({
-          id: log.id,
-          actor_type: log.actor_type,
-          actor_id: log.actor_id,
-          action: log.action,
-          target_type: log.target_type,
-          target_id: log.target_id,
-          metadata: log.metadata,
-          created_at: log.created_at
-        })
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] APPEND audit_log event: ${log.action}`);
+    const { data, error } = await supabase
+      .from("audit_logs")
+      .insert({
+        id: log.id,
+        actor_type: log.actor_type,
+        actor_id: log.actor_id,
+        action: log.action,
+        target_type: log.target_type,
+        target_id: log.target_id,
+        metadata: log.metadata,
+        created_at: log.created_at
+      })
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "recordAuditEvent");
-        localStore.unshift(log);
-        return log;
-      }
-      return data as AuditLog;
-    } else {
-      localStore.unshift(log);
-      return log;
+    if (error) {
+      console.error("[AAN DB ERROR] recordAuditEvent failed:", error.message);
+      throw error;
     }
+    return data as AuditLog;
   },
 
   /**
@@ -196,40 +156,35 @@ export const supabaseService = {
    */
   async recordSecurityEvent(
     event: SecurityEvent,
-    localStore: SecurityEvent[]
+    _localStore?: any[]
   ): Promise<SecurityEvent> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] APPEND security_event: ${event.event_type} (${event.severity})`);
-      const { data, error } = await supabase
-        .from("security_events")
-        .insert({
-          id: event.id,
-          severity: event.severity,
-          event_type: event.event_type,
-          actor_type: event.actor_type,
-          actor_id: event.actor_id,
-          ip_address: event.ip_address,
-          user_agent: event.user_agent,
-          session_id: event.session_id,
-          partner_app_id: event.partner_app_id,
-          request_path: event.request_path,
-          detection_reason: event.detection_reason,
-          raw_metadata: event.raw_metadata,
-          created_at: event.created_at
-        })
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] APPEND security_event: ${event.event_type} (${event.severity})`);
+    const { data, error } = await supabase
+      .from("security_events")
+      .insert({
+        id: event.id,
+        severity: event.severity,
+        event_type: event.event_type,
+        actor_type: event.actor_type,
+        actor_id: event.actor_id,
+        ip_address: event.ip_address,
+        user_agent: event.user_agent,
+        session_id: event.session_id,
+        partner_app_id: event.partner_app_id,
+        request_path: event.request_path,
+        detection_reason: event.detection_reason,
+        raw_metadata: event.raw_metadata,
+        created_at: event.created_at
+      })
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "recordSecurityEvent");
-        localStore.unshift(event);
-        return event;
-      }
-      return data as SecurityEvent;
-    } else {
-      localStore.unshift(event);
-      return event;
+    if (error) {
+      console.error("[AAN DB ERROR] recordSecurityEvent failed:", error.message);
+      throw error;
     }
+    return data as SecurityEvent;
   },
 
   /**
@@ -237,38 +192,28 @@ export const supabaseService = {
    */
   async savePartnerApp(
     partnerApp: PartnerApp,
-    localStore: PartnerApp[]
+    _localStore?: any[]
   ): Promise<PartnerApp> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] UPSERT partner_app project in Supabase`);
-      const { data, error } = await supabase
-        .from("partner_apps")
-        .upsert({
-          id: partnerApp.id,
-          name: partnerApp.name,
-          api_key_hash: partnerApp.api_key_hash,
-          webhook_url: partnerApp.webhook_url,
-          status: partnerApp.status,
-          created_at: partnerApp.created_at
-        })
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] UPSERT partner_app project in Supabase`);
+    const { data, error } = await supabase
+      .from("partner_apps")
+      .upsert({
+        id: partnerApp.id,
+        name: partnerApp.name,
+        api_key_hash: partnerApp.api_key_hash,
+        webhook_url: partnerApp.webhook_url,
+        status: partnerApp.status,
+        created_at: partnerApp.created_at
+      })
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "savePartnerApp");
-        localStore.unshift(partnerApp);
-        return partnerApp;
-      }
-      return data as PartnerApp;
-    } else {
-      const existingIdx = localStore.findIndex(x => x.id === partnerApp.id);
-      if (existingIdx >= 0) {
-        localStore[existingIdx] = partnerApp;
-      } else {
-        localStore.unshift(partnerApp);
-      }
-      return partnerApp;
+    if (error) {
+      console.error("[AAN DB ERROR] savePartnerApp failed:", error.message);
+      throw error;
     }
+    return data as PartnerApp;
   },
 
   /**
@@ -276,23 +221,20 @@ export const supabaseService = {
    */
   async findPartnerAppByHash(
     hash: string,
-    localStore: PartnerApp[]
+    _localStore?: any[]
   ): Promise<PartnerApp | null> {
-    if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from("partner_apps")
-        .select("*")
-        .eq("api_key_hash", hash)
-        .maybeSingle();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    const { data, error } = await supabase
+      .from("partner_apps")
+      .select("*")
+      .eq("api_key_hash", hash)
+      .maybeSingle();
 
-      if (error) {
-        handleDbError(error, "findPartnerAppByHash");
-        return localStore.find(x => x.api_key_hash === hash) || null;
-      }
-      return data as PartnerApp | null;
-    } else {
-      return localStore.find(x => x.api_key_hash === hash) || null;
+    if (error) {
+      console.error("[AAN DB ERROR] findPartnerAppByHash failed:", error.message);
+      throw error;
     }
+    return data as PartnerApp | null;
   },
 
   /**
@@ -300,40 +242,35 @@ export const supabaseService = {
    */
   async createSecurityReport(
     report: SecurityReport,
-    localStore: SecurityReport[]
+    _localStore?: any[]
   ): Promise<SecurityReport> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] INSERT security_report ${report.id} to Supabase`);
-      const { data, error } = await supabase
-        .from("security_reports")
-        .insert({
-          id: report.id,
-          title: report.title,
-          category: report.category,
-          severity: report.severity,
-          affected_system: report.affected_system,
-          reproduction_steps: report.reproduction_steps,
-          submitted_evidence: report.submitted_evidence,
-          reporter_contact: report.reporter_contact,
-          status: report.status,
-          bounty_amount: report.bounty_amount,
-          internal_notes: report.internal_notes,
-          created_at: report.created_at,
-          resolved_at: report.resolved_at
-        })
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] INSERT security_report ${report.id} to Supabase`);
+    const { data, error } = await supabase
+      .from("security_reports")
+      .insert({
+        id: report.id,
+        title: report.title,
+        category: report.category,
+        severity: report.severity,
+        affected_system: report.affected_system,
+        reproduction_steps: report.reproduction_steps,
+        submitted_evidence: report.submitted_evidence,
+        reporter_contact: report.reporter_contact,
+        status: report.status,
+        bounty_amount: report.bounty_amount,
+        internal_notes: report.internal_notes,
+        created_at: report.created_at,
+        resolved_at: report.resolved_at
+      })
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "createSecurityReport");
-        localStore.unshift(report);
-        return report;
-      }
-      return data as SecurityReport;
-    } else {
-      localStore.unshift(report);
-      return report;
+    if (error) {
+      console.error("[AAN DB ERROR] createSecurityReport failed:", error.message);
+      throw error;
     }
+    return data as SecurityReport;
   },
 
   /**
@@ -342,35 +279,22 @@ export const supabaseService = {
   async updateSecurityReport(
     reportId: string,
     updates: Partial<SecurityReport>,
-    localStore: SecurityReport[]
+    _localStore?: any[]
   ): Promise<SecurityReport | null> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] UPDATE security_report ${reportId} in Supabase`);
-      const { data, error } = await supabase
-        .from("security_reports")
-        .update(updates)
-        .eq("id", reportId)
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] UPDATE security_report ${reportId} in Supabase`);
+    const { data, error } = await supabase
+      .from("security_reports")
+      .update(updates)
+      .eq("id", reportId)
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "updateSecurityReport");
-        const idx = localStore.findIndex(r => r.id === reportId);
-        if (idx >= 0) {
-          localStore[idx] = { ...localStore[idx], ...updates };
-          return localStore[idx];
-        }
-        return null;
-      }
-      return data as SecurityReport;
-    } else {
-      const idx = localStore.findIndex(r => r.id === reportId);
-      if (idx >= 0) {
-        localStore[idx] = { ...localStore[idx], ...updates };
-        return localStore[idx];
-      }
-      return null;
+    if (error) {
+      console.error("[AAN DB ERROR] updateSecurityReport failed:", error.message);
+      throw error;
     }
+    return data as SecurityReport;
   },
 
   /**
@@ -378,47 +302,39 @@ export const supabaseService = {
    */
   async createIntegrationRequest(
     request: IntegrationRequest,
-    localStore: IntegrationRequest[]
+    _localStore?: any[]
   ): Promise<IntegrationRequest> {
-    if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from("integration_requests")
-        .insert(request)
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    const { data, error } = await supabase
+      .from("integration_requests")
+      .insert(request)
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "createIntegrationRequest");
-        localStore.unshift(request);
-        return request;
-      }
-      return data as IntegrationRequest;
-    } else {
-      localStore.unshift(request);
-      return request;
+    if (error) {
+      console.error("[AAN DB ERROR] createIntegrationRequest failed:", error.message);
+      throw error;
     }
+    return data as IntegrationRequest;
   },
 
   /**
    * 10. GET INTEGRATION REQUESTS
    */
   async getIntegrationRequests(
-    localStore: IntegrationRequest[]
+    _localStore?: any[]
   ): Promise<IntegrationRequest[]> {
-    if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from("integration_requests")
-        .select("*")
-        .order("created_at", { ascending: false });
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    const { data, error } = await supabase
+      .from("integration_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-      if (error) {
-        handleDbError(error, "getIntegrationRequests");
-        return localStore;
-      }
-      return data as IntegrationRequest[];
-    } else {
-      return localStore;
+    if (error) {
+      console.error("[AAN DB ERROR] getIntegrationRequests failed:", error.message);
+      throw error;
     }
+    return data as IntegrationRequest[];
   },
 
   /**
@@ -427,34 +343,21 @@ export const supabaseService = {
   async updateIntegrationRequest(
     requestId: string,
     updates: Partial<IntegrationRequest>,
-    localStore: IntegrationRequest[]
+    _localStore?: any[]
   ): Promise<IntegrationRequest | null> {
-    if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from("integration_requests")
-        .update(updates)
-        .eq("id", requestId)
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    const { data, error } = await supabase
+      .from("integration_requests")
+      .update(updates)
+      .eq("id", requestId)
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "updateIntegrationRequest");
-        const idx = localStore.findIndex(r => r.id === requestId);
-        if (idx >= 0) {
-          localStore[idx] = { ...localStore[idx], ...updates, updated_at: new Date().toISOString() };
-          return localStore[idx];
-        }
-        return null;
-      }
-      return data as IntegrationRequest;
-    } else {
-      const idx = localStore.findIndex(r => r.id === requestId);
-      if (idx >= 0) {
-        localStore[idx] = { ...localStore[idx], ...updates, updated_at: new Date().toISOString() };
-        return localStore[idx];
-      }
-      return null;
+    if (error) {
+      console.error("[AAN DB ERROR] updateIntegrationRequest failed:", error.message);
+      throw error;
     }
+    return data as IntegrationRequest;
   },
 
   /**
@@ -462,25 +365,20 @@ export const supabaseService = {
    */
   async createIntegrationRequestStatusHistory(
     history: IntegrationRequestStatusHistory,
-    localStore: IntegrationRequestStatusHistory[]
+    _localStore?: any[]
   ): Promise<IntegrationRequestStatusHistory> {
-    if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from("integration_request_status_history")
-        .insert(history)
-        .select()
-        .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    const { data, error } = await supabase
+      .from("integration_request_status_history")
+      .insert(history)
+      .select()
+      .single();
 
-      if (error) {
-        handleDbError(error, "createIntegrationRequestStatusHistory");
-        localStore.unshift(history);
-        return history;
-      }
-      return data as IntegrationRequestStatusHistory;
-    } else {
-      localStore.unshift(history);
-      return history;
+    if (error) {
+      console.error("[AAN DB ERROR] createIntegrationRequestStatusHistory failed:", error.message);
+      throw error;
     }
+    return data as IntegrationRequestStatusHistory;
   },
 
   /**
@@ -488,159 +386,111 @@ export const supabaseService = {
    */
   async getIntegrationRequestStatusHistory(
     requestId: string,
-    localStore: IntegrationRequestStatusHistory[]
+    _localStore?: any[]
   ): Promise<IntegrationRequestStatusHistory[]> {
-    if (isConfigured && supabase) {
-      const { data, error } = await supabase
-        .from("integration_request_status_history")
-        .select("*")
-        .eq("integration_request_id", requestId)
-        .order("changed_at", { ascending: true });
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    const { data, error } = await supabase
+      .from("integration_request_status_history")
+      .select("*")
+      .eq("integration_request_id", requestId)
+      .order("changed_at", { ascending: true });
 
-      if (error) {
-        handleDbError(error, "getIntegrationRequestStatusHistory");
-        return localStore.filter(h => h.integration_request_id === requestId);
-      }
-      return data as IntegrationRequestStatusHistory[];
-    } else {
-      return localStore.filter(h => h.integration_request_id === requestId);
+    if (error) {
+      console.error("[AAN DB ERROR] getIntegrationRequestStatusHistory failed:", error.message);
+      throw error;
     }
+    return data as IntegrationRequestStatusHistory[];
   },
 
   /**
    * 14. TRUST INTELLIGENCE API: GET METRICS
    */
   async getTrustMetrics(): Promise<any> {
-    try {
-      const res = await fetch("/api/trust/metrics");
-      if (!res.ok) throw new Error("HTTP error: " + res.status);
-      return await res.json();
-    } catch (err: any) {
-      console.warn("getTrustMetrics API failed:", err);
-      return null;
-    }
+    const res = await fetch("/api/trust/metrics");
+    if (!res.ok) throw new Error("HTTP error: " + res.status);
+    return await res.json();
   },
 
   /**
    * 15. TRUST INTELLIGENCE API: GET CLUSTERS
    */
   async getTrustClusters(): Promise<any[]> {
-    try {
-      const res = await fetch("/api/trust/clusters");
-      if (!res.ok) throw new Error("HTTP error: " + res.status);
-      return await res.json();
-    } catch (err) {
-      console.warn("getTrustClusters API failed:", err);
-      return [];
-    }
+    const res = await fetch("/api/trust/clusters");
+    if (!res.ok) throw new Error("HTTP error: " + res.status);
+    return await res.json();
   },
 
   /**
    * 16. TRUST INTELLIGENCE API: GET VERIFIED HUMANS
    */
   async getVerifiedHumans(): Promise<any[]> {
-    try {
-      const res = await fetch("/api/trust/humans");
-      if (!res.ok) throw new Error("HTTP error: " + res.status);
-      return await res.json();
-    } catch (err) {
-      console.warn("getVerifiedHumans API failed:", err);
-      return [];
-    }
+    const res = await fetch("/api/trust/humans");
+    if (!res.ok) throw new Error("HTTP error: " + res.status);
+    return await res.json();
   },
 
   /**
    * 17. TRUST INTELLIGENCE API: GET TIMELINE
    */
   async getTrustTimelineData(): Promise<any[]> {
-    try {
-      const res = await fetch("/api/trust/timeline");
-      if (!res.ok) throw new Error("HTTP error: " + res.status);
-      return await res.json();
-    } catch (err) {
-      console.warn("getTrustTimelineData API failed:", err);
-      return [];
-    }
+    const res = await fetch("/api/trust/timeline");
+    if (!res.ok) throw new Error("HTTP error: " + res.status);
+    return await res.json();
   },
 
   /**
    * 18. TRUST INTELLIGENCE API: GET ALERTS
    */
   async getPartnerAlerts(): Promise<any[]> {
-    try {
-      const res = await fetch("/api/trust/alerts");
-      if (!res.ok) throw new Error("HTTP error: " + res.status);
-      return await res.json();
-    } catch (err) {
-      console.warn("getPartnerAlerts API failed:", err);
-      return [];
-    }
+    const res = await fetch("/api/trust/alerts");
+    if (!res.ok) throw new Error("HTTP error: " + res.status);
+    return await res.json();
   },
 
   /**
    * 19. TRUST INTELLIGENCE API: DISMISS ALERT
    */
   async dismissAlert(id: string): Promise<any> {
-    try {
-      const res = await fetch("/api/trust/alerts/dismiss", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id })
-      });
-      return await res.json();
-    } catch (err) {
-      console.warn("dismissAlert API failed:", err);
-      return null;
-    }
+    const res = await fetch("/api/trust/alerts/dismiss", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id })
+    });
+    return await res.json();
   },
 
   /**
    * 20. TEST LAB API: GET RUNS
    */
   async getTestLabRuns(): Promise<any[]> {
-    try {
-      const res = await fetch("/api/trust/test-lab/runs");
-      if (!res.ok) throw new Error("HTTP error: " + res.status);
-      return await res.json();
-    } catch (err) {
-      console.warn("getTestLabRuns API failed:", err);
-      return [];
-    }
+    const res = await fetch("/api/trust/test-lab/runs");
+    if (!res.ok) throw new Error("HTTP error: " + res.status);
+    return await res.json();
   },
 
   /**
    * 21. TEST LAB API: TRIGGER RUN
    */
   async runSimulationScenario(scenario_type: string): Promise<any> {
-    try {
-      const res = await fetch("/api/trust/test-lab/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenario_type })
-      });
-      return await res.json();
-    } catch (err) {
-      console.warn("runSimulationScenario API failed:", err);
-      return null;
-    }
+    const res = await fetch("/api/trust/test-lab/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenario_type })
+    });
+    return await res.json();
   },
 
   /**
    * 22. TRUST INTELLIGENCE API: GET UNIFIED GRAPH DATA
    */
   async getTrustGraphData(): Promise<any> {
-    try {
-      const res = await fetch("/api/trust/graph-data");
-      if (!res.ok) throw new Error("HTTP error: " + res.status);
-      return await res.json();
-    } catch (err) {
-      console.warn("getTrustGraphData API failed:", err);
-      return null;
-    }
+    const res = await fetch("/api/trust/graph-data");
+    if (!res.ok) throw new Error("HTTP error: " + res.status);
+    return await res.json();
   },
 
   /**
-   * 23. HANDSHAKE: CREATE TRUST EVENT IN SUPABASE (aan_trust_events)
+   * 23. HANDSHAKE: CREATE TRUST EVENT IN SUPABASE
    */
   async createTrustEvent(
     event: {
@@ -655,150 +505,96 @@ export const supabaseService = {
       created_at: string;
       completed_at?: string | null;
     },
-    localStore: any[]
+    _localStore?: any[]
   ): Promise<any> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] INSERT aan_trust_event for session ${event.session_id} to Supabase`);
-      try {
-        const { data, error } = await supabase
-          .from("aan_trust_events")
-          .insert({
-            session_id: event.session_id,
-            project_id: event.project_id || null,
-            external_user_id: event.external_user_id,
-            decision: event.decision,
-            risk_score: event.risk_score,
-            reason_codes: event.reason_codes,
-            signal_payload: event.signal_payload,
-            proof_token: event.proof_token || null,
-            created_at: event.created_at,
-            completed_at: event.completed_at || null
-          })
-          .select()
-          .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] INSERT aan_trust_event for session ${event.session_id} to Supabase`);
+    const { data, error } = await supabase
+      .from("aan_trust_events")
+      .insert({
+        session_id: event.session_id,
+        project_id: event.project_id || null,
+        external_user_id: event.external_user_id,
+        decision: event.decision,
+        risk_score: event.risk_score,
+        reason_codes: event.reason_codes,
+        signal_payload: event.signal_payload,
+        proof_token: event.proof_token || "",
+        created_at: event.created_at,
+        completed_at: event.completed_at || new Date().toISOString()
+      })
+      .select()
+      .single();
 
-        if (error) {
-          handleDbError(error, "createTrustEvent");
-          localStore.unshift(event);
-          return event;
-        }
-        return data;
-      } catch (err) {
-        console.warn("[AAN DB GRACEFUL FALLBACK] createTrustEvent exception:", err);
-        localStore.unshift(event);
-        return event;
-      }
-    } else {
-      localStore.unshift(event);
-      return event;
+    if (error) {
+      console.error("[AAN DB ERROR] createTrustEvent failed:", error.message);
+      throw error;
     }
+    return data;
   },
 
   /**
-   * 24. HANDSHAKE: UPDATE TRUST EVENT IN SUPABASE (aan_trust_events)
+   * 24. UPDATE TRUST EVENT IN SUPABASE
    */
   async updateTrustEvent(
     sessionId: string,
-    updates: {
-      decision: string;
-      risk_score: number;
-      reason_codes: string[];
-      proof_token: string;
-      completed_at: string;
-    },
-    localStore: any[]
+    updates: any,
+    _localStore?: any[]
   ): Promise<any> {
-    if (isConfigured && supabase) {
-      console.log(`[AAN DB] UPDATE aan_trust_events for session ${sessionId} in Supabase`);
-      try {
-        const { data, error } = await supabase
-          .from("aan_trust_events")
-          .update({
-            decision: updates.decision,
-            risk_score: updates.risk_score,
-            reason_codes: updates.reason_codes,
-            proof_token: updates.proof_token,
-            completed_at: updates.completed_at
-          })
-          .eq("session_id", sessionId)
-          .select()
-          .single();
+    if (!supabase) throw new Error("Supabase client is not initialized.");
+    console.log(`[AAN DB] UPDATE aan_trust_event for session ${sessionId} in Supabase`);
+    const { data, error } = await supabase
+      .from("aan_trust_events")
+      .update(updates)
+      .eq("session_id", sessionId)
+      .select()
+      .single();
 
-        if (error) {
-          handleDbError(error, "updateTrustEvent");
-          const idx = localStore.findIndex(e => e.session_id === sessionId);
-          if (idx >= 0) {
-            localStore[idx] = { ...localStore[idx], ...updates };
-            return localStore[idx];
-          }
-          return null;
-        }
-        return data;
-      } catch (err) {
-        console.warn("[AAN DB GRACEFUL FALLBACK] updateTrustEvent exception:", err);
-        const idx = localStore.findIndex(e => e.session_id === sessionId);
-        if (idx >= 0) {
-          localStore[idx] = { ...localStore[idx], ...updates };
-          return localStore[idx];
-        }
-        return null;
-      }
-    } else {
-      const idx = localStore.findIndex(e => e.session_id === sessionId);
-      if (idx >= 0) {
-        localStore[idx] = { ...localStore[idx], ...updates };
-        return localStore[idx];
-      }
-      return null;
+    if (error) {
+      console.error("[AAN DB ERROR] updateTrustEvent failed:", error.message);
+      throw error;
     }
+    return data;
   },
 
   /**
-   * 25. SYNC TRUST GRAPH INTELLIGENCE TO SUPABASE
+   * 25. STATE SYNC
    */
-  async syncGraphIntelligenceToDb(dbState: any): Promise<void> {
-    if (!isConfigured || !supabase) {
-      return;
-    }
+  async syncGraphIntelligenceToDb(db: any): Promise<void> {
+    if (!supabase) return;
     try {
-      console.log("[AAN DB SYNC] Starting asynchronous Supabase Trust Graph sync...");
-
+      console.log("[AAN DB SYNC] Beginning graph intelligence sync to Supabase...");
+      
       // A. Sync trust_clusters
-      if (dbState.trustClusters && dbState.trustClusters.length > 0) {
-        const clustersToUpsert = dbState.trustClusters.map((c: any) => {
-          let id = c.id;
-          if (id.startsWith("cluster_dynamic_")) {
-            id = getDeterministicUUID(id);
-          }
-          return {
-            id,
-            name: c.name,
-            risk_score: c.risk_score,
-            confidence_score: c.confidence_score,
-            status: c.status,
-            algorithm: c.algorithm,
-            verified_humans_count: c.verified_humans_count,
-            partner_accounts_count: c.partner_accounts_count,
-            trust_devices_count: c.trust_devices_count,
-            events_count: c.events_count,
-            decisions_count: c.decisions_count,
-            last_activity: c.last_activity,
-            created_at: c.created_at
-          };
-        });
+      if (db.trustClusters && db.trustClusters.length > 0) {
+        const clustersToUpsert = db.trustClusters.map((c: any) => ({
+          id: c.id.startsWith("cluster_dynamic_") ? getDeterministicUUID(c.id) : c.id,
+          name: c.name,
+          risk_score: c.risk_score,
+          confidence_score: c.confidence_score,
+          status: c.status,
+          algorithm: c.algorithm || "louvain",
+          verified_humans_count: c.verified_humans_count,
+          partner_accounts_count: c.partner_accounts_count,
+          trust_devices_count: c.trust_devices_count,
+          events_count: c.events_count,
+          decisions_count: c.decisions_count,
+          last_activity: c.last_activity || new Date().toISOString(),
+          created_at: c.created_at || new Date().toISOString()
+        }));
 
         const { error: clusterErr } = await supabase
           .from("trust_clusters")
           .upsert(clustersToUpsert, { onConflict: "id" });
-        
+
         if (clusterErr) {
           console.warn("[AAN DB SYNC] Failed to sync trust_clusters:", clusterErr.message);
         }
       }
 
       // B. Sync verified_humans
-      if (dbState.verifiedHumans && dbState.verifiedHumans.length > 0) {
-        const humansToUpsert = dbState.verifiedHumans.map((h: any) => {
+      if (db.verifiedHumans && db.verifiedHumans.length > 0) {
+        const humansToUpsert = db.verifiedHumans.map((h: any) => {
           let clusterId = h.primary_cluster_id;
           if (clusterId && clusterId.startsWith("cluster_dynamic_")) {
             clusterId = getDeterministicUUID(clusterId);
@@ -828,8 +624,8 @@ export const supabaseService = {
       }
 
       // C. Sync trust_relationships
-      if (dbState.trustRelationships && dbState.trustRelationships.length > 0) {
-        const relationshipsToUpsert = dbState.trustRelationships.map((r: any) => {
+      if (db.trustRelationships && db.trustRelationships.length > 0) {
+        const relationshipsToUpsert = db.trustRelationships.map((r: any) => {
           let clusterId = r.cluster_id;
           if (clusterId && clusterId.startsWith("cluster_dynamic_")) {
             clusterId = getDeterministicUUID(clusterId);
@@ -864,22 +660,3 @@ export const supabaseService = {
     }
   }
 };
-
-// Internal private helper for local updates
-function fallbackUpdate(
-  id: string,
-  updates: Partial<VerificationSession>,
-  store: VerificationSession[]
-): VerificationSession | null {
-  const index = store.findIndex(s => s.id === id);
-  if (index >= 0) {
-    const updated = {
-      ...store[index],
-      ...updates,
-      completed_at: updates.completed_at !== undefined ? updates.completed_at : (updates.status === "passed" || updates.status === "failed" ? new Date().toISOString() : null)
-    };
-    store[index] = updated;
-    return updated;
-  }
-  return null;
-}

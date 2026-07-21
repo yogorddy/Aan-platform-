@@ -37,9 +37,9 @@ import {
   Fingerprint, 
   Sparkles,
   FileText,
-  HeartPulse
+  HeartPulse,
+  Building
 } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
 import TrustDecisionSimulator from './TrustDecisionSimulator';
 import TestLabTab from './TestLabTab';
 
@@ -54,28 +54,6 @@ import WebhooksTab from './WebhooksTab';
 import AuditLogsTab from './AuditLogsTab';
 import PoliciesTab from './PoliciesTab';
 
-// Helper to initialize Supabase
-const getSupabaseClient = () => {
-  const supabaseUrl = 
-    (import.meta as any).env?.NEXT_PUBLIC_SUPABASE_URL || 
-    (import.meta as any).env?.VITE_SUPABASE_URL || 
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 
-    "";
-  const supabaseAnonKey = 
-    (import.meta as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
-    (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 
-    "";
-  if (supabaseUrl && supabaseAnonKey) {
-    try {
-      return createClient(supabaseUrl, supabaseAnonKey);
-    } catch (e) {
-      console.warn("Could not construct Supabase client", e);
-    }
-  }
-  return null;
-};
-
 interface PartnerDashboardProps {
   onNavigate: (page: string, path?: string, lessonId?: string) => void;
   onSetVerificationSessionId: (id: string) => void;
@@ -83,30 +61,33 @@ interface PartnerDashboardProps {
 }
 
 export default function PartnerDashboard({ onNavigate, onSetVerificationSessionId, onLogout }: PartnerDashboardProps) {
-  // Onboarding completion state
-  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(() => {
-    return localStorage.getItem('aan_onboarding_completed') === 'true';
-  });
-  const [onboardingStep, setOnboardingStep] = useState<number>(1);
+  const userEmail = localStorage.getItem('aan_user_email') || "";
+
+  // Integration states fetched from API
+  const [sessionData, setSessionData] = useState<any>(null);
+  const [onboarded, setOnboarded] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [serviceError, setServiceError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState<boolean>(false);
 
   // Tenant metadata states
-  const [orgName, setOrgName] = useState<string>(() => localStorage.getItem('aan_org_name') || "");
-  const [orgType, setOrgType] = useState<string>("SaaS");
+  const [orgName, setOrgName] = useState<string>("");
   const [orgWebsite, setOrgWebsite] = useState<string>("");
-  const [orgUseCase, setOrgUseCase] = useState<string>("bot_defense");
+  const [orgType, setOrgType] = useState<string>("SaaS");
 
   // Project configuration states
-  const [projName, setProjName] = useState<string>(() => localStorage.getItem('aan_project_name') || "");
+  const [projName, setProjName] = useState<string>("");
   const [projEnv, setProjEnv] = useState<'sandbox' | 'production'>('sandbox');
-  const [projVolume, setProjVolume] = useState<string>("1k_10k");
-  const [projSurface, setProjSurface] = useState<string>("signup");
+  const [projectId, setProjectId] = useState<string>("");
 
-  // API Credentials states
-  const [pubKey, setPubKey] = useState<string>(() => localStorage.getItem('aan_pub_key') || "");
-  const [secKey, setSecKey] = useState<string>(() => localStorage.getItem('aan_sec_key') || "");
-  const [whSecret, setWhSecret] = useState<string>(() => localStorage.getItem('aan_wh_secret') || "");
-  const [projectId, setProjectId] = useState<string>(() => localStorage.getItem('aan_project_id') || "");
-  const [keysCopied, setKeysCopied] = useState<Record<string, boolean>>({});
+  // Credentials states (populated upon onboarding completion)
+  const [pubKey, setPubKey] = useState<string>("");
+  const [secKey, setSecKey] = useState<string>("");
+  const [whSecret, setWhSecret] = useState<string>("");
+  const [justOnboardedSecrets, setJustOnboardedSecrets] = useState<boolean>(false);
+
+  // Stepper current step
+  const [onboardingStep, setOnboardingStep] = useState<number>(1);
 
   // Active navigation tab
   const [activeTab, setActiveTab] = useState<
@@ -116,8 +97,6 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
     'trust_intelligence' | 
     'integrations' | 
     'projects' | 
-    'events' | 
-    'decisions' | 
     'policies' | 
     'webhooks' | 
     'audit_logs' | 
@@ -126,22 +105,23 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
     'settings'
   >('overview');
 
-  const [loading, setLoading] = useState<boolean>(false);
+  // Dynamic ledger events
+  const [events, setEvents] = useState<any[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState<boolean>(false);
+
+  // Copy helper
+  const [keysCopied, setKeysCopied] = useState<Record<string, boolean>>({});
+  const copyToClipboard = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setKeysCopied(prev => ({ ...prev, [key]: true }));
+    setTimeout(() => {
+      setKeysCopied(prev => ({ ...prev, [key]: false }));
+    }, 1500);
+  };
+
+  // Policy thresholds configuration (Local state to allow interactive slider changes)
   const [savingRules, setSavingRules] = useState<boolean>(false);
   const [rulesSuccess, setRulesSuccess] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>( "");
-  const [decisionFilter, setDecisionFilter] = useState<string>("all");
-  const [selectedGlobalEvent, setSelectedGlobalEvent] = useState<any | null>(null);
-
-  // Administrative Audit Logs state
-  const [auditLogs, setAuditLogs] = useState<any[]>([
-    { id: "aud_1", action: "API credentials rotated", actor: "admin@aan.network", timestamp: new Date(Date.now() - 40 * 60 * 1000).toISOString(), status: "success", ip: "192.168.1.102" },
-    { id: "aud_2", action: "Policy updated (pol_bot_patterns)", actor: "admin@aan.network", timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(), status: "success", ip: "192.168.1.102" },
-    { id: "aud_3", action: "Project environment toggled to PRODUCTION", actor: "developer@aan.network", timestamp: new Date(Date.now() - 24 * 3600 * 1000).toISOString(), status: "success", ip: "10.0.4.89" },
-    { id: "aud_4", action: "New Webhook endpoint registered", actor: "admin@aan.network", timestamp: new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(), status: "success", ip: "192.168.1.102" }
-  ]);
-
-  // Policy thresholds configuration
   const [trustRules, setTrustRules] = useState({
     autoApproveBelow: 35,
     manualReviewAbove: 36,
@@ -151,7 +131,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
     fallbackNoCamera: "allow_with_risk_penalty"
   });
 
-  // Automated policies list
+  // Policies configurations list
   const [policies, setPolicies] = useState([
     {
       id: "pol_anti_emu",
@@ -178,266 +158,284 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         max_limit: 5,
         actions: { exceed: "REVIEW" }
       }, null, 2)
-    },
-    {
-      id: "pol_bot_patterns",
-      name: "Deny known bot patterns",
-      type: "Automated Attack Mitigation",
-      enabled: true,
-      threshold: "Telemetry confidence < 20%",
-      recommendedAction: "DENY",
-      jsonRule: JSON.stringify({
-        rule: "botnet_pattern_fingerprint",
-        min_humanness_confidence: 20,
-        actions: { below: "DENY" }
-      }, null, 2)
     }
   ]);
 
-  // Dynamic verification logs list
-  const [events, setEvents] = useState<any[]>(() => {
-    const savedEvents = localStorage.getItem('aan_verification_events');
-    if (savedEvents) {
-      return JSON.parse(savedEvents);
-    }
-    // Seed standard high-quality realistic sandbox data
-    return [
-      {
-        id: "evt_aan_9c4f8d21",
-        project: "Default Auth Layer",
-        external_user_id: "usr_verified_alice",
-        decision: "approved",
-        risk_score: 12,
-        reason_codes: ["HUMAN_TELEMETRY_PASSED", "IP_CLEAN", "DEVICE_MATCH"],
-        device_signal: "iOS Safari (iPhone 14)",
-        ip_risk_signal: "Low (0.04)",
-        returning_human: true,
-        proof_token_status: "valid",
-        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString()
-      },
-      {
-        id: "evt_aan_3b8a1c9e",
-        project: "Default Auth Layer",
-        external_user_id: "usr_phantom_botnet",
-        decision: "denied",
-        risk_score: 94,
-        reason_codes: ["DEVICE_SPOOF_DETECTED", "COORDINATED_REPLAY", "HIGH_RISK_IP"],
-        device_signal: "Headless Chrome (Linux)",
-        ip_risk_signal: "High (0.89)",
-        returning_human: false,
-        proof_token_status: "revoked",
-        timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
-      },
-      {
-        id: "evt_aan_7f2d5e31",
-        project: "Default Auth Layer",
-        external_user_id: "usr_borderline_charlie",
-        decision: "review",
-        risk_score: 52,
-        reason_codes: ["VOLATILE_NETWORK", "UNKNOWN_UA", "LATENCY_VARIANCE"],
-        device_signal: "Android WebView (Samsung S22)",
-        ip_risk_signal: "Medium (0.45)",
-        returning_human: false,
-        proof_token_status: "valid",
-        timestamp: new Date(Date.now() - 6 * 3600 * 1000).toISOString()
-      },
-      {
-        id: "evt_aan_1d4c2b8a",
-        project: "Default Auth Layer",
-        external_user_id: "usr_verified_david",
-        decision: "approved",
-        risk_score: 8,
-        reason_codes: ["HUMAN_TELEMETRY_PASSED", "IP_CLEAN"],
-        device_signal: "macOS Chrome 124",
-        ip_risk_signal: "Low (0.01)",
-        returning_human: true,
-        proof_token_status: "valid",
-        timestamp: new Date(Date.now() - 18 * 3600 * 1000).toISOString()
-      }
-    ];
-  });
-
-  // Trigger credentials generation upon entering Onboarding Step 3
-  useEffect(() => {
-    if (onboardingStep === 3 && (!pubKey || !secKey)) {
-      const generatedProjId = "proj_" + Math.random().toString(36).substring(2, 10);
-      const generatedPubKey = `aan_pub_sb_${Math.random().toString(36).substring(2, 16)}`;
-      const generatedSecKey = `aan_sec_sb_${Math.random().toString(36).substring(2, 16)}`;
-      const generatedWhSecret = `whsec_sb_${Math.random().toString(36).substring(2, 16)}`;
-      
-      setProjectId(generatedProjId);
-      setPubKey(generatedPubKey);
-      setSecKey(generatedSecKey);
-      setWhSecret(generatedWhSecret);
-      
-      localStorage.setItem('aan_project_id', generatedProjId);
-      localStorage.setItem('aan_pub_key', generatedPubKey);
-      localStorage.setItem('aan_sec_key', generatedSecKey);
-      localStorage.setItem('aan_wh_secret', generatedWhSecret);
-    }
-  }, [onboardingStep]);
-
-  // Onboarding Complete Handler
-  const handleSaveToSupabaseOnboarding = async () => {
+  // Fetch session configuration and context from the backend
+  const fetchSessionContext = async () => {
     setLoading(true);
-    const supabase = getSupabaseClient();
-    
+    setServiceError(null);
     try {
-      if (supabase) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from('organizations').insert({ id: projectId, name: orgName });
-          await supabase.from('projects').insert({ id: projectId, name: projName, env: projEnv });
+      const res = await fetch("/api/internal/session-context", {
+        headers: { "x-user-email": userEmail }
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
+      }
+      const data = await res.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setSessionData(data);
+      setOnboarded(data.onboarded);
+
+      if (data.onboarded) {
+        setOrgName(data.organization?.name || "");
+        setOrgWebsite(data.organization?.website || "");
+        setOrgType(data.organization?.type || "SaaS");
+
+        if (data.projects && data.projects.length > 0) {
+          const activeProj = data.projects[0];
+          setProjName(activeProj.name);
+          setProjectId(activeProj.id);
+          setProjEnv(activeProj.environment || "sandbox");
+        }
+
+        if (data.apiKeys && data.apiKeys.length > 0) {
+          const key = data.apiKeys[0];
+          setPubKey(key.publishable_key);
+          setWhSecret(key.webhook_signing_secret);
         }
       }
-    } catch (e) {
-      console.warn("Supabase onboarding storage failed, utilizing LocalStorage fallback.", e);
+    } catch (err: any) {
+      console.error("[CONTEXT FETCH ERROR]", err);
+      setServiceError(err.message || "Unable to load partner session context from remote database.");
     } finally {
-      localStorage.setItem('aan_onboarding_completed', 'true');
-      setOnboardingCompleted(true);
       setLoading(false);
-      
-      // Append Audit Log
-      const initialAudit = {
-        id: "aud_init",
-        action: "Organization & Project Node Onboarded",
-        actor: "admin@aan.network",
-        timestamp: new Date().toISOString(),
-        status: "success",
-        ip: "192.168.1.102"
-      };
-      setAuditLogs(prev => [initialAudit, ...prev]);
+      setIsRetrying(false);
     }
   };
 
+  // Fetch live decisions list for the current active project
+  const fetchDecisionsList = async () => {
+    if (!projectId) return;
+    setLoadingEvents(true);
+    try {
+      const res = await fetch(`/api/internal/decisions?projectId=${projectId}`, {
+        headers: { "x-user-email": userEmail }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Transform backend `verification_events` into the standard unified `events` structure
+        const mapped = data.map((e: any) => ({
+          id: e.id,
+          project: projName,
+          external_user_id: e.external_user_id,
+          decision: e.decision,
+          risk_score: e.risk_score,
+          reason_codes: e.reason_codes || [],
+          device_signal: e.device_signal || "Unknown Client Posture",
+          ip_risk_signal: e.ip_risk_signal || "Low (0.01)",
+          returning_human: e.risk_score < 30,
+          proof_token_status: e.decision === 'denied' ? 'revoked' : 'valid',
+          timestamp: e.created_at
+        }));
+        setEvents(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to load live decisions ledger:", err);
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
+
+  // Sync session context on mount and when email changes
+  useEffect(() => {
+    if (userEmail) {
+      fetchSessionContext();
+    } else {
+      setLoading(false);
+    }
+  }, [userEmail]);
+
+  // Sync decisions whenever the project context is active or the active tab changes
+  useEffect(() => {
+    if (onboarded && projectId) {
+      fetchDecisionsList();
+    }
+  }, [onboarded, projectId, activeTab]);
+
+  // Handler for onboarding submission
+  const handleOnboardSubmit = async () => {
+    setLoading(true);
+    setServiceError(null);
+    try {
+      const res = await fetch("/api/internal/onboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail,
+          orgName,
+          orgWebsite,
+          projName,
+          projEnv
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      setSessionData({
+        onboarded: true,
+        organization: data.organization,
+        projects: [data.project],
+        apiKeys: [data.api_key]
+      });
+
+      setOnboarded(true);
+      setOrgName(data.organization.name);
+      setOrgWebsite(data.organization.website);
+      setProjName(data.project.name);
+      setProjectId(data.project.id);
+      setProjEnv(data.project.environment);
+
+      setPubKey(data.api_key.publishable_key);
+      setWhSecret(data.api_key.webhook_signing_secret);
+      setSecKey(data.plain_secret_key); // Retain plain secret key ONLY once on the UI for disclosure
+      setJustOnboardedSecrets(true);
+
+    } catch (err: any) {
+      console.error("[ONBOARD ERROR]", err);
+      setServiceError(err.message || "Failed to complete organization onboarding database registration.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // API Key Rotation
+  const handleRotateKeys = async () => {
+    const keyId = sessionData?.apiKeys?.[0]?.id;
+    if (!keyId) {
+      alert("No active API keys found to rotate.");
+      return;
+    }
+
+    const confirmRot = window.confirm("Are you sure you want to rotate your API credentials? Existing backend clients will lose access immediately.");
+    if (!confirmRot) return;
+
+    try {
+      const res = await fetch("/api/internal/api-keys/rotate", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "x-user-email": userEmail 
+        },
+        body: JSON.stringify({ project_id: projectId, key_id: keyId })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to rotate credentials");
+      }
+
+      const data = await res.json();
+      setSecKey(data.plain_secret_key);
+      setJustOnboardedSecrets(true);
+      alert("API keys rotated successfully. Please copy your new secure endpoint secret token now.");
+      fetchSessionContext();
+    } catch (err: any) {
+      alert(`Rotation failed: ${err.message}`);
+    }
+  };
+
+  // Environment Toggling (Sandbox vs Production)
+  const handleToggleEnv = async () => {
+    // Kept client-side only as an dynamic UI filter/toggle, showing premium reactive responses.
+    const next = projEnv === 'sandbox' ? 'production' : 'sandbox';
+    setProjEnv(next);
+  };
+
+  // Update Project Name
+  const handleUpdateProjName = async (name: string) => {
+    setProjName(name);
+  };
+
+  // Save trust rules dummy action
   const handleSaveTrustRules = () => {
     setSavingRules(true);
     setTimeout(() => {
       setSavingRules(false);
       setRulesSuccess(true);
-      
-      // Append Audit Log
-      const ruleAudit = {
-        id: `aud_${Math.random().toString(36).substring(2, 6)}`,
-        action: "Trust Policy parameters updated (automated sliders)",
-        actor: "admin@aan.network",
-        timestamp: new Date().toISOString(),
-        status: "success",
-        ip: "192.168.1.102"
-      };
-      setAuditLogs(prev => [ruleAudit, ...prev]);
-
       setTimeout(() => setRulesSuccess(false), 3000);
-    }, 1000);
+    }, 8000);
   };
 
-  const handleSeedEvents = () => {
-    const sandboxData = [
-      {
-        id: "evt_aan_9c4f8d21",
-        project: "Default Auth Layer",
-        external_user_id: "usr_verified_alice",
-        decision: "approved",
-        risk_score: 12,
-        reason_codes: ["HUMAN_TELEMETRY_PASSED", "IP_CLEAN", "DEVICE_MATCH"],
-        device_signal: "iOS Safari (iPhone 14)",
-        ip_risk_signal: "Low (0.04)",
-        returning_human: true,
-        proof_token_status: "valid",
-        timestamp: new Date().toISOString()
-      }
-    ];
-    setEvents(sandboxData);
-    localStorage.setItem('aan_verification_events', JSON.stringify(sandboxData));
-  };
-
-  const handleClearEvents = () => {
-    setEvents([]);
-    localStorage.removeItem('aan_verification_events');
-  };
-
-  // Add event callback from simulation playground
-  const onAddEventToGlobalRegistry = (newEvent: any) => {
-    setEvents(prev => {
-      const updated = [newEvent, ...prev];
-      localStorage.setItem('aan_verification_events', JSON.stringify(updated));
-      return updated;
-    });
-
-    // Add Audit Log
-    const attAudit = {
-      id: `aud_${Math.random().toString(36).substring(2, 6)}`,
-      action: `Assurance verdict evaluated (${newEvent.decision})`,
-      actor: "system_attestation_engine",
-      timestamp: new Date().toISOString(),
-      status: "success",
-      ip: "10.0.8.204"
-    };
-    setAuditLogs(prev => [attAudit, ...prev]);
-  };
-
-  // API Credentials rotation handler
-  const handleRotateKeys = () => {
-    const confirmation = window.confirm("Are you sure you want to rotate your API credentials? Live applications using old keys will fail.");
-    if (!confirmation) return;
-
-    const generatedPubKey = `aan_pub_sb_${Math.random().toString(36).substring(2, 16)}`;
-    const generatedSecKey = `aan_sec_sb_${Math.random().toString(36).substring(2, 16)}`;
-    const generatedWhSecret = `whsec_sb_${Math.random().toString(36).substring(2, 16)}`;
-    
-    setPubKey(generatedPubKey);
-    setSecKey(generatedSecKey);
-    setWhSecret(generatedWhSecret);
-    
-    localStorage.setItem('aan_pub_key', generatedPubKey);
-    localStorage.setItem('aan_sec_key', generatedSecKey);
-    localStorage.setItem('aan_wh_secret', generatedWhSecret);
-
-    // Add Audit Log
-    const rotAudit = {
-      id: `aud_${Math.random().toString(36).substring(2, 6)}`,
-      action: "API credentials rotated (secret keys)",
-      actor: "admin@aan.network",
-      timestamp: new Date().toISOString(),
-      status: "success",
-      ip: "192.168.1.102"
-    };
-    setAuditLogs(prev => [rotAudit, ...prev]);
-    
-    alert("API Credentials rotated successfully.");
-  };
-
-  // Environment Toggling handler
-  const handleToggleEnv = () => {
-    const nextEnv = projEnv === 'sandbox' ? 'production' : 'sandbox';
-    setProjEnv(nextEnv);
-    localStorage.setItem('aan_project_env', nextEnv);
-
-    // Add Audit Log
-    const toggAudit = {
-      id: `aud_${Math.random().toString(36).substring(2, 6)}`,
-      action: `Project environment toggled to ${nextEnv.toUpperCase()}`,
-      actor: "admin@aan.network",
-      timestamp: new Date().toISOString(),
-      status: "success",
-      ip: "192.168.1.102"
-    };
-    setAuditLogs(prev => [toggAudit, ...prev]);
-  };
-
-  const handleUpdateProjName = (name: string) => {
-    setProjName(name);
-    localStorage.setItem('aan_project_name', name);
-  };
-
-  // Derive metrics
+  // Metrics derivation
   const totalAttempts = events.length;
   const approvedHumans = events.filter(e => e.decision === 'approved').length;
   const blockedBots = events.filter(e => e.decision === 'denied').length;
   const reviewCount = events.filter(e => e.decision === 'review').length;
 
-  // Render Onboarding Stepper flow if incomplete
-  if (!onboardingCompleted) {
+  // Render pristine "Service Unavailable" State if remote database is unreachable
+  if (serviceError) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 text-left">
+        <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-xl space-y-6 animate-[fadeIn_0.25s_ease-out]">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 tracking-tight block">Connection Not Configured</h2>
+              <span className="text-[9px] font-mono uppercase text-slate-400 font-bold tracking-widest block">Service Unavailable</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-500 font-light leading-relaxed">
+            The platform is unable to negotiate an active session with the remote Supabase PostgreSQL backend. Sandbox fallback states have been disabled to protect ledger integrity.
+          </p>
+
+          <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl font-mono text-[10px] text-slate-600 break-words leading-normal select-text">
+            <strong>Diagnostic Error:</strong>
+            <div className="mt-1 text-slate-500">{serviceError}</div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                setIsRetrying(true);
+                fetchSessionContext();
+              }}
+              disabled={isRetrying}
+              className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-200 text-white font-mono font-bold text-xs rounded-xl cursor-pointer active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRetrying ? 'animate-spin' : ''}`} />
+              <span>{isRetrying ? 'Retrying Connection...' : 'Retry Handshake'}</span>
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem('aan_authenticated');
+                if (onLogout) onLogout();
+                else onNavigate('landing');
+              }}
+              className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 font-mono text-xs rounded-xl cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Render loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center text-xs text-slate-500 font-mono tracking-wider">
+        <div className="flex flex-col items-center gap-3">
+          <RefreshCw className="w-6 h-6 text-emerald-600 animate-spin" />
+          <span>NEGOTIATING SECURE POSTURE ENCLAVE CONNECTIONS...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Render onboarding wizard if user profile has not completed database registration
+  if (!onboarded) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-12 relative overflow-hidden text-left">
         <div className="absolute inset-0 bg-slate-50" />
@@ -456,13 +454,12 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           <div className="flex items-center justify-between border-y border-slate-100 py-3 text-[10px] font-mono text-slate-400 uppercase tracking-widest font-bold">
             <span className={onboardingStep === 1 ? "text-emerald-600" : ""}>1. Organization</span>
             <span className={onboardingStep === 2 ? "text-emerald-600" : ""}>2. Project</span>
-            <span className={onboardingStep === 3 ? "text-emerald-600" : ""}>3. Credentials</span>
-            <span className={onboardingStep === 4 ? "text-emerald-600" : ""}>4. Complete</span>
+            <span className={onboardingStep === 3 ? "text-emerald-600" : ""}>3. Complete</span>
           </div>
 
           <div className="min-h-[14rem] flex flex-col justify-center">
             {onboardingStep === 1 && (
-              <div className="space-y-4 animate-[fadeIn_0.2s_ease-out]">
+              <form onSubmit={(e) => { e.preventDefault(); setOnboardingStep(2); }} className="space-y-4 animate-[fadeIn_0.2s_ease-out]">
                 <div className="space-y-1">
                   <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 1: Administrative Organization Tenant</h3>
                   <p className="text-[11px] text-slate-500 font-light">Establish the legal corporate entity boundary for your workspaces.</p>
@@ -473,6 +470,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block font-semibold">Organization Name</label>
                     <input
                       type="text"
+                      required
                       placeholder="e.g., Acme Corporation"
                       value={orgName}
                       onChange={(e) => setOrgName(e.target.value)}
@@ -490,11 +488,11 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     />
                   </div>
                 </div>
-              </div>
+              </form>
             )}
 
             {onboardingStep === 2 && (
-              <div className="space-y-4 animate-[fadeIn_0.2s_ease-out]">
+              <form onSubmit={(e) => { e.preventDefault(); setOnboardingStep(3); }} className="space-y-4 animate-[fadeIn_0.2s_ease-out]">
                 <div className="space-y-1">
                   <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 2: Attestation Scope Configuration</h3>
                   <p className="text-[11px] text-slate-500 font-light">Set up the technical project workspace environment to handle traffic.</p>
@@ -505,6 +503,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block font-semibold">Project Scope Name</label>
                     <input
                       type="text"
+                      required
                       placeholder="e.g., Default Auth Layer"
                       value={projName}
                       onChange={(e) => setProjName(e.target.value)}
@@ -512,46 +511,25 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Evaluation Target</label>
+                    <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block">Environment Mode</label>
                     <select
-                      value={projSurface}
-                      onChange={(e) => setProjSurface(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-900"
+                      value={projEnv}
+                      onChange={(e) => setProjEnv(e.target.value as any)}
+                      className="w-full bg-slate-50 border border-slate-200 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-900 font-semibold"
                     >
-                      <option value="signup">Registration / Signups Protection</option>
-                      <option value="api_gate">API Perimeter Defense</option>
-                      <option value="auth_layer">Single Sign On Security</option>
+                      <option value="sandbox">Sandbox / Evaluation Mode</option>
+                      <option value="production">Production Attestation Node</option>
                     </select>
                   </div>
                 </div>
-              </div>
+              </form>
             )}
 
             {onboardingStep === 3 && (
               <div className="space-y-4 animate-[fadeIn_0.2s_ease-out]">
                 <div className="space-y-1">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 3: Provision Cryptographic Credentials</h3>
-                  <p className="text-[11px] text-slate-500 font-light">Secure, non-recoverable secret keys compiled to initialize connections.</p>
-                </div>
-
-                <div className="space-y-3 font-mono text-[10px]">
-                  <div className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1.5">
-                    <div className="flex justify-between text-[9px] text-slate-400 font-bold uppercase">Publishable Client Key</div>
-                    <div className="text-slate-900 truncate">{pubKey}</div>
-                  </div>
-                  <div className="bg-slate-50 border border-slate-150 p-3 rounded-xl space-y-1.5">
-                    <div className="flex justify-between text-[9px] text-slate-400 font-bold uppercase">Secret Endpoint Key</div>
-                    <div className="text-slate-900 truncate">••••••••••••••••••••••••••••••••••••••••</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {onboardingStep === 4 && (
-              <div className="space-y-4 animate-[fadeIn_0.2s_ease-out]">
-                <div className="space-y-1">
-                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 4: Platform Architecture</h3>
-                  <p className="text-[11px] text-slate-500 font-light">Confirming privacy constraints. Node attestation pipeline is complete.</p>
+                  <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Step 3: Platform Architecture</h3>
+                  <p className="text-[11px] text-slate-500 font-light">Confirming privacy constraints. Node attestation pipeline is ready for compilation.</p>
                 </div>
 
                 <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-start gap-3 text-xs leading-normal font-light text-emerald-800">
@@ -559,7 +537,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   <div>
                     <span className="font-bold text-slate-900 block">Non-custodial Zero-knowledge Standard</span>
                     <p className="mt-0.5 text-slate-500">
-                      We operate purely as an offline-first trust platform. Raw user biometrics or passwords never touch our cloud storage databases.
+                      We operate strictly as a decentralized attestation platform. Private user keys or credentials are never recovery-seeded on shared storage devices.
                     </p>
                   </div>
                 </div>
@@ -572,7 +550,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             {onboardingStep > 1 ? (
               <button
                 onClick={() => setOnboardingStep(onboardingStep - 1)}
-                className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-900"
+                className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-slate-500 hover:text-slate-900 cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -594,19 +572,17 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   }
                   setOnboardingStep(3);
                 } else if (onboardingStep === 3) {
-                  setOnboardingStep(4);
-                } else if (onboardingStep === 4) {
-                  handleSaveToSupabaseOnboarding();
+                  handleOnboardSubmit();
                 }
               }}
               disabled={loading}
               className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs px-5 py-2.5 rounded-xl cursor-pointer active:scale-[0.98]"
             >
               {loading ? (
-                <span>Configuring node...</span>
+                <span>Registering Node...</span>
               ) : (
                 <>
-                  <span>{onboardingStep === 4 ? "Complete Node Setup" : "Continue"}</span>
+                  <span>{onboardingStep === 3 ? "Complete Node Setup" : "Continue"}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
@@ -617,10 +593,31 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
     );
   }
 
-  // Module Registry mapping tab IDs to their respective component renderers
+  // Sub-tab mapping
   const MODULE_REGISTRY: Record<string, () => React.ReactNode> = {
     overview: () => (
       <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+        
+        {/* Active Company Banner details inside header */}
+        <div className="bg-slate-100/65 border border-slate-200/80 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs leading-none">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
+              <Building className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-slate-900 text-sm">{orgName}</h4>
+                <span className="px-2 py-0.5 bg-slate-200/80 rounded-full font-mono text-[9px] font-bold text-slate-500 uppercase">{orgType}</span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-mono tracking-tight">{orgWebsite || "No domain declared"}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-[10px] text-slate-500 bg-white border border-slate-200/80 px-3 py-1.5 rounded-lg shadow-xs">
+            <span>Project Workspace:</span>
+            <strong className="text-slate-900 uppercase font-black">{projName}</strong>
+          </div>
+        </div>
+
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -633,6 +630,41 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             <span className="font-mono font-bold text-slate-900">AAN NODE ONLINE</span>
           </div>
         </div>
+
+        {/* One-time Secret Key Disclosure Notification Banner */}
+        {justOnboardedSecrets && secKey && (
+          <div className="bg-amber-50 border border-amber-200/80 p-5 rounded-2xl space-y-3 animate-[fadeIn_0.35s_ease-out]">
+            <div className="flex items-start gap-3">
+              <Lock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-slate-900 block">One-Time Secret Key Disclosure</span>
+                <p className="text-[11px] text-slate-500 font-light leading-relaxed">
+                  To enforce non-custodial, high-integrity privacy guarantees, endpoint secret keys are only displayed once upon generation or rotation. They are not stored in plaintext on our servers. Please record this key immediately.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-amber-100 p-3 rounded-xl flex items-center justify-between gap-4 font-mono text-[10px] text-slate-900">
+              <span className="truncate select-text">{secKey}</span>
+              <button 
+                onClick={() => copyToClipboard(secKey, 'sec')}
+                className="p-1.5 hover:bg-slate-50 text-slate-500 hover:text-slate-900 rounded-lg shrink-0 flex items-center gap-1 cursor-pointer"
+              >
+                {keysCopied['sec'] ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                <span className="text-[9px] font-bold uppercase">{keysCopied['sec'] ? 'Copied' : 'Copy'}</span>
+              </button>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button 
+                onClick={() => setJustOnboardedSecrets(false)}
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-mono font-bold text-[9px] uppercase rounded-lg cursor-pointer"
+              >
+                I have securely saved this secret key
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Metrics cards row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -658,93 +690,96 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           })}
         </div>
 
-        {/* Inbound request pipeline chart / summary bar */}
+        {/* Live assessment history list or empty state */}
         {totalAttempts === 0 ? (
           <div className="bg-white border border-slate-200/80 p-8 rounded-2xl text-center space-y-4">
             <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 mx-auto">
               <Activity className="w-5 h-5" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-slate-900 text-sm font-semibold">Your attestation project is initialized.</h3>
-              <p className="text-xs text-slate-500 max-w-xs mx-auto font-light leading-relaxed">
-                Trigger calls inside the Test Lab simulation panel or integrated apps to witness real-time posture decisions.
+              <h3 className="text-slate-900 text-sm font-semibold">Your attestation project is active.</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto font-light leading-relaxed">
+                No telemetry traffic has been processed yet. To register your first canonical trust decision, head over to the **Test Lab** tab to execute a mock posture simulation run.
               </p>
             </div>
-            <button onClick={handleSeedEvents} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">
-              Load Sandbox Demonstration Events
+            <button 
+              onClick={() => setActiveTab('test_lab')}
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-mono font-bold rounded-xl transition-all cursor-pointer"
+            >
+              Open Test Lab Playground
             </button>
           </div>
         ) : (
-          <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Assurance Verdict Breakdown</h3>
-              <button onClick={handleClearEvents} className="text-[9px] font-mono text-slate-400 hover:text-slate-900 uppercase">
-                Clear Logs (Reset)
-              </button>
-            </div>
-
-            <div className="space-y-4 font-mono text-[10px]">
-              <div className="space-y-1">
-                <div className="flex justify-between text-slate-500">
-                  <span>HUMAN TELEMETRY PASSED (AUTO-APPROVE)</span>
-                  <span className="text-slate-950 font-bold">{totalAttempts > 0 ? Math.round((approvedHumans / totalAttempts) * 100) : 0}%</span>
+          <div className="space-y-4">
+            {/* Visual Breakdown */}
+            <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4 font-mono text-[10px]">
+              <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Assurance Verdict Breakdown</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <div className="flex justify-between text-slate-500">
+                    <span>HUMAN TELEMETRY PASSED (AUTO-APPROVE)</span>
+                    <span className="text-slate-950 font-bold">{totalAttempts > 0 ? Math.round((approvedHumans / totalAttempts) * 100) : 0}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div style={{ width: `${totalAttempts > 0 ? (approvedHumans / totalAttempts) * 100 : 0}%` }} className="bg-emerald-500 h-full rounded-full transition-all duration-500" />
+                  </div>
                 </div>
-                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div style={{ width: `${totalAttempts > 0 ? (approvedHumans / totalAttempts) * 100 : 0}%` }} className="bg-emerald-500 h-full rounded-full transition-all duration-500" />
+
+                <div className="space-y-1">
+                  <div className="flex justify-between text-slate-500">
+                    <span>SUSPICIOUS AUTOMATION / EMULATORS (AUTO-DENY)</span>
+                    <span className="text-slate-950 font-bold">{totalAttempts > 0 ? Math.round((blockedBots / totalAttempts) * 100) : 0}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                    <div style={{ width: `${totalAttempts > 0 ? (blockedBots / totalAttempts) * 100 : 0}%` }} className="bg-rose-500 h-full rounded-full transition-all duration-500" />
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="space-y-1">
-                <div className="flex justify-between text-slate-500">
-                  <span>SUSPICIOUS AUTOMATION / EMULATORS (AUTO-DENY)</span>
-                  <span className="text-slate-950 font-bold">{totalAttempts > 0 ? Math.round((blockedBots / totalAttempts) * 100) : 0}%</span>
-                </div>
-                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                  <div style={{ width: `${totalAttempts > 0 ? (blockedBots / totalAttempts) * 100 : 0}%` }} className="bg-rose-500 h-full rounded-full transition-all duration-500" />
-                </div>
+            {/* Recent Assessments Table */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Recent Node Assessments</h3>
+              <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden text-xs">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider bg-slate-50">
+                      <th className="py-3 px-4 font-bold">Session ID</th>
+                      <th className="py-3 px-4 font-bold">Subject Ref</th>
+                      <th className="py-3 px-4 font-bold">Verdict</th>
+                      <th className="py-3 px-4 font-bold">Anomalies</th>
+                      <th className="py-3 px-4 font-bold text-right">Timestamp</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {events.slice(0, 5).map((e, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50/50 cursor-pointer" onClick={() => setActiveTab('decisions')}>
+                        <td className="py-3 px-4 font-mono text-slate-900">{e.id}</td>
+                        <td className="py-3 px-4 font-mono text-slate-500">{e.external_user_id}</td>
+                        <td className="py-3 px-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
+                            e.decision === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                            e.decision === 'review' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                            'bg-rose-50 text-rose-700 border border-rose-100'
+                          }`}>
+                            {e.decision}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-mono text-slate-500 truncate max-w-[150px]">{e.reason_codes ? e.reason_codes.join(', ') : "N/A"}</td>
+                        <td className="py-3 px-4 text-right text-slate-400 font-mono">{new Date(e.timestamp).toLocaleTimeString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         )}
 
-        {/* Quick trust decisions simulator */}
+        {/* Quick simulator component */}
         <TrustDecisionSimulator />
-
-        {/* Recent assessment history list */}
-        <div className="space-y-3">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Recent Node Assessments</h3>
-          <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden text-xs">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider bg-slate-50">
-                  <th className="py-3 px-4 font-bold">Session ID</th>
-                  <th className="py-3 px-4 font-bold">Subject Ref</th>
-                  <th className="py-3 px-4 font-bold">Verdict</th>
-                  <th className="py-3 px-4 font-bold">Anomalies</th>
-                  <th className="py-3 px-4 font-bold text-right">Timestamp</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {events.slice(0, 3).map((e, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 cursor-pointer" onClick={() => setActiveTab('events')}>
-                    <td className="py-3 px-4 font-mono text-slate-900">{e.id}</td>
-                    <td className="py-3 px-4 font-mono text-slate-500">{e.external_user_id}</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
-                        e.decision === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                        'bg-rose-50 text-rose-700 border border-rose-100'
-                      }`}>
-                        {e.decision}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-slate-500 truncate max-w-[150px]">{e.reason_codes ? e.reason_codes.join(', ') : "N/A"}</td>
-                    <td className="py-3 px-4 text-right text-slate-400 font-mono">{new Date(e.timestamp).toLocaleTimeString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
     ),
     session_health: () => (
@@ -754,7 +789,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
       <HumanAssuranceTab 
         events={events} 
         projName={projName} 
-        onAddEventToGlobalRegistry={onAddEventToGlobalRegistry} 
+        onAddEventToGlobalRegistry={fetchDecisionsList} 
       />
     ),
     trust_intelligence: () => (
@@ -778,9 +813,6 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         onUpdateProjName={handleUpdateProjName} 
       />
     ),
-    decisions: () => (
-      <DecisionsTab events={events} />
-    ),
     policies: () => (
       <PoliciesTab
         trustRules={trustRules}
@@ -796,12 +828,12 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
       <WebhooksTab whSecret={whSecret} />
     ),
     audit_logs: () => (
-      <AuditLogsTab auditLogs={auditLogs} />
+      <AuditLogsTab auditLogs={[]} />
     ),
     test_lab: () => (
       <TestLabTab 
         projName={projName} 
-        onAddEventToGlobalRegistry={onAddEventToGlobalRegistry} 
+        onAddEventToGlobalRegistry={fetchDecisionsList} 
       />
     ),
     docs: () => (
@@ -818,83 +850,45 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
           </p>
 
           <div className="space-y-2 pt-2">
-            <h4 className="text-xs font-bold text-slate-900">Recommended Pipeline Pattern</h4>
-            <ol className="list-decimal list-inside text-xs text-slate-500 space-y-2 font-light">
-              <li>Mount the lightweight <code className="font-mono bg-slate-50 text-emerald-600 px-1 py-0.5 rounded">@aan/web-sdk</code> on your client-side signup or action trigger handlers.</li>
-              <li>Inbound client calls returns a highly-compressed secure cryptographically signed <code className="font-mono bg-slate-50 text-emerald-600 px-1 py-0.5 rounded">proofToken</code>.</li>
-              <li>Transmit the proofToken to your server backends. Submit a secure post request to <code className="font-mono bg-slate-50 text-slate-800 px-1 py-0.5 rounded">https://api.aan.network/v1/assert</code> to verify claims.</li>
-            </ol>
+            <h4 className="text-[10px] font-mono uppercase text-slate-400 font-bold">HTTP Initialization Payload</h4>
+            <pre className="bg-slate-900 text-emerald-400 p-4 rounded-xl text-[11px] font-mono overflow-x-auto leading-relaxed">
+{`curl -X POST https://api.aan.network/v1/attest \\
+  -H "Authorization: Bearer <YOUR_SECRET_KEY>" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "session_id": "vss_9a2b8e4c-1204",
+    "subject_reference": "usr_9a8c12",
+    "telemetry_payload_hash": "6b8a21cf3d8..."
+  }'`}
+            </pre>
           </div>
         </div>
       </div>
     ),
     settings: () => (
-      <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
+      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-6 animate-[fadeIn_0.2s_ease-out]">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Organization Settings</h2>
-          <p className="text-xs text-slate-500 mt-1">Configure tenant business rules, compliance structures, and authorized domains.</p>
+          <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Node Settings</h3>
+          <p className="text-xs text-slate-400 mt-0.5 font-light">Global administrative configurations for organization `{orgName}`.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-          <div className="md:col-span-2 space-y-6">
-            
-            <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">General Configuration</h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block font-semibold">Legal Organization Name</label>
-                  <input
-                    type="text"
-                    value={orgName}
-                    onChange={(e) => {
-                      setOrgName(e.target.value);
-                      localStorage.setItem('aan_org_name', e.target.value);
-                    }}
-                    className="w-full bg-slate-50 border border-slate-200 focus:outline-none rounded-xl px-3.5 py-2.5 text-slate-900"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono uppercase tracking-wider text-slate-500 block font-semibold">Primary Business Domain</label>
-                  <input
-                    type="text"
-                    placeholder="acme.com"
-                    value={orgWebsite}
-                    onChange={(e) => setOrgWebsite(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 focus:outline-none rounded-xl px-3.5 py-2.5 text-slate-900"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button 
-                  onClick={() => alert("Organization settings saved successfully.")}
-                  className="bg-slate-900 hover:bg-slate-800 text-white font-mono font-bold text-xs py-2.5 px-5 rounded-xl cursor-pointer"
-                >
-                  Save Settings
-                </button>
-              </div>
+        <div className="space-y-4 text-xs font-mono">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-1">
+              <span className="text-[9px] text-slate-400 font-bold uppercase block">Owner Email</span>
+              <span className="text-slate-900 block">{userEmail}</span>
             </div>
-
-            <div className="bg-white border border-slate-200/80 p-6 rounded-2xl space-y-4 text-xs">
-              <h3 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold">Compliance Status</h3>
-              <div className="flex items-center gap-2.5 text-emerald-600 font-bold">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                <span>GDPR & SOC2 Type II Certified Node</span>
-              </div>
-              <p className="text-[11px] text-slate-400 font-light leading-relaxed">
-                This node resides inside secure server enclaves fully certified for HIPAA, GDPR, and ISO/IEC 27001 data processing requirements.
-              </p>
+            <div className="bg-slate-50 border border-slate-100 p-4 rounded-xl space-y-1">
+              <span className="text-[9px] text-slate-400 font-bold uppercase block">Active Organization ID</span>
+              <span className="text-slate-900 block truncate">{projectId || "None"}</span>
             </div>
-
           </div>
         </div>
       </div>
     )
   };
 
-  // COMPLETE ENTERPRISE TRUST-INFRASTRUCTURE DASHBOARD
+  // Complete Dashboard View Render
   return (
     <div className="min-h-screen bg-slate-50 text-slate-600 font-sans flex flex-col md:flex-row text-left">
       
@@ -915,7 +909,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             </div>
           </div>
 
-          {/* 14 items Sidebar Navigation Links */}
+          {/* Sidebar Navigation Links */}
           <nav className="space-y-1">
             <span className="text-[8px] font-mono font-bold text-slate-400 uppercase tracking-widest block px-3 mb-2">Technical Dashboard</span>
             {[
@@ -923,13 +917,11 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               { id: 'session_health', label: 'Session Health', icon: HeartPulse },
               { id: 'human_assurance', label: 'Human Assurance', icon: Fingerprint },
               { id: 'trust_intelligence', label: 'Trust Intelligence', icon: Sparkles },
-              { id: 'integrations', label: 'Integrations', icon: Code },
+              { id: 'integrations', label: 'Integrations & Keys', icon: Code },
               { id: 'projects', label: 'Projects', icon: Layers },
-              { id: 'decisions', label: 'Decisions & Events', icon: ShieldCheck },
               { id: 'policies', label: 'Policies', icon: Sliders },
               { id: 'webhooks', label: 'Webhooks', icon: Network },
-              { id: 'audit_logs', label: 'Audit Logs', icon: FileText },
-              { id: 'test_lab', label: 'Test Lab', icon: Play },
+              { id: 'test_lab', label: 'Test Lab Playground', icon: Play },
               { id: 'docs', label: 'Documentation', icon: Database },
               { id: 'settings', label: 'Settings', icon: Settings }
             ].map((item) => {
@@ -940,7 +932,6 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
                   key={item.id}
                   onClick={() => {
                     setActiveTab(item.id as any);
-                    setSelectedGlobalEvent(null);
                   }}
                   className={`w-full flex items-center gap-2.5 text-xs font-semibold px-3 py-2 rounded-xl transition-all text-left cursor-pointer ${
                     isActive 
@@ -960,11 +951,14 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         {/* Sidebar Footer */}
         <div className="pt-6 border-t border-slate-100 hidden md:block">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-mono text-xs font-bold">A</div>
-            <div className="space-y-0.5">
-              <span className="text-[10px] font-bold text-slate-900 block leading-none">{orgName || "Acme Inc."}</span>
+            <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-mono text-xs font-bold uppercase">
+              {orgName ? orgName.charAt(0) : 'A'}
+            </div>
+            <div className="space-y-0.5 overflow-hidden">
+              <span className="text-[10px] font-bold text-slate-900 block leading-none truncate">{orgName || "Acme Inc."}</span>
               <button 
                 onClick={() => {
+                  localStorage.removeItem('aan_authenticated');
                   if (onLogout) {
                     onLogout();
                   } else {
@@ -980,13 +974,32 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 bg-slate-50 p-6 sm:p-10 min-w-0 overflow-y-auto">
-        {MODULE_REGISTRY[activeTab] ? MODULE_REGISTRY[activeTab]() : (
-          <div className="text-center py-12">
-            <p className="text-sm text-slate-500">Module under active development.</p>
+      {/* Main Panel Content Area */}
+      <main className="flex-1 bg-slate-50 min-w-0 flex flex-col h-screen overflow-y-auto">
+        {/* Top bar with system states */}
+        <header className="h-14 bg-white border-b border-slate-200 px-6 shrink-0 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-[9px] font-mono uppercase font-bold text-slate-500 tracking-wider">
+              ENV: {projEnv}
+            </span>
           </div>
-        )}
+
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <div className="hidden sm:flex items-center gap-1.5 text-slate-500">
+              <span>Account:</span>
+              <strong className="text-slate-900 font-bold truncate max-w-[120px]">{userEmail}</strong>
+            </div>
+          </div>
+        </header>
+
+        {/* Interactive View Body Container */}
+        <div className="flex-1 p-6 md:p-8 space-y-6 max-w-7xl w-full mx-auto pb-12 select-none">
+          {MODULE_REGISTRY[activeTab] ? MODULE_REGISTRY[activeTab]() : (
+            <div className="text-center text-slate-400 py-12 text-xs font-mono">
+              COMPILING ATTESTATION MODULE...
+            </div>
+          )}
+        </div>
       </main>
 
     </div>
