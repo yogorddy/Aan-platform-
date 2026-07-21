@@ -20,11 +20,28 @@ export default defineConfig(() => {
       },
     },
     server: {
+      port: 3000,
+      host: '0.0.0.0',
+      strictPort: true,
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
+      // Explicitly disable or configure without overlays to prevent websocket conflicts.
+      hmr: process.env.DISABLE_HMR === 'true' ? false : {
+        overlay: false,
+      },
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
+      watch: process.env.DISABLE_HMR === 'true' ? null : {
+        usePolling: true,
+        interval: 100,
+      },
+      // Ensure the proxy configuration handles API requests without intercepting root/asset requests.
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:3000',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+      },
     },
   };
 });

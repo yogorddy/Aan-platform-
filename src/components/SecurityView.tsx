@@ -124,7 +124,7 @@ export default function SecurityView({ onNavigate, hideFooter = false }: Securit
         <div className="space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100">
             <Award className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-mono tracking-wider uppercase font-bold">SOC 2 Type II Compliance Verified</span>
+            <span className="text-[10px] font-mono tracking-wider uppercase font-bold">Security Program in Development</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-black max-w-2xl leading-tight">
             {t('security_title')}
@@ -222,15 +222,15 @@ export default function SecurityView({ onNavigate, hideFooter = false }: Securit
                   </div>
                   <div className="flex justify-between items-center pb-2 border-b border-slate-50">
                     <span className="font-semibold text-slate-700">Proof Protocol</span>
-                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">PLONK / EZKL Circuit Enclosures</span>
+                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">PLONK / EZKL (In Development)</span>
                   </div>
                   <div className="flex justify-between items-center pb-2 border-b border-slate-50">
                     <span className="font-semibold text-slate-700">Audit Authority</span>
-                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">Cure53 / NCC Group (Annual)</span>
+                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">To Be Determined (Future Objective)</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-slate-700">Data Location</span>
-                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">Volatile RAM, No Database PII</span>
+                    <span className="font-mono text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-800">Volatile RAM / Ephemeral Caching (Design Goal)</span>
                   </div>
                 </div>
               </div>
@@ -239,11 +239,54 @@ export default function SecurityView({ onNavigate, hideFooter = false }: Securit
 
           {activeTab === 'bounty' && (
             <div className="space-y-8 animate-[fadeIn_0.25s_ease-out]">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <h2 className="text-xl font-bold text-black">{t('security_bounty_title')}</h2>
-                <p className="text-xs text-slate-500 font-light leading-relaxed">
-                  {t('security_bounty_desc')}
+                <p className="text-xs text-slate-600 font-normal leading-relaxed">
+                  We take security seriously. This Responsible Disclosure Policy outlines how researchers can help us strengthen AAN.
                 </p>
+              </div>
+
+              {/* Responsible Disclosure Policy Document */}
+              <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl space-y-5 text-xs text-slate-600 font-light leading-relaxed">
+                <div>
+                  <h3 className="font-bold text-black text-sm mb-1.5">Our Commitment</h3>
+                  <p>
+                    We are committed to working with security researchers to verify, resolve, and disclose vulnerabilities responsibly. We prioritize the safety and privacy of our users while we continue building and maturing our platform.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-black text-sm mb-1.5">How to Report a Vulnerability</h3>
+                  <p>
+                    If you discover a potential security vulnerability in AAN, we encourage you to report it responsibly. Please submit your report through our secure vulnerability reporting form below. Please include a clear description of the vulnerability, steps to reproduce, potential impact, and any suggested mitigations or supporting evidence (screenshots, logs, proof-of-concept).
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-black text-sm mb-1.5">What We Ask From Researchers</h3>
+                  <ul className="list-disc pl-4 space-y-1 mt-1 font-light text-slate-600">
+                    <li><strong>Good faith:</strong> Conduct your research without violating the privacy of our users or destroying data.</li>
+                    <li><strong>Responsible disclosure:</strong> Do not publicly disclose the vulnerability before we have had a reasonable opportunity to investigate and address it.</li>
+                    <li><strong>Scope:</strong> Focus on issues that could meaningfully impact the security, confidentiality, or integrity of the AAN platform.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-black text-sm mb-1.5">Our Response</h3>
+                  <p>
+                    Upon receiving a report, we will promptly acknowledge receipt, investigate the issue, and provide regular updates on its status. We work to resolve confirmed vulnerabilities in a timely manner. We are currently in active development. A formal paid bug bounty program with financial rewards will be implemented in the future. At this stage, we are unable to offer monetary compensation, but we will publicly recognize researchers who help us improve our security (upon mutual agreement).
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-black text-sm mb-1.5">Safe Harbor & Scope</h3>
+                  <p>
+                    We consider security research conducted in accordance with this policy to be authorized. We will not pursue legal action against researchers who act in good faith and follow these guidelines.
+                  </p>
+                  <p className="mt-1.5">
+                    <strong>Out of Scope:</strong> Issues requiring physical access to devices, social engineering, denial of service (DoS) or resource exhaustion attacks, and issues already reported or known to the team.
+                  </p>
+                </div>
               </div>
 
               {bountySubmitted ? (
@@ -254,7 +297,7 @@ export default function SecurityView({ onNavigate, hideFooter = false }: Securit
                   <div className="space-y-1">
                     <h4 className="text-sm font-bold text-black">Vulnerability Report Submitted</h4>
                     <p className="text-xs text-slate-500 font-light max-w-sm mx-auto leading-relaxed">
-                      Thank you for helping secure Aan. Our compliance & engineering teams will review your submission within 24 hours. A tracking ticket was created.
+                      Thank you for helping secure AAN. Our engineering team will review your submission and follow up with you. A tracking ticket was created.
                     </p>
                   </div>
                 </div>
@@ -279,10 +322,10 @@ export default function SecurityView({ onNavigate, hideFooter = false }: Securit
                         onChange={(e) => setBountyForm({ ...bountyForm, severity: e.target.value })}
                         className="w-full bg-white border border-slate-200 focus:outline-none rounded-xl px-3 py-2.5 text-xs text-slate-900"
                       >
-                        <option value="critical">Critical (up to $50,000)</option>
-                        <option value="high">High (up to $15,000)</option>
-                        <option value="medium">Medium (up to $5,000)</option>
-                        <option value="low">Low (up to $1,500)</option>
+                        <option value="critical">Critical Severity</option>
+                        <option value="high">High Severity</option>
+                        <option value="medium">Medium Severity</option>
+                        <option value="low">Low Severity</option>
                       </select>
                     </div>
                   </div>
@@ -340,27 +383,20 @@ export default function SecurityView({ onNavigate, hideFooter = false }: Securit
               <div className="space-y-1">
                 <h3 className="text-xl font-bold text-black">{t('security_sub_disclosure')}</h3>
                 <p className="text-xs text-slate-500 font-light">
-                  Archived log of reported, patched, and publicly disclosed vulnerability reports in compliance with responsible disclosures.
+                  Official security advisories and updates regarding the AAN platform.
                 </p>
               </div>
 
-              <div className="space-y-3.5">
-                {disclosures.map((d) => (
-                  <div key={d.id} className="p-4 border border-slate-100 rounded-2xl flex flex-col sm:flex-row justify-between gap-3 sm:items-center text-xs">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-slate-900 text-[11px]">{d.id}</span>
-                        <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-mono text-[9px] font-bold">{d.severity}</span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono text-[9px] font-bold">{d.status}</span>
-                      </div>
-                      <p className="text-slate-600 font-medium">{d.title}</p>
-                    </div>
-                    <div className="flex sm:flex-col items-start sm:items-end justify-between font-mono text-[10px] text-slate-400">
-                      <span>Disclosed: {d.date}</span>
-                      <span className="text-[#00D632] font-bold">Bounty: {d.bounty}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="p-8 bg-slate-50 border border-slate-100 rounded-2xl text-center space-y-3.5">
+                <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mx-auto">
+                  <HelpCircle className="w-5 h-5" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold text-black">No public security notices have been issued</h4>
+                  <p className="text-xs text-slate-400 font-light max-w-xs mx-auto leading-relaxed">
+                    We are committed to transparency and will publish any verified security notices or bulletins here.
+                  </p>
+                </div>
               </div>
             </div>
           )}

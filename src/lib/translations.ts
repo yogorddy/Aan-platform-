@@ -36,7 +36,7 @@ export const translations: Record<Language, Record<string, string>> = {
     footer_terms: "Terms of Use",
     footer_privacy: "Privacy Policy",
     footer_security: "Security",
-    footer_systems_ok: "All Systems Operational",
+    footer_systems_ok: "Platform in Development",
     footer_status_page: "Status Page",
 
     // Pricing Section (Newly Added)
@@ -58,20 +58,20 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Security Section
     security_title: "Security & Cryptographic Assurance",
-    security_desc: "AAN is engineered like critical infrastructure. We safeguard privacy at the edge using decentralized proofs, encrypted memory states, and zero biometrics.",
+    security_desc: "AAN is engineered with security at its foundation. We are designing our platform to safeguard privacy at the edge using decentralized proofs, encrypted memory states, and zero biometrics as core architectural objectives from day one.",
     security_sub_standards: "Security Standards",
-    security_sub_bounty: "Bug Bounty",
-    security_sub_disclosure: "Vulnerability Feed",
+    security_sub_bounty: "Responsible Disclosure",
+    security_sub_disclosure: "Security Updates",
     security_card_minimization: "Strict Minimization",
-    security_card_minimization_desc: "Telemetry points collected during handshakes reside inside volatile session caches and expire completely in 10 minutes. Zero biometrics are written.",
+    security_card_minimization_desc: "Our architecture is designed so that telemetry points collected during handshakes reside inside volatile session caches and expire completely in 10 minutes. No biometrics are or will ever be written.",
     security_card_ledger: "Ephemeral Proof Ledger",
-    security_card_ledger_desc: "Rather than tracking individual users, our network writes temporary SHA-256 state hashes, preventing Sybil attacks safely.",
+    security_card_ledger_desc: "Our design avoids tracking individual users. Instead, the upcoming network architecture is built to write temporary SHA-256 state hashes, preventing Sybil attacks safely.",
     security_card_tee: "Confidential TEEs",
-    security_card_tee_desc: "All zero-knowledge circuit validation and credential signing execute inside hardware-attested Trusted Execution Environments.",
-    security_card_soc: "SOC 2 Type II Audited",
-    security_card_soc_desc: "Independent security audits regularly verify our infrastructure against trust service criteria with zero findings.",
-    security_bounty_title: "Whitehat Bug Bounty Program",
-    security_bounty_desc: "We actively collaborate with security researchers to harden the network. Submit reports and receive payouts up to $50,000 USD."
+    security_card_tee_desc: "Our development roadmap includes executing all zero-knowledge circuit validation and credential signing inside hardware-attested Trusted Execution Environments (TEEs).",
+    security_card_soc: "Compliance Readiness",
+    security_card_soc_desc: "We are designing and building our security program to align with industry-recognized frameworks like SOC 2, aiming for formal audits and certifications in our upcoming roadmap.",
+    security_bounty_title: "Responsible Disclosure Policy",
+    security_bounty_desc: "We appreciate the cybersecurity research community and welcome good-faith efforts to help us strengthen AAN. While a formal paid bug bounty program with financial rewards is planned for the future, we currently accept reports under this non-monetary policy."
   },
   Deutsch: {
     // Nav & Common
@@ -106,7 +106,7 @@ export const translations: Record<Language, Record<string, string>> = {
     footer_terms: "Nutzungsbedingungen",
     footer_privacy: "Datenschutzrichtlinie",
     footer_security: "Sicherheit",
-    footer_systems_ok: "Alle Systeme betriebsbereit",
+    footer_systems_ok: "Plattform in Entwicklung",
     footer_status_page: "Statusseite",
 
     // Pricing Section
@@ -128,18 +128,18 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Security Section
     security_title: "Sicherheit & Kryptographische Garantie",
-    security_desc: "AAN ist wie eine kritische Infrastruktur konzipiert. Wir schützen die Privatsphäre an der Netzwerk-Edge durch dezentrale Nachweise, verschlüsselte Speicherzustände und Verzicht auf Biometrie.",
+    security_desc: "AAN ist von Grund auf auf Sicherheit ausgelegt. Wir entwickeln unsere Plattform so, dass die Privatsphäre an der Netzwerk-Edge durch dezentrale Nachweise, verschlüsselte Speicherzustände und Verzicht auf Biometrie als Kernarchitekturziele geschützt wird.",
     security_sub_standards: "Sicherheitsstandards",
-    security_sub_bounty: "Bug-Bounty",
-    security_sub_disclosure: "Schwachstellen-Feed",
+    security_sub_bounty: "Verantwortungsvolle Offenlegung",
+    security_sub_disclosure: "Sicherheits-Updates",
     security_card_minimization: "Strikte Minimierung",
-    security_card_minimization_desc: "Die während der Handshakes gesammelten Telemetriedaten verbleiben im flüchtigen Sitzungscache und werden nach 10 Minuten vollständig gelöscht. Keine Biometrie.",
+    security_card_minimization_desc: "Unsere Architektur ist so konzipiert, dass während der Handshakes gesammelte Telemetriedaten im flüchtigen Sitzungscache verbleiben und nach 10 Minuten vollständig gelöscht werden. Keine Biometrie wird jemals erfasst.",
     security_card_ledger: "Kurzlebiges Proof-Ledger",
-    security_card_ledger_desc: "Anstatt einzelne Benutzer zu verfolgen, schreibt unser Netzwerk temporäre SHA-256-Zustandshashes, wodurch Sybil-Angriffe sicher verhindert werden.",
+    security_card_ledger_desc: "Unser Design verzichtet auf das Tracking einzelner Benutzer. Stattdessen ist die geplante Netzwerkarchitektur darauf ausgelegt, temporäre SHA-256-Zustandshashes zu schreiben, um Sybil-Angriffe sicher zu verhindern.",
     security_card_tee: "Vertrauliche TEEs",
-    security_card_tee_desc: "Alle Zero-Knowledge-Schaltkreisprüfungen und Berechtigungsunterzeichnungen werden in hardware-attestierten Trusted Execution Environments ausgeführt.",
-    security_card_soc: "SOC 2 Typ II Zertifiziert",
-    security_card_soc_desc: "Unabhängige Sicherheitsaudits überprüfen regelmäßig unsere Infrastruktur anhand der Kriterien für Vertrauensdienste ohne Beanstandungen."
+    security_card_tee_desc: "Unsere Entwicklungs-Roadmap sieht vor, alle Zero-Knowledge-Schaltkreisprüfungen und Berechtigungsunterzeichnungen in hardware-attestierten Trusted Execution Environments (TEEs) auszuführen.",
+    security_card_soc: "Compliance-Bereitschaft",
+    security_card_soc_desc: "Wir gestalten und bauen unser Sicherheitsprogramm so auf, dass es an anerkannten Standards wie SOC 2 ausgerichtet ist, mit dem Ziel formeller Audits im Zuge der Plattformentwicklung."
   },
   Español: {
     // Nav & Common
@@ -174,7 +174,7 @@ export const translations: Record<Language, Record<string, string>> = {
     footer_terms: "Términos de Uso",
     footer_privacy: "Política de Privacidad",
     footer_security: "Seguridad",
-    footer_systems_ok: "Todos los sistemas operativos",
+    footer_systems_ok: "Plataforma en Desarrollo",
     footer_status_page: "Estado de Red",
 
     // Pricing Section
@@ -196,18 +196,18 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Security Section
     security_title: "Seguridad y Garantía Criptográfica",
-    security_desc: "AAN está diseñado como una infraestructura crítica. Salvaguardamos la privacidad en el extremo de la red mediante pruebas descentralizadas, estados de memoria encriptados y cero datos biométricos.",
+    security_desc: "AAN está diseñado con la seguridad como base. Estamos desarrollando nuestra plataforma para proteger la privacidad en el extremo de la red mediante pruebas descentralizadas, estados de memoria encriptados y cero datos biométricos como objetivos arquitectónicos principales.",
     security_sub_standards: "Estándares de Seguridad",
-    security_sub_bounty: "Recompensa por Errores",
-    security_sub_disclosure: "Registro de Vulnerabilidades",
+    security_sub_bounty: "Divulgación Responsable",
+    security_sub_disclosure: "Actualizaciones de Seguridad",
     security_card_minimization: "Minimización Estricta",
-    security_card_minimization_desc: "Los puntos de telemetría recopilados durante las conexiones residen en cachés de sesión volátiles y expiran en 10 minutos. No se almacena biometría.",
+    security_card_minimization_desc: "Nuestra arquitectura está diseñada para que los puntos de telemetría recopilados durante las conexiones residen en cachés de sesión volátiles y expiren por completo en 10 minutos. No se registra ni se registrará nunca biometría.",
     security_card_ledger: "Libro de Pruebas Efímero",
-    security_card_ledger_desc: "En lugar de rastrear usuarios individuales, nuestra red escribe hashes de estado SHA-256 temporales, lo que evita ataques Sybil con seguridad.",
+    security_card_ledger_desc: "Nuestro diseño evita el seguimiento de usuarios individuales. En su lugar, la próxima arquitectura de red está diseñada para escribir hashes de estado SHA-256 temporales, evitando ataques Sybil con seguridad.",
     security_card_tee: "TEEs Confidenciales",
-    security_card_tee_desc: "Toda la validación de circuitos de conocimiento cero y firma de credenciales se ejecuta dentro de Entornos de Ejecución Segura (TEE).",
-    security_card_soc: "Auditoría SOC 2 Tipo II",
-    security_card_soc_desc: "Las auditorías de seguridad independientes verifican periódicamente nuestra infraestructura con respecto a los criterios de servicios de confianza con cero hallazgos."
+    security_card_tee_desc: "Nuestra hoja de ruta de desarrollo incluye ejecutar toda la validación de circuitos de conocimiento cero y la firma de credenciales dentro de Entornos de Ejecución Segura (TEE) certificados por hardware.",
+    security_card_soc: "Preparación para el Cumplimiento",
+    security_card_soc_desc: "Estamos diseñando y construyendo nuestro programa de seguridad para alinearlo con marcos reconocidos por la industria como SOC 2, con el objetivo de realizar auditorías formales a medida que la plataforma madure."
   },
   Français: {
     // Nav & Common
@@ -242,7 +242,7 @@ export const translations: Record<Language, Record<string, string>> = {
     footer_terms: "Conditions d'utilisation",
     footer_privacy: "Politique de Confidentialité",
     footer_security: "Sécurité",
-    footer_systems_ok: "Tous les systèmes opérationnels",
+    footer_systems_ok: "Plateforme en Développement",
     footer_status_page: "Statut du Réseau",
 
     // Pricing Section
@@ -264,17 +264,17 @@ export const translations: Record<Language, Record<string, string>> = {
 
     // Security Section
     security_title: "Sécurité & Assurance Cryptographique",
-    security_desc: "AAN est conçu comme une infrastructure critique. Nous protégeons la vie privée à la périphérie du réseau grâce à des preuves décentralisées, des états de mémoire chiffrés et l'absence totale de biométrie.",
+    security_desc: "AAN est conçu avec la sécurité comme fondement. Nous concevons notre plateforme pour protéger la vie privée à la périphérie du réseau grâce à des preuves décentralisées, des états de mémoire chiffrés et l'absence totale de biométrie comme objectifs architecturaux de base.",
     security_sub_standards: "Normes de Sécurité",
-    security_sub_bounty: "Bug Bounty",
-    security_sub_disclosure: "Flux de Vulnérabilités",
+    security_sub_bounty: "Divulgation Responsable",
+    security_sub_disclosure: "Mises à jour de Sécurité",
     security_card_minimization: "Minimisation Stricte",
-    security_card_minimization_desc: "Les données de télémétrie collectées lors des handshakes résident dans des caches de session volatils et expirent en 10 minutes. Aucune donnée biométrique n'est enregistrée.",
+    security_card_minimization_desc: "Notre architecture est conçue pour que les données de télémétrie collectées lors des handshakes résident dans des caches de session volatils et expirent complètement en 10 minutes. Aucune donnée biométrique n'est ou ne sera jamais enregistrée.",
     security_card_ledger: "Registre de Preuves Éphémère",
-    security_card_ledger_desc: "Au lieu de suivre les utilisateurs individuels, notre réseau écrit des hachages d'état SHA-256 temporaires, évitant ainsi les attaques Sybil en toute sécurité.",
+    security_card_ledger_desc: "Notre conception évite le suivi des utilisateurs individuels. Au lieu de cela, la future architecture réseau est conçue pour écrire des hachages d'état SHA-256 temporaires, empêchant ainsi les attaques Sybil en toute sécurité.",
     security_card_tee: "TEEs Confidentielles",
-    security_card_tee_desc: "Toute la validation des circuits à divulgation nulle de connaissance (ZK) et la signature des identifiants s'exécutent dans des environnements d'exécution sécurisés (TEE).",
-    security_card_soc: "Audité SOC 2 Type II",
-    security_card_soc_desc: "Des audits de sécurité indépendants vérifient régulièrement notre infrastructure par rapport aux critères des services de confiance, sans aucune anomalie."
+    security_card_tee_desc: "Notre feuille de route de développement prévoit l'exécution de toute la validation des circuits ZK et de la signature des identifiants dans des environnements d'exécution sécurisés (TEE) attestés par le matériel.",
+    security_card_soc: "Préparation à la Conformité",
+    security_card_soc_desc: "Nous concevons et développons notre programme de sécurité pour l'aligner sur des cadres reconnus de l'industrie comme le SOC 2, en visant des audits formels à mesure que la plateforme mûrit."
   }
 };

@@ -663,7 +663,7 @@ export default function TrustDocsPortal({ activeSubSection = 'docs', onNavigate,
                       </div>
                       <div className="bg-black/30 p-2.5 rounded border border-white/[0.03]">
                         <span className="text-[#646e7a] block text-[8px] uppercase">Core Audit</span>
-                        <span className="text-emerald-400 font-bold mt-1 block">Pass (SOC 2 Type II)</span>
+                        <span className="text-emerald-400 font-bold mt-1 block">SOC 2 Aligned</span>
                       </div>
                       <div className="bg-black/30 p-2.5 rounded border border-white/[0.03]">
                         <span className="text-[#646e7a] block text-[8px] uppercase">Active Nodes</span>
