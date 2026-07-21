@@ -30,7 +30,18 @@ export default function App() {
   });
   const [pageHistory, setPageHistory] = useState<string[]>([]);
   const [showInactivityAlert, setShowInactivityAlert] = useState<boolean>(false);
+  const [orgName, setOrgName] = useState<string>(() => {
+    return localStorage.getItem('aan_org_name') || "";
+  });
   const isUserAuthenticated = isAanAccessed || localStorage.getItem('aan_authenticated') === 'true';
+
+  useEffect(() => {
+    if (isUserAuthenticated) {
+      setOrgName(localStorage.getItem('aan_org_name') || "");
+    } else {
+      setOrgName("");
+    }
+  }, [isUserAuthenticated, userEmail, currentPage]);
 
   // Clean SPA custom routing synchronized with standard window.history and role-based guards
   useEffect(() => {
@@ -98,17 +109,7 @@ export default function App() {
         setDocsSubSection(cleanPath);
         setCurrentPage('trustdocs');
       } else {
-        if (isAuthenticated) {
-          if (isAdmin) {
-            setCurrentPage('admin');
-            window.history.replaceState({}, '', '/admin');
-          } else {
-            setCurrentPage('partner');
-            window.history.replaceState({}, '', '/dashboard');
-          }
-        } else {
-          setCurrentPage('landing');
-        }
+        setCurrentPage('landing');
       }
     };
 
@@ -127,10 +128,7 @@ export default function App() {
     let targetPath = customPath || "";
 
     if (isAuthenticated) {
-      if (targetPage === 'landing' || targetPage === 'verify') {
-        targetPage = isAdmin ? 'admin' : 'partner';
-        targetPath = isAdmin ? '/admin' : '/dashboard';
-      } else if (targetPage === 'partner' && isAdmin) {
+      if (targetPage === 'partner' && isAdmin) {
         targetPage = 'admin';
         targetPath = '/admin';
       } else if (targetPage === 'admin' && !isAdmin) {
@@ -313,6 +311,8 @@ export default function App() {
   const showNavbar = isUserAuthenticated && currentPage !== 'landing' && currentPage !== 'verify';
   const isAdmin = isPrivilegedEmail(userEmail);
   const roleDisplay = getRoleDisplay(userEmail);
+  const orgDisplay = isAdmin ? "AAN Infrastructure" : (orgName || "Acme Inc.");
+  const orgInitial = orgDisplay ? orgDisplay.charAt(0).toUpperCase() : "";
 
   return (
     <div className="relative min-h-screen bg-white flex flex-col text-slate-800 selection:bg-[#00D632]/20 font-sans">
@@ -331,12 +331,32 @@ export default function App() {
               </button>
             )}
 
-            {/* Platform Logo */}
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 text-[#00D632]">
-                <AanShieldLogo strokeWidth={6} />
-              </div>
-              <span className="font-bold text-black tracking-tight text-sm">Aan</span>
+            {/* Platform Logo & Active Tenant / Company Details */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigateTo(isAdmin ? 'admin' : 'partner')}
+                className="flex items-center gap-2 bg-transparent border-none cursor-pointer hover:opacity-80 transition-all"
+              >
+                <div className="w-5 h-5 text-[#00D632]">
+                  <AanShieldLogo strokeWidth={6} />
+                </div>
+                <span className="font-bold text-black tracking-tight text-sm">Aan</span>
+              </button>
+
+              {orgDisplay && (
+                <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
+                  {/* Company Logo Badge: Premium dark slate rounded-lg with green initial letter */}
+                  <div className="w-6 h-6 rounded-lg bg-slate-900 text-[#00D632] font-mono text-[10px] font-black flex items-center justify-center shadow-sm select-none shrink-0">
+                    {orgInitial}
+                  </div>
+                  <div className="flex flex-col text-left">
+                    <span className="text-[11px] font-extrabold text-slate-900 leading-none tracking-tight">{orgDisplay}</span>
+                    <span className="text-[9px] font-mono text-slate-400 font-semibold leading-none mt-1">
+                      {isAdmin ? "Verified Node" : "Active Partner"}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -394,6 +414,7 @@ export default function App() {
           <PartnerDashboard 
             onNavigate={(page) => navigateTo(page)}
             onSetVerificationSessionId={(id) => setSessionIdParam(id)}
+            onLogout={handleLogout}
           />
         )}
 
@@ -412,6 +433,7 @@ export default function App() {
         {currentPage === 'admin' && (
           <AdminDashboard 
             onNavigate={(page) => navigateTo(page)} 
+            onLogout={handleLogout}
           />
         )}
 

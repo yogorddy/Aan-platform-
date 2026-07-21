@@ -196,6 +196,16 @@ export default function AanSignupForm({ onBack, onSuccess }: AanSignupFormProps)
       // Track the user's email in localStorage
       localStorage.setItem('aan_user_email', email.trim());
       localStorage.setItem('aan_authenticated', 'true');
+      if (authMode === 'signup') {
+        localStorage.setItem('aan_org_name', organizationName.trim() || 'Acme Inc.');
+      } else {
+        // Derive some default if not present
+        if (!localStorage.getItem('aan_org_name')) {
+          const domain = email.split('@')[1] || '';
+          const derivedName = domain ? domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1) : 'Acme Inc.';
+          localStorage.setItem('aan_org_name', derivedName);
+        }
+      }
 
       setLoading(false);
 

@@ -33,6 +33,7 @@ import AanShieldLogo from './AanShieldLogo';
 import AanSignupForm from './AanSignupForm';
 import Footer from './Footer';
 import { translations, Language } from '../lib/translations';
+import { isPrivilegedEmail } from '../lib/authorization';
 
 interface LandingPageProps {
   onNavigate: (page: string, customPath?: string) => void;
@@ -40,6 +41,16 @@ interface LandingPageProps {
 }
 
 export default function LandingPage({ onNavigate, onStartDemoSession }: LandingPageProps) {
+  const isAuthenticated = localStorage.getItem('aan_authenticated') === 'true';
+  const loggedInEmail = localStorage.getItem('aan_user_email');
+  const isAdminUser = isPrivilegedEmail(loggedInEmail);
+
+  const handleLocalLogout = () => {
+    localStorage.removeItem('aan_authenticated');
+    localStorage.removeItem('aan_user_email');
+    window.location.reload();
+  };
+
   const [language, setLanguage] = useState<Language>(() => {
     return (localStorage.getItem('aan_selected_language') as Language) || 'English';
   });
@@ -225,12 +236,29 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
           </nav>
 
           <div className="flex items-center gap-4">
-            <button 
-              onClick={handleOpenAuth}
-              className="px-5 py-2.5 rounded-full bg-black hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-all active:scale-95"
-            >
-              {t('btn_launch_pilot')}
-            </button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleLocalLogout}
+                  className="px-4 py-2 rounded-full border border-slate-200 text-slate-500 hover:text-black hover:border-slate-400 text-xs font-semibold tracking-wide transition-all active:scale-95 cursor-pointer bg-white"
+                >
+                  Sign Out
+                </button>
+                <button 
+                  onClick={() => onNavigate(isAdminUser ? 'admin' : 'partner', isAdminUser ? '/admin' : '/dashboard')}
+                  className="px-5 py-2.5 rounded-full bg-black hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-all active:scale-95 cursor-pointer"
+                >
+                  Go to Console
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={handleOpenAuth}
+                className="px-5 py-2.5 rounded-full bg-black hover:bg-slate-800 text-white text-xs font-semibold tracking-wide transition-all active:scale-95 cursor-pointer"
+              >
+                {t('btn_launch_pilot')}
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -253,16 +281,26 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <button 
-                onClick={handleOpenAuth}
-                className="px-8 py-4 rounded-full bg-[#00D632] hover:bg-[#00b029] text-black font-semibold text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-[#00D632]/10 hover:shadow-xl hover:shadow-[#00D632]/20 transition-all active:scale-[0.98]"
-              >
-                <span>{t('btn_launch_pilot')}</span>
-                <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-              </button>
+              {isAuthenticated ? (
+                <button 
+                  onClick={() => onNavigate(isAdminUser ? 'admin' : 'partner', isAdminUser ? '/admin' : '/dashboard')}
+                  className="px-8 py-4 rounded-full bg-[#00D632] hover:bg-[#00b029] text-black font-semibold text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-[#00D632]/10 hover:shadow-xl hover:shadow-[#00D632]/20 transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <span>Go to Console</span>
+                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              ) : (
+                <button 
+                  onClick={handleOpenAuth}
+                  className="px-8 py-4 rounded-full bg-[#00D632] hover:bg-[#00b029] text-black font-semibold text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-[#00D632]/10 hover:shadow-xl hover:shadow-[#00D632]/20 transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <span>{t('btn_launch_pilot')}</span>
+                  <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              )}
               <button 
                 onClick={() => setShowContactOverlay(true)}
-                className="px-8 py-4 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 font-semibold text-sm inline-flex items-center justify-center transition-all active:scale-[0.98]"
+                className="px-8 py-4 rounded-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 font-semibold text-sm inline-flex items-center justify-center transition-all active:scale-[0.98] cursor-pointer"
               >
                 {t('btn_contact_sales')}
               </button>

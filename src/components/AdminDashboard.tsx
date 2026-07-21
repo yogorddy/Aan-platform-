@@ -15,9 +15,10 @@ import AuditTab from './admin/AuditTab';
 
 interface AdminDashboardProps {
   onNavigate: (page: string, path?: string, lessonId?: string) => void;
+  onLogout?: () => void;
 }
 
-export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
+export default function AdminDashboard({ onNavigate, onLogout }: AdminDashboardProps) {
   // Tabs management
   const [activeTab, setActiveTab] = useState<'health' | 'identities' | 'partners' | 'requests' | 'policies' | 'audit'>('health');
   
@@ -339,7 +340,13 @@ export default function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           </div>
 
           <button 
-            onClick={() => onNavigate('landing')} 
+            onClick={() => {
+              if (onLogout) {
+                onLogout();
+              } else {
+                onNavigate('landing');
+              }
+            }} 
             className="text-xs font-semibold text-slate-500 hover:text-black transition-colors flex items-center justify-center gap-1.5 mx-auto bg-transparent border-none cursor-pointer"
           >
             <span>Exit Admin Console</span>

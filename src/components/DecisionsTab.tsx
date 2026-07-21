@@ -10,7 +10,9 @@ import {
   Calendar,
   Layers,
   Cpu,
-  Fingerprint
+  Fingerprint,
+  Terminal,
+  Activity
 } from 'lucide-react';
 
 interface DecisionsTabProps {
@@ -18,6 +20,7 @@ interface DecisionsTabProps {
 }
 
 export default function DecisionsTab({ events }: DecisionsTabProps) {
+  const [activeSubTab, setActiveSubTab] = useState<'decisions' | 'events'>('decisions');
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedDecision, setSelectedDecision] = useState<any | null>(null);
@@ -52,7 +55,8 @@ export default function DecisionsTab({ events }: DecisionsTabProps) {
       policy_version: `v1.2.0`,
       model_version: `mv_9a8c-31`,
       proof_token: `prft_${event.id ? event.id.substring(8) : `sh8c`}_sig_zkp_token_aan_v1_secure_proof`,
-      created_at: event.timestamp || new Date().toISOString()
+      created_at: event.timestamp || new Date().toISOString(),
+      device_signal: event.device_signal || "Unknown Client Posture"
     };
   });
 
@@ -68,27 +72,61 @@ export default function DecisionsTab({ events }: DecisionsTabProps) {
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.2s_ease-out] text-left">
-      {/* Header */}
-      <div>
-        <h2 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-          <ShieldCheck className="w-5 h-5 text-emerald-600" />
-          <span>Trust Decisions Ledger</span>
-        </h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Verify evaluated humanness outcomes, risk levels, recommended actions, and zero-knowledge proof tokens.
-        </p>
+      {/* Combined Page Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
+            <span>Decisions & Activity Events</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Analyze evaluated trust ledger decisions, cryptographically signed zero-knowledge proof tokens, and diagnostic node telemetry.
+          </p>
+        </div>
+
+        {/* Sub-tab Switches */}
+        <div className="flex items-center gap-1 bg-slate-100 border border-slate-200/80 p-1 rounded-xl">
+          <button
+            onClick={() => {
+              setActiveSubTab('decisions');
+              setSelectedDecision(null);
+            }}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+              activeSubTab === 'decisions'
+                ? 'bg-white text-slate-900 shadow-sm font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Decisions Ledger</span>
+          </button>
+          <button
+            onClick={() => {
+              setActiveSubTab('events');
+              setSelectedDecision(null);
+            }}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all cursor-pointer ${
+              activeSubTab === 'events'
+                ? 'bg-white text-slate-900 shadow-sm font-bold'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Terminal className="w-3.5 h-3.5" />
+            <span>Telemetry Stream</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white border border-slate-200/60 p-4 rounded-2xl">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search by User Reference, ID..."
+            placeholder={activeSubTab === 'decisions' ? "Search by User Ref, Decision ID..." : "Search by User Ref..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white border border-slate-200 focus:border-emerald-500 focus:outline-none rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900"
+            className="w-full bg-slate-50 border border-slate-250 focus:border-[#00D632]/50 focus:outline-none rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900"
           />
         </div>
 
@@ -109,76 +147,129 @@ export default function DecisionsTab({ events }: DecisionsTabProps) {
         </div>
       </div>
 
-      {/* Decisions Table */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden text-xs">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider bg-slate-50">
-              <th className="py-3 px-4 font-bold">Decision ID</th>
-              <th className="py-3 px-4 font-bold">User Ref</th>
-              <th className="py-3 px-4 font-bold">Result</th>
-              <th className="py-3 px-4 font-bold">Risk Level</th>
-              <th className="py-3 px-4 font-bold">Proof Token</th>
-              <th className="py-3 px-4 font-bold text-right">Evaluated At</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
-            {filteredDecisions.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="py-12 text-center text-slate-400 font-light">
-                  No evaluated trust decisions found.
-                </td>
+      {/* Conditional Sub-tab Render */}
+      {activeSubTab === 'decisions' ? (
+        /* Decisions Ledger Table */
+        <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden text-xs">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider bg-slate-50">
+                <th className="py-3 px-4 font-bold">Decision ID</th>
+                <th className="py-3 px-4 font-bold">User Ref</th>
+                <th className="py-3 px-4 font-bold">Result</th>
+                <th className="py-3 px-4 font-bold">Risk Level</th>
+                <th className="py-3 px-4 font-bold">Proof Token</th>
+                <th className="py-3 px-4 font-bold text-right">Evaluated At</th>
               </tr>
-            ) : (
-              filteredDecisions.map((d) => (
-                <tr 
-                  key={d.decision_id} 
-                  onClick={() => setSelectedDecision(d)} 
-                  className="hover:bg-slate-50/50 cursor-pointer transition-colors"
-                >
-                  <td className="py-3.5 px-4 font-mono text-slate-900">{d.decision_id}</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-500">{d.subject_reference}</td>
-                  <td className="py-3.5 px-4">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
-                      d.assurance_status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                      d.assurance_status === 'denied' ? 'bg-rose-50 text-rose-700 border border-rose-100' :
-                      'bg-amber-50 text-amber-700 border border-amber-100'
-                    }`}>
-                      {d.assurance_status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-4 font-mono">
-                    <span className={`font-semibold ${
-                      d.risk_level === 'LOW' ? 'text-emerald-600' :
-                      d.risk_level === 'HIGH' ? 'text-rose-600' : 'text-amber-600'
-                    }`}>{d.risk_level} ({d.risk_score}%)</span>
-                  </td>
-                  <td className="py-3.5 px-4 max-w-xs truncate font-mono text-[10px] text-slate-400">
-                    <div className="flex items-center gap-1.5">
-                      <span className="truncate">{d.proof_token}</span>
-                      <button 
-                        onClick={(e) => copyToken(d.proof_token, e)}
-                        className="text-slate-400 hover:text-slate-900 transition-colors"
-                      >
-                        {copiedToken === d.proof_token ? (
-                          <span className="text-emerald-500">Copied</span>
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
-                      </button>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-4 text-right text-slate-400 font-mono">
-                    {new Date(d.created_at).toLocaleTimeString()}
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {filteredDecisions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-400 font-light">
+                    No evaluated trust decisions found.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              ) : (
+                filteredDecisions.map((d) => (
+                  <tr 
+                    key={d.decision_id} 
+                    onClick={() => setSelectedDecision(d)} 
+                    className="hover:bg-slate-50/50 cursor-pointer transition-colors"
+                  >
+                    <td className="py-3.5 px-4 font-mono text-slate-900">{d.decision_id}</td>
+                    <td className="py-3.5 px-4 font-mono text-slate-500">{d.subject_reference}</td>
+                    <td className="py-3.5 px-4">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
+                        d.assurance_status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                        d.assurance_status === 'denied' ? 'bg-rose-50 text-rose-700 border border-rose-100' :
+                        'bg-amber-50 text-amber-700 border border-amber-100'
+                      }`}>
+                        {d.assurance_status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 font-mono">
+                      <span className={`font-semibold ${
+                        d.risk_level === 'LOW' ? 'text-emerald-600' :
+                        d.risk_level === 'HIGH' ? 'text-rose-600' : 'text-amber-600'
+                      }`}>{d.risk_level} ({d.risk_score}%)</span>
+                    </td>
+                    <td className="py-3.5 px-4 max-w-xs truncate font-mono text-[10px] text-slate-400">
+                      <div className="flex items-center gap-1.5">
+                        <span className="truncate">{d.proof_token}</span>
+                        <button 
+                          onClick={(e) => copyToken(d.proof_token, e)}
+                          className="text-slate-400 hover:text-slate-900 transition-colors"
+                        >
+                          {copiedToken === d.proof_token ? (
+                            <span className="text-emerald-500">Copied</span>
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-right text-slate-400 font-mono">
+                      {new Date(d.created_at).toLocaleTimeString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        /* Granular Events Stream Table */
+        <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden text-xs">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider bg-slate-50">
+                <th className="py-3 px-4 font-bold">Event ID</th>
+                <th className="py-3 px-4 font-bold">External Ref</th>
+                <th className="py-3 px-4 font-bold">Score</th>
+                <th className="py-3 px-4 font-bold">Verdict</th>
+                <th className="py-3 px-4 font-bold">Client Posture</th>
+                <th className="py-3 px-4 font-bold text-right">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {filteredDecisions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-400 font-light">
+                    No diagnostic telemetry events logged.
+                  </td>
+                </tr>
+              ) : (
+                filteredDecisions.map((d) => (
+                  <tr 
+                    key={d.decision_id} 
+                    onClick={() => setSelectedDecision(d)} 
+                    className="hover:bg-slate-50/50 cursor-pointer transition-colors"
+                  >
+                    <td className="py-3.5 px-4 font-mono text-slate-900">{d.decision_id.replace('dec_aan_', 'evt_aan_')}</td>
+                    <td className="py-3.5 px-4 font-mono text-slate-500">{d.subject_reference}</td>
+                    <td className="py-3.5 px-4 font-mono">{d.risk_score}%</td>
+                    <td className="py-3.5 px-4">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
+                        d.assurance_status === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                        d.assurance_status === 'denied' ? 'bg-rose-50 text-rose-700 border border-rose-100' :
+                        'bg-amber-50 text-amber-700 border border-amber-100'
+                      }`}>
+                        {d.assurance_status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-slate-500 max-w-xs truncate">{d.device_signal}</td>
+                    <td className="py-3.5 px-4 text-right text-slate-400 font-mono">
+                      {new Date(d.created_at).toLocaleTimeString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* Decision Detail Drawer Overlay */}
+      {/* Decision / Event Detail Drawer Overlay */}
       {selectedDecision && (
         <div className="fixed inset-0 z-50 flex items-center justify-end p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setSelectedDecision(null)} />

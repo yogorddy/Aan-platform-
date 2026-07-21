@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Shield, 
+  ShieldCheck,
   Activity, 
   CheckCircle2, 
   Copy, 
@@ -78,9 +79,10 @@ const getSupabaseClient = () => {
 interface PartnerDashboardProps {
   onNavigate: (page: string, path?: string, lessonId?: string) => void;
   onSetVerificationSessionId: (id: string) => void;
+  onLogout?: () => void;
 }
 
-export default function PartnerDashboard({ onNavigate, onSetVerificationSessionId }: PartnerDashboardProps) {
+export default function PartnerDashboard({ onNavigate, onSetVerificationSessionId, onLogout }: PartnerDashboardProps) {
   // Onboarding completion state
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(() => {
     return localStorage.getItem('aan_onboarding_completed') === 'true';
@@ -776,136 +778,6 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
         onUpdateProjName={handleUpdateProjName} 
       />
     ),
-    events: () => (
-      <div className="space-y-6 animate-[fadeIn_0.2s_ease-out]">
-        {/* Page Header */}
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 tracking-tight">Attestation Event Stream</h2>
-          <p className="text-xs text-slate-500 mt-1">Granular diagnostic telemetry logs captured on client nodes.</p>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white border border-slate-200/80 p-4 rounded-2xl">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Filter by external user ref..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 focus:outline-none rounded-xl pl-9 pr-4 py-2 text-xs text-slate-900"
-            />
-          </div>
-
-          <div className="flex gap-2 w-full sm:w-auto">
-            {['all', 'approved', 'review', 'denied'].map((status) => (
-              <button
-                key={status}
-                onClick={() => setDecisionFilter(status)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold uppercase border tracking-wider cursor-pointer ${
-                  decisionFilter === status 
-                    ? 'bg-slate-900 text-white border-slate-900' 
-                    : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden text-xs">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-200 text-[9px] font-mono text-slate-400 uppercase tracking-wider bg-slate-50">
-                <th className="py-3 px-4 font-bold">Event ID</th>
-                <th className="py-3 px-4 font-bold">External Ref</th>
-                <th className="py-3 px-4 font-bold">Score</th>
-                <th className="py-3 px-4 font-bold">Assurance Verdict</th>
-                <th className="py-3 px-4 font-bold">Client Posture</th>
-                <th className="py-3 px-4 font-bold text-right">Timestamp</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
-              {events
-                .filter(e => {
-                  const matchesSearch = e.external_user_id.toLowerCase().includes(searchQuery.toLowerCase());
-                  const matchesFilter = decisionFilter === 'all' || e.decision === decisionFilter;
-                  return matchesSearch && matchesFilter;
-                })
-                .map((e, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50/50 cursor-pointer" onClick={() => setSelectedGlobalEvent(e)}>
-                    <td className="py-3.5 px-4 font-mono text-slate-900">{e.id}</td>
-                    <td className="py-3.5 px-4 font-mono text-slate-500">{e.external_user_id}</td>
-                    <td className="py-3.5 px-4 font-mono">{e.risk_score}%</td>
-                    <td className="py-3.5 px-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${
-                        e.decision === 'approved' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
-                        e.decision === 'denied' ? 'bg-rose-50 text-rose-700 border border-rose-100' :
-                        'bg-amber-50 text-amber-700 border border-amber-100'
-                      }`}>
-                        {e.decision}
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-500">{e.device_signal}</td>
-                    <td className="py-3.5 px-4 text-right text-slate-400 font-mono">{new Date(e.timestamp).toLocaleTimeString()}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Event detail modal drawer */}
-        {selectedGlobalEvent && (
-          <div className="fixed inset-0 z-50 flex items-center justify-end p-4">
-            <div className="absolute inset-0 bg-black/45 backdrop-blur-xs" onClick={() => setSelectedGlobalEvent(null)} />
-            <div className="relative w-full max-w-md h-full bg-white border-l border-slate-200 p-8 shadow-2xl z-10 flex flex-col justify-between overflow-y-auto">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-slate-150 pb-4">
-                  <div className="space-y-0.5">
-                    <span className="text-[9px] font-mono text-slate-400 font-bold uppercase tracking-wider block">Assestation Record</span>
-                    <h3 className="text-base font-black text-slate-950">{selectedGlobalEvent.id}</h3>
-                  </div>
-                  <button onClick={() => setSelectedGlobalEvent(null)} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="space-y-3 font-mono text-[11px] text-slate-500 text-left">
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>External Reference</span>
-                    <span className="text-slate-900 font-bold">{selectedGlobalEvent.external_user_id}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>Attestation Verdict</span>
-                    <span className="text-slate-900 font-bold">{selectedGlobalEvent.decision}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>Risk score</span>
-                    <span className="text-slate-900 font-bold">{selectedGlobalEvent.risk_score}%</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>Client Posture</span>
-                    <span className="text-slate-900 font-bold">{selectedGlobalEvent.device_signal}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>IP network Health</span>
-                    <span className="text-slate-900 font-bold">{selectedGlobalEvent.ip_risk_signal}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-slate-100">
-                    <span>ZKP Proof Status</span>
-                    <span className="text-slate-900 font-bold">{selectedGlobalEvent.proof_token_status}</span>
-                  </div>
-                </div>
-              </div>
-
-              <button onClick={() => setSelectedGlobalEvent(null)} className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold font-mono uppercase tracking-wider">
-                Close Profile Record
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    ),
     decisions: () => (
       <DecisionsTab events={events} />
     ),
@@ -1053,8 +925,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               { id: 'trust_intelligence', label: 'Trust Intelligence', icon: Sparkles },
               { id: 'integrations', label: 'Integrations', icon: Code },
               { id: 'projects', label: 'Projects', icon: Layers },
-              { id: 'events', label: 'Events', icon: Terminal },
-              { id: 'decisions', label: 'Decisions', icon: CheckCircle2 },
+              { id: 'decisions', label: 'Decisions & Events', icon: ShieldCheck },
               { id: 'policies', label: 'Policies', icon: Sliders },
               { id: 'webhooks', label: 'Webhooks', icon: Network },
               { id: 'audit_logs', label: 'Audit Logs', icon: FileText },
@@ -1093,7 +964,13 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             <div className="space-y-0.5">
               <span className="text-[10px] font-bold text-slate-900 block leading-none">{orgName || "Acme Inc."}</span>
               <button 
-                onClick={() => onNavigate('landing')}
+                onClick={() => {
+                  if (onLogout) {
+                    onLogout();
+                  } else {
+                    onNavigate('landing');
+                  }
+                }}
                 className="text-[9px] text-rose-500 hover:underline block cursor-pointer"
               >
                 Sign Out / Disconnect
