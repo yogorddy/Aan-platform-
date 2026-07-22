@@ -61,7 +61,9 @@ interface PartnerDashboardProps {
 }
 
 export default function PartnerDashboard({ onNavigate, onSetVerificationSessionId, onLogout }: PartnerDashboardProps) {
-  const userEmail = localStorage.getItem('aan_user_email') || "";
+  const userEmailRaw = localStorage.getItem('aan_user_email') || "";
+  const cleanedEmail = userEmailRaw.trim().replace(/[\r\n"']/g, "").replace(/[^\x20-\x7E]/g, "");
+  const userEmail = (cleanedEmail === "null" || cleanedEmail === "undefined") ? "" : cleanedEmail;
 
   // Integration states fetched from API
   const [sessionData, setSessionData] = useState<any>(null);
@@ -163,6 +165,10 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
   // Fetch session configuration and context from the backend
   const fetchSessionContext = async () => {
+    if (!userEmail) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setServiceError(null);
     try {
