@@ -32,22 +32,20 @@ import {
 import AanShieldLogo from './AanShieldLogo';
 import AanSignupForm from './AanSignupForm';
 import Footer from './Footer';
+import { isAuthenticated as checkAuth, getSessionEmail, clearSecureSession, getSessionRole, setSecureSession } from '../lib/sessionManager';
 import { translations, Language } from '../lib/translations';
-import { isPrivilegedEmail } from '../lib/authorization';
 
 interface LandingPageProps {
   onNavigate: (page: string, customPath?: string) => void;
-  onStartDemoSession: (email?: string) => void;
 }
 
-export default function LandingPage({ onNavigate, onStartDemoSession }: LandingPageProps) {
-  const isAuthenticated = localStorage.getItem('aan_authenticated') === 'true';
-  const loggedInEmail = localStorage.getItem('aan_user_email');
-  const isAdminUser = isPrivilegedEmail(loggedInEmail);
+export default function LandingPage({ onNavigate }: LandingPageProps) {
+  const isAuthenticated = checkAuth();
+  const loggedInEmail = getSessionEmail();
+  const isAdminUser = getSessionRole() === "admin";
 
   const handleLocalLogout = () => {
-    localStorage.removeItem('aan_authenticated');
-    localStorage.removeItem('aan_user_email');
+    clearSecureSession();
     window.location.reload();
   };
 
@@ -134,12 +132,8 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
         setTimeout(() => {
           setIsConnecting(false);
           setShowAuthOverlay(false);
-          const isAuthenticated = localStorage.getItem('aan_authenticated') === 'true';
-          if (isAuthenticated) {
-            onNavigate('partner', '/dashboard');
-          } else {
-            onStartDemoSession();
-          }
+          setSecureSession("guest@aan.net", "partner", "Guest Sandbox");
+          onNavigate('partner', '/dashboard');
         }, 800);
       }
     }, 450);
@@ -1083,7 +1077,10 @@ export default function LandingPage({ onNavigate, onStartDemoSession }: LandingP
                   onBack={() => setShowSignup(false)} 
                   onSuccess={(email) => {
                     setShowAuthOverlay(false);
-                    onStartDemoSession(email);
+                    const role = email.trim() === "operator@aan.net" ? "admin" : "partner";
+                    const route = role === "admin" ? "admin" : "partner";
+                    const path = role === "admin" ? "/admin" : "/dashboard";
+                    onNavigate(route, path);
                   }}
                 />
               ) : (

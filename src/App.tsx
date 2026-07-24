@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
-import VerifySessionFlow from './components/VerifySessionFlow';
 import PartnerDashboard from './components/PartnerDashboard';
 import AdminDashboard from './components/AdminDashboard';
 import TrustDocsPortal from './components/TrustDocsPortal';
@@ -15,6 +14,7 @@ import { isAcademyEnabled } from './academyConfig';
 import { isBrandEnabled } from './brandConfig';
 import { motion, AnimatePresence } from 'motion/react';
 import { isPrivilegedEmail, getRoleDisplay } from './lib/authorization';
+import { isAuthenticated as checkAuth, getSessionEmail, getSessionOrgName, clearSecureSession, getSessionRole } from './lib/sessionManager';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>('landing');
@@ -23,21 +23,21 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [academySelectedId, setAcademySelectedId] = useState<string>("intro");
   const [isAanAccessed, setIsAanAccessed] = useState<boolean>(() => {
-    return localStorage.getItem('aan_authenticated') === 'true';
+    return checkAuth();
   });
   const [userEmail, setUserEmail] = useState<string | null>(() => {
-    return localStorage.getItem('aan_user_email');
+    return getSessionEmail();
   });
   const [pageHistory, setPageHistory] = useState<string[]>([]);
   const [showInactivityAlert, setShowInactivityAlert] = useState<boolean>(false);
   const [orgName, setOrgName] = useState<string>(() => {
-    return localStorage.getItem('aan_org_name') || "";
+    return getSessionOrgName();
   });
-  const isUserAuthenticated = isAanAccessed || localStorage.getItem('aan_authenticated') === 'true';
+  const isUserAuthenticated = isAanAccessed || checkAuth();
 
   useEffect(() => {
     if (isUserAuthenticated) {
-      setOrgName(localStorage.getItem('aan_org_name') || "");
+      setOrgName(getSessionOrgName());
     } else {
       setOrgName("");
     }
@@ -47,9 +47,9 @@ export default function App() {
   useEffect(() => {
     const handleLocationChange = () => {
       const path = window.location.pathname;
-      const isAuthenticated = localStorage.getItem('aan_authenticated') === 'true';
-      const email = localStorage.getItem('aan_user_email') || userEmail;
-      const isAdmin = isPrivilegedEmail(email);
+      const authenticated = checkAuth();
+      const email = getSessionEmail() || userEmail;
+      const isAdmin = getSessionRole() === "admin";
 
       const validSubSections = [
         'docs', 'api-ref', 'sdks', 'changelog', 'github', 'security', 'privacy',
@@ -58,12 +58,8 @@ export default function App() {
       ];
       const cleanPath = path.replace('/', '');
 
-      if (path.startsWith('/verify/session/')) {
-        const id = path.replace('/verify/session/', '');
-        setSessionIdParam(id);
-        setCurrentPage('verify');
-      } else if (path === '/dashboard' || path.startsWith('/dashboard/')) {
-        if (!isAuthenticated) {
+      if (path === '/dashboard' || path.startsWith('/dashboard/')) {
+        if (!authenticated) {
           setCurrentPage('landing');
           window.history.replaceState({}, '', '/');
         } else if (isAdmin) {
@@ -74,7 +70,7 @@ export default function App() {
           setCurrentPage('partner');
         }
       } else if (path === '/admin' || path.startsWith('/admin/')) {
-        if (!isAuthenticated) {
+        if (!authenticated) {
           setCurrentPage('landing');
           window.history.replaceState({}, '', '/');
         } else if (!isAdmin) {
@@ -120,14 +116,14 @@ export default function App() {
 
   // Safe navigation director with role-based destination interceptors
   const navigateTo = (page: string, customPath?: string, preferredLessonId?: string) => {
-    const isAuthenticated = localStorage.getItem('aan_authenticated') === 'true';
-    const email = localStorage.getItem('aan_user_email') || userEmail;
-    const isAdmin = isPrivilegedEmail(email);
+    const authenticated = checkAuth();
+    const email = getSessionEmail() || userEmail;
+    const isAdmin = getSessionRole() === "admin";
 
     let targetPage = page;
     let targetPath = customPath || "";
 
-    if (isAuthenticated) {
+    if (authenticated) {
       if (targetPage === 'partner' && isAdmin) {
         targetPage = 'admin';
         targetPath = '/admin';
@@ -136,7 +132,7 @@ export default function App() {
         targetPath = '/dashboard';
       }
     } else {
-      const publicPages = ['landing', 'terms', 'privacy', 'security', 'contact', 'trustdocs', 'verify', ...(isAcademyEnabled() ? ['academy'] : [])];
+      const publicPages = ['landing', 'terms', 'privacy', 'security', 'contact', 'trustdocs', ...(isAcademyEnabled() ? ['academy'] : [])];
       if (!publicPages.includes(targetPage)) {
         targetPage = 'landing';
         targetPath = '/';
@@ -155,7 +151,6 @@ export default function App() {
         admin: '/admin',
         brand: '/brand',
         academy: '/academy/' + (preferredLessonId || academySelectedId || 'intro'),
-        verify: '/verify/session/' + (sessionIdParam || "vss_session_unconfirmed_9a4"),
         terms: '/terms',
         privacy: '/privacy',
         security: '/security',
@@ -171,15 +166,15 @@ export default function App() {
   };
 
   const goBack = () => {
-    const isAuthenticated = localStorage.getItem('aan_authenticated') === 'true';
-    const email = localStorage.getItem('aan_user_email') || userEmail;
-    const isAdmin = isPrivilegedEmail(email);
+    const authenticated = checkAuth();
+    const email = getSessionEmail() || userEmail;
+    const isAdmin = getSessionRole() === "admin";
     const homePage = isAdmin ? 'admin' : 'partner';
     const homePath = isAdmin ? '/admin' : '/dashboard';
 
     if (pageHistory.length > 0) {
       const prevPage = pageHistory[pageHistory.length - 1];
-      if (prevPage === 'landing' || prevPage === 'verify') {
+      if (prevPage === 'landing') {
         navigateTo(homePage, homePath);
         return;
       }
@@ -191,7 +186,6 @@ export default function App() {
         admin: '/admin',
         brand: '/brand',
         academy: '/academy/' + (academySelectedId || 'intro'),
-        verify: '/verify/session/' + (sessionIdParam || "vss_session_unconfirmed_9a4"),
         terms: '/terms',
         privacy: '/privacy',
         security: '/security',
@@ -206,8 +200,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('aan_authenticated');
-    localStorage.removeItem('aan_user_email');
+    clearSecureSession();
     setIsAanAccessed(false);
     setUserEmail(null);
     setPageHistory([]);
@@ -253,15 +246,6 @@ export default function App() {
     };
   }, [isUserAuthenticated]);
 
-  // Helper trigger to start a custom onboarding verification instantly from landing triggers
-  const startDemoVerification = (email?: string) => {
-    if (email) {
-      setUserEmail(email);
-      localStorage.setItem('aan_user_email', email);
-    }
-    navigateTo('verify', '/verify/session/vss_session_unconfirmed_9a4');
-  };
-
   const menuItems = [
     {
       id: 'landing',
@@ -269,13 +253,6 @@ export default function App() {
       description: 'Value proposition landing explaining decentralized trust & humanness verification standard.',
       icon: HeartHandshake,
       path: '/'
-    },
-    {
-      id: 'verify',
-      name: '2. User Scan Onboarding',
-      description: 'Unique humanness validation environment employing multi-modal non-custodial telemetry.',
-      icon: Users,
-      path: '/verify/session/' + (sessionIdParam || 'vss_session_unconfirmed_9a4')
     },
     {
       id: 'partner',
@@ -308,10 +285,10 @@ export default function App() {
   ];
 
   const activeItem = menuItems.find(item => item.id === currentPage) || menuItems[0];
-  const showNavbar = isUserAuthenticated && currentPage !== 'landing' && currentPage !== 'verify';
-  const isAdmin = isPrivilegedEmail(userEmail);
+  const showNavbar = isUserAuthenticated && currentPage !== 'landing';
+  const isAdmin = getSessionRole() === "admin";
   const roleDisplay = getRoleDisplay(userEmail);
-  const orgDisplay = isAdmin ? "AAN Infrastructure" : (orgName || "Acme Inc.");
+  const orgDisplay = orgName || "Default Organization";
   const orgInitial = orgDisplay ? orgDisplay.charAt(0).toUpperCase() : "";
 
   return (
@@ -406,27 +383,14 @@ export default function App() {
         {currentPage === 'landing' && (
           <LandingPage 
             onNavigate={(page, customPath) => navigateTo(page, customPath)}
-            onStartDemoSession={startDemoVerification} 
           />
         )}
 
         {currentPage === 'partner' && (
           <PartnerDashboard 
             onNavigate={(page) => navigateTo(page)}
-            onSetVerificationSessionId={(id) => setSessionIdParam(id)}
+            onSetVerificationSessionId={setSessionIdParam}
             onLogout={handleLogout}
-          />
-        )}
-
-        {currentPage === 'verify' && (
-          <VerifySessionFlow 
-            sessionId={sessionIdParam || 'vss_session_unconfirmed_9a4'}
-            onComplete={() => {
-              setIsAanAccessed(true);
-              localStorage.setItem('aan_authenticated', 'true');
-              navigateTo('partner', '/dashboard');
-            }}
-            onNavigate={(page) => navigateTo(page)}
           />
         )}
 

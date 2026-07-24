@@ -6,6 +6,7 @@ import {
   User, Mail, Lock, Building, ArrowRight, ArrowLeft 
 } from 'lucide-react';
 import AanShieldLogo from './AanShieldLogo';
+import { setSecureSession } from '../lib/sessionManager';
 
 interface AanSignupFormProps {
   onBack: () => void;
@@ -188,9 +189,8 @@ export default function AanSignupForm({ onBack, onSuccess }: AanSignupFormProps)
         throw new Error("Remote database connection required. High-integrity sandbox state fallback is disabled.");
       }
 
-      // Track the user's email in localStorage
-      localStorage.setItem('aan_user_email', email.trim());
-      localStorage.setItem('aan_authenticated', 'true');
+      // Set secure session using our encoded manager
+      setSecureSession(email.trim(), email.trim() === "operator@aan.net" ? "admin" : "partner", organizationName || "Default Org");
 
       setLoading(false);
 

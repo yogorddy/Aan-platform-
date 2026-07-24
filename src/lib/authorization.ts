@@ -7,12 +7,7 @@
  * Additional privileged accounts can be registered here in a single location.
  */
 
-// Central list of emails with full administrative (AAN Operator) access
-export const PRIVILEGED_EMAILS = [
-  "jcrawford1992@gmail.com",
-  "gorddywit40@gmail.com",
-  "yogorddy@gmail.com"
-];
+import { getSessionRole } from "./sessionManager";
 
 // Reusable granular permission tokens
 export type Permission =
@@ -56,34 +51,32 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
 };
 
 /**
- * Validates if a given email belongs to a privileged internal account.
+ * Validates if the current logged-in user is an administrator based on session role.
  */
-export function isPrivilegedEmail(email: string | null | undefined): boolean {
-  if (!email) return false;
-  const cleanEmail = email.trim().toLowerCase();
-  return PRIVILEGED_EMAILS.some(privileged => privileged.toLowerCase() === cleanEmail);
+export function isPrivilegedEmail(email?: string | null | undefined): boolean {
+  return getSessionRole() === "admin";
 }
 
 /**
- * Returns the resolved platform role for a given email.
+ * Returns the resolved platform role.
  */
-export function getUserRoleByEmail(email: string | null | undefined): UserRole {
-  return isPrivilegedEmail(email) ? "admin" : "partner";
+export function getUserRoleByEmail(email?: string | null | undefined): UserRole {
+  return getSessionRole();
 }
 
 /**
- * Checks if a user email is authorized to perform a specific permission.
+ * Checks if a user is authorized to perform a specific permission.
  */
 export function hasPermission(email: string | null | undefined, permission: Permission): boolean {
-  const role = getUserRoleByEmail(email);
+  const role = getSessionRole();
   return ROLE_PERMISSIONS[role].includes(permission);
 }
 
 /**
  * Return user role display label and color configuration.
  */
-export function getRoleDisplay(email: string | null | undefined) {
-  const role = getUserRoleByEmail(email);
+export function getRoleDisplay(email?: string | null | undefined) {
+  const role = getSessionRole();
   if (role === "admin") {
     return {
       label: "AAN Operator",
@@ -97,3 +90,4 @@ export function getRoleDisplay(email: string | null | undefined) {
     description: "External organization access restricted to self-owned configurations."
   };
 }
+

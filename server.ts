@@ -706,7 +706,8 @@ function transitionSession(session: any, targetStatus: any, req: any, reason: st
   if (allowed) {
     session.status = targetStatus;
     if (reason) session.result_reason = reason;
-    supabaseService.updateVerificationSession(session.id, { status: targetStatus, result_reason: session.result_reason }, db.verificationSessions);
+    supabaseService.updateVerificationSession(session.id, { status: targetStatus, result_reason: session.result_reason }, db.verificationSessions)
+      .catch(err => console.error("[AAN DB BACKGROUND ERROR] Failed to update verification session status:", err));
     return { allowed: true };
   } else {
     const ip = (req.headers['x-forwarded-for'] || req.ip || "127.0.0.1").toString();
@@ -2270,7 +2271,8 @@ async function startServer() {
       proofToken = issueProofToken(partner_user_id, verificationSessionId, humanStatus, uniquenessStatus, riskLevel);
       existingSession.proof_token = proofToken;
       existingSession.status = 'passed';
-      supabaseService.updateVerificationSession(existingSession.id, { proof_token: proofToken, status: 'passed' }, db.verificationSessions);
+      supabaseService.updateVerificationSession(existingSession.id, { proof_token: proofToken, status: 'passed' }, db.verificationSessions)
+        .catch(err => console.error("[AAN DB BACKGROUND ERROR] Failed to update verification session proof token:", err));
     }
 
     if (duplicateSignalsFound) {
@@ -2658,7 +2660,7 @@ async function startServer() {
       }
 
       // Try a lightweight query to verify the remote connection health.
-      const { data, error } = await supabaseClient.from("organizations").select("id").limit(1);
+      const { data, error } = await supabaseClient.from("aan_projects").select("id").limit(1);
       if (error) {
         return res.json({
           configured: true,
@@ -2680,13 +2682,31 @@ async function startServer() {
     }
   });
 
+  // Local onboarding state for Development Sandbox mode
+  let localOnboardingState: any = null;
+
+  const PRIVILEGED_EMAILS = [
+    "jcrawford1992@gmail.com",
+    "gorddywit40@gmail.com",
+    "yogorddy@gmail.com"
+  ];
+
   app.get("/api/internal/session-context", async (req, res) => {
     const userEmail = req.headers["x-user-email"] as string;
     if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
 
+    const isPrivileged = PRIVILEGED_EMAILS.includes(userEmail.toLowerCase().trim());
+
     const supabaseClient = (supabaseService as any).supabase;
     if (!supabaseClient) {
-      return res.status(503).json({ error: "Database not configured" });
+      if (localOnboardingState) {
+        return res.json({
+          ...localOnboardingState,
+          role: isPrivileged ? "admin" : "partner"
+        });
+      } else {
+        return res.json({ onboarded: false, role: isPrivileged ? "admin" : "partner" });
+      }
     }
 
     try {
@@ -2699,34 +2719,52 @@ async function startServer() {
 
       if (pErr) throw pErr;
       if (!profile) {
-        return res.json({ onboarded: false });
+        return res.json({ onboarded: false, role: isPrivileged ? "admin" : "partner" });
       }
 
-      // 2. Fetch organization membership
-      const { data: membership, error: mErr } = await supabaseClient
-        .from("organization_members")
-        .select("*, organizations(*)")
-        .eq("user_id", profile.id)
-        .maybeSingle();
+      // 2. Fetch project memberships (from aan_project_members)
+      const { data: memberships, error: mErr } = await supabaseClient
+        .from("aan_project_members")
+        .select("*, aan_projects(*)")
+        .eq("user_id", profile.id);
 
       if (mErr) throw mErr;
-      if (!membership || !membership.organizations) {
-        return res.json({ onboarded: false, profile });
+      if (!memberships || memberships.length === 0) {
+        return res.json({ onboarded: false, profile, role: isPrivileged ? "admin" : "partner" });
       }
 
-      const org = membership.organizations;
+      // Map memberships to projects
+      const projects = memberships
+        .map((m: any) => {
+          if (!m.aan_projects) return null;
+          const meta = m.aan_projects.metadata || {};
+          return {
+            id: m.aan_projects.id,
+            name: m.aan_projects.name,
+            environment: meta.environment || m.aan_projects.project_key || "sandbox",
+            expected_verifications: meta.expected_verifications || "10k-50k",
+            integration_surface: meta.integration_surface || "api",
+            policies: meta.policies || null,
+            created_at: m.aan_projects.created_at
+          };
+        })
+        .filter(Boolean);
 
-      // 3. Fetch projects
-      const { data: projects, error: projErr } = await supabaseClient
-        .from("projects")
-        .select("*")
-        .eq("organization_id", org.id);
+      const firstMembership = memberships[0];
+      const role = isPrivileged ? "admin" : (firstMembership.role || "viewer");
 
-      if (projErr) throw projErr;
+      // Derive organization details to satisfy dashboard rendering expectations
+      const org = {
+        id: "org_" + (projects[0]?.id || "default"),
+        name: projects[0]?.name || "Default Organization",
+        type: "SaaS",
+        website: "",
+        use_case: "bot_defense"
+      };
 
-      // 4. Fetch API keys
+      // 3. Fetch API keys from api_keys (linked to aan_projects)
       let apiKeys: any[] = [];
-      if (projects && projects.length > 0) {
+      if (projects.length > 0) {
         const projIds = projects.map((p: any) => p.id);
         const { data: keys, error: keysErr } = await supabaseClient
           .from("api_keys")
@@ -2740,9 +2778,10 @@ async function startServer() {
       res.json({
         onboarded: true,
         profile,
+        role: role,
         membership: {
-          role: membership.role,
-          created_at: membership.created_at
+          role: role,
+          created_at: firstMembership.created_at
         },
         organization: org,
         projects: projects || [],
@@ -2768,9 +2807,60 @@ async function startServer() {
     if (!orgName) return res.status(400).json({ error: "Missing organization name" });
     if (!projName) return res.status(400).json({ error: "Missing project name" });
 
+    const isPrivileged = PRIVILEGED_EMAILS.includes(userEmail.toLowerCase().trim());
+
     const supabaseClient = (supabaseService as any).supabase;
     if (!supabaseClient) {
-      return res.status(503).json({ error: "Database not configured" });
+      const localProfile = {
+        id: "usr_sandbox_profile",
+        email: userEmail || "sandbox@aan.network",
+        full_name: (userEmail || "sandbox").split("@")[0]
+      };
+      const localOrg = {
+        id: "org_sandbox",
+        name: orgName,
+        type: "SaaS",
+        website: orgWebsite || "",
+        use_case: "bot_defense"
+      };
+      const localProj = {
+        id: "proj_sandbox",
+        organization_id: "org_sandbox",
+        name: projName,
+        environment: projEnv || "sandbox",
+        expected_verifications: "10k-50k",
+        integration_surface: "api"
+      };
+      const localKey = {
+        id: "key_sandbox",
+        project_id: "proj_sandbox",
+        name: "Default API Key",
+        publishable_key: `aan_pub_sandbox_${crypto.randomBytes(8).toString('hex')}`,
+        webhook_signing_secret: `whsec_sandbox_${crypto.randomBytes(8).toString('hex')}`,
+        status: "active",
+        created_at: new Date().toISOString()
+      };
+
+      localOnboardingState = {
+        onboarded: true,
+        profile: localProfile,
+        role: isPrivileged ? "admin" : "partner",
+        membership: {
+          role: "owner",
+          created_at: new Date().toISOString()
+        },
+        organization: localOrg,
+        projects: [localProj],
+        apiKeys: [localKey]
+      };
+
+      return res.json({
+        success: true,
+        organization: localOrg,
+        project: localProj,
+        api_key: localKey,
+        plain_secret_key: `aan_live_sandbox_${crypto.randomBytes(16).toString('hex')}`
+      });
     }
 
     try {
@@ -2799,57 +2889,49 @@ async function startServer() {
 
       // 2. Check if user already has a membership to prevent double-onboarding
       const { data: existingMember, error: mErr } = await supabaseClient
-        .from("organization_members")
+        .from("aan_project_members")
         .select("*")
         .eq("user_id", profile.id)
         .limit(1);
 
       if (mErr) throw mErr;
       if (existingMember && existingMember.length > 0) {
-        return res.status(400).json({ error: "User is already associated with an organization." });
+        return res.status(400).json({ error: "User is already associated with an active project." });
       }
 
-      // 3. Create organization
-      const { data: org, error: orgErr } = await supabaseClient
-        .from("organizations")
-        .insert({
-          name: orgName,
-          type: "SaaS",
-          website: orgWebsite || "",
-          use_case: "bot_defense"
-        })
-        .select()
-        .single();
-
-      if (orgErr) throw orgErr;
-
-      // 4. Create organization member as owner
-      const { error: memberErr } = await supabaseClient
-        .from("organization_members")
-        .insert({
-          organization_id: org.id,
-          user_id: profile.id,
-          role: "owner"
-        });
-
-      if (memberErr) throw memberErr;
-
-      // 5. Create project
+      // 3. Create project in aan_projects
       const { data: project, error: projErr } = await supabaseClient
-        .from("projects")
+        .from("aan_projects")
         .insert({
-          organization_id: org.id,
           name: projName,
-          environment: projEnv || "sandbox",
-          expected_verifications: "10k-50k",
-          integration_surface: "api"
+          project_key: `aan_proj_${crypto.randomBytes(8).toString('hex')}`,
+          status: "active",
+          assertion_audience: userEmail,
+          default_proof_ttl_seconds: 3600,
+          metadata: {
+            environment: projEnv || "sandbox",
+            expected_verifications: "10k-50k",
+            integration_surface: "api"
+          }
         })
         .select()
         .single();
 
       if (projErr) throw projErr;
 
-      // 6. Generate secure credentials
+      // 4. Create project membership in aan_project_members as owner
+      const { error: memberErr } = await supabaseClient
+        .from("aan_project_members")
+        .insert({
+          project_id: project.id,
+          user_id: profile.id,
+          role: "owner",
+          is_active: true
+        });
+
+      if (memberErr) throw memberErr;
+
+      // 5. Generate secure credentials
       const keyToken = `aan_live_${crypto.randomBytes(16).toString('hex')}`;
       const keyHash = crypto.createHash('sha256').update(keyToken).digest('hex');
       const whSecret = `whsec_${crypto.randomBytes(16).toString('hex')}`;
@@ -2869,6 +2951,14 @@ async function startServer() {
 
       if (keyErr) throw keyErr;
 
+      const org = {
+        id: "org_" + project.id,
+        name: orgName,
+        type: "SaaS",
+        website: orgWebsite || "",
+        use_case: "bot_defense"
+      };
+
       res.json({
         success: true,
         organization: org,
@@ -2882,22 +2972,151 @@ async function startServer() {
     }
   });
 
+  // POST /api/internal/projects/update
+  // Replaces client-only project name, environment, and policy rules modifications with real persistence
+  app.post("/api/internal/projects/update", express.json(), async (req, res) => {
+    const userEmail = req.headers["x-user-email"] as string;
+    const { projectId, name, environment, policies } = req.body;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) {
+      if (localOnboardingState && localOnboardingState.projects?.[0]) {
+        if (name !== undefined) {
+          localOnboardingState.projects[0].name = name;
+          localOnboardingState.organization.name = name;
+        }
+        if (environment !== undefined) {
+          localOnboardingState.projects[0].environment = environment;
+        }
+        if (policies !== undefined) {
+          localOnboardingState.projects[0].policies = policies;
+        }
+        return res.json({ success: true, project: localOnboardingState.projects[0] });
+      }
+      return res.json({ success: true });
+    }
+
+    try {
+      const updates: any = {};
+      if (name !== undefined) updates.name = name;
+
+      const { data: proj, error: fErr } = await supabaseClient
+        .from("aan_projects")
+        .select("*")
+        .eq("id", projectId)
+        .maybeSingle();
+
+      if (fErr) throw fErr;
+      if (proj) {
+        const meta = proj.metadata || {};
+        if (environment !== undefined) {
+          meta.environment = environment;
+        }
+        if (policies !== undefined) {
+          meta.policies = policies;
+        }
+        updates.metadata = meta;
+
+        const { error: uErr } = await supabaseClient
+          .from("aan_projects")
+          .update(updates)
+          .eq("id", projectId);
+
+        if (uErr) throw uErr;
+      }
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("Project update failed:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST /api/internal/decisions
+  // Persists dynamic simulated verification decisions in the database
+  app.post("/api/internal/decisions", express.json(), async (req, res) => {
+    const userEmail = req.headers["x-user-email"] as string;
+    if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
+
+    const { projectId, id, external_user_id, decision, risk_score, reason_codes, device_signal, ip_risk_signal } = req.body;
+
+    const supabaseClient = (supabaseService as any).supabase;
+    if (!supabaseClient) {
+      const newSession: any = {
+        id: id || `vss_sim_${Math.random().toString(36).substr(2, 9)}`,
+        project_id: projectId || "proj_sandbox",
+        partner_app_id: projectId || "proj_sandbox",
+        external_user_id: external_user_id || "sim_user",
+        status: decision || "approved",
+        risk_score: risk_score || 0,
+        result_reason: reason_codes?.[0] || "Simulated posture check",
+        risk_reasons: reason_codes || [],
+        proof_token: `proof_${Math.random().toString(36).substr(2, 12)}`,
+        created_at: new Date().toISOString()
+      };
+      db.verificationSessions.unshift(newSession);
+      return res.json({ success: true, session: newSession });
+    }
+
+    try {
+      const { error } = await supabaseClient
+        .from("aan_trust_event_log")
+        .insert({
+          project_id: projectId,
+          session_id: id || `vss_sim_${crypto.randomBytes(8).toString('hex')}`,
+          event_state: decision || "approved",
+          payload: {
+            external_user_id,
+            risk_score,
+            risk_reasons: reason_codes || [],
+            device_signal,
+            ip_risk_signal,
+            proof_token: `proof_${crypto.randomBytes(12).toString('hex')}`
+          }
+        });
+
+      if (error) throw error;
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("Failed to write decision:", err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/internal/decisions", async (req, res) => {
     const userEmail = req.headers["x-user-email"] as string;
     const projectId = req.query.projectId as string;
     if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
 
     const supabaseClient = (supabaseService as any).supabase;
-    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+    if (!supabaseClient) {
+      const filtered = (db.verificationSessions || []).filter((s: any) => s.project_id === projectId || s.partner_app_id === projectId);
+      return res.json(filtered);
+    }
 
     try {
-      let query = supabaseClient.from("verification_events").select("*");
+      let query = supabaseClient.from("aan_trust_event_log").select("*");
       if (projectId) {
         query = query.eq("project_id", projectId);
       }
       const { data, error } = await query.order("created_at", { ascending: false }).limit(100);
       if (error) throw error;
-      res.json(data || []);
+
+      const mappedDecisions = (data || []).map((row: any) => {
+        const payload = row.payload || {};
+        return {
+          id: row.id,
+          project_id: row.project_id,
+          session_id: row.session_id,
+          status: row.event_state || payload.status || "approved",
+          risk_score: payload.risk_score || 0,
+          proof_token: payload.proof_token || row.event_hash,
+          duplicate_candidate: payload.duplicate_candidate || false,
+          risk_reasons: payload.risk_reasons || payload.reasons || [],
+          created_at: row.created_at
+        };
+      });
+      res.json(mappedDecisions);
     } catch (err: any) {
       res.status(500).json({ error: err?.message || String(err) });
     }
@@ -2909,16 +3128,23 @@ async function startServer() {
     if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
 
     const supabaseClient = (supabaseService as any).supabase;
-    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+    if (!supabaseClient) {
+      return res.json((db as any).aanTrustEvents || []);
+    }
 
     try {
       let query = supabaseClient.from("aan_trust_events").select("*");
       if (projectId) {
-        query = query.eq("project_id", projectId);
+        query = query.eq("partner_project_id", projectId);
       }
       const { data, error } = await query.order("created_at", { ascending: false }).limit(100);
       if (error) throw error;
-      res.json(data || []);
+
+      const mappedEvents = (data || []).map((row: any) => ({
+        ...row,
+        project_id: row.partner_project_id || row.project_id
+      }));
+      res.json(mappedEvents);
     } catch (err: any) {
       res.status(500).json({ error: err?.message || String(err) });
     }
@@ -2931,7 +3157,9 @@ async function startServer() {
     if (!projectId) return res.status(400).json({ error: "Missing project ID" });
 
     const supabaseClient = (supabaseService as any).supabase;
-    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+    if (!supabaseClient) {
+      return res.json(localOnboardingState?.apiKeys || []);
+    }
 
     try {
       const { data, error } = await supabaseClient
@@ -2962,7 +3190,26 @@ async function startServer() {
     if (!project_id || !key_id) return res.status(400).json({ error: "Missing parameters" });
 
     const supabaseClient = (supabaseService as any).supabase;
-    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+    if (!supabaseClient) {
+      const keyToken = `aan_live_${crypto.randomBytes(16).toString('hex')}`;
+      const newKey = {
+        id: key_id,
+        project_id,
+        name: "Rotated API Key",
+        publishable_key: `aan_pub_sandbox_${crypto.randomBytes(8).toString('hex')}`,
+        webhook_signing_secret: `whsec_sandbox_${crypto.randomBytes(8).toString('hex')}`,
+        status: "active",
+        created_at: new Date().toISOString()
+      };
+      if (localOnboardingState) {
+        localOnboardingState.apiKeys = [newKey];
+      }
+      return res.json({
+        success: true,
+        api_key: newKey,
+        plain_secret_key: keyToken
+      });
+    }
 
     try {
       const keyToken = `aan_live_${crypto.randomBytes(16).toString('hex')}`;
@@ -3005,10 +3252,13 @@ async function startServer() {
     if (!userEmail) return res.status(401).json({ error: "Unauthorized" });
 
     const supabaseClient = (supabaseService as any).supabase;
-    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+    if (!supabaseClient) {
+      return res.json((db as any).webhooks || []);
+    }
 
     try {
-      let query = supabaseClient.from("webhooks").select("*");
+      const table = (supabaseService as any).tableColumnsCache?.aan_webhook_endpoints ? "aan_webhook_endpoints" : "webhooks";
+      let query = supabaseClient.from(table).select("*");
       if (projectId) {
         query = query.eq("project_id", projectId);
       }
@@ -3027,11 +3277,26 @@ async function startServer() {
     if (!url || !project_id) return res.status(400).json({ error: "Missing parameters" });
 
     const supabaseClient = (supabaseService as any).supabase;
-    if (!supabaseClient) return res.status(503).json({ error: "Database not configured" });
+    if (!supabaseClient) {
+      const newWh = {
+        id: `wh_sandbox_${crypto.randomBytes(4).toString('hex')}`,
+        project_id,
+        url,
+        secret: `whsec_sandbox_${crypto.randomBytes(16).toString('hex')}`,
+        status: "active",
+        created_at: new Date().toISOString()
+      };
+      if (!(db as any).webhooks) {
+        (db as any).webhooks = [];
+      }
+      (db as any).webhooks.push(newWh);
+      return res.json(newWh);
+    }
 
     try {
+      const table = (supabaseService as any).tableColumnsCache?.aan_webhook_endpoints ? "aan_webhook_endpoints" : "webhooks";
       const { data, error } = await supabaseClient
-        .from("webhooks")
+        .from(table)
         .insert({
           project_id,
           url,

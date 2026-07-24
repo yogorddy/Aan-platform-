@@ -42,6 +42,7 @@ import {
 } from 'lucide-react';
 import TrustDecisionSimulator from './TrustDecisionSimulator';
 import TestLabTab from './TestLabTab';
+import { getSessionEmail, clearSecureSession } from '../lib/sessionManager';
 
 // Import newly created modular sub-tabs
 import SessionHealthTab from './SessionHealthTab';
@@ -61,9 +62,7 @@ interface PartnerDashboardProps {
 }
 
 export default function PartnerDashboard({ onNavigate, onSetVerificationSessionId, onLogout }: PartnerDashboardProps) {
-  const userEmailRaw = localStorage.getItem('aan_user_email') || "";
-  const cleanedEmail = userEmailRaw.trim().replace(/[\r\n"']/g, "").replace(/[^\x20-\x7E]/g, "");
-  const userEmail = (cleanedEmail === "null" || cleanedEmail === "undefined") ? "" : cleanedEmail;
+  const userEmail = getSessionEmail() || "";
 
   // Integration states fetched from API
   const [sessionData, setSessionData] = useState<any>(null);
@@ -184,19 +183,19 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
       }
 
       setSessionData(data);
-      setOnboarded(data.onboarded);
+      
+      const hasActiveProjectMembership = data.onboarded && data.projects && data.projects.length > 0;
+      setOnboarded(hasActiveProjectMembership);
 
-      if (data.onboarded) {
+      if (hasActiveProjectMembership) {
         setOrgName(data.organization?.name || "");
         setOrgWebsite(data.organization?.website || "");
         setOrgType(data.organization?.type || "SaaS");
 
-        if (data.projects && data.projects.length > 0) {
-          const activeProj = data.projects[0];
-          setProjName(activeProj.name);
-          setProjectId(activeProj.id);
-          setProjEnv(activeProj.environment || "sandbox");
-        }
+        const activeProj = data.projects[0];
+        setProjName(activeProj.name);
+        setProjectId(activeProj.id);
+        setProjEnv(activeProj.environment || "sandbox");
 
         if (data.apiKeys && data.apiKeys.length > 0) {
           const key = data.apiKeys[0];
@@ -350,24 +349,82 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
 
   // Environment Toggling (Sandbox vs Production)
   const handleToggleEnv = async () => {
-    // Kept client-side only as an dynamic UI filter/toggle, showing premium reactive responses.
     const next = projEnv === 'sandbox' ? 'production' : 'sandbox';
     setProjEnv(next);
+    try {
+      const res = await fetch("/api/internal/projects/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-email": userEmail
+        },
+        body: JSON.stringify({
+          projectId,
+          environment: next
+        })
+      });
+      if (!res.ok) {
+        console.error("Failed to update project environment on backend");
+      }
+    } catch (err) {
+      console.error("Error updating project environment:", err);
+    }
   };
 
   // Update Project Name
   const handleUpdateProjName = async (name: string) => {
     setProjName(name);
+    try {
+      const res = await fetch("/api/internal/projects/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-email": userEmail
+        },
+        body: JSON.stringify({
+          projectId,
+          name
+        })
+      });
+      if (!res.ok) {
+        console.error("Failed to update project name on backend");
+      } else {
+        fetchSessionContext();
+      }
+    } catch (err) {
+      console.error("Error updating project name:", err);
+    }
   };
 
-  // Save trust rules dummy action
-  const handleSaveTrustRules = () => {
+  // Save trust rules action
+  const handleSaveTrustRules = async () => {
     setSavingRules(true);
-    setTimeout(() => {
-      setSavingRules(false);
+    setRulesSuccess(false);
+    try {
+      const res = await fetch("/api/internal/projects/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-email": userEmail
+        },
+        body: JSON.stringify({
+          projectId,
+          policies: trustRules
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to persist updated trust policies.");
+      }
+
       setRulesSuccess(true);
       setTimeout(() => setRulesSuccess(false), 3000);
-    }, 8000);
+    } catch (err: any) {
+      console.error("Error updating trust policies:", err);
+      alert(err.message || "Unable to save trust policies to the remote database.");
+    } finally {
+      setSavingRules(false);
+    }
   };
 
   // Metrics derivation
@@ -414,7 +471,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
             </button>
             <button
               onClick={() => {
-                localStorage.removeItem('aan_authenticated');
+                clearSecureSession();
                 if (onLogout) onLogout();
                 else onNavigate('landing');
               }}
@@ -839,6 +896,8 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
     test_lab: () => (
       <TestLabTab 
         projName={projName} 
+        projectId={projectId}
+        userEmail={userEmail}
         onAddEventToGlobalRegistry={fetchDecisionsList} 
       />
     ),
@@ -964,7 +1023,7 @@ export default function PartnerDashboard({ onNavigate, onSetVerificationSessionI
               <span className="text-[10px] font-bold text-slate-900 block leading-none truncate">{orgName || "Acme Inc."}</span>
               <button 
                 onClick={() => {
-                  localStorage.removeItem('aan_authenticated');
+                  clearSecureSession();
                   if (onLogout) {
                     onLogout();
                   } else {

@@ -44,10 +44,39 @@ interface SimulatedEvent {
 
 interface TestLabTabProps {
   projName: string;
-  onAddEventToGlobalRegistry: (event: any) => void;
+  projectId?: string;
+  userEmail?: string;
+  onAddEventToGlobalRegistry: (event?: any) => void;
 }
 
-export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: TestLabTabProps) {
+export default function TestLabTab({ projName, projectId, userEmail, onAddEventToGlobalRegistry }: TestLabTabProps) {
+  const persistDecision = async (evt: any) => {
+    try {
+      const decisionVal = evt.decision === 'ALLOW' ? 'approved' : evt.decision === 'DENY' ? 'denied' : 'review';
+      const res = await fetch('/api/internal/decisions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-email': userEmail || ''
+        },
+        body: JSON.stringify({
+          projectId: projectId || 'proj_sandbox',
+          id: evt.id,
+          external_user_id: evt.external_user_id,
+          decision: decisionVal,
+          risk_score: evt.risk_score,
+          reason_codes: evt.reason_codes,
+          device_signal: evt.metadata.device || 'Unspecified Device',
+          ip_risk_signal: `${evt.risk_score > 60 ? 'High' : evt.risk_score > 30 ? 'Medium' : 'Low'} (${(evt.risk_score / 100).toFixed(2)})`
+        })
+      });
+      if (!res.ok) {
+        console.error("Failed to persist simulated decision in DB");
+      }
+    } catch (err) {
+      console.error("Error persisting simulated decision:", err);
+    }
+  };
   // Simulator running state
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [simulationSpeed, setSimulationSpeed] = useState<'single' | 'benchmark'>('single');
@@ -228,7 +257,7 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
       console.warn("Backend stateful simulation trigger failed or bypassed:", err);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       let newEvent: SimulatedEvent;
       const randomIdSuffix = Math.random().toString(36).substring(2, 8);
       const timestampNow = new Date().toISOString();
@@ -384,20 +413,9 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
       // Add to simulation log list
       setSimulatedEvents(prev => [newEvent, ...prev]);
       
-      // Inject to existing global Verification Events registry for full-platform coherence!
-      onAddEventToGlobalRegistry({
-        id: newEvent.id,
-        project: projName || "Default Auth Layer",
-        external_user_id: newEvent.external_user_id,
-        decision: newEvent.decision === 'ALLOW' ? 'approved' : newEvent.decision === 'DENY' ? 'denied' : 'review',
-        risk_score: newEvent.risk_score,
-        reason_codes: newEvent.reason_codes,
-        device_signal: newEvent.metadata.device,
-        ip_risk_signal: `${newEvent.risk_score > 60 ? 'High' : newEvent.risk_score > 30 ? 'Medium' : 'Low'} (${(newEvent.risk_score / 100).toFixed(2)})`,
-        returning_human: newEvent.eventType === 'legit_user',
-        proof_token_status: newEvent.decision === 'DENY' ? 'revoked' : 'valid',
-        timestamp: newEvent.timestamp
-      });
+      // Persist to DB and sync UI
+      await persistDecision(newEvent);
+      onAddEventToGlobalRegistry();
 
       // Automatically inspect the newly generated token
       setSelectedEvent(newEvent);
@@ -489,24 +507,15 @@ export default function TestLabTab({ projName, onAddEventToGlobalRegistry }: Tes
 
         setSimulatedEvents(prev => [...mockBulkEvents, ...prev]);
 
-        // Sync representative bulk events to global parent state
-        mockBulkEvents.forEach(evt => {
-          onAddEventToGlobalRegistry({
-            id: evt.id,
-            project: projName || "Default Auth Layer",
-            external_user_id: evt.external_user_id,
-            decision: evt.decision === 'ALLOW' ? 'approved' : evt.decision === 'DENY' ? 'denied' : 'review',
-            risk_score: evt.risk_score,
-            reason_codes: evt.reason_codes,
-            device_signal: evt.metadata.device,
-            ip_risk_signal: `High (${(evt.risk_score / 100).toFixed(2)})`,
-            returning_human: false,
-            proof_token_status: evt.decision === 'DENY' ? 'revoked' : 'valid',
-            timestamp: evt.timestamp
-          });
+        // Persist bulk events and refresh global state
+        Promise.all(mockBulkEvents.map(evt => persistDecision(evt))).then(() => {
+          onAddEventToGlobalRegistry();
+          setIsSimulating(false);
+        }).catch(err => {
+          console.error("Error persisting bulk decisions:", err);
+          onAddEventToGlobalRegistry();
+          setIsSimulating(false);
         });
-
-        setIsSimulating(false);
       } else {
         setSimulationProgress(currentProgress);
       }
